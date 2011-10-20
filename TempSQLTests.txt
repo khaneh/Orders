@@ -1,0 +1,510 @@
+CREATE PROCEDURE dbo.proc_GLAccountReport 
+	@GLAccount	int,
+	@FromDate	nvarchar(10),
+	@ToDate	nvarchar(10),
+	@FromTafsil	int,
+	@ToTafsil	int,
+	@GL		int
+AS
+
+SELECT     GLRows.Tafsil, SUM(GLRows.IsCredit * GLRows.Amount) AS SumCredit, SUM(- ((GLRows.IsCredit - 1) * GLRows.Amount)) AS SumDebit, COUNT(*) 
+                      AS CNT, Accounts.AccountTitle
+FROM         (SELECT     ID AS GLDoc, GLDocDate
+                        FROM         GLDocs
+                        WHERE     (GLDocs.IsTemporary = 1 OR
+                                              GLDocs.IsChecked = 1 OR
+                                              GLDocs.IsFinalized = 1) AND (GLDocDate >= @FromDate) AND (GLDocDate <= @ToDate) AND (GL = @GL ) AND (IsRemoved = 0) AND 
+                                              (deleted = 0)) EffectiveGLDocs INNER JOIN
+                      GLRows ON EffectiveGLDocs.GLDoc = GLRows.GLDoc INNER JOIN
+                      Accounts ON GLRows.Tafsil = Accounts.ID
+WHERE     (GLRows.GLAccount = @GLAccount)
+GROUP BY GLRows.Tafsil, Accounts.AccountTitle
+HAVING      (ISNULL(GLRows.Tafsil, 0) >= @FromTafsil) AND (ISNULL(GLRows.Tafsil, 0) <= @ToTafsil)
+ORDER BY Accounts.AccountTitle
+GO
+===================================================
+exec proc_GLAccountReport '1303', '1383/06/01', '1383/07/01', '0', '9999999', '83'
+===================================================
+CREATE PROCEDURE dbo.proc_GLAccountReport 
+	@GLAccount	int,
+	@FromDate	nvarchar(10),
+	@ToDate	nvarchar(10),
+	@FromTafsil	int,
+	@ToTafsil	int,
+	@GL		int
+AS
+
+SELECT     0 AS Tafsil, SUM(GLRows.IsCredit * GLRows.Amount) AS SumCredit, SUM(- ((GLRows.IsCredit - 1) * GLRows.Amount)) AS SumDebit, COUNT(*) 
+			AS CNT, '    ãÇäÏå ÍÓÇÈ  '+CONVERT(nvarchar(4),@GLAccount)+' ÞÈá ÇÒ '+@FromDate AS AccountTitle
+FROM         (SELECT     ID AS GLDoc
+                        FROM         GLDocs
+                        WHERE     (GLDocs.IsTemporary = 1 OR
+                                              GLDocs.IsChecked = 1 OR
+                                              GLDocs.IsFinalized = 1) AND (GLDocDate >= N'1383/01/01') AND (GLDocDate <= @FromDate) AND (GL = @GL) AND (IsRemoved = 0) AND 
+                                              (deleted = 0)) EffectiveGLDocs INNER JOIN
+                      GLRows ON EffectiveGLDocs.GLDoc = GLRows.GLDoc
+WHERE     (1 = 1) AND (GLRows.GLAccount = @GLAccount) AND (ISNULL(GLRows.Tafsil, 0) >= @FromTafsil) AND (ISNULL(GLRows.Tafsil, 0) <= @ToTafsil)
+GROUP BY GLRows.GLAccount
+UNION
+SELECT     GLRows.Tafsil, SUM(GLRows.IsCredit * GLRows.Amount) AS SumCredit, SUM(- ((GLRows.IsCredit - 1) * GLRows.Amount)) AS SumDebit, COUNT(*) 
+                      AS CNT, Accounts.AccountTitle AS AccountTitle
+FROM         (SELECT     ID AS GLDoc, GLDocDate
+                        FROM         GLDocs
+                        WHERE     (GLDocs.IsTemporary = 1 OR
+                                              GLDocs.IsChecked = 1 OR
+                                              GLDocs.IsFinalized = 1) AND (GLDocDate >= @FromDate) AND (GLDocDate <= @ToDate) AND (GL = @GL ) AND (IsRemoved = 0) AND 
+                                              (deleted = 0)) EffectiveGLDocs INNER JOIN
+                      GLRows ON EffectiveGLDocs.GLDoc = GLRows.GLDoc INNER JOIN
+                      Accounts ON GLRows.Tafsil = Accounts.ID
+WHERE     (GLRows.GLAccount = @GLAccount)
+GROUP BY GLRows.Tafsil, Accounts.AccountTitle
+HAVING      (ISNULL(GLRows.Tafsil, 0) >= @FromTafsil) AND (ISNULL(GLRows.Tafsil, 0) <= @ToTafsil)
+ORDER BY Accounts.AccountTitle
+GO
+
+
+===================================================
+SELECT     GLAccounts.Name, DERIVEDTBL.totalDebit AS totalDebit, DERIVEDTBL.totalCredit AS totalCredit, GLAccounts.ID
+FROM         (SELECT     SUM(GLRows.IsCredit * GLRows.Amount) AS totalCredit, SUM(- ((GLRows.IsCredit - 1) * GLRows.Amount)) AS totalDebit, 
+                                              GLRows.GLAccount, COUNT(*) AS Expr1
+                        FROM         GLDocs INNER JOIN
+                                              GLRows ON GLDocs.ID = GLRows.GLDoc
+                        WHERE     (GLDocs.IsTemporary = 1 OR
+                                              GLDocs.IsChecked = 1 OR
+                                              GLDocs.IsFinalized = 1) AND (GLDocs.deleted = 0) AND (GLDocs.IsRemoved = 0) AND (GLRows.deleted = 0)
+                        GROUP BY GLRows.GLAccount, GLDocs.GL
+                        HAVING      (GLDocs.GL = 83)) DERIVEDTBL RIGHT OUTER JOIN
+                      GLAccounts ON DERIVEDTBL.GLAccount = GLAccounts.ID
+WHERE     (GLAccounts.GL = 83) AND (GLAccounts.GLGroup = 1300)
+ORDER BY GLAccounts.ID
+===================================================
+SELECT     SUM(GLRows.IsCredit * GLRows.Amount) AS totalCredit, SUM(- ((GLRows.IsCredit - 1) * GLRows.Amount)) AS totalDebit, GLRows.GLAccount, 
+                      COUNT(*) AS Expr1
+FROM         GLDocs INNER JOIN
+                      GLRows ON GLDocs.ID = GLRows.GLDoc
+WHERE     (GLDocs.IsTemporary = 1 OR GLDocs.IsChecked = 1 OR GLDocs.IsFinalized = 1) AND (GLDocs.deleted = 0) AND (GLDocs.IsRemoved = 0) AND (GLRows.deleted = 0)
+GROUP BY GLRows.GLAccount, GLDocs.GL
+HAVING      (GLDocs.GL = 83) AND (GLRows.GLAccount = 1303)
+===================================================
+(GLDocs.IsTemporary = 1 OR GLDocs.IsChecked = 1 OR GLDocs.IsFinalized = 1) AND (GLDocs.deleted = 0) AND (GLDocs.IsRemoved = 0) AND (GLRows.deleted = 0) 
+===============
+
+SELECT     0 AS Tafsil, SUM(GLRows.IsCredit * GLRows.Amount) AS SumCredit, SUM(- ((GLRows.IsCredit - 1) * GLRows.Amount)) AS SumDebit, COUNT(*) AS CNT, 
+                      GLRows.GLAccount
+FROM         (SELECT     ID AS GLDoc
+                        FROM         GLDocs
+                        WHERE     (GLDocs.IsTemporary = 1 OR
+                                              GLDocs.IsChecked = 1 OR
+                                              GLDocs.IsFinalized = 1) AND (GLDocDate >= N'1383/01/01') AND (GLDocDate <= N'1383/07/10') AND (GL = 83) AND (IsRemoved = 0) AND 
+                                              (deleted = 0)) EffectiveGLDocs INNER JOIN
+                      GLRows ON EffectiveGLDocs.GLDoc = GLRows.GLDoc
+WHERE     (1 = 1) AND (GLRows.GLAccount = 1303) AND (ISNULL(GLRows.Tafsil, 0) >= 0) AND (ISNULL(GLRows.Tafsil, 0) <= 999999)
+GROUP BY GLRows.GLAccount
+UNION
+
+
+SELECT GLRows.Tafsil, SUM(GLRows.IsCredit * GLRows.Amount) AS SumCredit, SUM(- ((GLRows.IsCredit - 1) * GLRows.Amount)) AS SumDebit, COUNT(*) 
+                      AS CNT, Accounts.AccountTitle
+
+
+
+
+
+
+
+
+===================================================
+SELECT     SUM(GLRows.IsCredit * GLRows.Amount) AS SumCredit, SUM(- ((GLRows.IsCredit - 1) * GLRows.Amount)) AS SumDebit, COUNT(*) AS CNT, 
+                      GLRows.GLAccount
+FROM         (SELECT     ID AS GLDoc, GLDocDate
+                        FROM         GLDocs
+                        WHERE     (GLDocs.IsTemporary = 1 OR
+                                              GLDocs.IsChecked = 1 OR
+                                              GLDocs.IsFinalized = 1) AND (GLDocDate >= N'1383/01/01') AND (GLDocDate <= N'1383/07/10') AND (GL = 83) AND (IsRemoved = 0) AND 
+                                              (deleted = 0)) EffectiveGLDocs INNER JOIN
+                      GLRows ON EffectiveGLDocs.GLDoc = GLRows.GLDoc
+WHERE     (GLRows.GLAccount = 1303) AND (ISNULL(GLRows.Tafsil, 0) >= 0) AND (ISNULL(GLRows.Tafsil, 0) <= 999999)
+GROUP BY GLRows.GLAccount
+
+===================================================
+
+SELECT     GLRows.Tafsil, SUM(GLRows.IsCredit * GLRows.Amount) AS SumCredit, SUM(- ((GLRows.IsCredit - 1) * GLRows.Amount)) AS SumDebit, COUNT(*) AS CNT
+                      
+FROM         (SELECT     ID AS GLDoc, GLDocDate
+                        FROM         GLDocs
+                        WHERE     (GLDocs.IsTemporary = 1 OR
+                                              GLDocs.IsChecked = 1 OR
+                                              GLDocs.IsFinalized = 1) AND (GLDocDate >= N'1383/06/01') AND (GLDocDate <= N'1383/07/01') AND (GL = 83) AND (IsRemoved = 0) AND 
+                                              (deleted = 0)) EffectiveGLDocs INNER JOIN
+                      GLRows ON EffectiveGLDocs.GLDoc = GLRows.GLDoc
+WHERE     (GLRows.GLAccount = 1303)
+GROUP BY GLRows.Tafsil
+HAVING      (ISNULL(GLRows.Tafsil, 0) >= 0) AND (ISNULL(GLRows.Tafsil, 0) <= 999999)
+ORDER BY GLRows.Tafsil
+
+GO
+
+
+===========================
+
+SELECT     *
+FROM         (SELECT     ID AS GLDoc, GLDocDate
+                        FROM         GLDocs
+                        WHERE     (GLDocs.IsTemporary = 1 OR
+                                              GLDocs.IsChecked = 1 OR
+                                              GLDocs.IsFinalized = 1) AND (GLDocDate <= N'1383/07/12') AND (GLDocDate >= N'1383/06/01') AND (GL = 83) AND (IsRemoved = 0) AND 
+                                              (deleted = 0)) EffectiveGLDocs INNER JOIN
+                      GLRows ON EffectiveGLDocs.GLDoc = GLRows.GLDoc
+WHERE     (GLRows.GLAccount = 1303)
+ORDER BY EffectiveGLDocs.GLDocDate
+
+
+
+
+
+
+
+
+
+
+============
+============
+SELECT     EffGLAccBal.*
+FROM         GLAccounts INNER JOIN
+                          (SELECT     SUM(GLRows.IsCredit * GLRows.Amount) AS totalCredit, SUM(- ((GLRows.IsCredit - 1) * GLRows.Amount)) AS totalDebit, 
+                                                   GLRows.GLAccount, COUNT(*) AS CNT
+                             FROM         GLDocs INNER JOIN
+                                                   GLRows ON GLDocs.ID = GLRows.GLDoc
+                             WHERE     (GLDocs.IsTemporary = 1 OR
+                                                   GLDocs.IsChecked = 1 OR
+                                                   GLDocs.IsFinalized = 1) AND (GLDocs.deleted = 0) AND (GLDocs.IsRemoved = 0) AND (GLRows.deleted = 0)
+                             GROUP BY GLRows.GLAccount, GLDocs.GL
+                             HAVING      (GLDocs.GL = 83)) EffGLAccBal ON GLAccounts.ID = EffGLAccBal.GLAccount INNER JOIN
+                      GLAccountGroups ON GLAccounts.GLGroup = GLAccountGroups.ID INNER JOIN
+                      GLAccountSuperGroups ON GLAccountGroups.GLSuperGroup = GLAccountSuperGroups.ID
+WHERE     (GLAccountSuperGroups.GL = 83) AND (GLAccountGroups.GL = 83) AND (GLAccounts.GL = 83)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+============================
+============================
+SELECT     ISNULL(Remains.GLAccount, EffGLRows.GLAccount) AS GLAccount, EffGLRows.GLDoc, EffGLRows.GLDocID, EffGLRows.GLDocDate, 
+                      EffGLRows.Amount, EffGLRows.IsCredit, EffGLRows.Description, ISNULL(Remains.remCred, 0) AS remainedCredit, ISNULL(Remains.remDeb, 0) 
+                      AS remainedDebit
+FROM         (SELECT     isnull(SUM(IsCredit * Amount), 0) AS remCred, isnull(SUM(- ((IsCredit - 1) * Amount)), 0) AS remDeb, GLAccount
+                        FROM         EffectiveGLRows
+                        WHERE     (GL = 83) AND (GLDocDate < N'1383/08/01') AND (Tafsil = 215256)
+                        GROUP BY GLAccount) Remains FULL OUTER JOIN
+                          (SELECT     GLDoc, GLDocID, GLDocDate, Amount, IsCredit, Description, GLAccount
+                             FROM         EffectiveGLRows
+                             WHERE     (Tafsil = 215256) AND (GL = 83) AND (GLDocDate <= N'1383/08/09') AND (GLDocDate >= N'1383/08/09')) EffGLRows ON 
+                      Remains.GLAccount = EffGLRows.GLAccount
+
+
+
+
+===============================
+===============================
+SELECT     DRV.GLAcc AS GLAccount, GLAccounts.Name, DRV.GLDoc, DRV.GLDocID, DRV.GLDocDate, DRV.Amount, DRV.IsCredit, DRV.Description, 
+                      DRV.remainedCredit, DRV.remainedDebit
+FROM         (SELECT     ISNULL(Remains.GLAccount, EffGLRows.GLAccount) AS GLAcc, ISNULL(Remains.remCred, 0) AS remainedCredit, ISNULL(Remains.remDeb,
+                                               0) AS remainedDebit, EffGLRows.*
+                        FROM         (SELECT     ISNULL(SUM(IsCredit * Amount), 0) AS remCred, ISNULL(SUM(- ((IsCredit - 1) * Amount)), 0) AS remDeb, GLAccount
+                                                FROM         EffectiveGLRows
+                                                WHERE     (GL = 83) AND (GLDocDate < N'1383/08/01') AND (Tafsil = 215256)
+                                                GROUP BY GLAccount) Remains FULL OUTER JOIN
+                                                  (SELECT     GLDoc, GLDocID, GLDocDate, Amount, IsCredit, Description, GLAccount
+                                                     FROM         EffectiveGLRows
+                                                     WHERE     (Tafsil = 215256) AND (GL = 83) AND (GLDocDate <= N'1383/08/09') AND (GLDocDate >= N'1383/08/09')) EffGLRows ON 
+                                              Remains.GLAccount = EffGLRows.GLAccount) DRV INNER JOIN
+                      GLAccounts ON DRV.GLAcc = GLAccounts.ID
+WHERE     (GLAccounts.GL = 83)
+
+===============================
+===============================
+===============================
+===============================
+
+
+SELECT GLRows.Amount, GLRows.Description, GLRows.Ref1, GLRows.Ref2, GLRows.IsCredit, GLDocs.GLDocDate 
+FROM GLRows INNER JOIN GLDocs ON GLRows.GLDoc = GLDocs.ID 
+WHERE (GLRows.ID IN (
+		SELECT MAX(GLRows.ID) AS MaxID 
+		FROM GLRows INNER JOIN GLDocs ON GLRows.GLDoc = GLDocs.ID 
+		WHERE (GLRows.deleted = 0) AND (GLRows.Ref1 <> '') AND (GLRows.GLAccount = 17001) AND (GLRows.Tafsil IS NULL) AND (GLDocs.IsRemoved = 0) AND (GLDocs.deleted = 0) AND (GLDocs.GL = 83) 
+		GROUP BY GLRows.Ref1, GLRows.Ref2, GLRows.Amount, GLRows.GLAccount, GLRows.Tafsil, GLDocs.GL HAVING (COUNT(GLRows.Ref1) % 2 = 1)
+	)
+) 
+ORDER BY GLRows.Ref2, GLRows.ID
+
+
+
+===============================
+
+SELECT     Amount, Description, Ref1, Ref2, IsCredit, GLDocDate
+FROM         EffectiveGLRows
+WHERE     (ID IN
+                          (SELECT     MAX(ID) AS MaxID
+                             FROM         EffectiveGLRows
+                             GROUP BY GLAccount, Tafsil, Amount, Ref1, Ref2, GL
+                             HAVING      (GLAccount = 17001) AND (Tafsil IS NULL) AND (GL = 83) AND (Ref1 <> N'') AND (COUNT(Ref1) % 2 = 1)))
+ORDER BY Ref2, ID
+
+===============================
+SUM REMAINED:
+
+SELECT     ISNULL(SUM(IsCredit * Amount), 0) AS remCred, ISNULL(SUM(- ((IsCredit - 1) * Amount)), 0) AS remDeb
+FROM         EffectiveGLRows
+WHERE     (ID IN(
+		SELECT     MAX(ID) AS MaxID
+		FROM         EffectiveGLRows
+		GROUP BY GLAccount, Tafsil, Amount, Ref1, Ref2, GL, Ref1, Ref2
+		HAVING      (GLAccount = 17001) AND (Tafsil IS NULL) AND (GL = 83) AND (Ref1 <> N'') AND (COUNT(Ref1) % 2 = 1) AND (Ref2 < N'1382/01/01')
+	))
+===============================
+
+SELECT     ISNULL(SUM(IsCredit * Amount), 0) AS remCred, ISNULL(SUM(- ((IsCredit - 1) * Amount)), 0) AS remDeb
+FROM         EffectiveGLRows
+WHERE     (ID IN
+                          (SELECT     MAX(ID) AS MaxID
+                             FROM         EffectiveGLRows
+                             GROUP BY GLAccount, Tafsil, Amount, Ref1, Ref2, GL, Ref1, Ref2
+                             HAVING      (GLAccount = 17001) AND (Tafsil IS NULL) AND (GL = 83) AND (Ref1 <> N'') AND (COUNT(Ref1) % 2 = 1) AND (Ref2 < N'')))
+
+
+===============================
+===============================
+
+CREATE PROCEDURE dbo.proc_CheqBook_Partial
+	@GLAccount	int,
+	@Tafsil		int,
+	@FromDate	nvarchar(10),
+	@ToDate	nvarchar(10),
+	@GL		int,
+	@ShowRemained	bit
+AS
+DECLARE 
+	@remainedCredit	int,
+	@remainedDebit		int
+SELECT     @remainedCredit=ISNULL(SUM(IsCredit * Amount), 0) , @remainedDebit=ISNULL(SUM(- ((IsCredit - 1) * Amount)), 0) 
+FROM         EffectiveGLRows
+WHERE     (ID IN(
+		SELECT     MAX(ID) AS MaxID
+		FROM         EffectiveGLRows
+		GROUP BY GLAccount, Tafsil, Amount, Ref1, Ref2, GL, Ref1, Ref2
+		HAVING      (GLAccount = 17001) AND (Tafsil IS NULL) AND (GL = 83) AND (Ref1 <> N'') AND (COUNT(Ref1) % 2 = 1) AND (Ref2 < N'1382/01/01')
+	))
+
+IF @Tafsil='' 
+	BEGIN
+		SELECT     Amount, Description, Ref1, Ref2, IsCredit, GLDocDate
+		FROM         EffectiveGLRows
+		WHERE     (ID IN
+		                          (SELECT     MAX(ID) AS MaxID
+		                             FROM         EffectiveGLRows
+		                             GROUP BY GLAccount, Tafsil, Amount, Ref1, Ref2, GL
+		                             HAVING      (GLAccount = @GLAccount) AND (Tafsil IS NULL) AND (GL = @GL) AND (Ref1 <> N'') AND (COUNT(Ref1) % 2 = 1)) AND (Ref2 >= @FromDate) AND (Ref2 <= @ToDate))
+		ORDER BY Ref2, ID
+	END
+ELSE
+	BEGIN
+		SELECT     Amount, Description, Ref1, Ref2, IsCredit, GLDocDate
+		FROM         EffectiveGLRows
+		WHERE     (ID IN
+		                          (SELECT     MAX(ID) AS MaxID
+		                             FROM         EffectiveGLRows
+		                             GROUP BY GLAccount, Tafsil, Amount, Ref1, Ref2, GL
+		                             HAVING      (GLAccount = @GLAccount) AND (Tafsil = @Tafsil ) AND (GL = @GL) AND (Ref1 <> N'') AND (COUNT(Ref1) % 2 = 1)) AND (Ref2 >= @FromDate) AND (Ref2 <= @ToDate))
+		ORDER BY Ref2, ID
+	END
+GO
+
+===============================
+===============================
+
+SELECT     ISNULL(CONVERT(tinyint, Invoices.IsA), 2) AS IsA, Accounts.IsADefault, ARItems.Link
+FROM         Accounts INNER JOIN
+                      ARItems ON ARItems.Account = Accounts.ID LEFT OUTER JOIN
+                      ARItemsRelations ON ARItemsRelations.CreditARItem = ARItems.ID LEFT OUTER JOIN
+                      ARItems ARItems_2 ON ARItems_2.ID = ARItemsRelations.DebitARItem LEFT OUTER JOIN
+                      Invoices ON ARItems_2.Link = Invoices.ID
+WHERE     (ARItems.Type = 2) AND (ARItems.Link = 23681)
+
+===============================
+===============================
+SELECT     *
+FROM         EffectiveGLRows
+WHERE     (Ref1 IN
+                          (SELECT DISTINCT Ref1
+                             FROM         EffectiveGLRows
+                             WHERE     (Ref1 <> '') AND (GL = 83) AND (GLAccount LIKE '4200%'))) AND (Ref1 NOT IN
+                          (SELECT DISTINCT Ref1
+                             FROM         EffectiveGLRows
+                             WHERE     (Ref1 <> '') AND (GL = 83) AND (GLAccount LIKE '4200%') AND SYS IS NOT NULL))
+ORDER BY Ref1, ID DESC
+
+===============================
+*** GLAccount wich has worked with 4200%
+SELECT DISTINCT GLAccount
+FROM         EffectiveGLRows
+WHERE     (Ref1 IN
+                          (SELECT DISTINCT Ref1
+                             FROM         EffectiveGLRows
+                             WHERE     (Ref1 <> '') AND (GL = 83) AND (GLAccount LIKE '4200%'))) AND (GL = 83)
+ORDER BY GLAccount
+
+===============================
+SELECT DISTINCT GLAccount
+FROM         EffectiveGLRows
+WHERE     (Ref1 IN
+                          (SELECT DISTINCT Ref1
+                             FROM         EffectiveGLRows
+                             WHERE     (Ref1 <> '') AND (GL = 83))) AND (GL = 83) AND (Ref1 NOT IN
+                          (SELECT DISTINCT Ref1
+                             FROM         EffectiveGLRows
+                             WHERE     (Ref1 <> '') AND (GL = 83) AND (SYS IS NOT NULL)))
+ORDER BY GLAccount
+===============================
+===============================
+SELECT     Accounts.ID AS AccID, Accounts.AccountTitle, SUM(InvoiceLines.Price) AS Price, SUM(InvoiceLines.Discount) AS Discount, SUM(InvoiceLines.Reverse) 
+                      AS Reverse, InvoiceItemCategories.ID AS CatID, InvoiceItemCategories.Name AS CatName, COUNT(*) AS InvQtty
+FROM         InvoiceItemCategoryRelations INNER JOIN
+                      InvoiceItems ON InvoiceItemCategoryRelations.InvoiceItem = InvoiceItems.ID INNER JOIN
+                      InvoiceItemCategories ON InvoiceItemCategoryRelations.InvoiceItemCategory = InvoiceItemCategories.ID INNER JOIN
+                      InvoiceLines ON InvoiceItems.ID = InvoiceLines.Item INNER JOIN
+                      Invoices ON InvoiceLines.Invoice = Invoices.ID INNER JOIN
+                      Accounts ON Invoices.Customer = Accounts.ID
+WHERE     (Invoices.Voided = 0) AND (Invoices.Issued = 1) AND (Invoices.IssuedDate >= N'1382/08/20') AND (Invoices.IssuedDate <= N'1383/08/20')
+GROUP BY Accounts.AccountTitle, InvoiceItemCategories.ID, InvoiceItemCategories.Name, Accounts.ID
+HAVING      (InvoiceItemCategories.ID > 2)
+ORDER BY AccID, CatID
+===============================
+SELECT     Kid.AccID, Kid.AccountTitle, Kid.Price, Kid.Discount, Kid.Reverse, Kid.CatID, Kid.CatName, Kid.InvQtty, COUNT(*) AS TotalInvQtty, 
+                      SUM(Invoices.TotalReceivable) AS TotalReceivable, SUM(Invoices.TotalDiscount) AS TotalDiscount, SUM(Invoices.TotalReverse) 
+                      AS TotalReverse
+FROM         (SELECT     Accounts.ID AS AccID, Accounts.AccountTitle, SUM(InvoiceLines.Price) AS Price, SUM(InvoiceLines.Discount) AS Discount, 
+                                              SUM(InvoiceLines.Reverse) AS Reverse, InvoiceItemCategories.ID AS CatID, InvoiceItemCategories.Name AS CatName, COUNT(*) 
+                                              AS InvQtty
+                        FROM         InvoiceItemCategoryRelations INNER JOIN
+                                              InvoiceItems ON InvoiceItemCategoryRelations.InvoiceItem = InvoiceItems.ID INNER JOIN
+                                              InvoiceItemCategories ON InvoiceItemCategoryRelations.InvoiceItemCategory = InvoiceItemCategories.ID INNER JOIN
+                                              InvoiceLines ON InvoiceItems.ID = InvoiceLines.Item INNER JOIN
+                                              Invoices ON InvoiceLines.Invoice = Invoices.ID INNER JOIN
+                                              Accounts ON Invoices.Customer = Accounts.ID
+                        WHERE     (Invoices.Voided = 0) AND (Invoices.Issued = 1) AND (Invoices.IssuedDate >= N'1382/08/20') AND (Invoices.IssuedDate <= N'1383/08/20')
+                        GROUP BY Accounts.AccountTitle, InvoiceItemCategories.ID, InvoiceItemCategories.Name, Accounts.ID
+                        HAVING      (InvoiceItemCategories.ID > 2)) Kid INNER JOIN
+                      Invoices ON Kid.AccID = Invoices.Customer
+GROUP BY Kid.AccID, Kid.AccountTitle, Kid.Price, Kid.Discount, Kid.Reverse, Kid.CatID, Kid.CatName, Kid.InvQtty, Invoices.Issued, Invoices.Voided
+HAVING      (Invoices.Issued = 1) AND (Invoices.Voided = 0)
+ORDER BY Kid.AccID, Kid.CatID
+===============================
+SELECT     InvoiceLines.Item
+FROM         InvoiceLines INNER JOIN
+                      Invoices ON InvoiceLines.Invoice = Invoices.ID
+WHERE     (Invoices.Voided = 0) AND (Invoices.Issued = 1) AND (Invoices.IssuedDate >= N'1382/08/20') AND (Invoices.IssuedDate <= N'1383/08/20')
+===============================
+SELECT     ID
+FROM         InvoiceItems
+WHERE     (ID IN
+                          (SELECT     InvoiceLines.Item
+                             FROM         InvoiceLines INNER JOIN
+                                                   Invoices ON InvoiceLines.Invoice = Invoices.ID
+                             WHERE     (Invoices.Voided = 0) AND (Invoices.Issued = 1) AND (Invoices.IssuedDate >= N'1382/08/20') AND 
+                                                   (Invoices.IssuedDate <= N'1383/08/20'))) AND (ID NOT IN
+                          (SELECT     Item_ID
+                             FROM         InventoryItemCategoryRelations
+                             WHERE     (Cat_ID > 2)))
+===============================
+===============================
+===============================
+===============================
+===============================
+===============================
+===============================
+===============================
+===============================
+
+===============================
+===============================
+SELECT     *
+FROM         (SELECT     TOP 10 Accounts.ID AS AccID, Accounts.AccountTitle, SUM(InvoiceLines.Price) AS Price, SUM(InvoiceLines.Discount) AS Discount, 
+                                              SUM(InvoiceLines.Reverse) AS Reverse, InvoiceItemCategories.ID AS CatID, COUNT(*) AS InvQtty
+                        FROM         InvoiceItemCategoryRelations INNER JOIN
+                                              InvoiceItems ON InvoiceItemCategoryRelations.InvoiceItem = InvoiceItems.ID INNER JOIN
+                                              InvoiceItemCategories ON InvoiceItemCategoryRelations.InvoiceItemCategory = InvoiceItemCategories.ID INNER JOIN
+                                              InvoiceLines ON InvoiceItems.ID = InvoiceLines.Item INNER JOIN
+                                              Invoices ON InvoiceLines.Invoice = Invoices.ID INNER JOIN
+                                              Accounts ON Invoices.Customer = Accounts.ID
+                        WHERE     (Invoices.IssuedDate >= N'1382/08/20') AND (Invoices.IssuedDate <= N'1383/08/20') AND (Invoices.Voided = 0) AND (Invoices.Issued = 1)
+                        GROUP BY Accounts.AccountTitle, InvoiceItemCategories.ID, Accounts.ID
+                        HAVING      (InvoiceItemCategories.ID = 3)
+                        ORDER BY COUNT(*) DESC, SUM(InvoiceLines.Price) DESC) TOPSORTED
+===============================
+SELECT     Ref1, Ref2, Amount, IsCredit
+FROM         GLRows
+WHERE     (GLAccount = 15004) AND (IsCredit = 1) AND (Ref1 <> '') AND (SYS IS NULL)
+
+===============================
+SELECT     *
+FROM         GLRows
+WHERE     (ID IN
+                          (SELECT     GLRows.ID
+                             FROM         (SELECT     Ref1, Ref2, Amount
+                                                     FROM         GLRows
+                                                     WHERE     (GLAccount IN (49001,49010,49011,49012,49013,15004)) AND (IsCredit = 1) AND (Ref1 <> '') AND (SYS IS NULL)) CHQ INNER JOIN
+                                                   GLRows ON CHQ.Ref1 = GLRows.Ref1 AND CHQ.Ref2 = GLRows.Ref2 AND CHQ.Amount = GLRows.Amount))
+						   
+===============================
+UPDATE    GLRows
+SET              IsCredit = CONVERT(bit, 1 - IsCredit)
+WHERE     (ID IN
+                          (SELECT     GLRows.ID
+                             FROM         (SELECT     Ref1, Ref2, Amount
+                                                     FROM         GLRows
+                                                     WHERE     (GLAccount IN (49001,49010,49011,49012,49013,15004)) AND (IsCredit = 1) AND (Ref1 <> '') AND (SYS IS NULL)) CHQ INNER JOIN
+                                                   GLRows ON CHQ.Ref1 = GLRows.Ref1 AND CHQ.Ref2 = GLRows.Ref2 AND CHQ.Amount = GLRows.Amount))
+						   
+===============================
+
+===============================
+
+===============================
+
+===============================
+
+===============================
+
+===============================
+
+===============================
+
+===============================
+
+===============================
+
+===============================
+
+===============================
+
+===============================
+
+===============================
+
+===============================
+
+===============================
+
+===============================
+
