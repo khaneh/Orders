@@ -1,0 +1,3 @@
+<%
+	Set myTObj = Nothing
+%>

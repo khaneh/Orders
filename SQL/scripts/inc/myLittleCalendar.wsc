@@ -1,0 +1,775 @@
+<?xml version="1.0"?>
+<component>
+
+<registration
+	description="myLittleCalendar"
+	progid="myLittleCalendar.WSC"
+	version="1.00"
+	classid="{e56afaa0-4a20-11d5-9dfb-0020183c3dec}"
+>
+</registration>
+<?component error="true" debug="true"?>
+
+<public>
+	<property name="mlcDate">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcFirstDayOfWeek">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcMonthName">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcMonthAbbr">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcDisplayMonthLongName">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcDayName">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcDayAbbr">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcDisplayDayLongName">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcEmptyCellStyle">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcCellStyle">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcSelectedCellStyle">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcWeekDayStyle">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcMonthAndYearStyle">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcMonthStyle">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcYearStyle">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcListStyle">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcListCellStyle">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcTableBGColor">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcTableBorder">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcTableCellSpacing">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcTableCellPadding">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcFormName">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcActionURL">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcListPosition">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcMonthPosition">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcYearPosition">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcMonthAndYearPosition">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcYearRange">
+		<get/>
+		<put/>
+	</property>
+	<property name="mlcErrorNumber">
+		<get/>
+	</property>
+	<property name="mlcErrorDescription">
+		<get/>
+	</property>
+	<method name="displayCalendar"/>
+	
+</public>
+	
+<implements type="ASP" /> 
+
+<resource id="-3">Invalid value passed to mlcDate : default value is used.</resource>
+<resource id="-4">Invalid value passed to mlcFirstDayOfWeek : default value is used.</resource>
+<resource id="-5">Invalid value passed to mlcMonthName : default value is used.</resource>
+<resource id="-6">Invalid value passed to mlcMonthAbbr : default value is used.</resource>
+<resource id="-7">Invalid value passed to mlcDisplayMonthLongName : default value is used.</resource>
+<resource id="-8">Invalid value passed to mlcDayName : default value is used.</resource>
+<resource id="-9">Invalid value passed to mlcDayAbbr : default value is used.</resource>
+<resource id="-10">Invalid value passed to mlcDisplayDayLongName : default value is used.</resource>
+<resource id="-11">Invalid value passed to mlcTableBorder : default value is used.</resource>
+<resource id="-12">Invalid value passed to mlcTableCellSpacing : default value is used.</resource>
+<resource id="-13">Invalid value passed to mlcTableCellPadding : default value is used.</resource>
+<resource id="-14">Invalid value passed to mlcYearPosition : default value is used.</resource>
+<resource id="-15">Invalid value passed to mlcMonthPosition : default value is used.</resource>
+<resource id="-16">Invalid value passed to mlcMonthAndYearPosition : default value is used.</resource>
+<resource id="-17">Invalid value passed to mlcListPosition : default value is used.</resource>
+<resource id="-18">Invalid value passed to mlcYearRange : default value is used.</resource>
+
+<script language="VBScript">
+<![CDATA[
+option explicit
+
+' ############################
+' ###  Properties declaration
+' ############################
+Dim mlcDate, mlcFirstDayOfWeek
+Dim mlcMonthName, mlcMonthAbbr, mlcDisplayMonthLongName, mlcDayName, mlcDayAbbr, mlcDisplayDayLongName
+Dim mlcEmptyCellStyle, mlcCellStyle, mlcSelectedCellStyle
+Dim mlcWeekDayStyle, mlcMonthAndYearStyle, mlcMonthStyle, mlcYearStyle, mlcListStyle, mlcListCellStyle
+Dim mlcTableBorder, mlcTableBGColor, mlcTableCellSpacing, mlcTableCellPadding
+Dim mlcYearRange
+Dim mlcFormName, mlcActionURL
+Dim mlcListPosition, mlcMonthAndYearPosition, mlcMonthPosition, mlcYearPosition
+Dim mlcErrorNumber, mlcErrorDescription
+
+' ############################
+' ###  Properties default values
+' ############################
+mlcDate = date()
+mlcFirstDayOfWeek = vbSunday
+mlcMonthName = Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+mlcMonthAbbr = Array("Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec.")
+mlcDisplayMonthLongName = 1
+mlcDayName = Array("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+mlcDayAbbr = Array("S", "M", "T", "W", "T", "F", "S")
+mlcDisplayDayLongName = 0
+mlcEmptyCellStyle = "font-family: Arial; font-size: 12px; color: #885B3B; background-color: #F5EAE2;"
+mlcCellStyle = "font-family: Arial; font-size: 12px; color: #885B3B; background-color: #F9F3EE; text-decoration : none;"
+mlcSelectedCellStyle = "font-family: Arial; font-size: 12px; color: #885B3B; background-color: #F9F3EE; font-weight: Bold; text-decoration : none;"
+mlcWeekDayStyle = "font-family: Arial; font-size: 12px; color: #885B3B; background-color: #E8D5C6;"
+mlcMonthAndYearStyle = "font-family: Arial; font-size: 12px; color: #885B3B; background-color: #D5B49B; font-weight: Bold;"
+mlcMonthStyle = "font-family: Arial; font-size: 12px; color: #885B3B; background-color: #D5B49B; font-weight: Bold;"
+mlcYearStyle = "font-family: Arial; font-size: 12px; color: #885B3B; background-color: #D5B49B; font-weight: Bold;"
+mlcListStyle = "color : #885B3B; font-size : 10px; background-color: #E8D5C6;"
+mlcListCellStyle = "color : #885B3B; font-size : 10px; background-color: #D5B49B;"
+mlcTableBGColor = "#885B3B"
+mlcTableBorder = 0
+mlcTableCellSpacing = 0
+mlcTableCellPadding = 3
+mlcFormName = "myLittleCalendar"
+mlcActionURL = ""
+mlcYearRange = 10
+mlcListPosition = "Top"
+mlcMonthAndYearPosition = "Bottom"
+mlcMonthPosition = "Hidden"
+mlcYearPosition = "Hidden"
+mlcErrorNumber = 0
+mlcErrorDescription = ""
+
+' ############################
+' ###  Properties get/set functions
+' ############################
+Function get_mlcDate()
+	get_mlcDate = mlcDate
+End Function
+
+Function put_mlcDate(pValue)
+	If isDate(pValue) Then
+		mlcDate = pValue
+	Else
+		mlcErrorNumber = -3
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcFirstDayOfWeek()
+	get_mlcFirstDayOfWeek = mlcFirstDayOfWeek
+End Function
+
+Function put_mlcFirstDayOfWeek(pValue)
+	If isNumeric(pValue) Then
+		If pValue > 0 AND pValue < 8 Then
+			mlcFirstDayOfWeek = pValue
+		Else
+			mlcErrorNumber = -4
+			mlcErrorDescription = getResource(mlcErrorNumber)
+		End If
+	Else
+		mlcErrorNumber = -4
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcMonthName()
+	get_mlcMonthName = mlcMonthName
+End Function
+
+Function put_mlcMonthName(pValue)
+Dim myArray
+	myArray = Split(pValue, ",")
+	If Ubound(myArray, 1) = 11 Then
+		mlcMonthName = myArray
+	Else
+		mlcErrorNumber = -5
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcMonthAbbr()
+	get_mlcMonthAbbr = mlcMonthAbbr
+End Function
+
+Function put_mlcMonthAbbr(pValue)
+Dim myArray
+	myArray = Split(pValue, ",")
+	If Ubound(myArray, 1) = 11 Then
+		mlcMonthAbbr = myArray
+	Else
+		mlcErrorNumber = -6
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcDisplayMonthLongName()
+	get_mlcDisplayMonthLongName = mlcDisplayMonthLongName
+End Function
+
+Function put_mlcDisplayMonthLongName(pValue)
+	If isNumeric(pValue) Then
+		mlcDisplayMonthLongName = pValue
+	Else
+		mlcErrorNumber = -7
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcDayName()
+	get_mlcDayName = mlcDayName
+End Function
+
+Function put_mlcDayName(pValue)
+Dim myArray
+	myArray = Split(pValue, ",")
+	If Ubound(myArray, 1) = 6 Then
+		mlcDayName = myArray
+	Else
+		mlcErrorNumber = -8
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcDayAbbr()
+	get_mlcDayAbbr = mlcDayAbbr
+End Function
+
+Function put_mlcDayAbbr(pValue)
+Dim myArray
+	myArray = Split(pValue, ",")
+	If Ubound(myArray, 1) = 6 Then
+		mlcDayAbbr = myArray
+	Else
+		mlcErrorNumber = -9
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcDisplayDayLongName()
+	get_mlcDisplayDayLongName = mlcDisplayDayLongName
+End Function
+
+Function put_mlcDisplayDayLongName(pValue)
+	If isNumeric(pValue) Then
+		mlcDisplayDayLongName = pValue
+	Else
+		mlcErrorNumber = -10
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcEmptyCellStyle()
+	get_mlcEmptyCellStyle = mlcEmptyCellStyle
+End Function
+
+Function put_mlcEmptyCellStyle(pValue)
+	mlcEmptyCellStyle = pValue
+End Function
+
+Function get_mlcCellStyle()
+	get_mlcCellStyle = mlcCellStyle
+End Function
+
+Function put_mlcCellStyle(pValue)
+	mlcCellStyle = pValue
+End Function
+
+Function get_mlcSelectedCellStyle()
+	get_mlcSelectedCellStyle = mlcSelectedCellStyle
+End Function
+
+Function put_mlcSelectedCellStyle(pValue)
+	mlcSelectedCellStyle = pValue
+End Function
+
+Function get_mlcWeekDayStyle()
+	get_mlcWeekDayStyle = mlcWeekDayStyle
+End Function
+
+Function put_mlcWeekDayStyle(pValue)
+	mlcWeekDayStyle = pValue
+End Function
+
+Function get_mlcMonthAndYearStyle()
+	get_mlcMonthAndYearStyle = mlcMonthAndYearStyle
+End Function
+
+Function put_mlcMonthAndYearStyle(pValue)
+	mlcMonthAndYearStyle = pValue
+End Function
+
+Function get_mlcMonthStyle()
+	get_mlcMonthStyle = mlcMonthStyle
+End Function
+
+Function put_mlcMonthStyle(pValue)
+	mlcMonthStyle = pValue
+End Function
+
+Function get_mlcYearStyle()
+	get_mlcYearStyle = mlcYearStyle
+End Function
+
+Function put_mlcYearStyle(pValue)
+	mlcYearStyle = pValue
+End Function
+
+Function get_mlcListStyle()
+	get_mlcListStyle = mlcListStyle
+End Function
+
+Function put_mlcListStyle(pValue)
+	mlcListStyle = pValue
+End Function
+
+Function get_mlcListCellStyle()
+	get_mlcListCellStyle = mlcListCellStyle
+End Function
+
+Function put_mlcListCellStyle(pValue)
+	mlcListCellStyle = pValue
+End Function
+
+Function get_mlcTableBorder()
+	get_mlcTableBorder = mlcTableBorder
+End Function
+
+Function put_mlcTableBorder(pValue)
+	If isNumeric(pValue) Then
+		mlcTableBorder = pValue
+	Else
+		mlcErrorNumber = -11
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End if
+End Function
+
+Function get_mlcTableBGColor()
+	get_mlcTableBGColor = mlcTableBGColor
+End Function
+
+Function put_mlcTableBGColor(pValue)
+	mlcTableBGColor = pValue
+End Function
+
+Function get_mlcTableCellSpacing()
+	get_mlcTableCellSpacing = mlcTableCellSpacing
+End Function
+
+Function put_mlcTableCellSpacing(pValue)
+	If isNumeric(pValue) Then
+		mlcTableCellSpacing = pValue
+	Else
+		mlcErrorNumber = -12
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcTableCellPadding()
+	get_mlcTableCellPadding = mlcTableCellPadding
+End Function
+
+Function put_mlcTableCellPadding(pValue)
+	If isNumeric(pValue) Then
+		mlcTableCellPadding = pValue
+	Else
+		mlcErrorNumber = -13
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcFormName()
+	get_mlcFormName = mlcFormName
+End Function
+
+Function put_mlcFormName(pValue)
+	mlcFormName = pValue
+End Function
+
+Function get_mlcActionURL()
+	get_mlcActionURL = mlcActionURL
+End Function
+
+Function put_mlcActionURL(pValue)
+	mlcActionURL = pValue
+End Function
+
+Function get_mlcListPosition()
+	get_mlcListPosition = mlcListPosition
+End Function
+
+Function put_mlcListPosition(pValue)
+	If pValue = "Top" OR pValue = "Bottom" OR pValue = "Hidden" Then
+		mlcListPosition = pValue
+	Else
+		mlcErrorNumber = -16
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcMonthAndYearPosition()
+	get_mlcMonthAndYearPosition = mlcMonthAndYearPosition
+End Function
+
+Function put_mlcMonthAndYearPosition(pValue)
+	If pValue = "Top" OR pValue = "Bottom" OR pValue = "Hidden" Then
+		mlcMonthAndYearPosition = pValue
+	Else
+		mlcErrorNumber = -16
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcMonthPosition()
+	get_mlcMonthPosition = mlcMonthPosition
+End Function
+
+Function put_mlcMonthPosition(pValue)
+	If pValue = "Top" OR pValue = "Bottom" OR pValue = "Hidden" Then
+		mlcMonthPosition = pValue
+	Else
+		mlcErrorNumber = -15
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcYearPosition()
+	get_mlcYearPosition = mlcYearPosition
+End Function
+
+Function put_mlcYearPosition(pValue)
+	If pValue = "Top" OR pValue = "Bottom" OR pValue = "Hidden" Then
+		mlcYearPosition = pValue
+	Else
+		mlcErrorNumber = -14
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcYearRange()
+	get_mlcYearRange = mlcYearRange
+End Function
+
+Function put_mlcYearRange(pValue)
+	If isNumeric(pValue) Then
+		mlcYearRange = CInt(pValue)
+	Else
+		mlcErrorNumber = -18
+		mlcErrorDescription = getResource(mlcErrorNumber)
+	End If
+End Function
+
+Function get_mlcErrorNumber()
+	get_mlcErrorNumber = mlcErrorNumber
+End Function
+
+Function get_mlcErrorDescription()
+	get_mlcErrorDescription = mlcErrorDescription
+End Function
+
+' ############################
+' ###  Display functions
+' ############################
+' =================================
+' writes JavaScript function
+' =================================
+Function displayJavaScript()
+Dim myJSstr
+	myJSstr = "<SCRIPT LANGUAGE=""JavaScript"" TYPE=""text/javascript"">" & vbCrlf & "<!--" & vbCrlf
+	myJSstr = myJSstr & "function mlc_setdate(pYear, pMonth, pDay, pDayChosen)" & vbCrlf & "{" & vbCrlf
+	myJSstr = myJSstr & vbTab & "if (eval(document." & mlcFormName & ".mlcYearList))" & vbCrlf
+	myJSstr = myJSstr & vbTab & "{" & vbCrlf
+	myJSstr = myJSstr & vbTab & vbTab & "mySelectedIndex = document." & mlcFormName & ".mlcYearList.selectedIndex;" & vbCrlf
+	myJSstr = myJSstr & vbTab & vbTab & "if (pYear == 0) pYear = document." & mlcFormName & ".mlcYearList.options[mySelectedIndex].value;" & vbCrlf
+	myJSstr = myJSstr & vbTab & vbTab & "mySelectedIndex = document." & mlcFormName & ".mlcMonthList.selectedIndex;" & vbCrlf
+	myJSstr = myJSstr & vbTab & vbTab & "if (pMonth == 0) pMonth = document." & mlcFormName & ".mlcMonthList.options[mySelectedIndex].value;" & vbCrlf
+	myJSstr = myJSstr & vbTab & "}" & vbCrlf
+	myJSstr = myJSstr & vbTab & "document." & mlcFormName & ".mlcYear.value=pYear;" & vbCrlf
+	myJSstr = myJSstr & vbTab & "document." & mlcFormName & ".mlcMonth.value=pMonth;" & vbCrlf
+	myJSstr = myJSstr & vbTab & "document." & mlcFormName & ".mlcDay.value=pDay;" & vbCrlf
+	myJSstr = myJSstr & vbTab & "document." & mlcFormName & ".mlcDate.value="""";" & vbCrlf
+	myJSstr = myJSstr & vbTab & "if (typeof(pDayChosen) != ""undefined"") document." & mlcFormName & ".mlcDayChosen.value=pDayChosen;" & vbCrlf
+	myJSstr = myJSstr & vbTab & "document." & mlcFormName & ".submit();" & vbCrlf
+	myJSstr = myJSstr & vbTab & "return(0);" & vbCrlf
+	myJSstr = myJSstr & "}" & vbCrlf & vbCrlf
+	myJSstr = myJSstr & "//-->" & vbCrlf & "<" & "/SCRIPT>" & vbCrlf
+	displayJavaScript = myJSstr
+End Function
+
+' =================================
+' writes List block
+' =================================
+Function displayList()
+Dim myHTMLstr, i, myMonth, myFirstYear, myLastYear
+	myHTMLstr = vbTab & "<TR>" & vbCrlf
+	' Displays Month Box
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD COLSPAN=7 ALIGN=CENTER NOWRAP STYLE=""" & mlcListCellStyle & """><SELECT NAME=mlcMonthList STYLE=""" & mlcListStyle & """ onChange=""mlc_setdate(0, 0, " & Day(mlcDate) & "); return false;"">" & vbCrlf
+	For i = 0 To 11
+		If mlcDisplayMonthLongName <> 0 Then
+			myMonth = mlcMonthName(i)
+		Else
+			myMonth = mlcMonthAbbr(i)
+		End If
+		myHTMLstr = myHTMLstr & vbTab & vbTab & vbTab & "<OPTION VALUE=" & i + 1
+		If Month(mlcDate) = i + 1 Then
+			myHTMLstr = myHTMLstr & " SELECTED"
+		End If
+		myHTMLstr = myHTMLstr & ">" & myMonth & vbCrlf
+	Next
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "</SELECT>&nbsp;" & vbCrlf
+	' Displays Year Box
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "<SELECT NAME=mlcYearList STYLE=""" & mlcListStyle & """ onChange=""mlc_setdate(0, 0, " & Day(mlcDate) & "); return false;"">" & vbCrlf
+	myFirstYear = Year(mlcDate) - mlcYearRange
+	myLastYear = Year(mlcDate) + mlcYearRange
+	For i = myFirstYear To myLastYear
+		myHTMLstr = myHTMLstr & vbTab & vbTab & vbTab & "<OPTION VALUE=" & i
+		If Year(mlcDate) = i Then
+			myHTMLstr = myHTMLstr & " SELECTED"
+		End If
+		myHTMLstr = myHTMLstr & ">" & i & vbCrlf
+	Next
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "</SELECT></TD>" & vbCrlf
+	displayList = myHTMLstr
+End Function
+
+' =================================
+' writes monthAndYear block
+' =================================
+Function displayMonthAndYear()
+Dim myHTMLstr, myDate, myLinkDate, i, myMonth
+	myHTMLstr = vbTab & "<TR>" & vbCrlf
+	myDate = DateAdd("m", -1, mlcDate)
+	myLinkDate = "mlc_setdate(" & Year(myDate) & ", " & Month(myDate) & ", " & Day(myDate) & "); return false;"
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD ALIGN=CENTER STYLE=""" & mlcMonthAndYearStyle & """><A HREF=# onclick=""" & myLinkDate & """ STYLE=""" & mlcMonthAndYearStyle & """><FONT STYLE=""text-decoration: none;"">&lt;</FONT></A></TD>" & vbCrlf
+	If mlcDisplayMonthLongName <> 0 Then
+		myMonth = mlcMonthName(Month(mlcDate)-1)
+	Else
+		myMonth = mlcMonthAbbr(Month(mlcDate)-1)
+	End If
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD COLSPAN=5 ALIGN=CENTER STYLE=""" & mlcMonthAndYearStyle & """><FONT STYLE=""" & mlcMonthAndYearStyle & """>" & myMonth & " " & Year(mlcDate) & "</FONT></TD>" & vbCrlf
+	myDate = DateAdd("m", 1, mlcDate)
+	myLinkDate = "mlc_setdate(" & Year(myDate) & ", " & Month(myDate) & ", " & Day(myDate) & "); return false;"
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD ALIGN=CENTER STYLE=""" & mlcMonthAndYearStyle & """><A HREF=# onclick=""" & myLinkDate & """ STYLE=""" & mlcMonthAndYearStyle & """><FONT STYLE=""text-decoration: none;"">&gt;</FONT></TD>" & vbCrlf
+	myHTMLstr = myHTMLstr & vbTab & "</TR>" & vbCrlf
+	displayMonthAndYear = myHTMLstr
+End Function
+
+' =================================
+' writes monthName block
+' =================================
+Function displayMonth()
+Dim myHTMLstr, myDate, myLinkDate, i, myMonth
+	myHTMLstr = vbTab & "<TR>" & vbCrlf
+	myDate = DateAdd("m", -1, mlcDate)
+	myLinkDate = "mlc_setdate(" & Year(myDate) & ", " & Month(myDate) & ", " & Day(myDate) & "); return false;"
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD ALIGN=CENTER STYLE=""" & mlcMonthStyle & """><A HREF=# onclick=""" & myLinkDate & """ STYLE=""" & mlcMonthStyle & """><FONT STYLE=""text-decoration: none;"">&lt;</FONT></A></TD>" & vbCrlf
+	If mlcDisplayMonthLongName <> 0 Then
+		myMonth = mlcMonthName(Month(mlcDate)-1)
+	Else
+		myMonth = mlcMonthAbbr(Month(mlcDate)-1)
+	End If
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD COLSPAN=5 ALIGN=CENTER STYLE=""" & mlcMonthStyle & """><FONT STYLE=""" & mlcMonthStyle & """>" & myMonth & "</FONT></TD>" & vbCrlf
+	myDate = DateAdd("m", 1, mlcDate)
+	myLinkDate = "mlc_setdate(" & Year(myDate) & ", " & Month(myDate) & ", " & Day(myDate) & "); return false;"
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD ALIGN=CENTER STYLE=""" & mlcMonthStyle & """><A HREF=# onclick=""" & myLinkDate & """ STYLE=""" & mlcMonthStyle & """><FONT STYLE=""text-decoration: none;"">&gt;</FONT></TD>" & vbCrlf
+	myHTMLstr = myHTMLstr & vbTab & "</TR>" & vbCrlf
+	displayMonth = myHTMLstr
+End Function
+
+' =================================
+' writes year block
+' =================================
+Function displayYear()
+Dim myHTMLstr, myDate, myLinkDate
+	myHTMLstr = myHTMLstr & vbTab & "<TR>" & vbCrlf
+	myDate = DateAdd("yyyy", -1, mlcDate)
+	myLinkDate = "mlc_setdate(" & Year(myDate) & ", " & Month(myDate) & ", " & Day(myDate) & "); return false;"
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD ALIGN=CENTER STYLE=""" & mlcYearStyle & """><A HREF=# onclick=""" & myLinkDate & """ STYLE=""" & mlcMonthStyle & """><FONT STYLE=""text-decoration: none;"">&lt;</FONT></TD>" & vbCrlf
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD ALIGN=CENTER COLSPAN=5 STYLE=""" & mlcYearStyle & """><FONT STYLE=""" & mlcYearStyle & """>" & Year(mlcDate) & "</FONT></TD>" & vbCrlf
+	myDate = DateAdd("yyyy", 1, mlcDate)
+	myLinkDate = "mlc_setdate(" & Year(myDate) & ", " & Month(myDate) & ", " & Day(myDate) & "); return false;"
+	myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD ALIGN=CENTER STYLE=""" & mlcYearStyle & """><A HREF=# onclick=""" & myLinkDate & """ STYLE=""" & mlcYearStyle & """><FONT STYLE=""text-decoration: none;"">&gt;</FONT></TD>" & vbCrlf
+	myHTMLstr = myHTMLstr & vbTab & "</TR>" & vbCrlf
+	displayYear = myHTMLstr
+End Function
+
+' =================================
+' writes weekday block
+' =================================
+Function displayWeekDayName
+Dim myHTMLstr, myWeekDay, i
+	myHTMLstr = myHTMLstr & vbTab & "<TR>" & vbCrlf
+	For i = 0 To 6
+		If mlcDisplayDayLongName <> 0 Then
+			myWeekDay = mlcDayName((i + mlcFirstDayOfWeek - 1) MOD 7)
+		Else
+			myWeekDay = mlcDayAbbr((i + mlcFirstDayOfWeek - 1) MOD 7)
+		End If
+		myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD ALIGN=CENTER WIDTH=""14%"" STYLE=""" & mlcWeekDayStyle & """><FONT STYLE=""" & mlcWeekDayStyle & """>" & myWeekDay & "</FONT></TD>" & vbCrlf
+	Next
+	myHTMLstr = myHTMLstr & vbTab & "</TR>" & vbCrlf
+	displayWeekDayName = myHTMLstr
+End Function
+
+' =================================
+' writes complete calendar
+' =================================
+Function displayCalendar()
+Dim myHTMLstr
+Dim myFirstDay, myLastDay, myDayCount
+Dim myLink, myLinkDate, myDate, myMonth
+Dim myCellStyle
+Dim i, myFlag
+	' Initializes
+	myFirstDay = CDate(Year(mlcDate) & "/" & Month(mlcDate) & "/01")
+	myLastDay = CDate(DateAdd("m", 1, myFirstDay))
+	myLastDay = DateAdd("d", -1, myLastDay)
+	myDayCount = Day(myLastDay)
+	' Prepares Form and Table
+	myHTMLstr = displayJavaScript()
+	myHTMLstr = myHTMLstr & "<FORM NAME=""" & mlcFormName & """ METHOD=POST ACTION=""" & mlcActionURL & """>" & vbCrlf
+	myHTMLstr = myHTMLstr & "<INPUT TYPE=""hidden"" NAME=mlcYear VALUE=""" & Year(mlcDate) & """>" & vbCrlf
+	myHTMLstr = myHTMLstr & "<INPUT TYPE=""hidden"" NAME=mlcMonth VALUE=""" & Month(mlcDate) & """>" & vbCrlf
+	myHTMLstr = myHTMLstr & "<INPUT TYPE=""hidden"" NAME=mlcDay VALUE=""" & Day(mlcDate) & """>" & vbCrlf
+	myHTMLstr = myHTMLstr & "<INPUT TYPE=""hidden"" NAME=mlcDate VALUE=""" & mlcDate & """>" & vbCrlf
+myHTMLstr = myHTMLstr & "<INPUT TYPE=""hidden"" NAME=mlcDayChosen>" & vbCrlf
+	myHTMLstr = myHTMLstr & "<TABLE BORDER=" & mlcTableBorder & " CELLSPACING=" & mlcTableCellSpacing & " CELLPADDING=" & mlcTableCellPadding & " BGCOLOR=""" & mlcTableBGColor & """>" & vbCrlf
+	' Displays List
+	If mlcListPosition = "Top" Then myHTMLstr = myHTMLstr & displayList()
+	' Displays MonthAndYear
+	If mlcMonthAndYearPosition = "Top" Then myHTMLstr = myHTMLstr & displayMonthAndYear()
+	' Displays MonthName
+	If mlcMonthPosition = "Top" Then myHTMLstr = myHTMLstr & displayMonth()
+	' Displays MonthName
+	If mlcYearPosition = "Top" Then myHTMLstr = myHTMLstr & displayYear()
+	' Displays WeekDayName
+	myHTMLstr = myHTMLstr & displayWeekDayName()
+	' Displays necessary empty cells
+	myHTMLstr = myHTMLstr & vbTab & "<TR>" & vbCrlf
+	For i = 1 To WeekDay(myFirstDay, mlcFirstDayOfWeek) - 1
+		myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD ALIGN=CENTER WIDTH=""14%"" STYLE=""" & mlcEmptyCellStyle & """>&nbsp;</TD>" & vbCrlf
+	Next
+	' Displays first week
+	For i = WeekDay(myFirstDay, mlcFirstDayOfWeek) To 7
+		If Day(mlcDate) = i - WeekDay(myFirstDay, mlcFirstDayOfWeek) + 1 Then
+			myCellStyle = mlcSelectedCellStyle
+		Else
+			myCellStyle = mlcCellStyle
+		End If
+		myDate = DateAdd("d",  i - WeekDay(myFirstDay, mlcFirstDayOfWeek), myFirstDay)
+		myLinkDate = "mlc_setdate(" & Year(myDate) & ", " & Month(myDate) & ", " & Day(myDate) & ", 1); return false;"
+		myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD ALIGN=CENTER WIDTH=""14%"" STYLE=""" & myCellStyle & """><A HREF=# onclick=""" & myLinkDate & """ STYLE=""" & myCellStyle & """>" & i - WeekDay(myFirstDay, mlcFirstDayOfWeek) + 1 & "</A></TD>" & vbCrlf
+	Next
+	myHTMLstr = myHTMLstr & vbTab & "</TR>" & vbCrlf & vbTab & "<TR>" & vbCrlf
+	' Displays all other weeks
+	i = 9 - WeekDay(myFirstDay, mlcFirstDayOfWeek)
+	Do While i <= myDayCount
+		If Day(mlcDate) = i Then
+			myCellStyle = mlcSelectedCellStyle
+		Else
+			myCellStyle = mlcCellStyle
+		End If
+		myDate = DateAdd("d",  i - 1, myFirstDay)
+		myLinkDate = "mlc_setdate(" & Year(myDate) & ", " & Month(myDate) & ", " & Day(myDate) & ", 1); return false;"
+		myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD ALIGN=CENTER WIDTH=""14%"" STYLE=""" & myCellStyle & """><A HREF=# onclick=""" & myLinkDate & """ STYLE=""" & myCellStyle & """>" & i & "</A></TD>" & vbCrlf
+		If (i - 8 + WeekDay(myFirstDay, mlcFirstDayOfWeek)) MOD 7 = 0 Then
+			myHTMLstr = myHTMLstr & vbTab & "</TR>" & vbCrlf 
+			If i <> myDayCount Then
+				myHTMLstr = myHTMLstr & vbTab & "<TR>" & vbCrlf
+			End If
+		End If
+		i = i + 1
+	Loop
+	' Displays necessary empty cells
+	myFlag = false
+	For i = WeekDay(myLastDay, mlcFirstDayOfWeek) + 1 To 7
+		myHTMLstr = myHTMLstr & vbTab & vbTab & "<TD ALIGN=CENTER STYLE=""" & mlcEmptyCellStyle & """>&nbsp;</TD>" & vbCrlf
+		myFlag = true
+	Next
+	If myFlag Then
+		myHTMLstr = myHTMLstr & vbTab & "</TR>" & vbCrlf
+	End If
+	' Displays MonthAndYear
+	If mlcMonthAndYearPosition = "Bottom" Then myHTMLstr = myHTMLstr & displayMonthAndYear()
+	' Displays MonthName
+	If mlcMonthPosition = "Bottom" Then myHTMLstr = myHTMLstr & displayMonth()
+	' Displays MonthName
+	If mlcYearPosition = "Bottom" Then myHTMLstr = myHTMLstr & displayYear()
+	' Displays List
+	If mlcListPosition = "Bottom" Then myHTMLstr = myHTMLstr & displayList()
+	' Closes Table and Form
+	myHTMLstr = myHTMLstr & "</TABLE>" & vbCrlf & "</FORM>" & vbCrlf
+	' writes HTML stream
+	Response.Write myHTMLstr
+	' Finally returns error number
+	displayCalendar = mlcErrorNumber
+End Function
+
+]]>
+</script>
+
+</component>

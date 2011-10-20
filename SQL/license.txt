@@ -1,0 +1,44 @@
+Important! You should carefully read the following enduser license agreement before buying and installing this software program. If you do not agree with the terms of this Agreement, you cannot install the software. 
+
+License Agreement
+You are granted the license to install myLittleAdmin in one server for one site. For multi-site or multi-server installation, please contact us at webmaster@mylittletools.net. 
+
++  You can modify the source code.
++  You may not re-distribute the source code.
++  myLittleTools.net retains the copyright to the source code.
++  Your license is non-transferable.
+
+
+You can modify the ASP files that came with myLittleAdmin. myLittleAdmin is provided to the endusers in source code format to enable them to customize it according to their specifications. However myLittleTools.net cannot provide support to the customizations made by the endusers. 
+
+You cannot re-distribute the source code. myLittleAdmin comes with a Single Site license and should be used on one website only. The license does not allow you to share or distribute ASP files or part of the ASP code that comes with myLittleAdmin. You can always recommend our product to your friends/customers and they can buy a license from us. You can also resell our products at any price that you wish after purchasing it from us. 
+
+myLittleTools.net does not offer refunds on myLittleAdmin. That's why you are encouraged to try out all the features of our Live Demo prior to purchasing myLittleAdmin to determine if it meets your needs. myLittleTools.net cannot afford to offer refunds because myLittleAdmin is sold with complete source code. 
+
+This software is provided AS IS and WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+
+Neither myLittleTools.net, its parents, subsidiaries, affiliates or licensors shall be liable in any way for loss or damage of any kind resulting from the use of the program including, but not limited to, loss of goodwill, work stoppage, computer failure or malfunction, data loss, data corruption or any and all other commercial damages or losses. 
+
+====================================================
+
+Important! Veuillez lire attentivement la licence d'utilisateur suivante avant d'acheter ou d'installer ce logiciel. Si vous n'acceptez pas tous les termes de cet accord, vous ne devez pas installer le logiciel. 
+
+Licence d'utilisateur
+Vous avez le droit d'installer myLittleAdmin sur un serveur pour administrer un site. Pour une utilisation sur plusieurs sites ou sur plusieurs serveurs, merci de nous contacter à webmaster@mylittletools.net. 
+
++  Vous pouvez modifier les codes sources.
++  Vous ne pouvez pas re-distribuer les codes sources.
++  myLittleTools conserve les copyright sur les codes sources.
++  Votre licence n'est pas transmissible.
+
+
+Vous pouvez modifier les fichiers ASP qui viennent avec myLittleAdmin. myLittleAdmin est livré aux utilisateurs avec les codes sources afin que ceux-ci puissent l'adapter et le personnaliser selon leurs besoins et spécifications propres. Cependant, myLittleTools.net ne fournit aucun support sur ces personnalisations. 
+
+Vous ne pouvez pas re-distribuer les codes sources. Cette licence est une licence mono-site et myLittleAdmin ne doit être utilisé que sur un seul site internet. Cette licence ne vous autorise pas à partager ou à distribuer les fichiers ASP, ou des portions des fichiers ASP, qui viennent avec myLittleAdmin. Vous pouvez recommander myLittleAdmin à vos amis/clients pour qu'ils achètent une licence. Vous pouvez également revendre myLittleAdmin au prix que vous souhaitez pourvu que vous ayez acheté une licence. 
+
+Aucun remboursement de myLittleAdmin n'est possible. C'est pourquoi il est fortement conseillé que vous testiez toutes les fonctionnalités de myLittleAdmin dans la section Live Demo avant de l'acheter afin de vérifier que myLittleAdmin répond à vos attentes. myLittleTools ne peut pas offrir de remboursement, myLittleAdmin étant livré avec tous les codes sources. 
+
+This software is provided AS IS and WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+
+myLittleTools ou ses représentants ne pourra pas être tenu pour responsable de tout dommage indirect, accidentel ou induit (de façon non exhaustive : perte d'activité, perte de profits, perte de données) que ce soit à la suite de rupture de contrat, tort (y compris mais pas seulement négligence), fiabilité du produit ou autre, même dans le cas où myLittleTools ou ses représentants auraient été avisés de la possibilité de tels préjudices et même si un recours décrit ici se révèle manquant à son but principal. 
+
