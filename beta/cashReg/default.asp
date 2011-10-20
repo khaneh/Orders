@@ -1,0 +1,3 @@
+<%
+server.transfer "ReceiptInput.asp"
+%>
