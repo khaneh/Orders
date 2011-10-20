@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "C:\...\CRReports_Proj\", ".", "{D6D730A8-E1A1-4B12-B517-67A75E690024}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.VirtualPath = "/CRReports_Proj"
+		Debug.AspNetCompiler.PhysicalPath = "..\..\..\..\..\..\Inetpub\wwwroot\Orders\CRReports_Proj\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\CRReports_Proj\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/CRReports_Proj"
+		Release.AspNetCompiler.PhysicalPath = "..\..\..\..\..\..\Inetpub\wwwroot\Orders\CRReports_Proj\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\CRReports_Proj\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "4652"
+		DefaultWebSiteLanguage = "Visual C#"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|.NET = Debug|.NET
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D6D730A8-E1A1-4B12-B517-67A75E690024}.Debug|.NET.ActiveCfg = Debug|.NET
+		{D6D730A8-E1A1-4B12-B517-67A75E690024}.Debug|.NET.Build.0 = Debug|.NET
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
