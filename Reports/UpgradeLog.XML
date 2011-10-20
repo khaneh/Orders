@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="Reports">
+</Property><Property Name="Solution File" Value="C:\Inetpub\wwwroot\Orders\Reports\Reports.sln">
+</Property><Property Name="Date" Value="Sunday, June 17, 2007">
+</Property><Property Name="Time" Value="19:23 PM">
+</Property></Properties><Event ErrorLevel="2" Project="Reports" Source="http://Appserv:1374/Reports/Reports.csproj" Description="Web project component not installed.  Unable to convert project: http://Appserv:1374/Reports/Reports.csproj">
+</Event><Event ErrorLevel="3" Project="Reports" Source="http://Appserv:1374/Reports/Reports.csproj" Description="Not Converted">
+</Event><Event ErrorLevel="0" Project="" Source="Reports.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="Reports.sln" Description="Converted">
+</Event></UpgradeLog>

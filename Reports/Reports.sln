@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reports", "http://apps:1374/Reports/Reports.csproj", "{9CA5B944-3DD3-4CCD-AB8B-3585F7C665D2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9CA5B944-3DD3-4CCD-AB8B-3585F7C665D2}.Debug|Default.ActiveCfg = Debug|Any CPU
+		{9CA5B944-3DD3-4CCD-AB8B-3585F7C665D2}.Debug|Default.Build.0 = Debug|Any CPU
+		{9CA5B944-3DD3-4CCD-AB8B-3585F7C665D2}.Release|Default.ActiveCfg = Release|Any CPU
+		{9CA5B944-3DD3-4CCD-AB8B-3585F7C665D2}.Release|Default.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
