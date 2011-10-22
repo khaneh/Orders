@@ -46,6 +46,19 @@ else
 	CashRegID=RS1("ID")
 	theBanker=RS1("Banker")
 	CashRegName=RS1("NameDate")
+	cashAmountA=cdbl(RS1("cashAmountA"))
+	cashAmountB=cdbl(RS1("cashAmountB"))
+	if cashAmountA=0 and cashAmountB=0 then 
+		%><br><br>
+			<TABLE width='70%' align='center'>
+			<TR>
+				<TD align=center bgcolor=#FFBBBB style='border: solid 1pt black'><BR><b>ÔãÇ ßå åäæÒ æáí äÑİÊí å ØæÑí ãíÎæÇí ÑÏÇÎÊ ÏÇÔÊå ÈÇÔí!</b><BR><BR></TD>
+			</TR>
+			</TABLE>
+		<%	
+		conn.close
+		response.end
+	end if
 	Set RS1=nothing
 end if
 
@@ -142,7 +155,22 @@ elseif request("act")="getPayment" then
 					</tr>
 					</table></TD>
 				<td>Çáİ
-				<input name="isA" type="checkbox">
+				<input name="isA" type="checkbox" 
+					<% 
+					if cashAmountA=0 or cashAmountB=0 then 
+						if cashAmountB=0 then 
+							response.write " checked='checked' "
+							response.write " onclick='this.checked=true;' "
+							response.write " title='İŞØ ÕäÏæŞ Çáİ ãæÌæÏí ÏÇÑÏ' "
+						else
+							response.write " onclick='this.checked=false;' "
+							response.write " title='İŞØ ÕäÏæŞ È ãæÌæÏí ÏÇÑÏ' "
+						end if
+					else 
+						response.write " checked='checked' "	
+					end if
+					%>
+				>
 				</td>
 				<TD align="left"><table>
 					<tr>
@@ -237,6 +265,18 @@ elseif request("act")="getPayment" then
 		Conn.close
 		response.redirect "?errMsg=" & Server.URLEncode("ÎØÇ! ÓÇá ãÇáí ÌÇÑí ÈÓÊå ÔÏå æ ÔãÇ ŞÇÏÑ Èå ÊÛííÑ ÏÑ Âä äíÓÊíÏ.")
 	end if 
+	'------- Check total cash A or B amount larger than this payment :)
+	if isA=1 then
+		if cashAmountA < CashAmount then  
+			Conn.close
+			response.redirect "?errMsg=" & Server.URLEncode("ÏŞÊ! ãæÌæÏí ÕäÏæŞ Çáİ ÔãÇ ÇÒ ãíÒÇä ÑÏÇÎÊí ßãÊÑ ÇÓÊ")
+		end if
+	else
+		if cashAmountB < CashAmount then  
+			Conn.close
+			response.redirect "?errMsg=" & Server.URLEncode("ÏŞÊ! ãæÌæÏí ÕäÏæŞ È ÔãÇ ÇÒ ãíÒÇä ÑÏÇÎÊí ßãÊÑ ÇÓÊ")
+		end if
+	end if
 	'----
 	' ######################################################### 
 	'					INSERTING PAYMENT  ...
