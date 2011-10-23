@@ -256,9 +256,9 @@ elseif act = "voidPayment" then
 				'				(increasing)
 				' #########################################################
 				if isA then 
-					mySQL="UPDATE CashRegisters SET CashAmountA = CashAmountA + '"& CashAmount & " WHERE (ID ='"& CashReg & "')"
+					mySQL="UPDATE CashRegisters SET CashAmountA = CashAmountA + "& CashAmount & " WHERE (ID ="& CashReg & ")"
 				else
-					mySQL="UPDATE CashRegisters SET CashAmountB = CashAmountB + '"& CashAmount & " WHERE (ID ='"& CashReg & "')"
+					mySQL="UPDATE CashRegisters SET CashAmountB = CashAmountB + "& CashAmount & " WHERE (ID ="& CashReg & ")"
 				end if
 				'mySQL="UPDATE CashRegisters SET CashAmount = CashAmount + '"& CashAmount & "' WHERE (ID ='"& CashReg & "')"
 				conn.Execute(mySQL)
