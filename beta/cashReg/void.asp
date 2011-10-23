@@ -59,6 +59,11 @@ if act = "voidReceipt" then
 			HasCashRegLine =	false
 		end if
 		RS1.close
+		'------------Check cash sitll open before void receipt
+		if not isOpen then 
+			conn.close
+			response.redirect "top.asp?errmsg=" & Server.URLEncode("Çíä ÏÑíÇİÊ ãÊÚáŞ Èå ÕäÏæŞí ÇÓÊ ßå ŞÈáÇ ÈÓÊå ÔÏå!<br>Ó äãíÊæÇäíÏ ÂäÑÇ ÈÇØá ßäíÏ")
+		end if
 
 		if NOT ( Auth(9 , 7) OR (IsOpen AND Cashier=session("ID")) ) then
 			' Doesn't Have the Priviledge to VOID the RECEIPT/PAYMENT 
@@ -195,6 +200,11 @@ elseif act = "voidPayment" then
 			HasCashRegLine =	false
 		end if
 		RS1.close
+		'------------Check cash sitll open before void payment
+		if not isOpen then 
+			conn.close
+			response.redirect "top.asp?errmsg=" & Server.URLEncode("Çíä ÑÏÇÎÊ ãÊÚáŞ Èå ÕäÏæŞí ÇÓÊ ßå ŞÈáÇ ÈÓÊå ÔÏå!<br>Ó äãíÊæÇäíÏ ÂäÑÇ ÈÇØá ßäíÏ")
+		end if
 
 		if NOT ( Auth(9 , 7) OR (IsOpen AND Cashier=session("ID")) ) then
 			' Doesn't Have the Priviledge to VOID the RECEIPT/PAYMENT 
