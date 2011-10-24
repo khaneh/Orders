@@ -249,7 +249,11 @@ elseif request("act")="getPayment" then
 
 	creationDate=	shamsiToday()
 	creationTime=	CurrentTime10()
-	GLAccount=		"11005"		'This must be changed... (Cashier B)
+	if isA=0 then 
+		GLAccount=		"11005"		'This must be changed... (Cashier B)
+	else
+		GLAccount=		"11007"		'This must be changed... (Cashier A)
+	end if
 
 	effectiveDate=	sqlSafe(request.form("PaymentDate"))
 

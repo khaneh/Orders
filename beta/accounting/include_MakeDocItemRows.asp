@@ -262,22 +262,9 @@ End Sub
 				if sys="AR" then
 					mySQL="SELECT ISNULL(CONVERT(tinyint, Invoices.IsA), 2) AS IsA, Accounts.IsADefault, ISNULL(InvoicePrintForms.ID,0) as invPrintForm  FROM Accounts INNER JOIN ARItems ON ARItems.Account = Accounts.ID LEFT OUTER JOIN ARItemsRelations ON ARItemsRelations.CreditARItem = ARItems.ID LEFT OUTER JOIN ARItems ARItems_2 ON ARItems_2.ID = ARItemsRelations.DebitARItem LEFT OUTER JOIN Invoices ON ARItems_2.Link = Invoices.ID left outer join InvoicePrintForms on ARItems_2.Link=InvoicePrintForms.InvoiceID and InvoicePrintForms.Voided=0 WHERE (ARItems.Type = 2) AND (ARItems.Link = '"& ReceiptID & "')"
 					Set RS2=Conn.Execute(mySQL)
-					if cint(RS2("IsA"))=0 then
-						IsA=false
-					elseif cint(RS2("IsA"))=1 then
-						IsA=true
-						if RS2("invPrintForm")=0 then disabled="disabled"
-					elseif cint(RS2("IsA"))=2 then
-						if RS2("IsADefault") then
-							IsA=true
-						else
-							IsA=false
-						end if
-					end if
+					if cint(RS2("IsA"))=1 and RS2("invPrintForm")=0 then disabled="disabled"
 					Rs2.close
 					Set Rs2=Nothing
-				else
-					IsA=false
 				end if
 				'--------------
 				Call WriteFirstRow()
@@ -293,17 +280,9 @@ End Sub
 					end if
 					Amount = RcpCash
 					Account = ""
-					'sysCashGLAccountB = "11005"
-					'sysCashGLAccountBName = "’‰œÊﬁ »"
-					'sysCashGLAccountA = "11007"
-					'sysCashGLAccountAName = "’‰œÊﬁ «·›"
-					if IsA then
-						GLAccount = sysCashGLAccountA
-						AccountTitle = sysCashGLAccountAName
-					else
-						GLAccount = sysCashGLAccountB
-						AccountTitle = sysCashGLAccountBName
-					end if
+					' NEW cash
+					GLAccount = DestGLAccount
+					AccountTitle = DestGLAccName
 					LineDescription="œ—Ì«›  ÊÃÂ ‰ﬁœ «“ " & RS1("AccountTitle") & " ÿÌ —”Ìœ " & ReceiptID
 					'--------------
 					Call WriteRow()
@@ -321,17 +300,9 @@ End Sub
 							Debit=Amount
 						end if
 						Account = ""
-						'sysChequeGLAccountB = "17001"
-						'sysChequeGLAccountBName = "«”‰«œ œ—Ì«› ‰Ì (» )"
-						'sysChequeGLAccountA = "17002"
-						'sysChequeGLAccountAName = "«”‰«œœ—Ì«› ‰Ì («·› )"
-						if IsA then
-							GLAccount = sysChequeGLAccountA
-							AccountTitle = sysChequeGLAccountAName
-						else
-							GLAccount = sysChequeGLAccountB
-							AccountTitle = sysChequeGLAccountBName
-						end if
+						' NEW cash
+						GLAccount = DestGLAccount
+						AccountTitle = DestGLAccName
 						Ref1=RS2("ChequeNo")
 						Ref2=RS2("ChequeDate")
 						LineDescription="çﬂ "& Ref1 & " „Ê—Œ "& Ref2 & " "& RS2("BankOfOrigin") & " œ—Ì«› Ì ÿÌ —”Ìœ " & ReceiptID & " "& RS2("Description") & " " & RS1("AccountTitle")

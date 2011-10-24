@@ -225,7 +225,7 @@ if request("act")="Show" then
 			<TR bgcolor="<%=tmpColor%>" >
 				<TD style="border-left:solid 1px black"><A HREF="GLMemoDocShow.asp?id=<%=RSS("GLDoc")%>" target="_blank"><%=RSS("GLDocID")%></A></TD>
 				<TD  align=center dir=ltr style="border-left:solid 1px black"><%=RSS("GLDocDate")%></TD>
-				<TD  width=100 style="border-left:solid 1px black"><INPUT TYPE="text" value="<%=RSS("Description")%>" style="width=200pt; border:solid 0pt; font-size:8pt; background-color:transparent"></TD>
+				<TD  width=100 style="border-left:solid 1px black"><INPUT size="60" TYPE="text" value="<%=RSS("Description")%>" style="width=200pt; border:solid 0pt; font-size:8pt; background-color:transparent"></TD>
 				<TD dir=ltr align=right style="border-left:solid 1px black"><% if debit<>"0" then %> <%=Separate(debit)%><% end if %>&nbsp;</TD>
 				<TD dir=ltr align=right style="border-left:solid 1px black"><% if credit<>"0" then %> <%=Separate(credit)%><% end if %>&nbsp;</TD>
 				<TD align=right style="border-left:solid 1px black">&nbsp;<% if remainedAmount > 0 then response.write "Ï" else if remainedAmount < 0 then response.write "Ó"%></TD>
