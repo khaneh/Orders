@@ -259,6 +259,11 @@ End Sub
 				LineDescription="œ—Ì«›  «“ " & AccountTitle & " ÿÌ —”Ìœ " & ReceiptID
 				'--------------------------
 				'--------------------------
+				mySQL="select * from CashRegisterLines where Type=1 and voided=0 and link=" & ReceiptID
+				set RS2=conn.Execute(mySQL)
+				isA = CBool(RS2("isA"))
+				RS2.close
+				set RS2=nothing
 				if sys="AR" then
 					mySQL="SELECT ISNULL(CONVERT(tinyint, Invoices.IsA), 2) AS IsA, Accounts.IsADefault, ISNULL(InvoicePrintForms.ID,0) as invPrintForm  FROM Accounts INNER JOIN ARItems ON ARItems.Account = Accounts.ID LEFT OUTER JOIN ARItemsRelations ON ARItemsRelations.CreditARItem = ARItems.ID LEFT OUTER JOIN ARItems ARItems_2 ON ARItems_2.ID = ARItemsRelations.DebitARItem LEFT OUTER JOIN Invoices ON ARItems_2.Link = Invoices.ID left outer join InvoicePrintForms on ARItems_2.Link=InvoicePrintForms.InvoiceID and InvoicePrintForms.Voided=0 WHERE (ARItems.Type = 2) AND (ARItems.Link = '"& ReceiptID & "')"
 					Set RS2=Conn.Execute(mySQL)
@@ -281,8 +286,15 @@ End Sub
 					Amount = RcpCash
 					Account = ""
 					' NEW cash
-					GLAccount = DestGLAccount
-					AccountTitle = DestGLAccName
+					if IsA then
+						GLAccount = sysCashGLAccountA
+						AccountTitle = sysCashGLAccountAName
+					else
+						GLAccount = sysCashGLAccountB
+						AccountTitle = sysCashGLAccountBName
+					end if
+					'GLAccount = DestGLAccount
+					'AccountTitle = DestGLAccName
 					LineDescription="œ—Ì«›  ÊÃÂ ‰ﬁœ «“ " & RS1("AccountTitle") & " ÿÌ —”Ìœ " & ReceiptID
 					'--------------
 					Call WriteRow()
@@ -301,8 +313,15 @@ End Sub
 						end if
 						Account = ""
 						' NEW cash
-						GLAccount = DestGLAccount
-						AccountTitle = DestGLAccName
+						if IsA then
+							GLAccount = sysChequeGLAccountA
+							AccountTitle = sysChequeGLAccountAName
+						else
+							GLAccount = sysChequeGLAccountB
+							AccountTitle = sysChequeGLAccountBName
+						end if
+						'GLAccount = DestGLAccount
+						'AccountTitle = DestGLAccName
 						Ref1=RS2("ChequeNo")
 						Ref2=RS2("ChequeDate")
 						LineDescription="çﬂ "& Ref1 & " „Ê—Œ "& Ref2 & " "& RS2("BankOfOrigin") & " œ—Ì«› Ì ÿÌ —”Ìœ " & ReceiptID & " "& RS2("Description") & " " & RS1("AccountTitle")
