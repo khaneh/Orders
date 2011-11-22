@@ -150,15 +150,15 @@
 	  <Tr><Td colspan="2" align=center><BR><BR>
 			<table class="CustTable" cellspacing='1'>
 				<tr>
-					<td colspan="2" class="CusTableHeader"><span style="width:350;text-align:center;">Ì«œœ«‘  Â«</span><span style="width:80;text-align:left;background-color:red;"><input class="GenButton" type="button" value="‰Ê‘ ‰ Ì«œœ«‘ "onclick="window.location = '../home/message.asp?sendTo=<%=RS1("CSR")%>&RelatedTable=accounts&RelatedID=<%=cusID%>&retURL=<%=Server.URLEncode("../CRM/AccountInfo.asp?act=show&selectedCustomer="&RS1("ID"))%>';"></span></td>
+					<td colspan="3" class="CusTableHeader"><span style="width:350;text-align:center;">Ì«œœ«‘  Â«</span><span style="width:80;text-align:left;background-color:red;"><input class="GenButton" type="button" value="‰Ê‘ ‰ Ì«œœ«‘ "onclick="window.location = '../home/message.asp?sendTo=<%=RS1("CSR")%>&RelatedTable=accounts&RelatedID=<%=cusID%>&retURL=<%=Server.URLEncode("../CRM/AccountInfo.asp?act=show&selectedCustomer="&RS1("ID"))%>';"></span></td>
 				</tr>
 				<%
-				mySQL="SELECT * FROM Messages INNER JOIN Users ON Messages.MsgFrom = Users.ID WHERE (Messages.RelatedTable = 'accounts') AND (Messages.RelatedID = "& cusID & ") ORDER BY Messages.ID DESC"
+				mySQL="SELECT Messages.*, users.realName, message_types.name as messageTypeName FROM Messages INNER JOIN Users ON Messages.MsgFrom = Users.ID inner join message_types on message_types.id= messages.type WHERE (Messages.RelatedTable = 'accounts') AND (Messages.RelatedID = "& cusID & ") ORDER BY Messages.ID DESC"
 				Set RS1 = conn.execute(mySQL)
 				if RS1.eof then
 				%>
 					<tr>
-						<td class="CusTD3" > «ﬂ‰Ê‰ Ì«œœ«‘ Ì »—«Ì «Ì‰ Õ”«» ‰Ê‘ Â ‰‘œÂ</td>
+						<td colspan="3" class="CusTD3" > «ﬂ‰Ê‰ Ì«œœ«‘ Ì »—«Ì «Ì‰ Õ”«» ‰Ê‘ Â ‰‘œÂ</td>
 					</tr>
 				<%
 				end if
@@ -167,6 +167,7 @@
 					tmpCounter=tmpCounter+1
 				%>
 					<tr class="<%if (tmpCounter MOD 2) = 1 then response.write "CusTD3" else response.write "CusTD4" %>">
+						<td><%=rs1("messageTypeName")%></td>
 						<td>«“ <%=RS1("RealName")%><br>
 							<%=RS1("MsgDate")%> <BR> <%=RS1("MsgTime")%>
 						</td>

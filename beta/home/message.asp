@@ -47,7 +47,13 @@ if request.form("Submit")="«—”«· ÅÌ«„" then
 		else
 			returnURL = returnURL & "?"
 		end if
-
+		
+		if IsNumeric(request.form("msgType")) then
+			msgType = CInt(request.form("msgType"))
+		else
+			msgType=0
+		end if
+		
 		if MsgTo <> -100 then
 			set RS=Conn.Execute ("SELECT RealName FROM Users where ID="& MsgTo) 
 			if RS.eof then
@@ -76,7 +82,7 @@ if request.form("Submit")="«—”«· ÅÌ«„" then
 		set RSV=Conn.Execute ("SELECT * FROM Users WHERE (ID <> 0) AND (Display = 1) ORDER BY RealName") 
 		Do while not RSV.eof
 			MsgTo=RSV("ID")
-			MySQL = "INSERT INTO Messages (MsgFrom, MsgTo, MsgTime, MsgDate, IsRead, MsgTitle, MsgBody, replyTo, IsReply, relatedID, RelatedTable, urgent) VALUES ( "& MsgFrom & ", "& MsgTo & ", N'"& MsgTime & "', N'"& MsgDate & "', 0, N'"& MsgTitle & "', N'"& MsgBody & "', "& replyTo & ", "& IsReply & ", '"& relatedID & "', '"& RelatedTable & "', "& urgent & ")"
+			MySQL = "INSERT INTO Messages (MsgFrom, MsgTo, MsgTime, MsgDate, IsRead, MsgTitle, MsgBody, replyTo, IsReply, relatedID, RelatedTable, urgent, type) VALUES ( "& MsgFrom & ", "& MsgTo & ", N'"& MsgTime & "', N'"& MsgDate & "', 0, N'"& MsgTitle & "', N'"& MsgBody & "', "& replyTo & ", "& IsReply & ", '"& relatedID & "', '"& RelatedTable & "', "& urgent & ", " & msgType & ")"
 			conn.Execute MySQL 
 			msg = msg & writeAnd & RSV("RealName")
 			writeAnd = " Ê "
@@ -85,7 +91,7 @@ if request.form("Submit")="«—”«· ÅÌ«„" then
 		RSV.close
 		msg = msg & " «—”«· ‘œ."
 	else
-		MySQL = "INSERT INTO Messages (MsgFrom, MsgTo, MsgTime, MsgDate, IsRead, MsgTitle, MsgBody, replyTo, IsReply, relatedID, RelatedTable, urgent) VALUES ( "& MsgFrom & ", "& MsgTo & ", N'"& MsgTime & "', N'"& MsgDate & "', 0, N'"& MsgTitle & "', N'"& MsgBody & "', "& replyTo & ", "& IsReply & ", '"& relatedID & "', '"& RelatedTable & "', "& urgent & ")"
+		MySQL = "INSERT INTO Messages (MsgFrom, MsgTo, MsgTime, MsgDate, IsRead, MsgTitle, MsgBody, replyTo, IsReply, relatedID, RelatedTable, urgent, type) VALUES ( "& MsgFrom & ", "& MsgTo & ", N'"& MsgTime & "', N'"& MsgDate & "', 0, N'"& MsgTitle & "', N'"& MsgBody & "', "& replyTo & ", "& IsReply & ", '"& relatedID & "', '"& RelatedTable & "', "& urgent & ", " & msgType & ")"
 		conn.Execute MySQL 
 		if MsgTo=0 then
 			msg = "Ì«œœ«‘  À»  ‘œ."
@@ -163,7 +169,7 @@ elseif request("act") = "forward" then
 elseif  request("act") ="" then
 	%>
 	<TR>
-		<TD colspan=2 align=center><H3>«—”«· ÅÌ«„</H3></TD>
+		<TD colspan=2 align=center><H3>«—”«· ÅÌ«„ Ì« ê“«—‘</H3></TD>
 	</TR>
 	<%
 end if
@@ -268,6 +274,22 @@ End Select
 		<span style="background-color:yellow"><INPUT TYPE="radio" NAME="urgent" value="2">ŒÌ·Ì ›Ê—Ì &nbsp;
 	</TD>
 </TR>
+<tr>
+	<td align="left">:‰Ê⁄</td>
+	<td align="right">
+		<select name="msgType">
+		<%
+		set rs= Conn.Execute("select * from message_types")
+		while not rs.eof
+		%>
+			<option value="<%=rs("id")%>"><%=rs("name")%></option>
+		<%	
+			rs.moveNext
+		wend
+		%>
+		</select>
+	</td>
+</tr>
 <TR>
 	<TD align=left></TD>
 	<TD align=center><br><INPUT TYPE="submit" name="submit" value="«—”«· ÅÌ«„"></TD>
