@@ -60,7 +60,7 @@ if act = "voidReceipt" then
 		end if
 		RS1.close
 		'------------Check cash sitll open before void receipt
-		if not isOpen then 
+		if (not isOpen) and (HasCashRegLine) then 
 			conn.close
 			response.redirect "top.asp?errmsg=" & Server.URLEncode("Çíä ÏÑíÇİÊ ãÊÚáŞ Èå ÕäÏæŞí ÇÓÊ ßå ŞÈáÇ ÈÓÊå ÔÏå!<br>Ó äãíÊæÇäíÏ ÂäÑÇ ÈÇØá ßäíÏ")
 		end if
@@ -186,7 +186,7 @@ elseif act = "voidPayment" then
 		'----------
 		mySQL = "SELECT CashRegisterLines.ID AS CashRegLine,CashRegisterLines.isA, CashRegisterLines.CashReg, CashRegisters.IsOpen, CashRegisterLines.Voided, CashRegisters.Cashier FROM CashRegisters INNER JOIN CashRegisterLines ON CashRegisters.ID = CashRegisterLines.CashReg WHERE (CashRegisterLines.Type = 2) AND (CashRegisterLines.Link = '"& PaymentID & "')"
 		Set RS1= conn.Execute(mySQL)
-
+		isOpen=false
 		if NOT RS1.eof then
 			' There is a CashRegister Line for this Payment
 			HasCashRegLine =	true
@@ -201,7 +201,9 @@ elseif act = "voidPayment" then
 		end if
 		RS1.close
 		'------------Check cash sitll open before void payment
-		if not isOpen then 
+		'response.write mySQL
+		'response.end
+		if (not isOpen) and (HasCashRegLine) then 
 			conn.close
 			response.redirect "top.asp?errmsg=" & Server.URLEncode("Çíä ÑÏÇÎÊ ãÊÚáŞ Èå ÕäÏæŞí ÇÓÊ ßå ŞÈáÇ ÈÓÊå ÔÏå!<br>Ó äãíÊæÇäíÏ ÂäÑÇ ÈÇØá ßäíÏ")
 		end if
