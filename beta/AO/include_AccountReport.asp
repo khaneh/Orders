@@ -1819,10 +1819,19 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 	end if
 	RS1.close
 
-
+	set rs1=Conn.Execute("select * from effectiveGlrows where sys='AR' and link in (select id from arItems where type=1 and reason=1 and link=" & invoiceID & ")")
 %>
 	</table><BR><BR>
 	<br><!--CENTER>ÅÌ‘ ‰„«Ì‘ ç«Å:</CENTER-->
+	<center>
+		<%
+		if not rs1.eof then
+		%>
+		<a href="../accounting/glMemoDocShow.asp?id=<%=rs1("glDoc")%>" title="»—«Ì ‰„«Ì‘ ”‰œ Õ”«»œ«—Ì ﬂ·Ìﬂ ﬂ‰Ìœ">”‰œ Õ”«»œ«—Ì œ«—œ</a>
+		<%
+		end if
+		%>
+	</center>
 	<BR>
 	<script language="JavaScript">
 	<!--

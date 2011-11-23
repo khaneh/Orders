@@ -78,7 +78,7 @@ end if
 				</TD>
 				<TD align="left">‘„«—Â ”‰œ :</TD>
 				<TD>	
-<%				mySQL="SELECT ISNULL(MAX(GLDocID),0) AS LastMemo FROM GLDocs WHERE GL='"& OpenGL & "'"
+<%				mySQL="SELECT ISNULL(MAX(GLDocID),100) AS LastMemo FROM GLDocs WHERE GL='"& OpenGL & "'"
 				Set RS1=conn.Execute (mySQL)
 				LastMemo = RS1("LastMemo")
 %>
@@ -148,7 +148,7 @@ elseif request("act")="editDoc" then
 	end if
 	id=clng(id)
 
-	mySQL="SELECT * FROM GLDocs WHERE (deleted = 0) and (GLDocID = "& id & ")  AND (GL = "& OpenGL & ")"
+	mySQL="SELECT * FROM GLDocs WHERE (deleted = 0) and (isRemoved=0) and (GLDocID = "& id & ")  AND (GL = "& OpenGL & ")"
 	set RS1=conn.execute(mySQL)
 	if RS1.eof then
 		response.write "<br>" 
@@ -901,7 +901,7 @@ elseif request("act")="submitMemo" then
 (‘„«—Â ”‰œ: <A target=_blank  HREF="GLMemoDocShow.asp?id=<%=GLDoc%>"><%=GLMemoNo%></A>)
 </CENTER>
 <%
-	response.redirect "GLMemoDocShow.asp?id="& GLDoc &"&msg="& Server.URLEncode("”‰œ »« „Ê›ﬁÌ  «ÌÃ«œ ‘œ.") &"&errmsg="& Server.URLEncode(WarningMsg)
+	'response.redirect "GLMemoDocShow.asp?id="& GLDoc &"&msg="& Server.URLEncode("”‰œ »« „Ê›ﬁÌ  «ÌÃ«œ ‘œ.") &"&errmsg="& Server.URLEncode(WarningMsg)
 '-----------------------------------------------------------------------------------------------------
 '-----------------------------------------------------------------------------------------------------
 '-----------------------------------------------------------------------------------------------------

@@ -69,7 +69,7 @@ select case Ord
 		order="EffectiveDate"
 		Ord=1
 end select	
-mySQL="select SUM(AmountOriginal) as AmountOriginal,SUM(RemainedAmount) as RemainedAmount, SUM(arBalance) as arBalance, count(ARItems.ID) AS totalItems from ARItems inner join Accounts on ARItems.Account=Accounts.ID where (ARItems.EffectiveDate between '" & input_date_start & "' and '" & input_date_end & "') and ARItems.Type=1"
+mySQL="select SUM(AmountOriginal) as AmountOriginal,SUM(RemainedAmount) as RemainedAmount, MAX(arBalance) as arBalance, count(ARItems.ID) AS totalItems from ARItems inner join Accounts on ARItems.Account=Accounts.ID where (ARItems.EffectiveDate between '" & input_date_start & "' and '" & input_date_end & "') and ARItems.Type=1"
 if fullyApplied=1 then mySQL=mySQL&" AND FullyApplied=0"
 
 %>

@@ -617,7 +617,7 @@ else
 		<INPUT TYPE="hidden" name="id" value="<%=id%>">
 	<% if status <> "deleted" then 
 		if status = "Draft" then 
-			if (session("ID") = Creator AND totalDebit=totalCredit) OR isBySubSystem then%>
+			if (((session("ID") = Creator) OR ( Auth( 8 , "H" ))) AND totalDebit=totalCredit) OR isBySubSystem then%>
 				<INPUT TYPE="submit" name="submit" value="ÊÈÏíá Èå ãæÞÊ" class="GenButton" onclick="return confirm('ÊÛííÑ æÖÚíÊ ÓäÏ ÇäÌÇã ÔæÏ¿')"><%
 			end if
 

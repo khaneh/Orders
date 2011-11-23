@@ -71,7 +71,7 @@ function myKeyPressHandler(){
 '-----------------------------------------------------------------------------------------------------
 '--------------------------------------------------------------------------------------- Submit Search
 '-----------------------------------------------------------------------------------------------------
-if request("act")="submitsearch" then
+if request("act")="submit search" then
 	if request("CustomerNameSearchBox") <> "" then
 		SA_TitleOrName=sqlSafe(request("CustomerNameSearchBox"))
 		mySQL="SELECT * FROM Accounts WHERE (REPLACE(AccountTitle, ' ', '') LIKE REPLACE(N'%"& SA_TitleOrName & "%', ' ', '') ) ORDER BY AccountTitle"
@@ -158,8 +158,8 @@ elseif request("act")="submitPayment" or editFlag = 1 then
 				set che = conn.execute("Select COUNT(*) AS cheque From PaidCheques inner join Payments on PaidCheques.payment = Payments.ID Where PaidCheques.ChequeNo = " & ChequeNo & " AND PaidCheques.ChequeDate = N'" & ChequeDate & "' AND Payments.Voided = 0")
 				if cdbl(che("cheque")) > 0 then
 					errorFound = true
-					errorMsg = Server.URLEncode("<B>Œÿ«! </B><br> «ÿ·«⁄«  «Ì‰ çò ﬁ»·« Ê«—œ ‘œÂ «” <br>")
-					call showAlert ("<B>Œÿ«! </B><br> «ÿ·«⁄«  «Ì‰ çò ﬁ»·« Ê«—œ ‘œÂ «” <b>",CONST_MSG_ERROR)
+					errorMsg = Server.URLEncode("<B>Œÿ«! </B><br> «ÿ·«⁄«  «Ì‰ çﬂ ﬁ»·« Ê«—œ ‘œÂ «” <br>")
+					call showAlert ("<B>Œÿ«! </B><br> «ÿ·«⁄«  «Ì‰ çﬂ ﬁ»·« Ê«—œ ‘œÂ «” <b>",CONST_MSG_ERROR)
 				end if
 				che.close
 			next
@@ -261,9 +261,9 @@ elseif request("act")="submitPayment" or editFlag = 1 then
 
 	next
 
-	'*************	Creating an Item for the Payment ...
+	'*************	Creating an Item for the Payment Ö
 	'*** Type = 5 means Item is a Payment
-	'*** GLAccount = NULL because it can't be identified right now, it depends on where the cheques are...
+	'*** GLAccount = NULL because it can't be identified right now, it depends on where the cheques areÖ
 	mySQL="INSERT INTO "& sys & "Items (GLAccount, GL, FirstGLAccount, Account, EffectiveDate, Reason, IsCredit, Type, Link, AmountOriginal, CreatedDate, CreatedBy, RemainedAmount) VALUES ("&_
 		GLAccount & ", '"& OpenGL & "', '"& firstGLAccount & "', '"& customerID & "', N'"& effectiveDate & "', '"& reason & "', 0, 5, '"& paymentID & "', '"& TotalAmount & "', N'"& creationDate & "', '"& session("ID") & "', '"& RemainedTotalAmount & "');SELECT @@Identity AS NewItem"
 	set RSF = Conn.execute(mySQL).NextRecordSet
@@ -540,7 +540,7 @@ elseif request("act")="enterCheque" then
 			<TABLE Border="0" Cellspacing="1" Cellpadding="0" Dir="RTL">
 			<TR>
 				<TD  class="RcpHeadInput" align='center' > 
-				<% if VoucherTotalPrice <> -1 then %>Ã„⁄ „«‰œÂ ›«ﬂ Ê—Â«:
+				<% if CDbl(VoucherTotalPrice) <> -1 then %>Ã„⁄ „«‰œÂ ›«ﬂ Ê—Â«:
 				<%=Separate(SumAPRemainedAmount)%>
 				<% end if %></td>
 				<TD class="RcpHeadInput" align='center' width="25px"> </td>
@@ -665,7 +665,7 @@ elseif request("act")="enterCheque" then
 		if (theKey==13){
 			return true;
 		}
-		else if (theKey < 48 || theKey > 57) { // 0-9 are acceptible
+		else if (theKey < 48 || theKey > 57) { // 0-9 are acceptable
 			return false;
 		}
 	}

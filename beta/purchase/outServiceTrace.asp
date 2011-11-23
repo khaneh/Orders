@@ -1,4 +1,5 @@
 <%@LANGUAGE="VBSCRIPT" CODEPAGE="1256"%><%
+'Response.Buffer = False
 'Purchase (4)
 PageTitle=" ííÑí ÎÑíÏ"
 SubmenuItem=4
@@ -28,10 +29,14 @@ function xmlsend()
 	reqID = document.getElementById("ireqID").value
 	url = "/beta/purchase/XMLchangeRelatedOrder.asp?ordID="+ordID + "&reqID="+ reqID
 	if (window.XMLHttpRequest) {
-		var objHTTP=new XMLHttpRequest();
+		var xmldoc=new XMLHttpRequest();
 	} else if (window.ActiveXObject) {
-		var objHTTP = new ActiveXObject("Microsoft.XMLHTTP");
+		var xmldoc = new ActiveXObject("Microsoft.XMLHTTP");
 	}
+	//objHTTP.open('GET',url,false)
+	//objHTTP.send()
+	//tmpStr = unescape(objHTTP.responseText)
+
 	document.getElementsByTagName('body')[0].style.cursor = 'wait';
 
 	url = url + "&<%=currentTime10()%>";
@@ -498,7 +503,7 @@ end if
 
 if request("lstOrd") <> "" then			
 	lstOrd = request("lstOrd")
-	set RSS=Conn.Execute ("SELECT dbo.PurchaseOrders.*, dbo.PurchaseRequests.Order_ID AS Order_ID, ISNULL(DERIVEDTBL.Approved2, 0) AS Approved, ISNULL(DERIVEDTBL.Issued2, 0) AS Issued, DERIVEDTBL.id AS invoice_ID FROM dbo.PurchaseRequests FULL OUTER JOIN (SELECT Invoices.id, isnull(Invoices.Approved, 0) AS Approved2, isnull(Invoices.Issued, 0) AS Issued2 FROM dbo.Invoices WHERE isnull(Invoices.voided, 0) = 0 and (isnull(Invoices.Approved, 0) = 1 OR isnull(Invoices.Issued, 0) = 1)) DERIVEDTBL INNER JOIN dbo.InvoiceOrderRelations ON DERIVEDTBL.id = dbo.InvoiceOrderRelations.Invoice ON dbo.PurchaseRequests.Order_ID = dbo.InvoiceOrderRelations.[Order] FULL OUTER JOIN dbo.PurchaseOrders LEFT OUTER JOIN dbo.PurchaseRequestOrderRelations ON dbo.PurchaseOrders.ID = dbo.PurchaseRequestOrderRelations.Ord_ID ON dbo.PurchaseRequests.ID = dbo.PurchaseRequestOrderRelations.Req_ID WHERE (dbo.PurchaseOrders.Status = '"& lstOrd & "') order by " & sB)
+	set RSS=Conn.Execute ("SELECT top 100 dbo.PurchaseOrders.*, dbo.PurchaseRequests.Order_ID AS Order_ID, ISNULL(DERIVEDTBL.Approved2, 0) AS Approved, ISNULL(DERIVEDTBL.Issued2, 0) AS Issued, DERIVEDTBL.id AS invoice_ID FROM dbo.PurchaseRequests FULL OUTER JOIN (SELECT Invoices.id, isnull(Invoices.Approved, 0) AS Approved2, isnull(Invoices.Issued, 0) AS Issued2 FROM dbo.Invoices WHERE isnull(Invoices.voided, 0) = 0 and (isnull(Invoices.Approved, 0) = 1 OR isnull(Invoices.Issued, 0) = 1)) DERIVEDTBL INNER JOIN dbo.InvoiceOrderRelations ON DERIVEDTBL.id = dbo.InvoiceOrderRelations.Invoice ON dbo.PurchaseRequests.Order_ID = dbo.InvoiceOrderRelations.[Order] FULL OUTER JOIN dbo.PurchaseOrders LEFT OUTER JOIN dbo.PurchaseRequestOrderRelations ON dbo.PurchaseOrders.ID = dbo.PurchaseRequestOrderRelations.Ord_ID ON dbo.PurchaseRequests.ID = dbo.PurchaseRequestOrderRelations.Req_ID WHERE (dbo.PurchaseOrders.Status = '"& lstOrd & "') order by " & sB)
 	%><br>
 	<TABLE dir=rtl align=center width=600>
 	<TR bgcolor="eeeeee" >
