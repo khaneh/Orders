@@ -136,7 +136,7 @@ function selectAll(src){
 		else 
 			response.end
 		end if
-		MySQL = "SELECT " & selectTop & " Messages.*, Messages_1.MsgBody AS OrigMsgBody, Messages_1.MsgDate AS OrigMsgDate, Messages_1.MsgTime AS OrigMsgTime, Users.RealName AS Sender FROM Messages INNER JOIN Users ON Messages.MsgFrom = Users.ID LEFT OUTER JOIN Messages Messages_1 ON Messages.replyTo = Messages_1.id WHERE (Messages.MsgTo = '" & session("id") & "') AND (Messages.IsRead = 0) AND (Messages.IsSmall = " & IsSmall & ") ORDER BY Messages.id DESC"
+		MySQL = "SELECT " & selectTop & " Messages.*, message_types.name as messageTypeName, message_types.id as typeID, Messages_1.MsgBody AS OrigMsgBody, Messages_1.MsgDate AS OrigMsgDate, Messages_1.MsgTime AS OrigMsgTime, Users.RealName AS Sender FROM Messages INNER JOIN Users ON Messages.MsgFrom = Users.ID LEFT OUTER JOIN Messages Messages_1 ON Messages.replyTo = Messages_1.id inner join message_types on message_types.id= messages.type WHERE (Messages.MsgTo = '" & session("id") & "') AND (Messages.IsRead = 0) AND (Messages.IsSmall = " & IsSmall & ") ORDER BY Messages.id DESC"
 		Set RS1 = conn.execute(mySQL)
 		if not RS1.eof then
 %>
@@ -198,23 +198,26 @@ function selectAll(src){
 					<TD><INPUT TYPE="checkbox" NAME="MsgIDs" Value="<%=RS1("id")%>"></TD>
 					<TD width=60 height=100%>
 						<table style="width:100%;height:100%">
-						<tr height=20 >
-							<td colspan=2><%=RS1("Sender")%></td>
-						</tr>
-						<tr height=* >
-							<td colspan=2 style="border-bottom:none;">&nbsp;</td>
-						</tr>
-						<tr height=15 >
-							<td class="MsgButton" >
-								<A HREF="message.asp?act=reply&id=<%=RS1("id")%>&retURL=<%=Server.URLEncode("default.asp")%>">Å«”Œ</a>
-							</td>
-							<td class="MsgButton">
-								<A HREF="message.asp?act=forward&id=<%=RS1("id")%>&retURL=<%=Server.URLEncode("default.asp")%>">«—Ã«⁄</a>
-							</td>
-						</tr>
+							<tr height=20 >
+								<td colspan=2><%=RS1("Sender")%></td>
+							</tr>
+							<tr height=* >
+								<td colspan=2 style="border-bottom:none;">&nbsp;</td>
+							</tr>
+							<tr height=15 >
+								<td class="MsgButton" >
+									<A HREF="message.asp?act=reply&id=<%=RS1("id")%>&retURL=<%=Server.URLEncode("default.asp")%>&typeID=<%=rs1("typeID")%>">Å«”Œ</a>
+								</td>
+								<td class="MsgButton">
+									<A HREF="message.asp?act=forward&id=<%=RS1("id")%>&retURL=<%=Server.URLEncode("default.asp")%>&typeID=<%=rs1("typeID")%>">«—Ã«⁄</a>
+								</td>
+							</tr>
 						</table>
 					</TD>
-					<TD dir="LTR" align='right'><%=RS1("MsgDate")%><br><%=RS1("MsgTime")%></TD>
+					<TD dir="LTR" align='right'>
+						<div><%=RS1("MsgDate")%><br><%=RS1("MsgTime")%></div>
+						<div style="font-size:6pt;margin:7px 0 0 0;color:gray;"><%=RS1("messageTypeName")%></div>
+					</TD>
 					<TD>
 						<div class="MsgBodyClass"><%=replace(RS1("MsgBody"),chr(13),"<br>")%>&nbsp;</div>
 						<%if RS1("isReply") <> 0 then%>

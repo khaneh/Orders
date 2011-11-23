@@ -280,9 +280,10 @@ End Select
 		<select name="msgType">
 		<%
 		set rs= Conn.Execute("select * from message_types")
+		if request("typeID")<>"" then typeID=request("typeID")
 		while not rs.eof
 		%>
-			<option value="<%=rs("id")%>"><%=rs("name")%></option>
+			<option value="<%=rs("id")%>" <%if cint(typeID)=cint(rs("id")) then response.write(" selected ") %>><%=rs("name")%></option>
 		<%	
 			rs.moveNext
 		wend
