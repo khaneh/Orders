@@ -62,11 +62,11 @@ menuItem=3
 
 			<%if SubmenuItem="7" then %> 
 				<TD width=10><img src='/images/RTB.gif'></td>
-				<TD align=center background="/images/MTB.gif" class='alak2'><A HREF='costs.asp'>ЪгЪ</A></TD>
+				<TD align=center background="/images/MTB.gif" class='alak2'><A HREF='costs.asp'>куспбЯ</A></TD>
 				<TD width=10><img src='/images/LTB.gif'></td>
 			<%else %>  
 				<TD width=10><img src='/images/RTS.gif'></td>
-				<TD align=center background="/images/MTS.gif" class='alak'><A HREF='costs.asp'>ЪгЪ</A></TD>
+				<TD align=center background="/images/MTS.gif" class='alak'><A HREF='costs.asp'>куспбЯ</A></TD>
 				<TD width=10><img src='/images/LTS.gif'></td>
 			<%end if %>
 			<%end if %>

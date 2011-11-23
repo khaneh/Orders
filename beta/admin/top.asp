@@ -4,6 +4,7 @@
 'Response.CacheControl="no-cache"
 Response.AddHeader "pragma", "no-cache"
 Response.Expires= -1
+
 if (session("AID")="") then
 '	session.abandon
 	response.redirect "login.asp?err=ÈÑÇí ÏíÏä Çíä ÕİÍå ÈÇíÏ æÇÑÏ ÓíÓÊã ÔæíÏ"

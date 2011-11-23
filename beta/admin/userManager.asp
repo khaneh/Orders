@@ -126,7 +126,7 @@ dim pages(20,25)
 	pages ( 8 , 14 ) = "œÌœ‰ ”«Ì— ê“«—‘ Â«"					'E
 	pages ( 8 , 15 ) = "”‰œ „—ﬂ» (Ê—Êœ Ê ÊÌ—«Ì‘) "			'F
 	pages ( 8 , 16 ) = "ê“«—‘ œ‘»Ê—œ Œ“«‰Âùœ«—Ì"			'G
-	'pages ( 8 , 17 ) = "Ì«œœ«‘ ùÂ«"						'H
+	pages ( 8 , 17 ) = " „«„ Ì«œœ«‘  ‘œÂùÂ« —« » Ê«‰œ „Ê›ﬁ  ﬂ‰œ"	'H
 '-------------------------------------
  pages ( 9 , 0 ) = "’‰œÊﬁ"
 	pages ( 9 , 1 ) = "œ—Ì«› "
@@ -375,6 +375,8 @@ elseif request("act")="edit" then
 		Account		= RSM("Account") 
 		Permission	= RSM("Permission")
 		Display		= RSM("Display")
+		'costCenterString= RSM("costCenter")
+		RSM.close
 		if Display then
 			DisplayChecked="checked"
 		else
@@ -447,6 +449,53 @@ elseif request("act")="edit" then
 			<TD>‰„Ì  Ê«‰œ »Â ”Ì” „ Ê«—œ ‘Êœ</TD>
 			<TD><INPUT TYPE="checkbox" NAME="disable" <%=DisabledChecked%>></TD>
 		</TR>
+		<tr>
+			<td>„—«ﬂ“ Â“Ì‰Â</td>
+			<td>
+				<table width="100%">
+					<%
+					'----------------------------- COST CENTER ---------------------------------
+					set rrs=Conn.Execute("SELECT cost_centers.name as costCenterName, cost_drivers.*,isnull(cost_user_relations.driver_id,-1) as driver_id FROM cost_centers inner join cost_drivers on cost_centers.id=cost_drivers.cost_center_id left outer join cost_user_relations on cost_drivers.id=cost_user_relations.driver_id and cost_user_relations.user_id=" & userID)
+					oldCostCenter=-1
+					while not rrs.eof
+						theTitle=""
+						set oprs=Conn.Execute("select * from cost_operation_type where driver_id=" & rrs("id"))
+						'response.write ("select * from cost_operation_type where driver_id=" & rrs("id"))
+						while not oprs.eof 
+							theTitle= theTitle & oprs("name") & "° "
+							oprs.moveNext
+						wend
+						oprs.close
+						if oldCostCenter=cint(rrs("cost_center_id")) then
+							
+							%>
+							<tr>
+								<td title="<%=theTitle%>"><%=rrs("name")%></td>
+								<td><input type="checkbox" name="costDriver-<%=rrs("id")%>" <%if cint(rrs("driver_id"))>0 then response.write("checked='checked'")%>></td>
+							</tr>
+							<%
+						else
+							%>
+							<tr bgcolor="#33AACC">
+								<td colspan="2" align="center"><b><%=rrs("costCenterName")%></b></td>
+							</tr>
+							<tr>
+								<td title="<%=theTitle%>"><%=rrs("name")%></td>
+								<td><input type="checkbox" name="costDriver-<%=rrs("id")%>" <%if cint(rrs("driver_id"))>0 then response.write("checked='checked'")%>></td>
+							</tr>
+							<%
+						end if
+							%>
+						<%
+						oldCostCenter=cint(rrs("cost_center_id"))
+						rrs.MoveNext
+					wend
+					rrs.close
+					'--------------------------------------------------------------------------------
+					%>
+				</table>
+			</td>
+		</tr>
 		<TR>
 			<TD colspan=2 align=center><INPUT TYPE="submit" value="–ŒÌ—Â"></TD>
 		</TR>
@@ -550,8 +599,16 @@ elseif request("act")="submit" then
 	else
 		Display="0"
 	end if
-
-
+	'------------------------ COST CENTER -----------------------------------
+	conn.Execute("delete cost_user_relations where user_id=" & userID)
+	set rrs = Conn.execute("select id from cost_drivers")
+	while not rrs.eof
+		if request("costDriver-"&rrs("id"))="on" then 
+			conn.Execute("insert into cost_user_relations (user_id,driver_id) values ("& userID & "," & rrs("id") & ")")
+		end if
+		rrs.MoveNext
+	wend
+	rrs.close
 	if userID="" then 
 		' Add New User
 		mySQL="SELECT MAX(ID)+1 AS NewID FROM Users"
