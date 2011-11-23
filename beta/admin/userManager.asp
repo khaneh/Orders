@@ -455,7 +455,12 @@ elseif request("act")="edit" then
 				<table width="100%">
 					<%
 					'----------------------------- COST CENTER ---------------------------------
-					set rrs=Conn.Execute("SELECT cost_centers.name as costCenterName, cost_drivers.*,isnull(cost_user_relations.driver_id,-1) as driver_id FROM cost_centers inner join cost_drivers on cost_centers.id=cost_drivers.cost_center_id left outer join cost_user_relations on cost_drivers.id=cost_user_relations.driver_id and cost_user_relations.user_id=" & userID)
+					if userID<>"" then
+						mySQL="SELECT cost_centers.name as costCenterName, cost_drivers.*,isnull(cost_user_relations.driver_id,-1) as driver_id FROM cost_centers inner join cost_drivers on cost_centers.id=cost_drivers.cost_center_id left outer join cost_user_relations on cost_drivers.id=cost_user_relations.driver_id and cost_user_relations.user_id=" & userID
+					else
+						mySQL="SELECT cost_centers.name as costCenterName, cost_drivers.*,isnull(cost_user_relations.driver_id,-1) as driver_id FROM cost_centers inner join cost_drivers on cost_centers.id=cost_drivers.cost_center_id left outer join cost_user_relations on cost_drivers.id=cost_user_relations.driver_id"
+					end if
+					set rrs=Conn.Execute(mySQL)
 					oldCostCenter=-1
 					while not rrs.eof
 						theTitle=""
@@ -600,7 +605,9 @@ elseif request("act")="submit" then
 		Display="0"
 	end if
 	'------------------------ COST CENTER -----------------------------------
-	conn.Execute("delete cost_user_relations where user_id=" & userID)
+	if userID<>"" then
+		conn.Execute("delete cost_user_relations where user_id=" & userID)
+	end if
 	set rrs = Conn.execute("select id from cost_drivers")
 	while not rrs.eof
 		if request("costDriver-"&rrs("id"))="on" then 
