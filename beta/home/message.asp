@@ -275,7 +275,7 @@ End Select
 	</TD>
 </TR>
 <tr>
-	<td align="left">:הזÚ</td>
+	<td align="left">הזÚ:</td>
 	<td align="right">
 		<select name="msgType">
 		<%
