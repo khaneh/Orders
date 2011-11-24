@@ -242,9 +242,16 @@ if CSR = "" then CSR = session("ID")
 				<td align='right' colspan=2>&nbsp;</td>
 				<td align='left'>‰Ê⁄:
 					<select name="type" class="CustGenInput">
-					<option <% if AccType = 1 then response.write "selected" %> value=1>›—Ê‘‰œÂ
-					<option <% if AccType = 2 then response.write "selected" %> value=2>„‘ —Ì
-					<option <% if AccType = 3 then response.write "selected" %> value=3>”«Ì—
+					<%
+					set rs=Conn.Execute("select * from accountTypes")
+					while not rs.eof
+						%>
+						<option <% if AccType = rs("id") then response.write "selected" %> value=<%=rs("id")%>><%=rs("name")%></option>	
+						<%
+						rs.moveNext
+					wend
+					rs.close
+					%>
 					</select>
 				</td>
 			</tr>
@@ -382,6 +389,71 @@ if CSR = "" then CSR = session("ID")
 			RSV.close
 			set RSV=nothing
 			%>
+					</table>
+				</td>
+			</tr>
+			<tr bgcolor='#C3C300'>
+				<td align='center' colspan='5'><b>”Ê«·« </b></td>
+			</tr>
+			<tr>
+				<td colspan="5">
+					<table>
+						<%
+						set rs=Conn.Execute("select * from accountGroupRelations where account=" & CusID)
+						if rs.eof then 
+						%>
+						<tr>
+							<td><b>‘—„‰œÂ! ”Ê«·«  ›ﬁÿ œ— ’Ê— Ì ‰„«Ì‘ œ«œÂ ŒÊ«Âœ ‘œ ﬂÂ œ” Â »‰œÌ «Ì —« «‰ Œ«» ﬂ—œÂ »«‘Ìœ</b></td>
+						</tr>
+						<%						
+						else
+							group=rs("accountGroup")
+							rs.close
+							set rs=Conn.Execute("select * from account_questions where [group]=" & group)
+							if rs.eof then
+							%>
+							<tr>
+								<td><b>»—«Ì «Ì‰ œ” Â ÂÌç ”Ê«·Ì ‰œ«—„</b></td>
+							</tr>
+							<%
+							else
+								while not rs.eof
+									%>
+							<tr>
+								<td><%=rs("name")%><input name="questionID" type="hidden" value="<%=rs("id")%>"></td>
+								<td>
+									<%
+									'response.write ("select * from account_answers where account_id=" & CusID & " and question=" & rs("id"))
+									set rss=Conn.Execute("select * from account_answers where account_id=" & CusID & " and question=" & rs("id"))
+									if CInt(rs("type"))=0 then
+									%>
+									<input name="answer" type="text" <%if not rss.eof then response.write (" value='" & rss("answer") & "'")%>>
+									<%
+									elseif CInt(rs("type"))=1 then
+									%>
+									<select name="answer">
+									<%
+										choice=Split(rs("choice"),",")
+										for i=0 to UBound(choice)
+										%>
+										<option value="<%=trim(choice(i))%>" <%if not rss.eof then if rss("answer")=choice(i) then response.write(" selected ")%>><%=choice(i)%></option>
+										<%
+										next
+									%>
+									</select>
+									<%
+									end if
+									rss.close
+									%>
+								</td>
+							</tr>
+									<%
+									rs.moveNext
+								wend
+								rs.close
+							end if
+						end if
+						%>
 					</table>
 				</td>
 			</tr>
@@ -581,6 +653,36 @@ elseif request("act")="submitEdit" then
 		conn.Execute("DELETE FROM AccountGroupRelations where account="&id&" AND AccountGroup="&oldAccountGroup)
 		conn.Execute("INSERT INTO AccountGroupRelations (Account,AccountGroup) VALUES ("&id&","&accountGroup&")") 
 	end if
+	questionID=split(request.form("questionID"),",")
+	'response.write (request.form("questionID"))
+	answers=split(request("answer"), ",")
+	set rs=Conn.Execute("select account_answers.* from account_answers inner join account_questions on account_questions.id=account_answers.question where account_questions.[group]=" & accountGroup & " and account_answers.account_id=" & id)
+	while not rs.eof
+		answer=""
+		for i=0 to UBound(questionID)
+			if cint(rs("id"))=cint(questionID(i)) then answer=trim(answers(i))
+			'response.write rs("id") &","&questionID(i)&","& answers(i)&"<br>"
+			'response.write answer
+		next 
+		'response.end
+		Conn.Execute("update account_answers set answer=N'" & answer & "' where id=" & rs("id"))
+		'response.write("update account_answers set answer=N'" & answer & "' where id=" & rs("id") &"<br>")
+		rs.moveNext
+	wend
+	
+	'response.end
+	rs.close
+	set rs=Conn.Execute("select * from account_questions where [group]=" & accountGroup & " and id not in (select question from account_answers where account_id=" & id & ")")
+	while not rs.eof
+		answer=""
+		'response.w
+		for i=0 to UBound(questionID)
+			if cint(rs("id"))=cint(questionID(i)) then answer=trim(answers(i))
+		next 
+		Conn.Execute("insert into account_answers (question,answer,account_id) values (" & rs("id") & ",N'" & answer & "'," & id & ")")
+		rs.moveNext
+	wend
+	rs.close
 	' ----------------------------S A M    E D I T  ----------------------------------------
 	if request("submit")="À»  Ê »⁄œÌ" then 
 		response.redirect "AccountEdit.asp?act=editaccount&NextOf=" & ID & "&msg=" & Server.URLEncode("«ÿ·«⁄«  Õ”«»  ﬁ»·Ì »Â —Ê“ ‘œ.")

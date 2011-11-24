@@ -14,6 +14,7 @@
 	.CusTD2 {background-color: #DDDDDD; direction: LTR; text-align: right; font-size:9pt;}
 	.CusTD3 {background-color: #DDDDDD; direction: LTR; text-align: center; font-size:9pt;}
 	.CusTD4 {background-color: #CCCC66; direction: LTR; text-align: center; font-size:9pt;}
+	.CusTD5 {background-color: yellow; direction: LTR; text-align: center; font-size:9pt;}
 </STYLE>
 
 
@@ -77,6 +78,11 @@
 			<td class="CusTD2"><%=RS1("EconomicalCode")%></td>
 		</tr>
 		<%
+		dim typeColor(4)
+		typeColor(1)="blue"
+		typeColor(2)="fuchsia"
+		typeColor(3)="red"
+		typeColor(4)="lime"
 		set rs2= conn.Execute("select * from accountGroupRelations inner join AccountGroups on accountGroupRelations.AccountGroup=AccountGroups.id where account="&RS1("ID"))
 		if not rs2.eof then 
 
@@ -100,22 +106,23 @@
 			<BR><BR><BR><BR>
 			Å”  <INPUT TYPE="checkbox" NAME="postable1" disabled <% if RS1("postable1") then response.write "checked" %> >
 			</td>
-			<td class="CusTD2"><TABLE class="CustContactTable">
-				<TR>
-					<TD><%=RS1("Dear1")%> - <%=RS1("FirstName1")%> - <%=RS1("LastName1")%></TD>
-					<TD width="140" style="border-right:1 solid black;"> ·›‰ : <%=echoTels(RS1("Tel1"))%></TD>
-				</TR>
-				<TR>
-					<TD rowspan="2" valign="top">¬œ—” : <%=RS1("City1")%> - <%=RS1("Address1")%></TD>
-					<TD style="border-right:1 solid black;">›«ﬂ” : <%=echoTels(RS1("Fax1"))%></TD>
-				</TR>
-				<TR>
-					<TD style="border-right:1 solid black;">«Ì„Ì· : <%=RS1("Email1")%></TD>
-				</TR>
-				<TR>
-					<TD>ﬂœÅ” Ì: <%=RS1("PostCode1")%></TD>
-					<TD style="border-right:1 solid black;">„Ê»«Ì·: <span  Dir="LTR"><%=echoTels(RS1("Mobile1"))%></span></TD>
-				</TR>
+			<td style="background-color: <%=typeColor(cint(rs1("type")))%>;">
+				<TABLE class="CustContactTable">
+					<TR>
+						<TD><%=RS1("Dear1")%> - <%=RS1("FirstName1")%> - <%=RS1("LastName1")%></TD>
+						<TD width="140" style="border-right:1 solid black;"> ·›‰ : <%=echoTels(RS1("Tel1"))%></TD>
+					</TR>
+					<TR>
+						<TD rowspan="2" valign="top">¬œ—” : <%=RS1("City1")%> - <%=RS1("Address1")%></TD>
+						<TD style="border-right:1 solid black;">›«ﬂ” : <%=echoTels(RS1("Fax1"))%></TD>
+					</TR>
+					<TR>
+						<TD style="border-right:1 solid black;">«Ì„Ì· : <%=RS1("Email1")%></TD>
+					</TR>
+					<TR>
+						<TD>ﬂœÅ” Ì: <%=RS1("PostCode1")%></TD>
+						<TD style="border-right:1 solid black;">„Ê»«Ì·: <span  Dir="LTR"><%=echoTels(RS1("Mobile1"))%></span></TD>
+					</TR>
 				</TABLE>
 			</td>
 		</tr>
@@ -126,22 +133,23 @@
 			Å”  <INPUT TYPE="checkbox" NAME="postable2" disabled <% if RS1("postable2") then response.write "checked" %> >
 			
 			</td>
-			<td class="CusTD2"><TABLE class="CustContactTable">
-				<TR>
-					<TD><%=RS1("Dear2")%> - <%=RS1("FirstName2")%> - <%=RS1("LastName2")%></TD>
-					<TD width="140"> ·›‰ : <%=echoTels(RS1("Tel2"))%></TD>
-				</TR>
-				<TR>
-					<TD rowspan="2" valign="top">¬œ—” : <%=RS1("City2")%> - <%=RS1("Address2")%></TD>
-					<TD>›«ﬂ” : <%=echoTels(RS1("Fax2"))%></TD>
-				</TR>
-				<TR>
-					<TD>«Ì„Ì· : <%=RS1("Email2")%></TD>
-				</TR>
-				<TR>
-					<TD>ﬂœÅ” Ì: <%=RS1("PostCode2")%></TD>
-					<TD>„Ê»«Ì·: <span  Dir="LTR"><%=RS1("Mobile2")%></span></TD>
-				</TR>
+			<td style="background-color: <%=typeColor(cint(rs1("type")))%>;">
+				<TABLE class="CustContactTable">
+					<TR>
+						<TD><%=RS1("Dear2")%> - <%=RS1("FirstName2")%> - <%=RS1("LastName2")%></TD>
+						<TD width="140"> ·›‰ : <%=echoTels(RS1("Tel2"))%></TD>
+					</TR>
+					<TR>
+						<TD rowspan="2" valign="top">¬œ—” : <%=RS1("City2")%> - <%=RS1("Address2")%></TD>
+						<TD>›«ﬂ” : <%=echoTels(RS1("Fax2"))%></TD>
+					</TR>
+					<TR>
+						<TD>«Ì„Ì· : <%=RS1("Email2")%></TD>
+					</TR>
+					<TR>
+						<TD>ﬂœÅ” Ì: <%=RS1("PostCode2")%></TD>
+						<TD>„Ê»«Ì·: <span  Dir="LTR"><%=RS1("Mobile2")%></span></TD>
+					</TR>
 				</TABLE>
 			</td>
 		</tr>
