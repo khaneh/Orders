@@ -399,7 +399,7 @@ if CSR = "" then CSR = session("ID")
 				<td colspan="5">
 					<table>
 						<%
-						if cint(CusID)>0 then 
+						if CLng(CusID)>0 then 
 							set rs=Conn.Execute("select * from accountGroupRelations where account=" & CusID)
 							if rs.eof then 
 							%>
