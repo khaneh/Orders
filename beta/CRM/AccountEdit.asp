@@ -399,58 +399,60 @@ if CSR = "" then CSR = session("ID")
 				<td colspan="5">
 					<table>
 						<%
-						set rs=Conn.Execute("select * from accountGroupRelations where account=" & CusID)
-						if rs.eof then 
-						%>
-						<tr>
-							<td><b>‘—„‰œÂ! ”Ê«·«  ›ﬁÿ œ— ’Ê— Ì ‰„«Ì‘ œ«œÂ ŒÊ«Âœ ‘œ ﬂÂ œ” Â »‰œÌ «Ì —« «‰ Œ«» ﬂ—œÂ »«‘Ìœ</b></td>
-						</tr>
-						<%						
-						else
-							group=rs("accountGroup")
-							rs.close
-							set rs=Conn.Execute("select * from account_questions where [group]=" & group)
-							if rs.eof then
+						if cint(CusID)>0 then 
+							set rs=Conn.Execute("select * from accountGroupRelations where account=" & CusID)
+							if rs.eof then 
 							%>
 							<tr>
-								<td><b>»—«Ì «Ì‰ œ” Â ÂÌç ”Ê«·Ì ‰œ«—„</b></td>
+								<td><b>‘—„‰œÂ! ”Ê«·«  ›ﬁÿ œ— ’Ê— Ì ‰„«Ì‘ œ«œÂ ŒÊ«Âœ ‘œ ﬂÂ œ” Â »‰œÌ «Ì —« «‰ Œ«» ﬂ—œÂ »«‘Ìœ</b></td>
 							</tr>
-							<%
+							<%						
 							else
-								while not rs.eof
-									%>
-							<tr>
-								<td><%=rs("name")%><input name="questionID" type="hidden" value="<%=rs("id")%>"></td>
-								<td>
-									<%
-									'response.write ("select * from account_answers where account_id=" & CusID & " and question=" & rs("id"))
-									set rss=Conn.Execute("select * from account_answers where account_id=" & CusID & " and question=" & rs("id"))
-									if CInt(rs("type"))=0 then
-									%>
-									<input name="answer" type="text" <%if not rss.eof then response.write (" value='" & rss("answer") & "'")%>>
-									<%
-									elseif CInt(rs("type"))=1 then
-									%>
-									<select name="answer">
-									<%
-										choice=Split(rs("choice"),",")
-										for i=0 to UBound(choice)
-										%>
-										<option value="<%=trim(choice(i))%>" <%if not rss.eof then if rss("answer")=choice(i) then response.write(" selected ")%>><%=choice(i)%></option>
-										<%
-										next
-									%>
-									</select>
-									<%
-									end if
-									rss.close
-									%>
-								</td>
-							</tr>
-									<%
-									rs.moveNext
-								wend
+								group=rs("accountGroup")
 								rs.close
+								set rs=Conn.Execute("select * from account_questions where [group]=" & group)
+								if rs.eof then
+								%>
+								<tr>
+									<td><b>»—«Ì «Ì‰ œ” Â ÂÌç ”Ê«·Ì ‰œ«—„</b></td>
+								</tr>
+								<%
+								else
+									while not rs.eof
+										%>
+								<tr>
+									<td><%=rs("name")%><input name="questionID" type="hidden" value="<%=rs("id")%>"></td>
+									<td>
+										<%
+										'response.write ("select * from account_answers where account_id=" & CusID & " and question=" & rs("id"))
+										set rss=Conn.Execute("select * from account_answers where account_id=" & CusID & " and question=" & rs("id"))
+										if CInt(rs("type"))=0 then
+										%>
+										<input name="answer" type="text" <%if not rss.eof then response.write (" value='" & rss("answer") & "'")%>>
+										<%
+										elseif CInt(rs("type"))=1 then
+										%>
+										<select name="answer">
+										<%
+											choice=Split(rs("choice"),",")
+											for i=0 to UBound(choice)
+											%>
+											<option value="<%=trim(choice(i))%>" <%if not rss.eof then if rss("answer")=choice(i) then response.write(" selected ")%>><%=choice(i)%></option>
+											<%
+											next
+										%>
+										</select>
+										<%
+										end if
+										rss.close
+										%>
+									</td>
+								</tr>
+										<%
+										rs.moveNext
+									wend
+									rs.close
+								end if
 							end if
 						end if
 						%>
