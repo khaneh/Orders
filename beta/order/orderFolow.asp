@@ -12,7 +12,7 @@ if not Auth(2 , 3) then NotAllowdToViewThisPage()
 %>
 <STYLE>
 	.CustTable {font-family:tahoma; width:100%; border:5 solid #C3DBEB; direction: RTL;background-color: #C3DBEB;color: black;}
-	.CustTable td {padding:5;}
+	.CustTable td {padding:5;width: 50px;}
 	.CustTable a {text-decoration:none;color:#000088;}
 	.CustTable a:hover {text-decoration:underline;}
 	.CustTable td:nth-child(odd) { background-color:#eee; }
@@ -140,8 +140,8 @@ wend
 	<%
 		for s= 1 to stepCount
 			if cint(steps(s,i))>0 then
-				fromDate=""
-				toDate=""
+				fromDate="1389/01/01"
+				toDate=shamsiToday()
 				orderTypes=""
 				condition="" 
 				if request("submit")="ÊÇííÏ" then 
@@ -155,8 +155,8 @@ wend
 					if request("isDelay")="on" or request("today")="on" or request("tomorrow")="on" or request("nextWeek")="on" or request("moreNextWeek")="on" then
 					 	condition = condition & " and ( 0=1"
 					 	if request("isDelay")="on" then 
-					 		condition = condition & " or orders_trace.return_date < '" & shamsiToday() & "'"
-					 		fromDate = "0000/00/00"
+					 		condition = condition & " or orders_trace.return_date between '1389/01/01' and '" & shamsiDate(dateadd("d",-1,date())) & "'"
+					 		fromDate = "1389/01/01"
 					 		toDate = shamsiDate(dateadd("d",-1,date()))
 					 	end if
 						if request("today")="on" then 
@@ -182,12 +182,12 @@ wend
 						condition = condition & ")"
 					end if
 				end if
-				mySQL = "select orderTraceSteps.name,isnull(drv.orderCount,0) as orderCount from orderTraceSteps left outer join (select orders_trace.step, count(orders_trace.radif_sefareshat) as orderCount from orders_trace inner join Orders on orders_trace.radif_sefareshat=orders.id and orders.Closed=0 where 1=1 " & condition & " group by orders_trace.step) drv on orderTraceSteps.id=drv.step where orderTraceSteps.id=" & steps(s,i)
+				mySQL = "select orderTraceSteps.name,isnull(drv.orderCount,0) as orderCount from orderTraceSteps left outer join (select orders_trace.step, count(orders_trace.radif_sefareshat) as orderCount from orders_trace inner join Orders on orders_trace.radif_sefareshat=orders.id and orders.Closed=0 where 1=1 and orders_trace.return_date >'1389/01/01' " & condition & " group by orders_trace.step) drv on orderTraceSteps.id=drv.step where orderTraceSteps.id=" & steps(s,i)
 				set rs=Conn.Execute(mySQL)
 	%>
 			<td title="ÈÑÇí ãÔÇåÏå ÌÒÆíÇÊ ßáíß ßäíÏ">
 			<center>
-				<img src="../images/folder<%if CDbl(rs("orderCount"))>0 then response.write "1" else response.write "2"%>.gif" align="top">
+				<img src="../images/folder1.gif" align="top">
 				<br>
 				<a href="orderFolow.asp?act=show&fromDate=<%=Server.URLEncode(fromDate)%>&toDate=<%=Server.URLEncode(toDate)%>&orderTypes=<%=Server.URLEncode(orderTypes)%>&step=<%=steps(s,i)%>"><%=rs("name") & " (" & rs("orderCount") & ")"%></a>
 			</center>
