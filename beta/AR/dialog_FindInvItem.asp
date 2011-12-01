@@ -50,7 +50,11 @@ function onMyLoad(){
 }
 
 //-->
-</script></HEAD>
+</script>
+<style>
+	.myDiv {float:left;padding-left: 5px;}
+</style>
+</HEAD>
 <BODY leftmargin=0 topmargin=0 bgcolor='#DDDDFF' onload="onMyLoad()">
 <font face="tahoma">
 	<TABLE border="0" width="100%" height="100%" cellspacing="0" cellpadding="0">
@@ -66,24 +70,18 @@ function onMyLoad(){
 		</TABLE>
 
 		<!--- Iz inja By Alix - 82-07-16 -->
-		<TABLE width=100%>
-		<TR>
-			<TD><A onclick="setSearchString('œÌÃÌ «·')">[œÌÃÌ «·]</A></TD>
-			<TD><A onclick="setSearchString('›Ì·„')">[›Ì·„]</A></TD>
-			<TD><A onclick="setSearchString('ÅÌ—«„Ê‰')">[ÅÌ—«„Ê‰]</A></TD>
-			<TD><A onclick="setSearchString('»Ì—Ê‰Ì')">[»Ì—Ê‰Ì]</A></TD>
-			<TD><A onclick="setSearchString('«›” ')">[«›” ]</A></TD>
-			<TD><A onclick="setSearchString('«€–')">[ò«€–]</A></TD>
-		</TR>
-		<TR>
-			<TD><A onclick="setSearchString('ç”»')">[ç”»]</A></TD>
-			<TD><A onclick="setSearchString('»—‘')">[»—‘]</A></TD>
-			<TD><A onclick="setSearchString('·„Ì‰Ì ')">[·„Ì‰Ì ]</A></TD>
-			<TD colspan=2><A onclick="setSearchString('·«—Ã ›—„ ')">[·«—Ã ›—„ ]</A></TD>
-			<TD><!--A onclick="setSearchString('«›” ')">[«›” ]</A--></TD>
-			<TD><!--A onclick="setSearchString('«€–')">[ò«€–]</A--></TD>
-		</TR>
-		</TABLE>
+		<%
+		mySQL="select * from InvoiceItemCategories where ID in (select distinct InvoiceItemCategoryRelations.InvoiceItemCategory from InvoiceItemCategoryRelations inner join InvoiceItems on InvoiceItemCategoryRelations.InvoiceItem=invoiceItems.ID where InvoiceItems.Enabled=1)"
+		set rs=Conn.Execute(mySQL)
+		while not rs.eof
+		%>
+			<span style="direction:rtl;"><a onclick="setSearchString('<%=rs("id")%>')"><%="[" & rs("Name") & "]"%></a></span>
+		<%
+			rs.moveNext
+		wend
+		%>
+		
+		
 		<SCRIPT LANGUAGE="JavaScript">
 		<!--
 			function setSearchString(st)

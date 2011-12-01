@@ -15,8 +15,12 @@
 <font face="tahoma">
 <%
 	name=request("name")&""
-	mySQL="SELECT * From InvoiceItems WHERE ((REPLACE([Name], ' ', '') LIKE REPLACE(N'%"& sqlSafe(name) & "%', ' ', ''))) AND (Enabled=1) ORDER BY [id]"
-	Set RS1 = conn.Execute(mySQL)
+	if IsNumeric(name) then 
+		if cint(name)>-100 then mySQL="select InvoiceItems.* from InvoiceItems inner join InvoiceItemCategoryRelations on InvoiceItemCategoryRelations.InvoiceItem = invoiceItems.ID where InvoiceItems.Enabled=1 and InvoiceItemCategoryRelations.InvoiceItemCategory=" & name
+	else
+		mySQL="SELECT * From InvoiceItems WHERE ((REPLACE([Name], ' ', '') LIKE REPLACE(N'%"& sqlSafe(name) & "%', ' ', ''))) AND (Enabled=1) ORDER BY [id]"
+	end if
+		Set RS1 = conn.Execute(mySQL)
 
 	if (RS1.eof) then %>
 		<br><br><br><hr>
