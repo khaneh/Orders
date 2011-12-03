@@ -206,7 +206,7 @@ elseif request("act")="submit" then
 	else
 		fulluApplied=1
 	end if
-	Conn.Execute("update Invoices set totalVat=" & totalVat & " ,TotalDiscount=" & TotalDiscount & " ,TotalReceivable=" & TotalReceivable & ", issuedDate='" &issuedDate & "', isA=1,originalIssuedDate='" & originalDate & "' where id=" & invoiceID)
+	Conn.Execute("update Invoices set totalVat=" & totalVat & " ,TotalDiscount=" & TotalDiscount & " ,TotalReceivable=" & TotalReceivable & ", issuedDate='" &issuedDate & "', isA=1,originalIssuedDate='" & originalDate & "',issuedDate_en=dbo.udf_date_solarToDate(cast(substring('" & issuedDate & "',1,4) as int),cast(substring('" & issuedDate & "',6,2) as int),cast(substring('" & issuedDate & "',9,2) as int)) where id=" & invoiceID)
 	Conn.execute("update arItems set fullyApplied=" & fullyApplied & ", amountOriginal=" & TotalReceivable & ", effectiveDate='" & issuedDate & "',remainedAmount=" & oldRemain+TotalReceivable-oldAmountOrigin & ", vat=" & totalVat & " where id=" & arID)
 	rs.close
 	set rs=Conn.Execute("select * from effectiveGlrows where sys='AR' and link in (select id from arItems where type=1 and reason=1 and link=" & invoiceID & ")")

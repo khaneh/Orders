@@ -100,12 +100,12 @@ elseif request("act")="editInvoice" then
 	if isReverse then
 		'Check for permission for EDITTING Rev. Invoice
 		if not Auth(6 , 5) then NotAllowdToViewThisPage()
-		itemTypeName="›«ò Ê— »—ê‘ "
+		itemTypeName="›«? Ê— »—ê‘ "
 		HeaderColor="#FF9900"
 	else
 		'Check for permission for EDITTING Invoice
 		if not Auth(6 , 3) then NotAllowdToViewThisPage()
-		itemTypeName="›«ò Ê—"
+		itemTypeName="›«? Ê—"
 		HeaderColor="#C3C300"
 	end if
 
@@ -116,7 +116,7 @@ elseif request("act")="editInvoice" then
 		if Auth(6 , "A") then
 			' Has the Priviledge to change the Invoice
 			response.write "<BR>"
-			call showAlert ("«Ì‰ ›«ﬂ Ê— ’«œ— ‘œÂ «” .<br>Â—ç‰œ òÂ ‘„« «Ã«“Â œ«—Ìœ òÂ «Ì‰ ›«ò Ê— —«  €ÌÌ— »œÂÌœ<br>„”Ê·Ì  „‘ò·«  «Õ „«·Ì —« „Ì Å–Ì—Ìœø",CONST_MSG_INFORM) 
+			call showAlert ("«Ì‰ ›«ﬂ Ê— ’«œ— ‘œÂ «” .<br>Â—ç‰œ ?Â ‘„« «Ã«“Â œ«—Ìœ ?Â «Ì‰ ›«? Ê— —«  €ÌÌ— »œÂÌœ<br>„”Ê·Ì  „‘?·«  «Õ „«·Ì —« „Ì Å–Ì—Ìœø",CONST_MSG_INFORM) 
 		else
 			Conn.close
 			response.redirect "AccountReport.asp?act=showInvoice&invoice="& InvoiceID & "&errmsg=" & Server.URLEncode("«Ì‰ ›«ﬂ Ê— ’«œ— ‘œÂ «” .")
@@ -316,7 +316,7 @@ elseif request("act")="editInvoice" then
 			<TD colspan="10"><div>
 			<TABLE Border="0" Cellspacing="1" Cellpadding="0" Dir="RTL" bgcolor="#CCCC88">
 			<tr bgcolor='#CCCC88'>
-				<td colspan='9' width='500px'>*** Œ›Ì› —‰œ ›«ò Ê— »⁄œ «“ À»  œ—Ã ŒÊ«Âœ ‘œ***</td>
+				<td colspan='9' width='500px'>*** Œ›Ì› —‰œ ›«ﬂ Ê— »⁄œ «“ À»  œ—Ã ŒÊ«Âœ ‘œ***</td>
 				<!--td align='center' width="25px"> &nbsp; </td>
 				<td><INPUT readonly class="InvHeadInput" TYPE="text" size="3" ></td>
 				<td><INPUT readonly class="InvHeadInput" TYPE="text" size="30"></td>
@@ -558,18 +558,18 @@ elseif request("act")="submitEdit" then
 		end if 
 		'----
 
-		mySQL="UPDATE Invoices SET IssuedDate=N'" & issueDate & "', Number='"& InvoiceNo & "', IsA='"& IsA & "' WHERE (ID='"& InvoiceID & "')"
+		mySQL="UPDATE Invoices SET IssuedDate=N'" & issueDate & "', Number='"& InvoiceNo & "', IsA='"& IsA & "',issuedDate_en=issuedDate_en=dbo.udf_date_solarToDate(cast(substring('" & issueDate & "',1,4) as int),cast(substring('" & issueDate & "',6,2) as int),cast(substring('" & issueDate & "',9,2) as int)) WHERE (ID='"& InvoiceID & "')"
 		conn.Execute(mySQL)
 
 		'if IsA then
-		'	GLAccount=	"91001"	'This must be changed... (Sales A)
+		'	GLAccount=	"91001"	'This must be changedÖ (Sales A)
 		'else
-		'	GLAccount=	"91002"	'This must be changed... (Sales B)
+		'	GLAccount=	"91002"	'This must be changedÖ (Sales B)
 		'end if
 		'
-		' Changed By Kid 860118 , seasing to use Sales B
+		' Changed By Kid 860118 , sea sing to use Sales B
 
-		GLAccount=	"91001"	'This must be changed... (Sales A)
+		GLAccount=	"91001"	'This must be changedÖ (Sales A)
 
 		conn.Execute("UPDATE ARItems SET GL='"& OpenGL & "', EffectiveDate='" & issueDate & "', GLAccount='"& GLAccount & "' WHERE (ID='" & ARItemID & "')")
 
@@ -615,7 +615,7 @@ elseif request("act")="submitEdit" then
 
 
 		conn.close
-		response.redirect "AccountReport.asp?act=showInvoice&invoice=" & InvoiceID & "&msg=" &Server.URLEncode("«Ì‰ ›«ﬂ Ê— ﬁ»·« ’«œ— ‘œÂ »Êœ.<br>Â—ç‰œ òÂ ‘„« «Ã«“Â œ«—Ìœ òÂ «Ì‰ ›«ò Ê— —«  €ÌÌ— »œÂÌœ<br>»Â — «”  òÂ «Ì‰ ò«— —«  ò—«— ‰ò‰Ìœ.")
+		response.redirect "AccountReport.asp?act=showInvoice&invoice=" & InvoiceID & "&msg=" &Server.URLEncode("«Ì‰ ›«ﬂ Ê— ﬁ»·« ’«œ— ‘œÂ »Êœ.<br>Â—ç‰œ ?Â ‘„« «Ã«“Â œ«—Ìœ ?Â «Ì‰ ›«? Ê— —«  €ÌÌ— »œÂÌœ<br>»Â — «”  ?Â «Ì‰ ?«— —«  ?—«— ‰?‰Ìœ.")
 	else
 ' S A M
 'response.write(totalDiscount)
@@ -657,7 +657,7 @@ elseif request("act")="submitEdit" then
 		next 
 		if RFD > 0 then
 			theItem =			39999
-			theDescription =	" Œ›Ì› —‰œ ›«ò Ê—"
+			theDescription =	" Œ›Ì› —‰œ ›«? Ê—"
 
 			theAppQtty =		0
 			thePrice =			0
@@ -1001,7 +1001,7 @@ elseif request("act")="voidInvoice" then
 	if trim(comment)<>"" then comment = chr(13) & chr(10) & "[" & comment & "]"
 	MsgTo			=	issuedBy
 	msgTitle		=	"Invoice Voided"
-	msgBody			=	"›«ò Ê— ›Êﬁ  Ê”ÿ "& session("CSRName") & " »«ÿ· ‘œ." & comment
+	msgBody			=	"›«? Ê— ›Êﬁ  Ê”ÿ "& session("CSRName") & " »«ÿ· ‘œ." & comment
 	RelatedTable	=	"invoices"
 	relatedID		=	invoiceID
 	replyTo			=	0
@@ -1013,7 +1013,7 @@ elseif request("act")="voidInvoice" then
 	Conn.Execute ("INSERT INTO Messages (MsgFrom, MsgTo, MsgTime, MsgDate, IsRead, MsgTitle, MsgBody, replyTo, IsReply, relatedID, RelatedTable, urgent) VALUES ( "& MsgFrom & ", "& MsgTo & ", N'"& MsgTime & "', N'"& MsgDate & "', 0, N'"& MsgTitle & "', N'"& MsgBody & "', "& replyTo & ", "& IsReply & ", "& relatedID & ", '"& RelatedTable & "', "& urgent & ")")
 
 
-	' Copying the PreInvoice Data...
+	' Copying the PreInvoice DataÖ
 	response.redirect "InvoiceInput.asp?act=copyInvoice&invoice="& InvoiceID & "&msg=" & Server.URLEncode(itemTypeName & " ‘„«—Â "& InvoiceID & " »«ÿ· ‘œ.")
 
 elseif request("act")="removePreInvoice" then

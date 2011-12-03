@@ -572,7 +572,9 @@ elseif request("act")="submitEdit" then
 	end if 
 	'----
 
-		mySQL="UPDATE Invoices SET IssuedDate=N'" & issueDate & "', Number='"& InvoiceNo & "', IsA='"&IsA&"' WHERE (ID='"& InvoiceID & "')"
+		mySQL="UPDATE Invoices SET IssuedDate=N'" & issueDate & "', Number='"& InvoiceNo & "', IsA='"&IsA&"',issuedDate_en=dbo.udf_date_solarToDate(cast(substring('" & issueDate & "',1,4) as int),cast(substring('" & issueDate & "',6,2) as int),cast(substring('" & issueDate & "',9,2) as int)) WHERE (ID='"& InvoiceID & "')"
+		'response.write mySQL
+		'response.end
 		conn.Execute(mySQL)
 '---------------------------------------------------------------------------------------------------
 		for i=1 to request.form("Items").count 
