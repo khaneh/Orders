@@ -31,11 +31,11 @@ text_r(0)="»Ì‘ «“ Ìﬂ ”«·"
 text_r(1)="Ìﬂ ”«· ÅÌ‘"
 text_r(2)="‘‘ „«Â ÅÌ‘"
 text_r(3)="”Â „«Â ÅÌ‘"
-text_f(0)="Â— »Ì‘ «“ Ìﬂ ”«·"
-text_f(1)="Â— Ìﬂ ”«·"
-text_f(2)="Â— ‘‘ „«Â"
-text_f(3)="Â— ”Â „«Â"
-text_f(4)="Â— Ìﬂ „«Â"
+text_f(0)="Ìﬂ ”›«—‘ œ— ‘‘ „«Â"
+text_f(1)="œÊ ”›«—‘ œ— ‘‘ „«Â"
+text_f(2)="”Â ”›«—‘ œ— ‘‘ „«Â"
+text_f(3)="»Ì‘ «“ ”Â ”›«—‘ œ— ‘‘ „«Â"
+'text_f(4)="Â— Ìﬂ „«Â"
 text_v(0)=" « ’œÂ“«— —Ì«·"
 text_v(1)=" « Å«‰’œ Â“«— —Ì«·"
 text_v(2)=" « Ìﬂ „·ÌÊ‰ —Ì«·"
@@ -45,23 +45,23 @@ text_v(5)="œÂ „·ÌÊ‰ —Ì«· »Â »«·«"
 Conn.Execute("update Invoices set issuedDate_en=dbo.udf_date_solarToDate(cast(substring(issuedDate,1,4) as int),cast(substring(issuedDate,6,2) as int),cast(substring(issuedDate,9,2) as int)) where Issued=1 and issuedDate_en is null")
 if request("act")="" then 
 	if request("ord")="" then 
-		ord= " Recency,Frequency,Value"
+		ord= " R.Recency,F.Frequency,V.Value"
 	elseif request("ord")="1" then 
-		ord= " Recency,Frequency,Value"
+		ord= " R.Recency,F.Frequency,V.Value"
 	elseif request("ord")="-1" then 
-		ord= " Recency desc,Frequency desc,Value desc"
+		ord= " R.Recency desc, F.Frequency desc, V.Value desc"
 	elseif request("ord")="2" then 
-		ord= " Frequency,Recency,Value"
+		ord= " F.Frequency, R.Recency, V.Value"
 	elseif request("ord")="-2" then 
-		ord= " Frequency desc,Recency desc,Value desc"
+		ord= " F.Frequency desc, R.Recency desc, V.Value desc"
 	elseif request("ord")="3" then 
-		ord= " Value,Recency,Frequency"
+		ord= " V.Value, R.Recency, F.Frequency"
 	elseif request("ord")="-3" then 
-		ord= " Value desc,Recency desc,Frequency desc"	
+		ord= " V.Value desc, R.Recency desc, F.Frequency desc"	
 	elseif request("ord")="4" then 
-		ord= " count(rfv_value.customer),Recency,Frequency,Value"
+		ord= " count(R.customer), R.Recency, F.Frequency, V.Value"
 	elseif request("ord")="-4" then 
-		ord= " count(rfv_value.customer) desc,Recency,Frequency,Value"
+		ord= " count(R.customer) desc, R.Recency, F.Frequency, V.Value"
 	end if
 		
 %>
@@ -102,21 +102,25 @@ if request("act")="" then
 		mySQLWarm="select count(customer) as [count] from (select distinct customer from Quotes where Customer not in (select distinct customer from Orders)) drv"
 		mySQLThreshold="select count(customer) as [count] from Orders where Customer in (select customer from invoices where Issued=0 and voided=0 and customer not in (select customer from Invoices where Voided=0 and issued=1))"
 	else 
-		myCond=" inner join AccountGroupRelations on AccountGroupRelations.account = rfv_value.customer  where AccountGroupRelations.accountGroup=" & request("accountGroup")
+		myCond=" inner join AccountGroupRelations on AccountGroupRelations.account = R.customer  where AccountGroupRelations.accountGroup=" & request("accountGroup")
 		mySQLCool="select count(Accounts.id) as [count] from Accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & request("accountGroup") & " and Accounts.type in (2,4) and Accounts.id not in (select distinct customer from Orders union select distinct customer from quotes )"
 		mySQLWarm="select count(accounts.id) as [count] from accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & request("accountGroup") & " and id in (select customer from (select distinct customer from Quotes where Customer not in (select distinct customer from Orders)) drv)"
 		mySQLThreshold="select count(customer) as [count] from Orders inner join AccountGroupRelations on AccountGroupRelations.account=orders.customer where AccountGroupRelations.accountGroup=" & request("accountGroup") & "  and Customer in (select customer from invoices where Issued=0 and voided=0 and customer not in (select customer from Invoices where Voided=0 and issued=1))"
 	end if
-	mySQL="select count(rfv_value.customer) as c,rfv_value.Value,rfv_recency.Recency,rfv_frequency.Frequency from rfv_frequency inner join rfv_recency on rfv_frequency.customer=rfv_recency.customer inner join rfv_value on rfv_recency.customer=rfv_value.customer " & myCond & " group by rfv_value.Value,rfv_recency.Recency,rfv_frequency.Frequency order by" & ord
+	myDate=Date()
+	response.write mydate
+	'response.end 
+	'mySQL="select count(R.customer) as c, V.Value, R.Recency, F.Frequency from dbo.rfm_recency('" & myDate & "') as R left outer join dbo.rfm_frequency('" & myDate & "') as F on F.customer = R.customer left outer join dbo.rfm_value('" & myDate & "') as V on R.customer = V.customer " & myCond & " group by V.Value, R.Recency, F.Frequency order by" & ord
+	mySQL="declare @todate datetime; set @todate=getdate(); select count(R.customer) as c, V.Value, R.Recency, F.Frequency from (select customer, case when datediff(day,max(issuedDate_en),@toDate) > 365 then 0 when datediff(day,max(issuedDate_en),@toDate) between 181 and 365 then 1 when datediff(day,max(issuedDate_en),@toDate) between 91 and 180 then 2 when datediff(day,max(issuedDate_en),@toDate) between 0 and 91 then 3 end as Recency, datediff(day,max(issuedDate_en),@toDate) as [Day] from Invoices where Voided=0 and Issued=1 and issuedDate_en <=@toDate group by Customer) as R left outer join (select customer,case when count(issuedDate) = 1 then 0 when count(issuedDate) = 2 then 1 when count(issuedDate) = 3 then 2 when count(issuedDate) > 3 then 3 end as Frequency , count(issuedDate) as [Count] from (select Customer,issuedDate, max(issuedDate_en) as issuedDate_en from Invoices where Voided=0 and Issued=1 and issuedDate_en > dateadd(month,-6,getdate()) group by Customer,issuedDate) as drf group by Customer) as F on F.customer = R.customer left outer join (select customer, case when sum(totalReceivable)/count(issuedDate) <= 100000 then 0 when sum(totalReceivable)/count(issuedDate) <= 500000 and sum(totalReceivable)/count(issuedDate) > 100000 then 1 when sum(totalReceivable)/count(issuedDate) <= 1000000 and sum(totalReceivable)/count(issuedDate) > 500000 then 2 when sum(totalReceivable)/count(issuedDate) <= 5000000 and sum(totalReceivable)/count(issuedDate) > 1000000 then 3 when sum(totalReceivable)/count(issuedDate) <= 10000000 and sum(totalReceivable)/count(issuedDate) > 5000000 then 4 when sum(totalReceivable)/count(issuedDate) > 10000000 then 5 end as Value, sum(totalReceivable) as Amount from (select Customer,issuedDate, max(issuedDate_en) as issuedDate_en,sum(totalReceivable) as totalReceivable from Invoices where Voided=0 and Issued=1 and issuedDate_en <=@toDate group by Customer,issuedDate) as drv group by Customer) as V on R.customer = V.customer " & myCond & " group by V.Value, R.Recency, F.Frequency order by " & ord
 	'response.write mySQL
 	'response.end
 	set rs=Conn.Execute(mySQL)
 	while not rs.eof
 %>
 	<tr>
-		<td style="background-color:<%=color(rs("Recency"))%>"><%=text_r(rs("Recency"))%></td>
-		<td style="background-color:<%=color(rs("Frequency"))%>"><%=text_f(rs("Frequency"))%></td>
-		<td style="background-color:<%=color(rs("Value"))%>"><%=text_v(rs("Value"))%></td>
+		<td style='background-color:<% if not isnull(rs("Recency")) then response.write color(rs("Recency"))%>'><% if not isnull(rs("Recency")) then response.write text_r(rs("Recency")) else response.write "‰œ«—œ" end if%></td>
+		<td style='background-color:<% if not isnull(rs("Frequency")) then response.write color(rs("Frequency"))%>'><% if not isnull(rs("Frequency")) then response.write text_f(rs("Frequency")) else response.write "‰œ«—œ" end if%></td>
+		<td style='background-color:<% if not isnull(rs("Value")) then response.write color(rs("Value"))%>'><% if not isnull(rs("Value")) then response.write text_v(rs("Value")) else response.write "‰œ«—œ" end if%></td>
 		<td><a href="rfmModel.asp?act=show&accountGroup=<%=request("accountGroup")%>&value=<%=rs("Value")%>&recency=<%=rs("Recency")%>&frequency=<%=rs("Frequency")%>"><%=Separate(rs("c"))%></a></td>
 	</tr>
 <%
@@ -152,65 +156,62 @@ elseif request("act")="show" then
 <table class="myTable" cellpadding="5px" cellspacing="0">
 	<tr>
 		<td width="30px">
-			<a href="rfmModel.asp?act=show&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="1" then response.write "-1" else response.write "1"%>">¬Œ—Ì‰ ”›«—‘ (—Ê“)</a>
+			<a href="rfmModel.asp?act=show&accountGroup=<%=request("accountGroup")%>&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="1" then response.write "-1" else response.write "1"%>">¬Œ—Ì‰ ”›«—‘ (—Ê“)</a>
 		</td>
 		<td width="30px">
-			<a href="rfmModel.asp?act=show&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="2" then response.write "-2" else response.write "2"%>">«Ê·Ì‰ ”›«—‘  « «„—Ê“ („«Â)</a>
+			<a href="rfmModel.asp?act=show&accountGroup=<%=request("accountGroup")%>&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="3" then response.write "-3" else response.write "3"%>"> ⁄œ«œ ”›«—‘ œ— ‘‘ „«Â</a>
 		</td>
 		<td width="30px">
-			<a href="rfmModel.asp?act=show&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="3" then response.write "-3" else response.write "3"%>"> ⁄œ«œ ”›«—‘</a>
-		</td>
-		<td width="30px">
-			<a href="rfmModel.asp?act=show&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="4" then response.write "-4" else response.write "4"%>">„Ì«‰êÌ‰ ”›«—‘ œ— „«Â</a>
+			<a href="rfmModel.asp?act=show&accountGroup=<%=request("accountGroup")%>&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="4" then response.write "-4" else response.write "4"%>">«„ Ì«“ ›—ﬂ«‰”</a>
 		</td>
 		<td width="50px">
-			<a href="rfmModel.asp?act=show&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="5" then response.write "-5" else response.write "5"%>">Ã⁄⁄ ﬂ· ”›«—‘</a>
+			<a href="rfmModel.asp?act=show&accountGroup=<%=request("accountGroup")%>&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="5" then response.write "-5" else response.write "5"%>">Ã⁄⁄ ﬂ· ”›«—‘</a>
 		</td>
 		<td width="50px">
-			<a href="rfmModel.asp?act=show&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="8" then response.write "-8" else response.write "8"%>">„Ì«‰êÌ‰ —Ì«·Ì ”›«—‘ œ—„«Â</a>
+			<a href="rfmModel.asp?act=show&accountGroup=<%=request("accountGroup")%>&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="8" then response.write "-8" else response.write "8"%>">„Ì«‰êÌ‰ —Ì«·Ì</a>
 		</td>
 		<td>
-			<a href="rfmModel.asp?act=show&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="6" then response.write "-6" else response.write "6"%>">„‘ —Ì</a>
+			<a href="rfmModel.asp?act=show&accountGroup=<%=request("accountGroup")%>&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="6" then response.write "-6" else response.write "6"%>">„‘ —Ì</a>
 		</td>
 		<td>
-			<a href="rfmModel.asp?act=show&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="7" then response.write "-7" else response.write "7"%>">Ã„⁄ „«‰œÂ</a>
+			<a href="rfmModel.asp?act=show&accountGroup=<%=request("accountGroup")%>&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&ord=<%if request("ord")="7" then response.write "-7" else response.write "7"%>">Ã„⁄ „«‰œÂ</a>
 		</td>
 	</tr>
 <%
 	if request("ord")="" then 
-		ord= " [day]"
+		ord= " R.[day]"
 	elseif request("ord")="1" then 
-		ord= " [day]"
+		ord= " R.[day]"
 	elseif request("ord")="-1" then 
-		ord= " [day] desc"
-	elseif request("ord")="2" then 
-		ord= " [month]"
-	elseif request("ord")="-2" then 
-		ord= " [Month] desc"
+		ord= " R.[day] desc"
+	'elseif request("ord")="2" then 
+	'	ord= " [month]"
+	'elseif request("ord")="-2" then 
+	'	ord= " [Month] desc"
 	elseif request("ord")="3" then 
-		ord= " [count]"
+		ord= " F.[count]"
 	elseif request("ord")="-3" then 
-		ord= " [count] desc"	
+		ord= " F.[count] desc"	
 	elseif request("ord")="4" then 
-		ord= " [count]/cast([Month] as float)"
+		ord= " F.Frequency"
 	elseif request("ord")="-4" then 
-		ord= " [count]/cast([Month] as float) desc"
+		ord= " F.Frequency desc"
 	elseif request("ord")="5" then 
-		ord= " amount"
+		ord= " V.amount"
 	elseif request("ord")="-5" then 
-		ord= " amount desc"
+		ord= " V.amount desc"
 	elseif request("ord")="6" then 
-		ord= " accountTitle"
+		ord= " accounts.accountTitle"
 	elseif request("ord")="-6" then 
-		ord= " accountTitle desc"
+		ord= " accounts.accountTitle desc"
 	elseif request("ord")="7" then 
 		ord= " remain"
 	elseif request("ord")="-7" then 
 		ord= " remain desc"
 	elseif request("ord")="8" then 
-		ord= " [amount]/cast([Month] as float)"
+		ord= " V.avrag"
 	elseif request("ord")="-8" then 
-		ord= " [amount]/cast([Month] as float) desc"
+		ord= " V.avrag desc"
 	end if
 	
 	if request("accountGroup")="" or request("accountGroup")="-1" then 
@@ -218,7 +219,11 @@ elseif request("act")="show" then
 	else 
 		myCond=" and accounts.id in (select account from AccountGroupRelations where AccountGroupRelations.accountGroup=" & request("accountGroup") & ") "
 	end if
-	mySQL="select rfv_frequency.customer,rfv_frequency.[count],rfv_frequency.[Month],rfv_value.Amount,rfv_recency.[day],accounts.accountTitle, accounts.arBalance+accounts.aoBalance+accounts.apBalance as Remain from rfv_frequency inner join rfv_recency on rfv_frequency.customer=rfv_recency.customer inner join rfv_value on rfv_recency.customer=rfv_value.customer inner join Accounts on rfv_value.Customer = Accounts.id where Recency=" & request("Recency") & " and Value=" & request("Value") & " and Frequency=" & request("Frequency") & myCond & " order by" & ord
+	'mySQL="select rfv_frequency.customer,rfv_frequency.[count],rfv_frequency.[Month],rfv_value.Amount,rfv_recency.[day],accounts.accountTitle, accounts.arBalance+accounts.aoBalance+accounts.apBalance as Remain from rfv_frequency inner join rfv_recency on rfv_frequency.customer=rfv_recency.customer inner join rfv_value on rfv_recency.customer=rfv_value.customer inner join Accounts on rfv_value.Customer = Accounts.id where Recency=" & request("Recency") & " and Value=" & request("Value") & " and Frequency=" & request("Frequency") & myCond & " order by" & ord
+	mySQL="declare @todate datetime; set @todate=getdate(); select R.customer, V.amount, V.Value, V.avrag, R.Recency, R.[day], F.[count], F.Frequency, accounts.accountTitle, accounts.arBalance+accounts.aoBalance+accounts.apBalance as Remain from (select customer, case when datediff(day,max(issuedDate_en),@toDate) > 365 then 0 when datediff(day,max(issuedDate_en),@toDate) between 181 and 365 then 1 when datediff(day,max(issuedDate_en),@toDate) between 91 and 180 then 2 when datediff(day,max(issuedDate_en),@toDate) between 0 and 91 then 3 end as Recency, datediff(day,max(issuedDate_en),@toDate) as [Day] from Invoices where Voided=0 and Issued=1 and issuedDate_en <=@toDate group by Customer) as R left outer join (select customer,case when count(issuedDate) = 1 then 0 when count(issuedDate) = 2 then 1 when count(issuedDate) = 3 then 2 when count(issuedDate) > 3 then 3 end as Frequency , count(issuedDate) as [Count] from (select Customer,issuedDate, max(issuedDate_en) as issuedDate_en from Invoices where Voided=0 and Issued=1 and issuedDate_en > dateadd(month,-6,getdate()) group by Customer,issuedDate) as drf group by Customer) as F on F.customer = R.customer left outer join (select customer, case when sum(totalReceivable)/count(issuedDate) <= 100000 then 0 when sum(totalReceivable)/count(issuedDate) <= 500000 and sum(totalReceivable)/count(issuedDate) > 100000 then 1 when sum(totalReceivable)/count(issuedDate) <= 1000000 and sum(totalReceivable)/count(issuedDate) > 500000 then 2 when sum(totalReceivable)/count(issuedDate) <= 5000000 and sum(totalReceivable)/count(issuedDate) > 1000000 then 3 when sum(totalReceivable)/count(issuedDate) <= 10000000 and sum(totalReceivable)/count(issuedDate) > 5000000 then 4 when sum(totalReceivable)/count(issuedDate) > 10000000 then 5 end as Value, sum(totalReceivable) as Amount,sum(totalReceivable)/count(issuedDate) as avrag from (select Customer,issuedDate, max(issuedDate_en) as issuedDate_en,sum(totalReceivable) as totalReceivable from Invoices where Voided=0 and Issued=1 and issuedDate_en <=@toDate group by Customer,issuedDate) as drv group by Customer) as V on R.customer = V.customer inner join Accounts on R.customer = Accounts.id " & myCond & " where R.Recency=" & request("Recency") 
+	if request("Value")<>"" then mySQL = mySQL & " and V.Value=" & request("Value")
+	if request("Frequency")<>"" then mySQL = mySQL & " and F.Frequency=" & request("Frequency")
+	mySQL = mySQL & " order by " & ord
 	'response.write mySQL
 	'response.end
 	set rs=Conn.Execute(mySQL)
@@ -228,11 +233,10 @@ elseif request("act")="show" then
 %>
 	<tr>
 		<td><%=rs("Day")%></td>
-		<td><%=rs("Month")%></td>
 		<td><%=rs("Count")%></td>
-		<td><%=Round(CInt(rs("Count"))/Cint(rs("Month")),2)%></td>
+		<td><%=rs("Frequency")%></td>
 		<td><%=Separate(rs("Amount"))%></td>
-		<td><%=Separate(round(CDbl(rs("amount"))/cint(rs("month"))))%></td>
+		<td><%=Separate(rs("avrag"))%></td>
 		<td><a href="AccountInfo.asp?act=show&selectedCustomer=<%=rs("Customer")%>"><%=rs("accountTitle")%></a></td>
 		<td><%=Separate(rs("Remain"))%></td>
 	</tr>
@@ -243,7 +247,7 @@ elseif request("act")="show" then
 %>
 	<tr>
 		<td>Ã„⁄ ﬂ·:</td>
-		<td colspan="7"><%=i%></td>
+		<td colspan="6"><%=i%></td>
 	</tr>
 </table>
 <%
