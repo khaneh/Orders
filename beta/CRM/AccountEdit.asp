@@ -177,6 +177,10 @@ elseif request("act")="editaccount" AND (request("selectedCustomer") <> ""  or r
 	Mobile2			=	RS1("Mobile2")
 	PostCode2		=	RS1("PostCode2")
 	NorRCode		=	RS1("NorRCode")
+	employee		=	RS1("employee")
+	JobTitle1		=	RS1("JobTitle1")
+	JobTitle2		=	RS1("JobTitle2")
+	website			=	RS1("website")
 end if
 if request("act")="getAccount" or editFlag = 1 then
 if CSR = "" then CSR = session("ID")
@@ -295,7 +299,24 @@ if CSR = "" then CSR = session("ID")
 					<input class="CustGenInput" name="NorRCode" value="<%=NorRCode%>" type="text" size="15" maxlength="20">
 				</td>
 			</tr>
-
+			<tr>
+				<td colspan="2" align="left"> ⁄œ«œ ‰›—« :</td>
+				<td align="right" colspan="3">
+					<select name="employee" id="employee" <% if IsPersonal then response.write " style='visibility:hidden;' " %> >
+						<option value="0" <%if IsNull(employee) or employee=0 or IsPersonal then response.write " selected='selected' "%>>«‰ Œ«» ‰‘œÂ</option>
+						<option value="1" <%if employee=1 then response.write " selected='selected' "%>>0  « 5 ‰›—</option>
+						<option value="2" <%if employee=2 then response.write " selected='selected' "%>>6  « 20 ‰›—</option>
+						<option value="3" <%if employee=3 then response.write " selected='selected' "%>>21  « 100 ‰›—</option>
+						<option value="4" <%if employee=4 then response.write " selected='selected' "%>>101 »Â »«·«</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" align="left">Ê» ”«Ì :</td>
+				<td align=right colspan=3>
+					<input class="CustGenInput" name="website" dir="ltr" value="<%=website%>" type="text" size="30" maxlength="100">
+				</td>
+			</tr>
 			<tr bgcolor='#C3C300'>
 				<td align='center' colspan='4'><b> «ÿ·«⁄«  —«»ÿ «’·Ì </b></td>
 				<td align='center'>
@@ -310,13 +331,16 @@ if CSR = "" then CSR = session("ID")
 				<td align='center'>ﬂœÅ” Ì <BR><INPUT class="CustGenInput" TYPE="text" NAME="PostCode1" size="15" value="<%=PostCode1%>"></td>
 			</tr>
 			<tr>
-				<td align='center' rowspan='2' colspan='3'> ¬œ—” <BR><TEXTAREA class="CustGenInput" NAME="Address1" ROWS="4" COLS="60"><%=Address1%></TEXTAREA></td>
+				<td align='center' rowspan='3' colspan='3'> ¬œ—” <BR><br><TEXTAREA class="CustGenInput" NAME="Address1" ROWS="6" COLS="60"><%=Address1%></TEXTAREA></td>
 				<td valign='top' align='center'> ·›‰<BR><INPUT class="CustGenInput" Dir="LTR" NAME="Tel1" value="<%=Tel1%>" TYPE="text" size="15"></td>
 				<td valign='top' align='center'>›«ﬂ”<BR><INPUT class="CustGenInput" Dir="LTR" NAME="Fax1" value="<%=Fax1%>" TYPE="text" size="15"></td>
 			</tr>
 			<tr>
 				<td align='center'>„Ê»«Ì· <BR><INPUT class="CustGenInput" TYPE="text"  Dir="LTR"  NAME="Mobile1" size="15" value="<%=Mobile1%>"></td>
 				<td valign='top' align='center'>«Ì„Ì·<BR><INPUT class="CustGenInput" Dir="LTR" NAME="Email1"  value="<%=Email1%>" TYPE="text" size="15" onkeyDown="return myKeyDownHandler();" onKeyPress="return myKeyPressHandler();"></td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center">”„  <br><input class="CustGenInput" type="text" dir="rtl" name="JobTitle1" value="<%=JobTitle1%>" size="40"></td>
 			</tr>
 			<tr bgcolor='#C3C300'>
 				<td align='center' colspan='4'><b> «ÿ·«⁄«  —«»ÿ œÊ„ </b></td>
@@ -332,13 +356,16 @@ if CSR = "" then CSR = session("ID")
 				<td align='center'>ﬂœÅ” Ì <BR><INPUT class="CustGenInput" TYPE="text" NAME="PostCode2" size="15" value="<%=PostCode2%>"></td>
 			</tr>
 			<tr>
-				<td align='center' rowspan='2' colspan='3'> ¬œ—” <BR><TEXTAREA class="CustGenInput" NAME="Address2" ROWS="4" COLS="60"><%=Address2%></TEXTAREA></td>
+				<td align='center' rowspan='3' colspan='3'> ¬œ—” <BR><TEXTAREA class="CustGenInput" NAME="Address2" ROWS="6" COLS="60"><%=Address2%></TEXTAREA></td>
 				<td valign='top' align='center'> ·›‰<BR><INPUT class="CustGenInput" Dir="LTR" NAME="Tel2" value="<%=Tel2%>" TYPE="text" size="15"></td>
 				<td valign='top' align='center'>›«ﬂ”<BR><INPUT class="CustGenInput" Dir="LTR" NAME="Fax2" value="<%=Fax2%>" TYPE="text" size="15"></td>
 			</tr>
 			<tr>
 				<td align='center'>„Ê»«Ì· <BR><INPUT class="CustGenInput" TYPE="text"  Dir="LTR"  NAME="Mobile2" size="15" value="<%=Mobile2%>"></td>
 				<td valign='top' align='center'>«Ì„Ì·<BR><INPUT class="CustGenInput" Dir="LTR" NAME="Email2"  value="<%=Email2%>" TYPE="text" size="15" onkeyDown="return myKeyDownHandler();" onKeyPress="return myKeyPressHandler();"></td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center">”„  <br><input class="CustGenInput" type="text" dir="rtl" name="JobTitle2" value="<%=JobTitle2%>" size="40"></td>
 			</tr>
 			<%' ----------------------------S A M    E D I T  ----------------------------------------
 			%>
@@ -526,7 +553,9 @@ elseif request("act")="submitEdit" then
 
 	CreditLimit		= cdbl(text2value(Request.form("CreditLimit")))
 	accountGroup	= cdbl(text2value(request.form("accountGroup")))
-
+	employee		= cint(text2value(request.form("employee")))
+	website			= left(sqlSafe(Request.form("website")) , 100)
+	
 	if not Auth(1 , 4) then ' Doesn't have the permission to set CSR / credit limit
 		CSR			= ""
 	else
@@ -642,9 +671,9 @@ elseif request("act")="submitEdit" then
 '	End of Log
 '   -------------------------------
 	if CSR="" then
-		mySQL="UPDATE Accounts SET LastEditOn='"& EditDate & "', LastEditBy='"& EditBy& "', Type ="&AccType & ", Status ="&Status & ", AccountTitle =N'"& AccountTitle& "', Postable1 = "& Postable1 & ", Postable2 = "& Postable2 & ", IsADefault = "& IsADefault & ", EconomicalCode =N'"& EconomicalCode& "', IsPersonal ="& IsPersonal& ", CompanyName =N'"& CompanyName& "', Dear1 =N'"& Dear1& "', FirstName1 =N'"& FirstName1& "', LastName1 =N'"& LastName1& "', JobTitle1 =N'"& JobTitle1& "', Tel1 =N'"& Tel1& "', Fax1 =N'"& Fax1& "', EMail1 =N'"& EMail1& "', Mobile1 =N'"& Mobile1& "', PostCode1 =N'"& PostCode1& "', City1 =N'"& City1& "', Address1 =N'"& Address1& "', Dear2 =N'"& Dear2& "', FirstName2 =N'"& FirstName2& "', LastName2 =N'"& LastName2& "', JobTitle2 =N'"& JobTitle2 & "', Tel2 =N'"& Tel2& "', Fax2 =N'"& Fax2& "', EMail2 =N'"& EMail2& "', Mobile2 =N'"& Mobile2& "', PostCode2 =N'"& PostCode2& "', City2 =N'"& City2& "', Address2 =N'"& Address2& "', NorRCode = N'" & NorRCode & "' WHERE (ID = "& ID & ")"
+		mySQL="UPDATE Accounts SET LastEditOn='"& EditDate & "', LastEditBy='"& EditBy& "', Type ="&AccType & ", Status ="&Status & ", AccountTitle =N'"& AccountTitle& "', Postable1 = "& Postable1 & ", Postable2 = "& Postable2 & ", IsADefault = "& IsADefault & ", EconomicalCode =N'"& EconomicalCode& "', IsPersonal ="& IsPersonal& ", CompanyName =N'"& CompanyName& "', Dear1 =N'"& Dear1& "', FirstName1 =N'"& FirstName1& "', LastName1 =N'"& LastName1& "', JobTitle1 =N'"& JobTitle1& "', Tel1 =N'"& Tel1& "', Fax1 =N'"& Fax1& "', EMail1 =N'"& EMail1& "', Mobile1 =N'"& Mobile1& "', PostCode1 =N'"& PostCode1& "', City1 =N'"& City1& "', Address1 =N'"& Address1& "', Dear2 =N'"& Dear2& "', FirstName2 =N'"& FirstName2& "', LastName2 =N'"& LastName2& "', JobTitle2 =N'"& JobTitle2 & "', Tel2 =N'"& Tel2& "', Fax2 =N'"& Fax2& "', EMail2 =N'"& EMail2& "', Mobile2 =N'"& Mobile2& "', PostCode2 =N'"& PostCode2& "', City2 =N'"& City2& "', Address2 =N'"& Address2& "', NorRCode = N'" & NorRCode & "' , employee=" & employee & ",website=N'" & website & "' WHERE (ID = "& ID & ")"
 	else
-		mySQL="UPDATE Accounts SET CSR ="& CSR & ", LastEditOn='"& EditDate & "', LastEditBy='"& EditBy& "', Type ="&AccType & ", Status ="&Status & ", AccountTitle =N'"& AccountTitle& "', Postable1 = "& Postable1 & ", Postable2 = "& Postable2 & ", IsADefault = "& IsADefault & ", EconomicalCode =N'"& EconomicalCode& "', CreditLimit="& CreditLimit & ", IsPersonal ="& IsPersonal& ", CompanyName =N'"& CompanyName& "', Dear1 =N'"& Dear1& "', FirstName1 =N'"& FirstName1& "', LastName1 =N'"& LastName1& "', JobTitle1 =N'"& JobTitle1& "', Tel1 =N'"& Tel1& "', Fax1 =N'"& Fax1& "', EMail1 =N'"& EMail1& "', Mobile1 =N'"& Mobile1& "', PostCode1 =N'"& PostCode1& "', City1 =N'"& City1& "', Address1 =N'"& Address1& "', Dear2 =N'"& Dear2& "', FirstName2 =N'"& FirstName2& "', LastName2 =N'"& LastName2& "', JobTitle2 =N'"& JobTitle2 & "', Tel2 =N'"& Tel2& "', Fax2 =N'"& Fax2& "', EMail2 =N'"& EMail2& "', Mobile2 =N'"& Mobile2& "', PostCode2 =N'"& PostCode2& "', City2 =N'"& City2& "', Address2 =N'"& Address2& "', NorRCode = N'" & NorRCode & "' WHERE (ID = "& ID & ")"
+		mySQL="UPDATE Accounts SET CSR ="& CSR & ", LastEditOn='"& EditDate & "', LastEditBy='"& EditBy& "', Type ="&AccType & ", Status ="&Status & ", AccountTitle =N'"& AccountTitle& "', Postable1 = "& Postable1 & ", Postable2 = "& Postable2 & ", IsADefault = "& IsADefault & ", EconomicalCode =N'"& EconomicalCode& "', CreditLimit="& CreditLimit & ", IsPersonal ="& IsPersonal& ", CompanyName =N'"& CompanyName& "', Dear1 =N'"& Dear1& "', FirstName1 =N'"& FirstName1& "', LastName1 =N'"& LastName1& "', JobTitle1 =N'"& JobTitle1& "', Tel1 =N'"& Tel1& "', Fax1 =N'"& Fax1& "', EMail1 =N'"& EMail1& "', Mobile1 =N'"& Mobile1& "', PostCode1 =N'"& PostCode1& "', City1 =N'"& City1& "', Address1 =N'"& Address1& "', Dear2 =N'"& Dear2& "', FirstName2 =N'"& FirstName2& "', LastName2 =N'"& LastName2& "', JobTitle2 =N'"& JobTitle2 & "', Tel2 =N'"& Tel2& "', Fax2 =N'"& Fax2& "', EMail2 =N'"& EMail2& "', Mobile2 =N'"& Mobile2& "', PostCode2 =N'"& PostCode2& "', City2 =N'"& City2& "', Address2 =N'"& Address2& "', NorRCode = N'" & NorRCode & "',employee=" & employee & ",website=N'" & website & "' WHERE (ID = "& ID & ")"
 	end If
 	'response.write mySQL
 	'response.end
@@ -732,7 +761,9 @@ elseif request("act")="submitcustomer" then
 
 	CreditLimit		= cdbl(text2value(Request.form("CreditLimit")))
 	accountGroup	= cdbl(text2value(request.form("accountGroup")))
-
+	employee		= cint(text2value(request.form("employee")))
+	website			= left(sqlSafe(Request.form("website")) , 100)
+	
 	if not Auth(1 , 4) then ' Doesn't have the permission to set CSR / credit limit
 		CreditLimit = 0
 		CSR			= 0
@@ -775,8 +806,8 @@ elseif request("act")="submitcustomer" then
 	RS1.close
 	Set RS1=Nothing
 
-	mySQL="INSERT INTO Accounts (ID, CreatedDate, CreatedBy, LastEditOn, LastEditBy, CSR, IsADefault, EconomicalCode, Type, AccountTitle, IsPersonal, CompanyName, Postable1, Dear1, FirstName1, LastName1, JobTitle1, Tel1, Fax1, EMail1, Mobile1, PostCode1, City1, Address1, Postable2, Dear2, FirstName2, LastName2, JobTitle2, Tel2, Fax2, EMail2, Mobile2, PostCode2, City2, Address2, NorRCode) VALUES ("&_
-	NewAccID & ", N'"& CreatedDate & "', "& CreatedBy & ", N'"& CreatedDate & "', "& CreatedBy & ", "& CSR & ", "& IsADefault & ", N'"& EconomicalCode & "', "& AccType & ", N'"& AccountTitle & "',"& IsPersonal & ", N'"& CompanyName & "', " & Postable1 & ", N'"& Dear1 & "', N'"& FirstName1 & "', N'"& LastName1 & "', N'"& JobTitle1 & "', N'"& Tel1 & "', N'"& Fax1 & "', N'"& Email1 & "', N'"& Mobile1 & "', N'"& PostCode1 & "', N'"& City1 & "', N'"& Address1 & "', " & Postable2 & ",N'"& Dear2 & "', N'"& FirstName2 & "', N'"& LastName2 & "',  N'"& JobTitle2 & "', N'"& Tel2 & "', N'"& Fax2 & "', N'"& Email2 & "', N'"& Mobile2 & "', N'"& PostCode2 & "', N'"& City2 & "', N'"& Address2 & "', N'" & NorRCode & "')"
+	mySQL="INSERT INTO Accounts (ID, CreatedDate, CreatedBy, LastEditOn, LastEditBy, CSR, IsADefault, EconomicalCode, Type, AccountTitle, IsPersonal, CompanyName, Postable1, Dear1, FirstName1, LastName1, JobTitle1, Tel1, Fax1, EMail1, Mobile1, PostCode1, City1, Address1, Postable2, Dear2, FirstName2, LastName2, JobTitle2, Tel2, Fax2, EMail2, Mobile2, PostCode2, City2, Address2, NorRCode, employee, website) VALUES ("&_
+	NewAccID & ", N'"& CreatedDate & "', "& CreatedBy & ", N'"& CreatedDate & "', "& CreatedBy & ", "& CSR & ", "& IsADefault & ", N'"& EconomicalCode & "', "& AccType & ", N'"& AccountTitle & "',"& IsPersonal & ", N'"& CompanyName & "', " & Postable1 & ", N'"& Dear1 & "', N'"& FirstName1 & "', N'"& LastName1 & "', N'"& JobTitle1 & "', N'"& Tel1 & "', N'"& Fax1 & "', N'"& Email1 & "', N'"& Mobile1 & "', N'"& PostCode1 & "', N'"& City1 & "', N'"& Address1 & "', " & Postable2 & ",N'"& Dear2 & "', N'"& FirstName2 & "', N'"& LastName2 & "',  N'"& JobTitle2 & "', N'"& Tel2 & "', N'"& Fax2 & "', N'"& Email2 & "', N'"& Mobile2 & "', N'"& PostCode2 & "', N'"& City2 & "', N'"& Address2 & "', N'" & NorRCode & "', " & employee & ",N'" & website & "')"
 
 	conn.Execute(mySQL)
 '	Added By kid 820727 
@@ -839,11 +870,13 @@ function showCompanyName(){
 	if (document.all.IsPersonal.checked){
 		document.all.CompanyName.style.visibility="hidden";
 		document.all.lblNorRCode.value="‘„«—Â „·Ì:";
+		document.all.employee.style.visibility="hidden";
 	}
 	else{
 		document.all.CompanyName.style.visibility="visible"
 		document.all.CompanyName.focus();
 		document.all.lblNorRCode.value="‘„«—Â À» :";
+		document.all.employee.style.visibility="visible";
 	}
 }
 //-->
