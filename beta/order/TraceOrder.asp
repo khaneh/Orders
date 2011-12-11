@@ -20,6 +20,9 @@ if not Auth(2 , 3) then NotAllowdToViewThisPage()
 	.CusTD2 {background-color: #DDDDDD; direction: LTR; text-align: right; font-size:9pt;}
 	.CusTD3 {background-color: #DDDDDD; direction: LTR; text-align: center; font-size:9pt;}
 	.CusTD4 {background-color: #CCCC66; direction: LTR; text-align: center; font-size:9pt;}
+	a.aYellow:link {color: yellow;}
+	a.aYellow:visited {color: green;}
+	a.aYellow:hover {color: gray;}
 </STYLE>
 <SCRIPT LANGUAGE='JavaScript'>
 <!--
@@ -209,7 +212,7 @@ elseif request("act")="show" then
 		<INPUT TYPE="button" value=" ç«Å " Class="GenButton" style="border:1 solid blue;" onclick="printThisReport(this,<%=ReportLogRow%>);">
 		<input type="button" value="›«ﬂ Ê—" Class="GenButton" onclick="window.location='../AR/InvoiceInput.asp?act=submitsearch&query=<%=Order%>';">
 		<!-----------------------SAM----------------------------
-		<INPUT type='buttom' value='›«Ì·Â«' class='GenButton' style='border:1 solid blue;' onclick=''-->
+		<INPUT type='button' value='›«Ì·Â«' class='GenButton' style='border:1 solid blue;' onclick=''-->
 	</CENTER>
 	
 	<BR>
@@ -246,7 +249,7 @@ elseif request("act")="show" then
 		<TD align="left"><FONT COLOR="YELLOW">Õ”«»:</FONT></TD>
 		<TD align="right" colspan=5 height="25px">
 			<span id="customer" style="color:yellow;"><%' after any changes in this span "./Customers.asp" must be revised%>
-				<span><%=RS1("AccID") & " - "& RS1("AccountTitle")%></span>.
+				<span title="»—«Ì ‰„«Ì‘ „‘Œ’«  „‘ —Ì ﬂ·Ìﬂ ﬂ‰Ìœ"><a class="aYellow" href='../CRM/AccountInfo.asp?act=show&selectedCustomer=<%=RS1("AccID")%>'><%=RS1("AccID") & " - "& RS1("AccountTitle")%></a></span>.
 			</span>
 		</TD>
 	</TR>
