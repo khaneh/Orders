@@ -55,7 +55,7 @@ function checkValidation(){
 	return true;
 }
 function dial(tel,exten){
-	window.showModalDialog('dial.asp?tel='+tel+'&exten='+exten,'dialogHeight:80px; dialogWidth:140px; dialogTop:; dialogLeft:; edge:None; center:Yes; help:No; resizable:No; status:No;');
+	window.showModalDialog('dial.asp?tel='+tel+'&exten='+exten,'dialogHeight:20px; dialogWidth:50px; dialogTop:; dialogLeft:; edge:None; center:Yes; help:No; resizable:No; status:No;');
 
 }
 //-->

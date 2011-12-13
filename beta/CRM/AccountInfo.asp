@@ -47,7 +47,7 @@ end function
 </STYLE>
 <script language="javascript">
 function dial(tel,exten){
-	window.showModalDialog('../home/dial.asp?tel='+tel+'&exten='+exten,'dialogHeight:80px; dialogWidth:140px; dialogTop:; dialogLeft:; edge:None; center:Yes; help:No; resizable:No; status:No;');
+	window.showModalDialog('../home/dial.asp?tel='+tel+'&exten='+exten,'dialogHeight:20px; dialogWidth:50px; dialogTop:; dialogLeft:; edge:None; center:Yes; help:No; resizable:No; status:No;');
 
 }
 
