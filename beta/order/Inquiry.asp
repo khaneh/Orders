@@ -1176,19 +1176,19 @@ elseif request("act")="submitQuote" then
 	CustomerID=request.form("CustomerID") 
 	if CustomerID="" OR not isNumeric(CustomerID) then
 		conn.close
-		response.redirect "?act=getQuote&selectedCustomer=" & CustomerID & "&errMsg=" & Server.URLEncode("ÎØÇ ÏÑ äÇã ãÔÊÑí<br>ÇØáÇÚÇÊ æÇÑÏ äÔÏ...<BR>")
+		response.redirect "?act=getQuote&selectedCustomer=" & CustomerID & "&errMsg=" & Server.URLEncode("ÎØÇ ÏÑ äÇã ãÔÊÑí<br>ÇØáÇÚÇÊ æÇÑÏ äÔÏ…<BR>")
 	end if
 
 	orderType=request.form("OrderType")
 	if orderType="" OR not isNumeric(OrderType) then
 		conn.close
-		response.redirect "?act=getQuote&selectedCustomer=" & CustomerID & "&errMsg=" & Server.URLEncode("ÎØÇ ÏÑ äæÚ ÇÓÊÚáÇã<br>ÇØáÇÚÇÊ æÇÑÏ äÔÏ...<BR>")
+		response.redirect "?act=getQuote&selectedCustomer=" & CustomerID & "&errMsg=" & Server.URLEncode("ÎØÇ ÏÑ äæÚ ÇÓÊÚáÇã<br>ÇØáÇÚÇÊ æÇÑÏ äÔÏ…<BR>")
 	end if
 
 	set RS1=Conn.Execute ("SELECT Name FROM OrderTraceTypes WHERE (ID='"& orderType & "') AND (IsActive=1)")
 	if RS1.eof then
 		conn.close
-		response.redirect "?act=getQuote&selectedCustomer=" & CustomerID & "&errMsg=" & Server.URLEncode("ÎØÇ ÏÑ äæÚ ÇÓÊÚáÇã<br>ÇØáÇÚÇÊ æÇÑÏ äÔÏ...<BR>")
+		response.redirect "?act=getQuote&selectedCustomer=" & CustomerID & "&errMsg=" & Server.URLEncode("ÎØÇ ÏÑ äæÚ ÇÓÊÚáÇã<br>ÇØáÇÚÇÊ æÇÑÏ äÔÏ…<BR>")
 	else
 		orderTypeName=RS1("Name")
 	end if
@@ -1197,7 +1197,7 @@ elseif request("act")="submitQuote" then
 	defaultVaziat = "ÏÑ ÌÑíÇä" ' 1
 	defaultMarhale = "ËÈÊ ÔÏå" ' 1
 
-	mySQL="INSERT INTO Quotes (CreatedDate, CreatedBy, Customer, Closed, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, marhale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy, Notes) VALUES ('"&_
+	mySQL="INSERT INTO Quotes (CreatedDate, CreatedBy, Customer, Closed, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, mar hale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy, Notes) VALUES ('"&_
 	CreationDate & "', '"& session("ID") & "', '"& CustomerID & "', '0', N'"& sqlSafe(request.form("OrderDate")) & "', N'"& sqlSafe(request.form("OrderTime")) & "', N'"& sqlSafe(request.form("ReturnDate")) & "', N'"& sqlSafe(request.form("ReturnTime")) & "', N'"& sqlSafe(request.form("CompanyName")) & "', N'"& sqlSafe(request.form("CustomerName")) & "', N'"& sqlSafe(request.form("Telephone")) & "', N'"& sqlSafe(request.form("OrderTitle")) & "', N'"& orderTypeName & "', '"& orderType & "', N'" & defaultVaziat & "', N'" & defaultMarhale & "', N'"& sqlSafe(request.form("SalesPerson")) & "', 1, 1, N'"& CreationDate & "',  N'"& currentTime10() & "', '"& session("ID") & "', N'"& sqlSafe(request.form("Notes")) & "'); SELECT @@Identity AS NewQuote"
 
 	set RS1 = Conn.execute(mySQL).NextRecordSet
@@ -1244,7 +1244,7 @@ elseif request("act")="editQuote" then
 
 	if RS2("salesperson")<>session("csrName") then 
 		response.write "<br>"
-		call showAlert("ÇÓÊÚáÇã íÑäÏå Çíä ÇÓÊÚáÇã ÔãÇ äíÓÊíÏ..<BR>ŞÈá ÇÒ æíÑÇíÔ ÈÇ ÇÓÊÚáÇã íÑäÏå åãÇåä ˜äíÏ.", CONST_MSG_ALERT ) 
+		call showAlert("ÇÓÊÚáÇã íÑäÏå Çíä ÇÓÊÚáÇã ÔãÇ äíÓÊíÏ..<BR>ŞÈá ÇÒ æíÑÇíÔ ÈÇ ÇÓÊÚáÇã íÑäÏå åãÇåä ßäíÏ.", CONST_MSG_ALERT ) 
 	end if
 
 	relatedApprovedInvoiceID = 0
@@ -1267,7 +1267,7 @@ elseif request("act")="editQuote" then
 '			tmpDesc=""
 '			tmpColor="#FFFFBB"
 '			response.write "<br>"
-'			call showAlert("ÊæÌå!<br>ÇÓÊÚáÇãí ßå ÔãÇ ÌÓÊÌæ ßÑÏíÏ ŞÈáÇ ÏÑ í˜ İÇßÊæÑ <B>ÊÇííÏ äÔÏå</B> æÌæÏ ÏÇÑÏ<br><A HREF='../AR/AccountReport.asp?act=showInvoice&invoice=" & FoundInvoice & "'>äãÇíÔ İÇßÊæÑ ãÑÈæØå (" & FoundInvoice & ")</A>", CONST_MSG_INFORM ) 
+'			call showAlert("ÊæÌå!<br>ÇÓÊÚáÇãí ßå ÔãÇ ÌÓÊÌæ ßÑÏíÏ ŞÈáÇ ÏÑ íß İÇßÊæÑ <B>ÊÇííÏ äÔÏå</B> æÌæÏ ÏÇÑÏ<br><A HREF='../AR/AccountReport.asp?act=showInvoice&invoice=" & FoundInvoice & "'>äãÇíÔ İÇßÊæÑ ãÑÈæØå (" & FoundInvoice & ")</A>", CONST_MSG_INFORM ) 
 '		end if
 '	end if 
 	%>
@@ -1515,12 +1515,12 @@ elseif request("act")="submitEditQuote" then
 	orderType=request.form("OrderType")
 	if orderType="" OR not isNumeric(OrderType) then
 		conn.close
-		response.redirect "?errMsg=" & Server.URLEncode("ÎØÇ ÏÑ äæÚ ÇÓÊÚáÇã<br>ÇØáÇÚÇÊ æÇÑÏ äÔÏ...<BR>")
+		response.redirect "?errMsg=" & Server.URLEncode("ÎØÇ ÏÑ äæÚ ÇÓÊÚáÇã<br>ÇØáÇÚÇÊ æÇÑÏ äÔÏ…<BR>")
 	else
 		set RS1=Conn.Execute ("SELECT Name FROM OrderTraceTypes WHERE (ID='"& orderType & "') AND (IsActive=1)")
 		if RS1.eof then
 			conn.close
-			response.redirect "?errMsg=" & Server.URLEncode("ÎØÇ ÏÑ äæÚ ÇÓÊÚáÇã<br>ÇØáÇÚÇÊ æÇÑÏ äÔÏ...<BR>")
+			response.redirect "?errMsg=" & Server.URLEncode("ÎØÇ ÏÑ äæÚ ÇÓÊÚáÇã<br>ÇØáÇÚÇÊ æÇÑÏ äÔÏ…<BR>")
 		else
 			orderTypeName=RS1("Name")
 		end if
@@ -1591,7 +1591,7 @@ elseif request("act")="convertToOrder" then
 		RS1.close
 
 		' create orders_trace row and copy info from quote
-		mySQL=	"INSERT INTO orders_trace (radif_sefareshat, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, marhale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy) "&_
+		mySQL=	"INSERT INTO orders_trace (radif_sefareshat, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, mar hale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy) "&_
 				"SELECT '" & OrderID & "', N'"& CreationDate & "', N'"& OrderTime & "', return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, N'ÏÑ ÌÑíÇä', N'ÏÑ Õİ ÔÑæÚ', salesperson, 1, 1, N'"& CreationDate & "',  N'"& currentTime10() & "', '"& session("ID") & "' FROM Quotes WHERE ID='" & quote & "'; "
 		conn.Execute(mySQL)
 
@@ -1604,7 +1604,7 @@ elseif request("act")="convertToOrder" then
 		conn.Execute(mySQL)
 
 		'close the quote
-		mySQL=	"UPDATE Quotes SET Closed = 1, step = 5, marhale = 'ÊÈÏíá Èå ÓİÇÑÔ ÔÏå' WHERE [ID] = '" & quote & "';"
+		mySQL=	"UPDATE Quotes SET Closed = 1, step = 5, mar hale = 'ÊÈÏíá Èå ÓİÇÑÔ ÔÏå' WHERE [ID] = '" & quote & "';"
 		conn.Execute(mySQL)
 
 		' keeping the relation

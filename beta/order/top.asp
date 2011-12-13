@@ -86,16 +86,28 @@ menuItem=2
 			<%if Auth(2 , 3) then %>
 			<%if SubmenuItem="7" then %> 
 				<TD width=10><img src='/images/RTB.gif'></td>
-				<TD align=center background="/images/MTB.gif" class='alak2'><A HREF='orderFolow.asp'>œ‘»Ê—œ ”›«—‘« </A></TD>
+				<TD align=center background="/images/MTB.gif" class='alak2'><A style="font-size:7pt;" HREF='orderFolow.asp'>œ‘»Ê—œ ”›«—‘« </A></TD>
 				<TD width=10><img src='/images/LTB.gif'></td>
 			<%else %>  
 				<TD width=10><img src='/images/RTS.gif'></td>
-				<TD align=center background="/images/MTS.gif" class='alak'><A HREF='orderFolow.asp'>œ‘»Ê—œ ”›«—‘« </A></TD>
+				<TD align=center background="/images/MTS.gif" class='alak'><A style="font-size:7pt;" HREF='orderFolow.asp'>œ‘»Ê—œ ”›«—‘« </A></TD>
+				<TD width=10><img src='/images/LTS.gif'></td>
+			<%end if %>
+			<%end if %>
+			
+			<%if Auth(2 , 3) then %>
+			<%if SubmenuItem="8" then %> 
+				<TD width=10><img src='/images/RTB.gif'></td>
+				<TD align=center background="/images/MTB.gif" class='alak2'><A style="font-size:7pt;" HREF='inquiryFolow.asp'>œ‘»Ê—œ «” ⁄·«„</A></TD>
+				<TD width=10><img src='/images/LTB.gif'></td>
+			<%else %>  
+				<TD width=10><img src='/images/RTS.gif'></td>
+				<TD align=center background="/images/MTS.gif" class='alak'><A style="font-size:7pt;" HREF='inquiryFolow.asp'>œ‘»Ê—œ «” ⁄·«„</A></TD>
 				<TD width=10><img src='/images/LTS.gif'></td>
 			<%end if %>
 			<%end if %>
 
-			<TD width=50 align=left bgcolor=<%=SelectedMenuColor%>></TD>
+			
 			<TD align=left bgcolor=<%=unSelectedSubMenuColor%>><A HREF="../logout.asp">Œ—ÊÃ </A></TD>
 		</TR>
 		</TABLE>
