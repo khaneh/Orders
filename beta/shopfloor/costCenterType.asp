@@ -24,6 +24,7 @@ rowID=request("row")
 	    			$("input#type-" + rowID).change();
 	    			$("input#isDirect-" + rowID).change();
 	    			$("input#isCountiuous-" + rowID).change();
+	    			
 	    		}
 	    	});
 	    });

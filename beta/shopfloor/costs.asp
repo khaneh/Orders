@@ -20,8 +20,8 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 <script type="text/javascript" src="/js/jquery-ui-timepicker-addon.js"></script>
 
 <script type="text/javascript">
-		
-	
+		//alert(new Date(Date.parse("2011/11/26 03:00 ")));
+		//2011/11/26 03:00 
 	$(document).ready(function() {
 		$.ajaxSetup({
 			cache: false
@@ -29,7 +29,7 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 		addFunctions2Row(0);
 		$("button#addRow").click(function () {
 			myRow = $("table#myTable tr:last").html();
-			checkRow();
+			//checkRow();
 			//myID = $("table#myTable tr:last").attr("id");
 			myID = $("table#myTable tr:last").index();
 			//myID = myIDtext.substr(myIDtext.indexOf("-n-"), myIDtext.indexOf("-", myIDtext.indexOf("-n-") + 4));
@@ -72,6 +72,7 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 		    	currentText: "ÍÇáÇ",
 		    	closeText: "ÇäÌÇã",
 		    	stepMinute: 10,
+		    	onOpen: function() {$(this.val(''))},
 		    	onClose: function() {$('input#startDateTime-' + rowID).val($('input#startDateTime-' + rowID).val()+' '+$('input#startTime-' + rowID).val())}
 		    });
 		    $('input#endTime-' + rowID).timepicker({
@@ -88,7 +89,7 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 		    	//$(this).change();
 				$(this).change(function () {
 					console.log('operation change!');
-					checkRow();
+					//checkRow();
 				});
 			});
 		    $('input#startDate-fa-' + rowID).change(function () {
@@ -98,9 +99,11 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 		    	checkRow(rowID);
 		    });
 		    $('input#startTime-' + rowID).change(function () {
+		    	//$('input#startDateTime-' + rowID).val($('input#startDateTime-' + rowID).val()+' '+$('input#startTime-' + rowID).val());
 		    	checkRow(rowID);
 		    });
 		    $('input#endTime-' + rowID).change(function () {
+		    	//$('input#endDateTime-' + rowID).val($('input#endDateTime-' + rowID).val()+' '+$('input#endTime-' + rowID).val());
 		    	checkRow(rowID);
 		    });
 		    $('input#order-' + rowID).change(function () {
@@ -135,9 +138,17 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 		    	if ($("input#isCountiuous-" + rowID).val()=="True") {
 		    		//-------------------------- check type is count --------------------------------
 		    		if ($("input#type-" + rowID).val()=='1') { 
-				    	if (rowID=='0') { 
-				    		// ------------- if first row -------------
-				    		console.log("temporary do nothing!");
+		    			hasAny=false;
+		    			$('input[id*="endCounter-"]').each(function (i){
+				    		if ($("input#driverID-" + rowID).val()==$('input#' + $(this).attr('id').replace('endCounter', 'driverID')).val()) {
+				    			if ($(this).attr('id').replace('endCounter-','') != rowID) hasAny=true;
+				    		}});
+				    	if (!hasAny) { 
+				    		// ------------- if first row of this DRIVER -------------
+				    		console.log("first row of this driver, temporary do nothing!");
+				    		$('input#startDate-fa-'+rowID).val('');
+				    		$('input#startTime-'+rowID).val('');
+				    		$('input#startDateTime-'+rowID).val('');
 				    	} else {
 				    		var lastCounter=0;
 				    		$('input[id*="endCounter-"]').each(function (i){
@@ -150,14 +161,23 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 				    		});
 				    		$('input#startCounter-'+rowID).val(lastCounter);
 				    		$('input#startCounter-'+rowID).prop('disabled', true);
+				    		$('input#startDate-fa-'+rowID).val('');
+				    		$('input#startTime-'+rowID).val('');
+				    		$('input#startDateTime-'+rowID).val('');
 				    	}
 				    }
 				    //------------------------- check type is time --------------------------------------
 				    if ($("input#type-" + rowID).val()=='2') { 
 				    	console.log('this is time :)');
-				    	if (rowID=='0') { 
-				    		// ------------- if first row -------------
-				    		console.log("temporary do nothing!");
+				    	hasAny=false;
+		    			$('input[id*="endCounter-"]').each(function (i){
+				    		if ($("input#driverID-" + rowID).val()==$('input#' + $(this).attr('id').replace('endCounter', 'driverID')).val()) {
+				    			if ($(this).attr('id').replace('endCounter-','') != rowID) hasAny=true;
+				    		}});
+				    	if (!hasAny) { 
+				    		// ------------- if first row of this DRIVER -------------
+				    		console.log("first row of this driver, temporary do nothing!");
+				    		$('input#startCounter-'+rowID).val('');
 				    	} else {
 				    		var lastDate = '';
 				    		var lastTime = '';
@@ -177,9 +197,11 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 				    		$('input#startDate-fa-'+rowID).val(lastDate);
 				    		$('input#startTime-'+rowID).val(lastTime);
 				    		$('input#startDateTime-'+rowID).val(lastDateTime);
+				    		$('input#startCounter-'+rowID).val('');
 				    		$('input#startDate-fa-'+rowID).prop('disabled', true);
 				    		$('input#startTime-'+rowID).prop('disabled', true);
 				    		$('input#startDateTime-'+rowID).prop('disabled', true);
+				    		$('input#startCounter-'+rowID).val('');
 				    	}
 				    }
 				};
@@ -188,25 +210,31 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 		
 		function checkRow(rowID){
 			var result = true;
+			if ($('input[id$="-' + rowID + '"]').length=0) {
+				result = false;
+			}
 			$('input[id$="-' + rowID + '"]').each(function (i) {
 				if ($(this).attr('disabled')!='disabled') {
-					if ($(this).val()!='') {
+					if ($(this).val().length > 0) {
 						result = result && true;
-						console.log($(this).attr('id') + ' is set true');
 					} else {
 						result = false;
-						console.log($(this).attr('id') + ' is set false');
 					}
 				} else {
 					$(this).val('');
-					console.log($(this).attr('id') + ' is clear');
 				}
 			});
-			console.log('check is: ' + result);
+			if ($("input#type-" + rowID).val()=='2')
+				if (result) {
+					var startDate = new Date(Date.parse($('input#startDateTime-' + rowID).val()));
+					var endDate = new Date(Date.parse($('input#endDateTime-' + rowID).val()));
+					console.log("start: " + startDate);
+					console.log("endDate" + endDate);
+					$('span#msg').html("test! " + ((endDate - startDate)/3600000));
+				}
 			$("button#addRow").prop('disabled', !result);
 			console.log('---------------------------------------');
 		};
-		
 	});
 </script>
 <style>
@@ -276,7 +304,7 @@ rs.close
 </form>
 
 <button id='addRow' disabled="disabled">ÇÖÇÝå</button>
-<div id='msg'></div>
+<span id='msg'></span>
 <%	
 elseif request("act")="setDriver" then 
 	
