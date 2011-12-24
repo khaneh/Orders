@@ -7,7 +7,7 @@ if isNumeric(InvItemID) then
 else
 	InvItemID=0
 end if
-sql="SELECT * FROM InvoiceItems WHERE (ID='" & InvItemID &"') AND (Enabled=1)"
+sql="SELECT replace(Name,'&#1740;',N'Ì') as name,type,isnull(fee,0) as fee,hasVat FROM InvoiceItems WHERE (ID='" & InvItemID &"') AND (Enabled=1)"
 set rs=Conn.Execute(sql)
 if (request("id")="") then
 	response.write escape ("”ÿ— Œ«·Ì" )
