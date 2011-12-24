@@ -241,7 +241,9 @@ elseif request("act")="show" then
 	RS_STEP.close
 	'set RS_STEP = nothing
 %>
-	
+	<tr>
+		<td colspan="5" align="center"><A HREF="../shopfloor/default.asp?orderNum=<%=order%>"> џнн— г—Ќбе</A></td>
+	</tr>
 	</TABLE><BR>
 	<BR>
 	<TABLE class="" border="0" cellspacing="0" cellpadding="2" align="center" style="background-color:#CCCCCC; color:black; direction:RTL; width:700; border: 2 solid black;">

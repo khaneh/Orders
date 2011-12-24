@@ -263,7 +263,11 @@ elseif request("act")="show" then
 			<TD><%=RS1("order_kind")%></TD>
 			<TD style="<%=tmpStyle%>"><%=RS1("marhale")%></TD>
 			<TD><%=RS1("salesperson")%>&nbsp;</TD>
-			<TD><IMG SRC="<%=RS1("Icon")%>" WIDTH="20" HEIGHT="20" BORDER="0"></TD>
+			<TD title="ÈÑÇí ÊÛííÑ ãÑÍáå ßáíß ßäíÏ">
+				<A HREF="../shopfloor/default.asp?orderNum=<%=rs1("radif_sefareshat")%>&marhale_box=<%=RS1("step")%>">
+					<IMG SRC="<%=RS1("Icon")%>" WIDTH="20" HEIGHT="20" BORDER="0">
+				</a>
+			</TD>
 			<td><%if isnull(RS1("price")) then response.write "----" else response.write Separate(RS1("price")) end if %></td>
 		</TR>
 		<TR bgcolor="#FFFFFF">
