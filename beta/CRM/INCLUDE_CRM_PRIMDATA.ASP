@@ -117,7 +117,22 @@
 						<TD style="border-right:1 solid black;">›«ﬂ” : <%=echoTels(RS1("Fax1"))%></TD>
 					</TR>
 					<TR>
-						<TD style="border-right:1 solid black;">«Ì„Ì· : <%=RS1("Email1")%></TD>
+						<TD style="border-right:1 solid black;">«Ì„Ì· : 
+							<span><%=RS1("Email1")%></span>
+							<%if RS1("email1")<>"" then %>
+							<span title="»« ﬂ·Ìﬂ —ÊÌ «Ì‰ œﬂ„Â »Â ’Ê—  ŒÊœﬂ«— Ìﬂ «Ì„Ì· »Â „‘ —Ì «—”«· ŒÊ«Âœ ‘œ ﬂÂ Õ«ÊÌ ‘„«—Â „‘ —Ì ÊÌ ŒÊ«Âœ »Êœ">
+								<form method="post" action="http://my.pdhco.com/sendMail.php">
+									<input type="hidden" name="id" value="<%=RS1("ID")%>">
+									<input type="hidden" name="Email" value="<%=RS1("Email1")%>">
+									<input type="hidden" name="AccountTitle" value="<%=RS1("AccountTitle")%>">
+									<input type="hidden" name="Dear" value="<%=RS1("Dear1")%>">
+									<input type="hidden" name="FirstName" value="<%=RS1("FirstName1")%>">
+									<input type="hidden" name="LastName" value="<%=RS1("LastName1")%>">
+									<input type="submit" name="jameSend" value="‘„«—Â „‘ —Ì «Ì„Ì· ‘Êœ">
+								</form>
+							</span>
+							<%end if%>
+						</TD>
 					</TR>
 					<TR>
 						<TD>ﬂœÅ” Ì: <%=RS1("PostCode1")%></TD>
@@ -144,7 +159,22 @@
 						<TD>›«ﬂ” : <%=echoTels(RS1("Fax2"))%></TD>
 					</TR>
 					<TR>
-						<TD>«Ì„Ì· : <%=RS1("Email2")%></TD>
+						<TD>«Ì„Ì· : 
+							<span><%=RS1("Email2")%></span>
+							<%if RS1("email2")<>"" then %>
+							<span title="»« ﬂ·Ìﬂ —ÊÌ «Ì‰ œﬂ„Â »Â ’Ê—  ŒÊœﬂ«— Ìﬂ «Ì„Ì· »Â „‘ —Ì «—”«· ŒÊ«Âœ ‘œ ﬂÂ Õ«ÊÌ ‘„«—Â „‘ —Ì ÊÌ ŒÊ«Âœ »Êœ">
+								<form method="post" action="http://my.pdhco.com/sendMail.php">
+									<input type="hidden" name="id" value="<%=RS1("ID")%>">
+									<input type="hidden" name="Email" value="<%=RS1("Email2")%>">
+									<input type="hidden" name="AccountTitle" value="<%=RS1("AccountTitle")%>">
+									<input type="hidden" name="Dear" value="<%=RS1("Dear2")%>">
+									<input type="hidden" name="FirstName" value="<%=RS1("FirstName2")%>">
+									<input type="hidden" name="LastName" value="<%=RS1("LastName2")%>">
+									<input type="submit" name="jameSend" value="‘„«—Â „‘ —Ì «Ì„Ì· ‘Êœ">
+								</form>
+							</span>
+							<%end if%>
+						</TD>
 					</TR>
 					<TR>
 						<TD>ﬂœÅ” Ì: <%=RS1("PostCode2")%></TD>

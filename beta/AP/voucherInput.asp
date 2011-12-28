@@ -222,7 +222,7 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 		</TD>
 	</TR>
 	<TR>
-		<TD align='left'>‘„«—Â ›«ò Ê— «’·Ì </TD>
+		<TD align='left'>‘„«—Â ›«ﬂ Ê— «’·Ì </TD>
 		<TD>
 			<input type='text' size='14' name='Number'>
 		</TD>

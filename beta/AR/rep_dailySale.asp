@@ -175,7 +175,13 @@ if rs.eof then
 				tmpColor2="#EEEEBB"
 			End if 
 	%>
-			<TR bgcolor="<%=tmpColor%>" >
+			<TR <%
+			if rs("voided")="False" then 
+				response.write "bgcolor='" & tmpColor & "'" 
+			else 
+				response.write "bgcolor='#FFEEEE' title='ÈÇØá ÔÏå'"
+			end if
+			%>" >
 				<TD><%=Separate(rs("EffectiveDate"))%></TD>
 				<TD title="ãÔÇåÏå ÍÓÇÈ"><A href='../CRM/AccountInfo.asp?act=show&selectedCustomer=<%=rs("Account")%>'><%=rs("AccountTitle")%></A></TD>
 				<TD dir=ltr align=right title="ãÔÇåÏå ÝÇßÊæÑ ãÑÈæØå"><a href='AccountReport.asp?act=showInvoice&invoice=<%=rs("Link")%>'><%=Separate(rs("AmountOriginal"))%></a></TD>
