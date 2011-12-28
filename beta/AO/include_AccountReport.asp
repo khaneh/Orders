@@ -1169,7 +1169,7 @@ elseif request("act")="showVoucher" then
 	</TR>
 	<TR>
 		<TD align=left VALIGN=TOP>›—Ê‘‰œÂ: </td>
-		<TD align=right VALIGN=TOP><B><%=RSF("AccountTitle")%> </B>
+		<TD align=right VALIGN=TOP><B><a href="../CRM/AccountInfo.asp?tab=3&act=show&selectedCustomer=<%=vendorID%>"><%=RSF("AccountTitle")%> </a></B>
 		</TD>
 	</TR>
 	<TR>
