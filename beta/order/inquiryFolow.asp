@@ -172,7 +172,7 @@ while not rs.eof
 		end if
 	end if
 	if fromDate="" then fromDate="1389/01/01"
-	mySQL = "select isnull(count(id),0) as quotesCount from Quotes where closed=0 and step=" & rs("id") & condition
+	mySQL = "select isnull(count(id),0) as quotesCount from Quotes where step=" & rs("id") & condition
 	set rs1=Conn.Execute(mySQL)
 	%>
 			<td title="»—«Ì „‘«ÂœÂ Ã“∆Ì«  ﬂ·Ìﬂ ﬂ‰Ìœ">
@@ -199,7 +199,7 @@ elseif request("act")="show" then
 	if request("orderTypes")<>"" then myCriteria = myCriteria & " and Quotes.type in (" & request("orderTypes") & ")"
 	myCriteria = myCriteria & " and Quotes.step=" & request("step")
 	
-	mySQL="SELECT Quotes.*, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon,DRV_Invoice.price,Quotes.customer FROM Quotes INNER JOIN  OrderTraceStatus ON Quotes.status = OrderTraceStatus.ID left outer join (select InvoiceQuoteRelations.quote,SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceQuoteRelations inner join Invoices on InvoiceQuoteRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceQuoteRelations.quote) DRV_Invoice on Quotes.ID=DRV_Invoice.quote WHERE (Quotes.Closed=0 "& myCriteria & ") ORDER BY order_date DESC, Quotes.id DESC"	
+	mySQL="SELECT Quotes.*, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon,DRV_Invoice.price,Quotes.customer FROM Quotes INNER JOIN  OrderTraceStatus ON Quotes.status = OrderTraceStatus.ID left outer join (select InvoiceQuoteRelations.quote,SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceQuoteRelations inner join Invoices on InvoiceQuoteRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceQuoteRelations.quote) DRV_Invoice on Quotes.ID=DRV_Invoice.quote WHERE (1=1 "& myCriteria & ") ORDER BY order_date DESC, Quotes.id DESC"	
 	'response.write mysql
 	set RS1=Conn.Execute (mySQL)
 	if not RS1.eof then
@@ -216,7 +216,6 @@ elseif request("act")="show" then
 			<TD width="122">‰«„ „‘ —Ì</TD>
 			<TD width="84">⁄‰Ê«‰ ﬂ«—</TD>
 			<TD width="40">‰Ê⁄</TD>
-			<TD width="53">„—Õ·Â</TD>
 			<TD width="36">«” ⁄·«„ êÌ—‰œÂ</TD>
 			<TD width="18">Ê÷⁄</TD>
 			<td width="50">„»·€ ﬂ·</td>
@@ -246,7 +245,6 @@ elseif request("act")="show" then
 			<TD><%=RS1("order_kind")%></TD>
 			<TD style="<%=tmpStyle%>"><%=RS1("marhale")%></TD>
 			<TD><%=RS1("salesperson")%>&nbsp;</TD>
-			<TD><IMG SRC="<%=RS1("Icon")%>" WIDTH="20" HEIGHT="20" BORDER="0"></TD>
 			<td><%if isnull(RS1("price")) then response.write "----" else response.write Separate(RS1("price")) end if %></td>
 		</TR>
 		<TR bgcolor="#FFFFFF">

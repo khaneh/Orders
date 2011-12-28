@@ -149,7 +149,6 @@ elseif request("act")="search" then
 			<TD width="36">‰Ê⁄</TD>
 			<TD width="76">„—Õ·Â</TD>
 			<TD width="56">«” ⁄·«„ êÌ—‰œÂ</TD>
-			<TD width="20">Ê÷⁄</TD>
 			<TD width="40">›«ﬂ Ê—</TD>
 		</TR>
 <%		Do while not RS1.eof
@@ -184,7 +183,6 @@ elseif request("act")="search" then
 			<TD width="40"><%=RS1("order_kind")%></TD>
 			<TD width="85"><%=RS1("marhale")%></TD>
 			<TD width="50"><%=RS1("salesperson")%>&nbsp;</TD>
-			<TD width="20"><IMG SRC="<%=RS1("Icon")%>" WIDTH="20" HEIGHT="20" BORDER=0 ALT="<%=RS1("StatusName")%>"></TD>
 			<TD width="30"><%=InvoiceStatus%>&nbsp;</TD>
 		</TR>
 		<TR bgcolor="#FFFFFF">
@@ -230,8 +228,8 @@ elseif request("act")="show" then
 		response.end
 	End If
 
-	If RS1("Status")=2 then
-		stamp="<div style='border:2 dashed red;width:150px; text-align:center; padding: 10px;color:red;font-size:15pt;font-weight:bold;'>ﬂ‰”· ‘œÂ</div>"
+	If RS1("Step")=4 then
+		stamp="<div style='border:2 dashed red;width:150px; text-align:center; padding: 10px;color:red;font-size:15pt;font-weight:bold;'>—œ ‘œÂ</div>"
 	End If
 
 %>
@@ -323,9 +321,7 @@ elseif request("act")="show" then
 	-->
 	<TR height=30>
 		<TD align="left">„—Õ·Â:</TD>
-		<TD><%=RS1("marhale")%></TD>
-		<TD align="left">Ê÷⁄Ì :</TD>
-		<TD colspan="3"><%=RS1("vazyat")%></TD>
+		<TD colspan="5"><%=RS1("marhale")%></TD>
 	</TR>
 	<TR height=30>
 		<TD align="left" valign="top" colspan="3"> Ê÷ÌÕ«  »Ì‘ —:</TD>
@@ -447,21 +443,8 @@ elseif request("act")="advancedSearch" then
 			<TD><INPUT TYPE="text" NAME="az_tarikh_tahvil" dir="LTR" value="<%=request.form("az_tarikh_tahvil")%>" size="10" onblur="acceptDate(this)" maxlength="10" onKeyPress="return maskDate(this);"></TD>
 			<TD> «</TD>
 			<TD><INPUT TYPE="text" NAME="ta_tarikh_tahvil" dir="LTR" value="<%=request.form("ta_tarikh_tahvil")%>" onblur="acceptDate(this)" maxlength="10" size="10" onKeyPress="return maskDate(this);"></TD>
-			<TD><INPUT TYPE="checkbox" NAME="check_vazyat" onclick="check_vazyat_Click()" checked></TD>
-			<TD>Ê÷⁄Ì </TD>
-			<TD><SELECT NAME="vazyat_box" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px'>
-				<%
-				set RS_STATUS=Conn.Execute ("SELECT * FROM OrderTraceStatus WHERE (IsActive=1)")
-				Do while not RS_STATUS.eof	
-				%>
-					<OPTION value="<%=RS_STATUS("ID")%>" <%if cint(request.form("vazyat_box"))=cint(RS_STATUS("ID")) then response.write "selected" %> ><%=RS_STATUS("Name")%></option>
-					<%
-					RS_STATUS.moveNext
-				loop
-				%>
-			</SELECT></TD>
-			<TD><span id="vazyat_not_check_label" style='font-weight:bold;color:red'>‰»«‘œ</span></TD>
-			<TD><INPUT TYPE="checkbox" NAME="vazyat_not_check" onclick="vazyat_not_check_Click();" checked></TD>
+			<td colspan="5"></td>
+			
 		</TR>
 		<TR bgcolor="#EEEEEE">
 			<TD colspan="5">&nbsp;</TD>
@@ -888,7 +871,6 @@ elseif request("act")="advancedSearch" then
 					<TD width="36">‰Ê⁄</TD>
 					<TD width="46">„—Õ·Â</TD>
 					<TD width="36">«” ⁄·«„ êÌ—‰œÂ</TD>
-					<TD width="18">Ê÷⁄</TD>
 					<TD width="40">›«ﬂ Ê—</TD>
 					<td width="50">ﬁÌ„ </td>
 				</TR>
@@ -932,7 +914,6 @@ elseif request("act")="advancedSearch" then
 					<TD ><%=RS1("order_kind")%></TD>
 					<TD style="<%=tmpStyle%>"><%=RS1("marhale")%></TD>
 					<TD ><%=RS1("salesperson")%>&nbsp;</TD>
-					<TD ><IMG SRC="<%=RS1("Icon")%>" WIDTH="20" HEIGHT="20" BORDER="0"></TD>
 					<TD ><%=InvoiceStatus%>&nbsp;</TD>
 					<td><%if isnull(RS1("price")) then response.write "----" else response.write Separate(RS1("price")) end if %></td>
 				</TR>
@@ -1197,7 +1178,7 @@ elseif request("act")="submitQuote" then
 	defaultVaziat = "œ— Ã—Ì«‰" ' 1
 	defaultMarhale = "À»  ‘œÂ" ' 1
 
-	mySQL="INSERT INTO Quotes (CreatedDate, CreatedBy, Customer, Closed, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, mar hale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy, Notes) VALUES ('"&_
+	mySQL="INSERT INTO Quotes (CreatedDate, CreatedBy, Customer, Closed, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, marhale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy, Notes) VALUES ('"&_
 	CreationDate & "', '"& session("ID") & "', '"& CustomerID & "', '0', N'"& sqlSafe(request.form("OrderDate")) & "', N'"& sqlSafe(request.form("OrderTime")) & "', N'"& sqlSafe(request.form("ReturnDate")) & "', N'"& sqlSafe(request.form("ReturnTime")) & "', N'"& sqlSafe(request.form("CompanyName")) & "', N'"& sqlSafe(request.form("CustomerName")) & "', N'"& sqlSafe(request.form("Telephone")) & "', N'"& sqlSafe(request.form("OrderTitle")) & "', N'"& orderTypeName & "', '"& orderType & "', N'" & defaultVaziat & "', N'" & defaultMarhale & "', N'"& sqlSafe(request.form("SalesPerson")) & "', 1, 1, N'"& CreationDate & "',  N'"& currentTime10() & "', '"& session("ID") & "', N'"& sqlSafe(request.form("Notes")) & "'); SELECT @@Identity AS NewQuote"
 
 	set RS1 = Conn.execute(mySQL).NextRecordSet
@@ -1373,7 +1354,7 @@ elseif request("act")="editQuote" then
 	</TR>
 	<TR bgcolor="#CCCCCC">
 		<TD align="left">„—Õ·Â:</TD>
-		<TD colspan="2"><SELECT NAME="Marhale" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px' tabIndex="13" >
+		<TD colspan="5"><SELECT NAME="Marhale" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px' tabIndex="13" >
 		<%
 		set RS_STEP=Conn.Execute ("SELECT * FROM QuoteSteps WHERE (IsActive=1)")
 		Do while not RS_STEP.eof	
@@ -1386,20 +1367,7 @@ elseif request("act")="editQuote" then
 		set RS_STEP = nothing
 		%>
 		</SELECT></TD>
-		<TD align="left">Ê÷⁄Ì :</TD>
-		<TD colspan="2"><SELECT NAME="Vazyat" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 100px' tabIndex="14" >
-		<%
-		set RS_STATUS=Conn.Execute ("SELECT * FROM OrderTraceStatus WHERE (IsActive=1)")
-		Do while not RS_STATUS.eof	
-		%>
-			<OPTION value="<%=RS_STATUS("ID")%>" <%if RS2("status")=RS_STATUS("ID") then response.write "selected" %> ><%=RS_STATUS("Name")%></option>
-			<%
-			RS_STATUS.moveNext
-		loop
-		RS_STATUS.close
-		set RS_STATUS = nothing
-		%>
-		</SELECT></TD>
+		
 	</TR>
 	<TR bgcolor="#CCCCCC">
 		<TD colspan="6">
@@ -1527,8 +1495,8 @@ elseif request("act")="submitEditQuote" then
 		RS1.close
 	end if
 
-	set RS1=Conn.Execute ("SELECT Name FROM OrderTraceStatus WHERE (IsActive=1) and ID = " & request.form("Vazyat"))
-	statusName = RS1("name")
+	'set RS1=Conn.Execute ("SELECT Name FROM OrderTraceStatus WHERE (IsActive=1) and ID = " & request.form("Vazyat"))
+	'statusName = RS1("name")
 
 	set RS1=Conn.Execute ("SELECT Name FROM QuoteSteps WHERE (IsActive=1) and ID = " & request.form("Marhale"))
 	stepName = RS1("name")
@@ -1543,7 +1511,7 @@ elseif request("act")="submitEditQuote" then
 	CustomerName =	sqlSafe(request.form("CustomerName"))
 	Telephone =		sqlSafe(request.form("Telephone"))
 	OrderTitle =	sqlSafe(request.form("OrderTitle"))
-	Vazyat =		sqlSafe(request.form("Vazyat"))
+	'Vazyat =		sqlSafe(request.form("Vazyat"))
 	Marhale =		sqlSafe(request.form("Marhale"))
 	SalesPerson =	sqlSafe(request.form("SalesPerson"))
 '	Qtty =			sqlSafe(request.form("Qtty"))
@@ -1552,7 +1520,7 @@ elseif request("act")="submitEditQuote" then
 '	Price =			sqlSafe(request.form("Price"))
 	Notes =			sqlSafe(request.form("Notes"))
 
-	mySql="UPDATE Quotes SET Customer='"& request.form("CustomerID") & "', order_date= N'"& OrderDate & "', order_time= N'"& OrderTime & "', return_date= N'"& ReturnDate & "', return_time= N'"& ReturnTime & "', company_name= N'"& CompanyName & "', customer_name= N'"& CustomerName & "', telephone= N'"& Telephone & "', order_title= N'"& OrderTitle & "', order_kind= N'"& orderTypeName & "', Type= '"& orderType & "', vazyat= N'"& statusName & "', status= "& Vazyat & ", step= "& Marhale & ",  marhale= N'"& stepName & "', salesperson= N'"& SalesPerson & "' , LastUpdatedDate=N'"& shamsitoday() & "' , LastUpdatedTime=N'"& currentTime10() & "', LastUpdatedBy=N'"& session("ID")& "', Notes= N'"& Notes & "'  WHERE (ID = N'"& quote & "')"	
+	mySql="UPDATE Quotes SET Customer='"& request.form("CustomerID") & "', order_date= N'"& OrderDate & "', order_time= N'"& OrderTime & "', return_date= N'"& ReturnDate & "', return_time= N'"& ReturnTime & "', company_name= N'"& CompanyName & "', customer_name= N'"& CustomerName & "', telephone= N'"& Telephone & "', order_title= N'"& OrderTitle & "', order_kind= N'"& orderTypeName & "', Type= '"& orderType & "', step= "& Marhale & ",  marhale= N'"& stepName & "', salesperson= N'"& SalesPerson & "' , LastUpdatedDate=N'"& shamsitoday() & "' , LastUpdatedTime=N'"& currentTime10() & "', LastUpdatedBy=N'"& session("ID")& "', Notes= N'"& Notes & "'  WHERE (ID = N'"& quote & "')"	
 	', qtty= N'"& Qtty & "', paperSize= N'"& Size & "', SimplexDuplex= N'"& SimplexDuplex & "', Price= N'"& Price & "'
 	conn.Execute mySql
 	response.write quote &" UPDATED<br>"
@@ -1591,7 +1559,7 @@ elseif request("act")="convertToOrder" then
 		RS1.close
 
 		' create orders_trace row and copy info from quote
-		mySQL=	"INSERT INTO orders_trace (radif_sefareshat, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, mar hale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy) "&_
+		mySQL=	"INSERT INTO orders_trace (radif_sefareshat, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, marhale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy) "&_
 				"SELECT '" & OrderID & "', N'"& CreationDate & "', N'"& OrderTime & "', return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, N'œ— Ã—Ì«‰', N'œ— ’› ‘—Ê⁄', salesperson, 1, 1, N'"& CreationDate & "',  N'"& currentTime10() & "', '"& session("ID") & "' FROM Quotes WHERE ID='" & quote & "'; "
 		conn.Execute(mySQL)
 
@@ -1604,7 +1572,7 @@ elseif request("act")="convertToOrder" then
 		conn.Execute(mySQL)
 
 		'close the quote
-		mySQL=	"UPDATE Quotes SET Closed = 1, step = 5, mar hale = ' »œÌ· »Â ”›«—‘ ‘œÂ' WHERE [ID] = '" & quote & "';"
+		mySQL=	"UPDATE Quotes SET Closed = 1, step = 5, marhale = ' »œÌ· »Â ”›«—‘ ‘œÂ' WHERE [ID] = '" & quote & "';"
 		conn.Execute(mySQL)
 
 		' keeping the relation
