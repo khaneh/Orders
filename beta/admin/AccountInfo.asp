@@ -181,11 +181,11 @@ GroupID = request("GroupID")
 
 set RSS=Conn.Execute ("SELECT GLs.Name AS GLName, GLs.ID AS GLID, GLAccountSuperGroups.ID AS SuperGroupID, GLAccountSuperGroups.Name AS SuperGroupName, GLAccountGroups.ID AS GroupID, GLAccountGroups.Name AS GroupName FROM GLAccountGroups INNER JOIN GLAccountSuperGroups ON GLAccountGroups.GLSuperGroup = GLAccountSuperGroups.ID INNER JOIN GLs ON GLAccountSuperGroups.GL = GLs.ID WHERE (GLAccountSuperGroups.GL = "& OpenGL & ") AND (GLAccountGroups.GL = "& OpenGL & ") AND (GLAccountGroups.ID = "& GroupID & ")")
 %><BR><BR>
-<TABLE dir=rtl align=center width=600>
+<TABLE dir=rtl align=center width=800>
 <TR >
 	<TD colspan=5>
 		<%
-		set RSS2=Conn.Execute ("SELECT GLAccounts.Name, DERIVEDTBL.totalDebit AS totalDebit, DERIVEDTBL.totalCredit AS totalCredit, GLAccounts.ID, GLAccounts.HasAppendix FROM (SELECT SUM(CONVERT(tinyint, IsCredit) * Amount) AS totalCredit, SUM((CONVERT(tinyint, IsCredit) - 1) * (- 1) * Amount) AS totalDebit, GLAccount FROM EffectiveGLRows where (GL = "& OpenGL & ")   GROUP BY GLAccount) DERIVEDTBL RIGHT OUTER JOIN GLAccounts ON DERIVEDTBL.GLAccount = GLAccounts.ID WHERE (GLAccounts.GL = "& OpenGL & ") AND (GLAccounts.GLGroup = "& GroupID & ") order by GLAccounts.ID")
+		set RSS2=Conn.Execute ("SELECT GLAccounts.Name, glAccountTypes.name as accountTypeName, DERIVEDTBL.totalDebit AS totalDebit, DERIVEDTBL.totalCredit AS totalCredit, GLAccounts.ID, GLAccounts.HasAppendix FROM (SELECT SUM(CONVERT(tinyint, IsCredit) * Amount) AS totalCredit, SUM((CONVERT(tinyint, IsCredit) - 1) * (- 1) * Amount) AS totalDebit, GLAccount FROM EffectiveGLRows where (GL = "& OpenGL & ")   GROUP BY GLAccount) DERIVEDTBL RIGHT OUTER JOIN GLAccounts ON DERIVEDTBL.GLAccount = GLAccounts.ID left outer join glAccountTypes on glAccounts.accountType = glAccountTypes.id WHERE (GLAccounts.GL = "& OpenGL & ") AND (GLAccounts.GLGroup = "& GroupID & ") order by GLAccounts.ID")
 		
 		%><A HREF="AccountInfo.asp?OpenGL=<%=RSS("GLID")%>"><%=RSS("GLname")%></A> > <A HREF="AccountInfo.asp?act=groups&SuperGroupID=<%=RSS("SuperGroupID")%>"><%=RSS("SuperGroupName")%></a>  > <%=RSS("GroupName")%>
 		<BR><hR>
@@ -194,6 +194,7 @@ set RSS=Conn.Execute ("SELECT GLs.Name AS GLName, GLs.ID AS GLID, GLAccountSuper
 <TR bgcolor="eeeeee" >
 	<TD><!A HREF="default.asp?s=1"><SMALL>‗Ï</SMALL></A></TD>
 	<TD><!A HREF="default.asp?s=2"><SMALL>ÚהזÇה ÍÓÇÈ</SMALL></A></TD>
+	<TD><!A HREF="default.asp?s=2"><SMALL>הזÚ ÍÓÇÈ</SMALL></A></TD>
 	<TD><!A HREF="default.asp?s=2"><SMALL>ÌדÚ ÈÓÊÇה‗ÇÑ</SMALL></A></TD>
 	<TD><!A HREF="default.asp?s=2"><SMALL>ÌדÚ ÈÏו‗ÇÑ</SMALL></A></TD>
 	<td><small>ÊÝÕםב</small></td>
@@ -216,6 +217,7 @@ Do while not RSS2.eof
 	<FORM METHOD=POST ACTION="editGL.asp?act=editAccountForms&GroupID=<%=GroupID%>&ACCID=<%=RSS2("id")%>">
 	<TD><A HREF="AccountInfo.asp?act=accountRows&accountID=<%=RSS2("id")%>"><%=RSS2("id")%></A></TD>
 	<TD><A HREF="AccountInfo.asp?act=accountRows&accountID=<%=RSS2("id")%>"><%=RSS2("Name")%></A></TD>
+	<td><small><%=rss2("accountTypeName")%></small></td>
 	<TD><span dir=ltr><%=RSS2("totalCredit")%></span></TD>
 	<TD><span dir=ltr><%=RSS2("totalDebit")%></span></TD>
 	<td><span dir=rtl><% If Cbool(RSS2("HasAppendix")) then response.write "ÏÇÑÏ" Else response.write "הÏÇÑÏ" End If %></span></td>

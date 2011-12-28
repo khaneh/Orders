@@ -33,13 +33,14 @@ if request("act")="EditAccountSubmit" then
 	ACCID = request("ACCID")
 	name = request("name")
 	GroupID = request("GroupID")
+	accountType = request("accountType")
 	If request("tafsil")="on" Then 
 		tafsil = 1
 	Else 
 		tafsil = 0
 	End If 
 
-	conn.Execute("UPDATE GLAccounts SET Name = N'"& name & "', HasAppendix = "&tafsil&" WHERE (ID = "& ACCID & ") AND (GL = "& OpenGL & ")")
+	conn.Execute("UPDATE GLAccounts SET Name = N'"& name & "', HasAppendix = "&tafsil&", accountType=" & accountType & " WHERE (ID = "& ACCID & ") AND (GL = "& OpenGL & ")")
 	response.redirect "AccountInfo.asp?act=account&GroupID=" & GroupID
 
 '-----------------------------------------------------------------------------------------------------
@@ -142,6 +143,24 @@ elseif request("act")="editAccountForms" then
 			<td> ›’Ì·</td>
 			<td><input type='checkbox' name='tafsil' <% If CBool(rs2("HasAppendix")) Then response.write " checked='checked' " %>></td>
 		</tr>
+		<tr>
+			<td>‰Ê⁄ Õ”«»</td>
+			<td>
+				<select name="accountType">
+<%
+set rs=Conn.Execute("select * from glAccountTypes")
+while not rs.eof
+%>
+					<option <%if rs2("accountType")=rs("id") then response.write " selected='selected' "%> value="<%=rs("id")%>">
+						<%=rs("name")& " (" &rs("name_en")& ")"%>
+					</option>
+<%
+	rs.moveNext
+wend
+%>
+				</select>
+			</td>
+		</tr>
 		<TR>
 			<TD colspan=2 align=center>
 				<BR><BR>
@@ -196,8 +215,12 @@ elseif request("act")="EditAccountGroupSubmit" then
 	SuperGroupID = request("SuperGroupID")
 
 	conn.Execute("UPDATE GLAccountGroups SET Name = N'"& name & "' WHERE (ID = "& GroupID & ") AND (GL = "& OpenGL & ")")
+	
+	if cint(request("accountType"))<>-1 then 
+		conn.Execute("update glAccounts set accountType=" & request("accountType") &" where glGroup=" & groupID & " and gl=" & openGL)
+	end if
 	response.redirect "AccountInfo.asp?act=groups&SuperGroupID=" & SuperGroupID
-
+'response.end
 '-----------------------------------------------------------------------------------------------------
 '------------------------------------------------------------------------ Add GL Account Groups submit
 '-----------------------------------------------------------------------------------------------------
@@ -289,6 +312,28 @@ elseif request("act")="editAccountGroupForms" then
 			<TD>‰«„ ê—ÊÂ</TD>
 			<TD><INPUT TYPE="text" NAME="name" value="<%=GroupName%>" ></TD>
 		</TR>
+		<tr>
+			<td>ù‰Ê⁄ Õ”«»ùÂ«</td>
+			<td>
+				<select name="accountType">
+					<option value="-1" selected="selected">ÂÌç ﬂœ«„</option>
+<%
+set rs=Conn.Execute("select * from glAccountTypes")
+while not rs.eof
+%>
+					<option value="<%=rs("id")%>">
+						<%=rs("name")& " (" &rs("name_en")& ")"%>
+					</option>
+<%
+	rs.moveNext
+wend
+%>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">* œ— ’Ê— Ì ﬂÂ ‰Ê⁄ Õ”«» —«  €ÌÌ— œÂÌœ  „«„Ì Õ”«»ùÂ« «“ «Ì‰ ‰Ê⁄ ŒÊ«Â‰œ ‘œ</td>
+		</tr>
 		<TR>
 			<TD colspan=2 align=center>
 				<BR><BR>
@@ -344,6 +389,9 @@ elseif request("act")="EditAccountSuperGroupSubmit" then
 	SuperGroupType = request("type")
 
 	conn.Execute("UPDATE GLAccountSuperGroups SET type="& SuperGroupType & ", Name = N'"& name & "' WHERE (ID = "& SuperGroupID & ") AND (GL = "& OpenGL & ")")
+	if cint(request("accountType"))<>-1 then 
+		conn.Execute("update glAccounts set accountType=" & request("accountType") & "where gl=" & openGL & " and glGroup in (select id from GLAccountGroups where gl=" &openGL& " and glSuperGroup=" &SuperGroupID& ")")
+	end if
 	response.redirect "AccountInfo.asp"
 
 '-----------------------------------------------------------------------------------------------------
@@ -454,6 +502,28 @@ elseif request("act")="editAccountSuperGroupForms" then
 			</SELECT>
 			</TD>
 		</TR>
+		<tr>
+			<td>ù‰Ê⁄ Õ”«»ùÂ«</td>
+			<td>
+				<select name="accountType">
+					<option value="-1" selected="selected">ÂÌç ﬂœ«„</option>
+<%
+set rs=Conn.Execute("select * from glAccountTypes")
+while not rs.eof
+%>
+					<option value="<%=rs("id")%>">
+						<%=rs("name")& " (" &rs("name_en")& ")"%>
+					</option>
+<%
+	rs.moveNext
+wend
+%>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">* œ— ’Ê— Ì ﬂÂ ‰Ê⁄ Õ”«» —«  €ÌÌ— œÂÌœ  „«„Ì Õ”«»ùÂ« «“ «Ì‰ ‰Ê⁄ ŒÊ«Â‰œ ‘œ</td>
+		</tr>
 		<TR>
 			<TD colspan=2 align=center>
 				<BR><BR>
