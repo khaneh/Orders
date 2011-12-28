@@ -39,7 +39,7 @@ function addRow(){
 
 	tempTD=document.createElement("td");
 	tempTD.setAttribute("dir", 'LTR');
-	tempTD.innerHTML="<INPUT class='InvRowInput' TYPE='text' NAME='Items' size='3' Maxlength='6' onKeyPress='return mask(this);' onChange='return check(this);' onfocus='setCurrentRow(this.parentNode.parentNode.rowIndex);'><INPUT TYPE='hidden' name='type' value=0><INPUT TYPE='hidden' name='fee' value=0><INPUT type='hidden' name='hasVat' value=0>"
+	tempTD.innerHTML="<INPUT class='InvRowInput' TYPE='text' NAME='Items' size='3' Maxlength='6' onKeyPress='return mask(this,event);' onChange='return check(this);' onfocus='setCurrentRow(this.parentNode.parentNode.rowIndex);'><INPUT TYPE='hidden' name='type' value=0><INPUT TYPE='hidden' name='fee' value=0><INPUT type='hidden' name='hasVat' value=0>"
 
 	newRow.appendChild(tempTD);
 
@@ -74,7 +74,7 @@ function addRow(){
 
 	tempTD=document.createElement("td");
 	tempTD.setAttribute("dir", 'LTR');
-	tempTD.innerHTML="<INPUT class='InvRowInput' TYPE='text' NAME='Fees' size='7' onBlur='setPrice(this);'>"	
+	tempTD.innerHTML="<INPUT class='InvRowInput' TYPE='text' NAME='Fees' readonly size='7' onBlur='setPrice(this);'>"	
 	newRow.appendChild(tempTD);
 
 	tempTD=document.createElement("td");
@@ -95,7 +95,7 @@ function addRow(){
 	// S A M
 	tempTD=document.createElement("td");
 	tempTD.setAttribute("dir", 'LTR');
-	tempTD.innerHTML="<INPUT tabIndex='9998' class='InvRowInput' TYPE='text' NAME='Vat' size='6' readonly>"
+	tempTD.innerHTML="<INPUT tabIndex='9998' class='InvRowInput4' TYPE='text' NAME='Vat' size='6' readonly>"
 	//tempTD.appendChild(tempTD);
 	newRow.appendChild(tempTD);
 
@@ -257,14 +257,21 @@ function setFeeQtty(src){
 	if (itemType==1 || itemType==5){   
 		document.getElementsByName("AppQttys")[rowNo].value = parseInt(txt2val(document.getElementsByName("Qttys")[rowNo].value)) * parseInt(txt2val(document.getElementsByName("Sets")[rowNo].value)); 
 
-		document.getElementsByName("Fees")[rowNo].value =  parseInt(txt2val(itemFee)) 
-	
+		document.getElementsByName("Fees")[rowNo].value =  parseInt(txt2val(itemFee)); 
+		if (parseInt(itemFee)>0){
+			document.getElementsByName("Fees")[rowNo].setAttribute("readonly",'readonly');
+		}
+		else {
+			document.getElementsByName("Fees")[rowNo].removeAttribute('readonly');
+			document.getElementsByName("Fees")[rowNo].readOnly=false;
+		}
 		if (''+document.getElementsByName("AppQttys")[rowNo].value=='NaN')
-			document.getElementsByName("AppQttys")[rowNo].value = 0
+			document.getElementsByName("AppQttys")[rowNo].value = 0;
 	}
 
 	//////////////// Type =2  --->  Digital  //////////////////
-	if (itemType==2 && itemFee!="0"){   
+	if (itemType==2 && itemFee!="0"){ 
+		document.getElementsByName("Fees")[rowNo].setAttribute("readonly",'readonly');  
 		PF		= parseInt(txt2val(itemFee.substr(1)));
 		tmp		= itemFee.substr(0,1);
 		if (tmp == "s" ) 
@@ -324,6 +331,13 @@ function setFeeQtty(src){
 		w	= txt2val(document.getElementsByName("Widths")[rowNo].value);
 		document.getElementsByName("Fees")[rowNo].value =  parseInt(txt2val(itemFee)) 
 		document.getElementsByName("AppQttys")[rowNo].value =  val2txt(txt2val(document.getElementsByName("Qttys")[rowNo].value) * txt2val(document.getElementsByName("Sets")[rowNo].value) * h * w);
+		if (parseInt(itemFee)>0){
+			document.getElementsByName("Fees")[rowNo].setAttribute("readonly",'readonly');
+		}
+		else {
+			document.getElementsByName("Fees")[rowNo].removeAttribute('readonly');
+			document.getElementsByName("Fees")[rowNo].readOnly=false;
+		}
 	}
 
 	//////////////// Type =4  --->  Piramon  //////////////////
@@ -331,6 +345,13 @@ function setFeeQtty(src){
 		document.getElementsByName("Fees")[rowNo].value =  parseInt(txt2val(itemFee)) 
 		//document.getElementsByName("AppQttys")[rowNo].focus();
 		//document.getElementsByName("AppQttys")[rowNo].select();
+		if (parseInt(itemFee)>0){
+			document.getElementsByName("Fees")[rowNo].setAttribute("readonly",'readonly');
+		}
+		else {
+			document.getElementsByName("Fees")[rowNo].removeAttribute('readonly');
+			document.getElementsByName("Fees")[rowNo].readOnly=false;
+		}
 	}
 
 	setPrice(document.getElementsByName("Fees")[rowNo]);
@@ -338,16 +359,22 @@ function setFeeQtty(src){
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 
-function mask(src){ 
+function mask(src,ev){ 
 	var theKey=event.keyCode;
-
+	//theKey = (ev.charCode) ? ev.charCode : event.keyCode;
+	//theKey = (ev.keyCode)? ev.keyCode: ((ev.charCode)? ev.charCode: ev.which);
+	
 	rowNo=src.parentNode.parentNode.rowIndex;
 	invTable=document.getElementById("InvoiceLines");
 	theRow=invTable.getElementsByTagName("tr")[rowNo];
 
 	if (src.name=="Items"){
 		if (theKey==13){
-			event.keyCode=9
+			if (ev.which){
+				ev.which=9
+			} else {
+				event.keyCode=9
+			}
 			dialogActive=true
 			document.all.tmpDlgArg.value="#"
 			document.all.tmpDlgTxt.value="‰«„ ¬Ì „Ì —« ﬂÂ „Ì ŒÊ«ÂÌœ Ã” ÃÊ ﬂ‰Ìœ Ê«—œ ﬂ‰Ìœ:"
@@ -418,6 +445,7 @@ function check(src){
 				objHTTP.open('GET','xml2.asp?id='+src.value,false)
 				objHTTP.send()
 				tmpStr = unescape( objHTTP.responseText)
+				//alert(tmpStr);
 				ar = tmpStr.split("#")
 
 				if (ar[0]=="ﬂœ ﬂ«·« €·ÿ «” ")
@@ -434,6 +462,9 @@ function check(src){
 					invTable.getElementsByTagName("tr")[rowNo].getElementsByTagName("td")[2].getElementsByTagName("Input")[0].value = ar[0];
 					invTable.getElementsByTagName("tr")[rowNo].getElementsByTagName("td")[1].getElementsByTagName("Input")[1].value = ar[1];
 					invTable.getElementsByTagName("tr")[rowNo].getElementsByTagName("td")[1].getElementsByTagName("Input")[2].value = ar[2];
+					//invTable.getElementsByTagName("tr")[rowNo].getElementsByTagName("td")[1].getElementsByTagName("Input")[2].readOnly="readonly";
+					//invTable.getElementsByTagName("tr")[rowNo].getElementsByTagName("td")[1].getElementsByTagName("Input")[2].Attributes.Add("readonly","readonly");
+					//alert(invTable.getElementsByTagName("tr")[rowNo].getElementsByTagName("td")[1].getElementsByTagName("Input")[2].value);
 					// VAT
 					if (ar[3] == "True")
 						invTable.getElementsByTagName("tr")[rowNo].getElementsByTagName("td")[1].getElementsByTagName("Input")[3].value = 1;

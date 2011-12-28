@@ -286,7 +286,7 @@ elseif request("act")="editInvoice" then
 %>
 			<tr bgcolor='#F0F0F0' onclick="setCurrentRow(this.rowIndex);" >
 				<td align='center' width="25px"><%=i%></td>
-				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Items" value="<%=RS1("Item")%>" size="3" Maxlength="6" onKeyPress="return mask(this);" onfocus="setCurrentRow(this.parentNode.parentNode.rowIndex);" onChange='return check(this);'>
+				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Items" value="<%=RS1("Item")%>" size="3" Maxlength="6" onKeyPress="return mask(this,event);" onfocus="setCurrentRow(this.parentNode.parentNode.rowIndex);" onChange='return check(this);'>
 				<INPUT TYPE="hidden" name="type" value="<%=RS1("type")%>">
 				<INPUT TYPE="hidden" name="fee" value="<%=RS1("fee")%>">
 				<input type='hidden' name='hasVat' value='<%=text2value(RS1("hasVat"))%>'>
@@ -298,7 +298,7 @@ elseif request("act")="editInvoice" then
 				<td dir="LTR"><INPUT class="InvRowInput2" TYPE="text" NAME="Qttys" value="<%=RS1("Qtty")%>" size="3" onBlur="setFeeQtty(this);"></td>
 				<td dir="LTR"><INPUT class="InvRowInput2" TYPE="text" NAME="Sets" value="<%=RS1("Sets")%>" size="2" onBlur="setFeeQtty(this);"></td>
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="AppQttys" value="<%=Separate(RS1("AppQtty"))%>" size="6" onBlur="setPrice(this);"></td>
-				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Fees" value="<%if RS1("AppQtty") <> 0 then response.write Separate(RS1("Price")/RS1("AppQtty")) else response.write "0"%>" size="7" onBlur="setPrice(this);"></td>
+				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Fees" <%if rs1("price")<>0 then response.write "readonly='readonly'"%> value="<%if RS1("AppQtty") <> 0 then response.write Separate(RS1("Price")/RS1("AppQtty")) else response.write "0"%>" size="7" onBlur="setPrice(this);"></td>
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Prices" value="<%=Separate(RS1("Price"))%>" size="9" readonly tabIndex="9999"></td>
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Discounts" value="<%=Separate(RS1("Discount"))%>" size="7" onBlur="setPrice(this);"></td><!-- S A M -->
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Reverses" value="<%=Separate(RS1("Reverse"))%>" size="5" onBlur="setPrice(this);" onfocus="setCurrentRow(this.parentNode.parentNode.rowIndex);"></td><!-- S A M -->
