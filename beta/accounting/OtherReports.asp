@@ -19,6 +19,7 @@ if not Auth(8 , "E") then NotAllowdToViewThisPage()
 	.RepTR0 {background-color: #DDDDDD;}
 	.RepTR1 {background-color: #FFFFFF;}
 	.RepTableHeader {background-color: #BBBBFF; text-align: center; font-weight:bold;}
+	.RepTDb {font-weight: bold;}
 </STYLE>
 <BR>
 
@@ -78,7 +79,7 @@ if request("act")="" then
 	if Auth(8 , "G") then
 	%>
 		<FORM METHOD=POST ACTION="?act=cash">
-			<table class="RepTable2" id="MoeenRep01">
+			<table class="RepTable2">
 				<tr>
 					<th colspan="2">ÏÔÈæÑÏ ÎÒÇäåÏÇÑí</td>
 				</tr>
@@ -93,11 +94,237 @@ if request("act")="" then
 	 <%end if%>
 	</TD>
 	<TD>
-	 &nbsp;
+	 <%
+	 if Auth(8,"G") then 
+	 	set rs=Conn.Execute ("select * from gls where id="&openGL)
+	 	if not rs.eof then 
+	 		startDate=rs("startDate")
+	 		if shamsiToday()>rs("endDate") then 
+	 			endDate=rs("endDate")
+	 		else
+	 			endDate=shamsiToday()
+	 		end if
+	 	end if
+	 %>
+	 	<form method="post" action="?act=finState">
+	 		<table class="RepTable2">
+	 			<tr>
+	 				<th colspan="2">ÕæÑÊåÇí ãÇáí</th>
+	 			<tr>
+					<td align=left>ÇÒ ÊÇÑíÎ</td>
+					<td><INPUT TYPE="text" NAME="FromDate" value="<%=startDate%>" style="width:75px;direction:LTR;" maxlength=10 OnBlur="return acceptDate(this);"></td>
+				</tr>
+				<tr>
+					<td align=left>ÊÇ ÊÇÑíÎ</td>
+					<td><INPUT TYPE="text" NAME="ToDate" value="<%=endDate%>" style="width:75px;direction:LTR;" maxlength=10 OnBlur="return acceptDate(this);"></td>
+				</tr>
+	 				<td colspan="2">
+	 					<input name="rep" type="submit" value="ÓæÏ æ ÒíÇä">
+	 					<input name="rep" type="submit" value="ÊÑÇÒ äÇãå">
+	 					<input name="rep" type="submit" value="ÑÏÔ æÌæå äŞÏ">
+	 				</td>
+	 			</tr>
+	 		</table>
+	 	</form>
+	 <%
+	 end if
+	 %>
 	</TD>
 </TR>
 </TABLE>
 <%
+'-----------------------------------------------------------------------------------------------------
+'-----------------------------------------------------------------------------------------------------
+'-----------------------------------------------------------------------------------------------------
+elseif request("act")="finState" then
+	fromDate=request("fromDate")
+	toDate=request("toDate")
+	function getRem(v,t)
+		if t="group" then 
+			mySQL="select isnull(sum(effectiveGlRows.Amount*2*(cast(effectiveGlRows.IsCredit as int)-.5)),0) as amount from effectiveGlRows inner join glAccounts on effectiveGlRows.glAccount=glAccounts.id and effectiveGlRows.gl=glAccounts.gl where effectiveGlRows.gl=" & OpenGL & " and glAccounts.GLGroup=" & v & " and effectiveGLRows.glDocDate between '" & fromDate & "' and '" & toDate & "'"
+		elseif t="super" then 
+			mySQL="select isnull(sum(effectiveGlRows.Amount*2*(cast(effectiveGlRows.IsCredit as int)-.5)),0) as amount from effectiveGlRows inner join glAccounts on effectiveGlRows.glAccount=glAccounts.id and effectiveGlRows.gl=glAccounts.gl inner join GLAccountGroups on glAccounts.GLGroup=GLAccountGroups.ID and GLAccountGroups.gl=glAccounts.gl where effectiveGlRows.gl=" & OpenGL & " and GLAccountGroups.GLSuperGroup=" & v & " and effectiveGLRows.glDocDate between '" & fromDate & "' and '" & toDate & "'"
+		end if
+		set rs=Conn.Execute(mySQL)
+		if not rs.eof then 
+			getRem = CDbl(rs("amount"))
+		else
+			getRem = "ÎØÇ"
+		end if
+	end function
+	if request("rep")="ÓæÏ æ ÒíÇä" then
+		sales = getRem(91000,"group")
+		cogs = abs(getRem(30000,"super"))
+		grossProfit = sales - cogs
+		cgA = abs(getRem(62000,"group")+getRem(63000,"group")+getRem(68000,"group")+getRem(69000,"group"))
+		rANDd = 0
+		other = 0
+		Interest = abs(getRem(61000,"group"))
+		netProfit = grossProfit - cgA - rANDd - other - interest
+		tax = 0
+		Depreciation = 0
+		EBITDA = netProfit + interest + tax + depreciation
+%>
+<table class="RepTable">
+	<tr>
+		<th>ÊÑÇÒäÇãå</th>
+		<th>ÇÒ <%=fromDate%> Çáí <%=toDate%></th>
+	</tr>
+	<tr>
+		<td> İÑæÔ ÎÇáÕ</td>
+		<td><%=Separate(sales)%></td>
+	</tr>
+	<tr>
+		<td> ÈåÇí ÊãÇãÔÏå ßÇáÇí İÑæÔÑİÊå</td>
+		<td><%=Separate(cogs)%></td>
+	</tr>
+	<tr>
+		<td>ÓæÏ (ÒíÇä) äÇÎÇáÕ</td>
+		<td><%=Separate(grossProfit)%></td>
+	</tr>
+	<tr>
+		<td> İÑæÔ¡ ÇÏÇÑí æ Úãæãí</td>
+		<td><%=Separate(cgA)%></td>
+	</tr>
+	<tr>
+		<td>ÊÍŞíŞ æ ÊæÓÚå</td>
+		<td><%=Separate(rANDd)%></td>
+	</tr>
+	<tr>
+		<td>åÒíäå (ÏÑÂãÏ) ÈåÑå</td>
+		<td><%=Separate(interest)%></td>
+	</tr>
+	<tr>
+		<td>ÓÇíÑ (ÚäÇæíä ÇÕáí ĞßÑ ÔæÏ)</td>
+		<td><%=Separate(other)%></td>
+	</tr>
+	<tr>
+		<td>ÓæÏ (ÒíÇä) ÎÇáÕ</td>
+		<td><%=Separate(netProfit)%></td>
+	</tr>
+	<tr>
+		<td>åÒíäååÇí ÈåÑå</td>
+		<td><%=Separate(interest)%></td>
+	</tr>
+	<tr>
+		<td>ãÇáíÇÊ</td>
+		<td><%=Separate(tax)%></td>
+	</tr>
+	<tr>
+		<td>ÇÓÊåáÇß</td>
+		<td><%=Separate(depreciation)%></td>
+	</tr>
+	<tr>
+		<td>ÇÈíÊÏÇ</td>
+		<td><%=Separate(EBITDA)%></td>
+	</tr>
+</table>
+<%	
+	elseif request("rep")="ÊÑÇÒ äÇãå" then 
+		cash=abs(getRem(11000,"group")) + abs(getRem(12000,"group"))
+		accountsReceviable = abs(getRem(13000,"group")) + abs(getRem(15000,"group")) + abs(getRem(17000,"group")) + abs(getRem(18000,"group"))
+		inventory = abs(getRem(14000,"group"))
+		orders = abs(getRem(16000,"group"))
+		plant = abs(getRem(26000,"group"))-abs(getRem(26100,"group"))
+		properties = abs(getRem(27000,"group"))-abs(getRem(27100,"group"))
+		otherAsset = abs(getRem(29000,"group"))
+		totalAsset = cash + accountsReceviable + inventory + orders + plant + properties + otherAsset
+		accountsPayable = abs(getRem(41000,"group"))+abs(getRem(42000,"group"))
+		bankDebit = abs(getRem(46000,"group"))
+		personsDebit = abs(getRem(44000,"group"))
+		otherDebit =  abs(getRem(43000,"group")) + abs(getRem(45000,"group")) + abs(getRem(47000,"group")) + abs(getRem(49000,"group")) + abs(getRem(71000,"group"))
+		totalDebit = accountsPayable + bankDebit + personsDebit + otherDebit
+		equity = abs(getRem(50100,"group"))
+		retainedEarnings = getRem(51000,"group") + getRem(52000,"group") + getRem(53000,"group") + getRem(54000,"group") + getRem(55000,"group") + getRem(59000,"group")
+		periodEarnings = 0
+		totalLiabilities = totalDebit + equity + retainedEarnings
+%>
+<table class="RepTable">
+	<tr>
+		<th>ÊÑÇÒäÇãå</th>
+		<th><%=toDate%></th>
+	</tr>
+	<tr>
+		<td>ãæÌæÏí äŞÏ</td>
+		<td><%=Separate(cash)%></td>
+	</tr>
+	<tr>
+		<td>ÍÓÇÈåÇ æ ÇÓäÇÏ ÏÑíÇİÊäí ÊÌÇÑí</td>
+		<td rowspan="2"><%=Separate(accountsReceviable)%></td>
+	</tr>
+	<tr>
+		<td>ÍÓÇÈåÇ æ ÇÓäÇÏ ÏÑíÇİÊäí ÛíÑ ÊÌÇÑí</td>
+		<!--td></td-->
+	</tr>
+	<tr>
+		<td>ãæÌæÏí ÇäÈÇÑ ãæÇÏ Çæáíå æ ßÇáÇí ÓÇÎÊå ÔÏå</td>
+		<td><%=Separate(inventory)%></td>
+	</tr>
+	<tr>
+		<td>ÓİÇÑÔÇÊ æ íÔ ÑÏÇÎÊåÇ</td>
+		<td><%=Separate(orders)%></td>
+	</tr>
+	<tr>
+		<td>ÏÇÑÇííåÇí ËÇÈÊ ãÔåæÏ</td>
+		<td><%=Separate(plant)%></td>
+	</tr>
+	<tr>
+		<td>ÏÇÑÇííåÇí äÇ ãÔåæÏ</td>
+		<td><%=Separate(properties)%></td>
+	</tr>
+	<tr>
+		<td>ÍÕå ÓäæÇÊ ÂÊí æÇã ÈÇäßí</td>
+		<td><%=Separate(otherAsset)%></td>
+	</tr>
+	<tr>
+		<td class="RepTDb">ÌãÚ ÏÇÑÇííåÇ</td>
+		<td><%=Separate(totalAsset)%></td>
+	</tr>
+	<tr>
+		<td>ÍÓÇÈåÇ æ ÇÓäÇÏ ÑÏÇÎÊäí ÊÌÇÑí</td>
+		<td rowspan="2"><%=Separate(accountsPayable)%></td>
+	</tr>
+	<tr>
+		<td>ÍÓÇÈåÇ æ ÇÓäÇÏ ÑÏÇÎÊäí ÛíÑ ÊÌÇÑí</td>
+<!-- 		<td></td> -->
+	</tr>
+	<tr>
+		<td>ÊÓåíáÇÊ ãÇáí ÈÇäßí</td>
+		<td><%=Separate(bankDebit)%></td>
+	</tr>
+	<tr>
+		<td>ÊÓåíáÇÊ ãÇáí ÇÔÎÇÕ</td>
+		<td><%=Separate(personsDebit)%></td>
+	</tr>
+	<tr>
+		<td>ÓÇíÑ ÈÏåíåÇ (ÚäÇæíä ÇÕáí ĞßÑ ÔæÏ(</td>
+		<td><%=Separate(otherDebit)%></td>
+	</tr>
+	<tr>
+		<td class="RepTDb">ÌãÚ ÈÏåíåÇ</td>
+		<td><%=Separate(totalDebit)%></td>
+	</tr>
+	<tr>
+		<td>ÓÑãÇíå</td>
+		<td><%=Separate(equity)%></td>
+	</tr>
+	<tr>
+		<td>ÇäÈÇÔÊå ( ÓæÏ (ÒíÇä</td>
+		<td><%=Separate(retainedEarnings)%></td>
+	</tr>
+	<tr>
+		<td>ÓæÏ æ ÒíÇä ÏæÑå ÌÇÑí</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td class="RepTDb">ÌãÚ ÈÏåíåÇ æ ÍŞæŞ ÕÇÍÈÇä ÓåÇã</td>
+		<td><%=Separate(totalLiabilities)%></td>
+	</tr>
+</table>
+<%
+	elseif request("rep")="ÑÏÔ æÌæå äŞÏ" then 
+		response.write "åäæÒ ÓÇÎÊå äÔÏå"
+	end if
 '-----------------------------------------------------------------------------------------------------
 '-----------------------------------------------------------------------------------------------------
 '-----------------------------------------------------------------------------------------------------
@@ -138,6 +365,20 @@ elseif request("act")="cash" then
 			else
 				result = result & Server.URLEncode(shamsiDate(DateAdd("m",-10,Date)))&"&toDate=" & Server.URLEncode(mid(shamsiDate(DateAdd("m",-6,Date)),1,8)) & "31" &"&vouchers=on&payments=on"">" 
 			end if
+		case "ar-full"
+			result = result & "<a target=”_blank” href=""../AR/rep_dailySale.asp?input_date_start="
+			if EffectiveDate<>"old" then 
+				result = result & Server.URLEncode(EffectiveDate&"01")&"&input_date_end=" & Server.URLEncode(EffectiveDate&"31")&"&fullyApplied="" >" 
+			else
+				result = result & Server.URLEncode("0000/00/00")&"&input_date_end=" & Server.URLEncode("1388/01/01") &"&fullyApplied="">" 
+			end if
+		case "ap-full"
+			result = result & "<a target=”_blank” href=""../AP/report.asp?fromDate="
+			if EffectiveDate<>"old" then 
+				result = result & Server.URLEncode(EffectiveDate&"01")&"&toDate=" & Server.URLEncode(EffectiveDate&"31")&"&vouchers=on&payments=on"">" 
+			else
+				result = result & Server.URLEncode(shamsiDate(DateAdd("m",-10,Date)))&"&toDate=" & Server.URLEncode(mid(shamsiDate(DateAdd("m",-6,Date)),1,8)) & "31" &"&vouchers=on&payments=on"">" 
+			end if
 		case else
 			if mid(sys,1,4)="bank" then 
 				result = result & "<a target=”_blank” href=""../bank/CheqBook.asp?act=showBook&GLAccount=" & mid(sys,5,5) & "&FromDate="
@@ -145,7 +386,7 @@ elseif request("act")="cash" then
 			end if
 		end select
 		result = result & Separate(num) 
-		if sys="ar" then result = result & "</a>"
+		if sys="ar" or sys="ar-full" or sys="ap" or sys="ap-full" then result = result & "</a>"
 		result = result & "</td>"
 		echoTD = result
 	end function
@@ -228,9 +469,9 @@ elseif request("act")="cash" then
 	<%
 	loop
 
-	mySQL="select * from (select sum(RemainedAmount) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(RemainedAmount) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ap' as sys from APItems where FullyApplied=0 and Voided=0 and APItems.Type=6 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) ) drv order by EffectiveDate,sys"
+	mySQL="select * from (select sum(RemainedAmount) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(RemainedAmount) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ap' as sys from APItems where FullyApplied=0 and Voided=0 and APItems.Type=6 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(amountOriginal) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ar-full' as sys from ARItems where  Voided=0 and ARItems.Type=1 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(amountOriginal) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ap-full' as sys from APItems where Voided=0 and APItems.Type=6 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8)) dev order by EffectiveDate,sys"
 	
-	mySQLold="select sum(RemainedAmount) as RemainedAmount,'old' as EffectiveDate,'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and EffectiveDate<'1388/01/01' UNION select sum(RemainedAmount) as RemainedAmount, 'old' as EffectiveDate,'ap' as sys from APItems where FullyApplied=0 and Voided=0 and APItems.Type=6 and EffectiveDate<'1388/01/01'"
+	mySQLold="select sum(RemainedAmount) as RemainedAmount,'old' as EffectiveDate,'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and EffectiveDate<'1388/01/01' UNION select sum(RemainedAmount) as RemainedAmount, 'old' as EffectiveDate,'ap' as sys from APItems where FullyApplied=0 and Voided=0 and APItems.Type=6 and EffectiveDate<'1388/01/01' UNION select sum(amountOriginal) as RemainedAmount,'old' as EffectiveDate,'ar-full' as sys from ARItems where Voided=0 and ARItems.Type=1 and EffectiveDate<'1388/01/01' UNION select sum(amountOriginal) as RemainedAmount, 'old' as EffectiveDate,'ap-full' as sys from APItems where Voided=0 and APItems.Type=6 and EffectiveDate<'1388/01/01'"
 
 	set rs=Conn.Execute(mySQL)
 	set rsOLD=conn.Execute(mySQLold)
@@ -244,6 +485,10 @@ elseif request("act")="cash" then
 				apRemainedAmount = CDbl(RSs("RemainedAmount"))
 			case "ar"
 				arRemainedAmount = CDbl(RSs("RemainedAmount"))	
+			case "ap-full"
+				apTotal = CDbl(RSs("RemainedAmount"))
+				case "ar-full"
+				arTotal = CDbl(RSs("RemainedAmount"))	
 		end select
 		if not RSs.EOF then RSs.MoveNext
 		if not RSs.eof then 
@@ -260,8 +505,11 @@ elseif request("act")="cash" then
 	<tr class="RepTableHeader">
 		<td colspan="2">&nbsp;</td>
 		<td>İÑæÔ</td>
+		<td>ßá İÑæÔ</td>
+		<td>ÏÑÕÏ ãÇäÏå</td>
 		<td>ÎÑíÏ</td>
-	
+		<td>ßá ÎÑíÏ</td>
+		<td>ÏÑÕÏ ãÇäÏå</td>
 	</tr>
 	
 	<%
@@ -272,13 +520,19 @@ elseif request("act")="cash" then
 		<tr class="<%=rowColor%>">
 			<%
 			arRemainedAmount=0
-			apRemainedAmount=0			
+			apRemainedAmount=0	
+			arTotal=0
+			apTotal=0		
 			call setAXValue(rsOLD)
 			%>
 			<td colspan="2">ãÇäÏå ŞÏíãí</td>
 			<%
 			response.write echoTD(arRemainedAmount, "ar")
+			response.write echoTD(arTotal, "ar-full")
+			response.write echoTD(round(arRemainedAmount/arTotal*100), "")
 			response.write echoTD(apRemainedAmount, "ap")
+			response.write echoTD(apTotal, "ap-full")
+			response.write echoTD(round(apRemainedAmount/apTotal*100), "")
 			%>
 		</tr>
 		<%
@@ -286,6 +540,8 @@ elseif request("act")="cash" then
 	loop
 	arRemainedAmountSum=0
 	apRemainedAmountSum=0
+	arTotalAmountSum=0
+	apTotalAmountSum=0
 	do while not rs.eof
 		EffectiveDate=rs("EffectiveDate")
 		if rowColor="RepTR0" then 
@@ -303,12 +559,18 @@ elseif request("act")="cash" then
 			call setAXValue(rs)
 			arRemainedAmountSum=arRemainedAmountSum+arRemainedAmount
 			apRemainedAmountSum=apRemainedAmountSum+apRemainedAmount
+			arTotalAmountSum=arTotalAmountSum+arTotal
+			apTotalAmountSum=apTotalAmountSum+apTotal
 			%>
 			<td title="<%=EffectiveDate%>"><%=yyyy%></td>
 			<td><%=mm%></td>
 			<%
 			response.write echoTD(arRemainedAmount, "ar")
+			response.write echoTD(arTotal, "ar-full")
+			response.write echoTD(round(arRemainedAmount/arTotal*100), "")
 			response.write echoTD(apRemainedAmount, "ap")
+			response.write echoTD(apTotal, "ap-full")
+			response.write echoTD(round(apRemainedAmount/apTotal*100), "")
 			%>
 		</tr>
 		<%
@@ -323,7 +585,11 @@ elseif request("act")="cash" then
 		<tr class="<%=rowColor%>">
 			<td colspan="2">ÌãÚ ÈÏæä ãÇäÏååÇ</td>
 			<td><%=Separate(arRemainedAmountSum)%></td>
+			<td><%=Separate(arTotalAmountSum)%></td>
+			<td><%=Round(arRemainedAmountSum/arTotalAmountSum*100)%></td>
 			<td><%=Separate(apRemainedAmountSum)%></td>
+			<td><%=Separate(apTotalAmountSum)%></td>
+			<td><%=Round(apRemainedAmountSum/apTotalAmountSum*100)%></td>
 		</tr>
 </table>
 <%
