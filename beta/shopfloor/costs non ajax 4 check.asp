@@ -28,17 +28,15 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 		});
 		addFunctions2Row(0);
 		$("button#addRow").click(function () {
-			$('span#msg').html("");
 			myRow = $("table#myTable tr:last").html();
 			//checkRow();
 			//myID = $("table#myTable tr:last").attr("id");
 			myID = $("table#myTable tr:last").index();
 			//myID = myIDtext.substr(myIDtext.indexOf("-n-"), myIDtext.indexOf("-", myIDtext.indexOf("-n-") + 4));
-			disableOldRow(myID);
-			newID= parseInt(myID)+1;
-			newID = "-" + newID;
-			myID = "-" + myID;
-			newRow="<tr>" + $("table#myTable tr:last").html().replace(RegExp(myID, "g"), newID).replace(RegExp('class="hasDatepicker"', "g"), '') + "</tr>";
+			newID= parseInt(myID)+1
+			newID = "-" + newID
+			myID = "-" + myID 
+			newRow="<tr>" + $("table#myTable tr:last").html().replace(RegExp(myID, "g"), newID).replace(RegExp('class="hasDatepicker"', "g"), '') + "</tr>"
 			//console.log(newRow);
 			$("table#myTable tr:last").after(newRow);
 			myID=$("table#myTable tr:last").index();
@@ -47,30 +45,13 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 			return false;
 			
 		});
-		//-------------------------------- DISABLE OLD ROW ---------------------------
-		function disableOldRow(rowID){
-			//$("input#startDate-fa-"+rowID).readOnly=true;
-			$("input#startDate-fa-" + rowID).prop("disabled", true);
-	    	$("input#startDateTime-" + rowID).prop("disabled", true);
-	    	$("input#startTime-" + rowID).prop("disabled", true);
-	    	$("input#endDate-fa-" + rowID).prop("disabled", true);
-	    	$("input#endDateTime-" + rowID).prop("disabled", true);
-	    	$("input#endTime-" + rowID).prop("disabled", true);
-	    	$("input#startCounter-" + rowID).prop("disabled", true);
-	    	$("input#endCounter-" + rowID).prop("disabled", true);
-			$("select#operationType-" + rowID).prop("disabled", true);
-			$("select#costCenter-" + rowID).prop("disabled", true);
-		}
 		// --------------------------------- ADD EVENTS ------------------------------
 		function addFunctions2Row(rowID) {
-			//if (rowID>0)  disableOldRow(rowID-1)
-			$("select#costCenter-" + rowID).prop("disabled", false);
 			console.log("ID: "+ rowID);
 			$("input#startDate-fa-" + rowID).datepicker({
 				onSelect: function(dateText,inst) {
 					$("input#endDate-fa-" + rowID).datepicker('option', 'minDate', new JalaliDate(inst['selectedYear'], inst['selectedMonth'], inst['selectedDay']));
-					$("input#startDateTime-" + rowID).val($.format.date(new JalaliDate(inst['selectedYear'], inst['selectedMonth'], inst['selectedDay']).getGregorianDate(), "yyyy/MM/dd")+ ' ' + $('input#startTime-'+rowID).val());
-					checkRow(rowID);
+					$("input#startDateTime-" + rowID).val($.format.date(new JalaliDate(inst['selectedYear'], inst['selectedMonth'], inst['selectedDay']).getGregorianDate(), "yyyy/MM/dd")); //;
 					//$('#startDate-0').val($.datepicker.formatDate("dd/MM/yyyy",'2009-12-18 10:54:50.546'));
 	
 				},
@@ -80,8 +61,7 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 			$("input#endDate-fa-" + rowID).datepicker({
 				dateFormat: "d MM yy",
 				onSelect: function(dateText,inst) { 
-					$("input#endDateTime-" + rowID).val($.format.date(new JalaliDate(inst['selectedYear'], inst['selectedMonth'], inst['selectedDay']).getGregorianDate(), "yyyy/MM/dd")+' '+$('input#endTime-' + rowID).val());
-					checkRow(rowID);
+					$("#endDateTime-" + rowID).val($.format.date(new JalaliDate(inst['selectedYear'], inst['selectedMonth'], inst['selectedDay']).getGregorianDate(), "yyyy/MM/dd"));
 				}
 			});
 		    $('input#startTime-' + rowID).timepicker({
@@ -93,11 +73,7 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 		    	closeText: "ÇäÌÇã",
 		    	stepMinute: 10,
 		    	onOpen: function() {$(this.val(''))},
-		    	onClose: function() {
-		    		if ($('input#startDateTime-' + rowID).val().length > 10)
-		    			$('input#startDateTime-' + rowID).val($('input#startDateTime-' + rowID).val().substring(0,10) + ' ' + $('input#startTime-' + rowID).val());
-		    			checkRow(rowID);
-		    	}
+		    	onClose: function() {$('input#startDateTime-' + rowID).val($('input#startDateTime-' + rowID).val()+' '+$('input#startTime-' + rowID).val())}
 		    });
 		    $('input#endTime-' + rowID).timepicker({
 		    	timeOnlyTitle: "ÒãÇä ÇíÇä",
@@ -107,27 +83,30 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 		    	currentText: "ÍÇáÇ",
 		    	closeText: "ÇäÌÇã",
 		    	stepMinute: 10,
-		    	onClose: function() {
-		    		if ($('input#endDateTime-' + rowID).val().length > 10)
-		    			$('input#endDateTime-' + rowID).val($('input#endDateTime-' + rowID).val().substring(0,10) + ' ' + $('input#endTime-' + rowID).val());
-		    			checkRow(rowID);
-		    	}
+		    	onClose: function() {$('input#endDateTime-' + rowID).val($('input#endDateTime-' + rowID).val()+' '+$('input#endTime-' + rowID).val())}
 		    }); 
 		    $("select#operationType-" + rowID).ready(function () {
 		    	//$(this).change();
-				$("select#operationType-" + rowID).change(function () {
+				$(this).change(function () {
 					console.log('operation change!');
 					//checkRow();
 				});
 			});
-		    //$('input#startDate-fa-' + rowID).change(function () {checkRow(rowID);});
-		    //$('input#endDate-fa-' + rowID).change(function () {checkRow(rowID);});
-		    //$('input#startTime-' + rowID).change(function () {checkRow(rowID);});
-		    //$('input#endTime-' + rowID).change(function () {checkRow(rowID);});
-		    $('input#order-' + rowID).change(function () {
+		    $('input#startDate-fa-' + rowID).change(function () {
 		    	checkRow(rowID);
 		    });
-		    $('input#description-'+rowID).focus(function() {
+		    $('input#endDate-fa-' + rowID).change(function () {
+		    	checkRow(rowID);
+		    });
+		    $('input#startTime-' + rowID).change(function () {
+		    	//$('input#startDateTime-' + rowID).val($('input#startDateTime-' + rowID).val()+' '+$('input#startTime-' + rowID).val());
+		    	checkRow(rowID);
+		    });
+		    $('input#endTime-' + rowID).change(function () {
+		    	//$('input#endDateTime-' + rowID).val($('input#endDateTime-' + rowID).val()+' '+$('input#endTime-' + rowID).val());
+		    	checkRow(rowID);
+		    });
+		    $('input#order-' + rowID).change(function () {
 		    	checkRow(rowID);
 		    });
 		    $("select#costCenter-" + rowID).change(function (){
@@ -209,10 +188,8 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 				    					lastDateTime = $(this).val();
 				    					lastDate =	$('input#' + $(this).attr('id').replace('endDateTime', 'endDate-fa')).val();
 				    					lastTime =	$('input#' + $(this).attr('id').replace('endDateTime', 'endTime')).val();
-				    					console.log($(this).attr('id'));
 				    				}
 				    				console.log('last: ' + i + '-' + lastDate);
-				    				
 				    			} else {
 				    				console.log('nothing found!!');
 				    			}
@@ -243,19 +220,18 @@ if not Auth(3 , 6) then NotAllowdToViewThisPage()
 					} else {
 						result = false;
 					}
-				} 
-			
+				} else {
+					$(this).val('');
+				}
 			});
 			if ($("input#type-" + rowID).val()=='2')
 				if (result) {
 					var startDate = new Date(Date.parse($('input#startDateTime-' + rowID).val()));
 					var endDate = new Date(Date.parse($('input#endDateTime-' + rowID).val()));
 					console.log("start: " + startDate);
-					console.log("endDate: " + endDate);
-					if ((endDate - startDate)<=0) result=false;
-					//$('span#msg').html("test! " + ((endDate - startDate)/3600000));
+					console.log("endDate" + endDate);
+					$('span#msg').html("test! " + ((endDate - startDate)/3600000));
 				}
-			if (result) $('span#msg').html("áØÝÇ ÞÈá ÇÒ Çíäßå ÎØ ÌÏíÏ ÑÇ ÇÖÇÝå ßäíÏ¡ íß ÈÇÑ ÏíÑ ß ßäíÏ. æä Çíä ÎØ ÈÚÏ ÇÒ ÇÖÇÝå ÔÏä ÎØ ÈÚÏí ÛíÑ ÞÇÈá æíÑÇíÔ ÎæÇåÏ ÈæÏ!");
 			$("button#addRow").prop('disabled', !result);
 			console.log('---------------------------------------');
 		};
