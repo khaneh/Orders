@@ -298,7 +298,7 @@ elseif request("act")="editInvoice" then
 				<td dir="LTR"><INPUT class="InvRowInput2" TYPE="text" NAME="Qttys" value="<%=RS1("Qtty")%>" size="3" onBlur="setFeeQtty(this);"></td>
 				<td dir="LTR"><INPUT class="InvRowInput2" TYPE="text" NAME="Sets" value="<%=RS1("Sets")%>" size="2" onBlur="setFeeQtty(this);"></td>
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="AppQttys" value="<%=Separate(RS1("AppQtty"))%>" size="6" onBlur="setPrice(this);"></td>
-				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Fees" <%if rs1("price")<>0 then response.write "readonly='readonly'"%> value="<%if RS1("AppQtty") <> 0 then response.write Separate(RS1("Price")/RS1("AppQtty")) else response.write "0"%>" size="7" onBlur="setPrice(this);"></td>
+				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Fees" <%if (cdbl(rs1("price"))>0 and cint(RS1("type"))<>0) then response.write " readonly='readonly' "%> value="<%if RS1("AppQtty") <> 0 then response.write Separate(RS1("Price")/RS1("AppQtty")) else response.write "0"%>" size="7" onBlur="setPrice(this);"></td>
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Prices" value="<%=Separate(RS1("Price"))%>" size="9" readonly tabIndex="9999"></td>
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Discounts" value="<%=Separate(RS1("Discount"))%>" size="7" onBlur="setPrice(this);"></td><!-- S A M -->
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Reverses" value="<%=Separate(RS1("Reverse"))%>" size="5" onBlur="setPrice(this);" onfocus="setCurrentRow(this.parentNode.parentNode.rowIndex);"></td><!-- S A M -->

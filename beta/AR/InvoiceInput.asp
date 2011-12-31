@@ -242,7 +242,7 @@ elseif request("act")="getInvoice" then
 %>
 			<tr bgcolor='#F0F0F0' onclick="setCurrentRow(this.rowIndex);" >
 				<td align='center' width="25px"><%=i%></td>
-				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Items" size="3" Maxlength="6" onKeyPress="return mask(this);" onfocus="setCurrentRow(this.parentNode.parentNode.rowIndex);" onChange='return check(this);'>
+				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Items" size="3" Maxlength="6" onKeyPress="return mask(this,event);" onfocus="setCurrentRow(this.parentNode.parentNode.rowIndex);" onChange='return check(this);'>
 				<INPUT TYPE="hidden" name="type" value=0>
 				<INPUT TYPE="hidden" name="fee" value=0>
 				<INPUT type='hidden' name='hasVat' value=0>

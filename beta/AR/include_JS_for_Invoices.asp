@@ -258,7 +258,7 @@ function setFeeQtty(src){
 		document.getElementsByName("AppQttys")[rowNo].value = parseInt(txt2val(document.getElementsByName("Qttys")[rowNo].value)) * parseInt(txt2val(document.getElementsByName("Sets")[rowNo].value)); 
 
 		document.getElementsByName("Fees")[rowNo].value =  parseInt(txt2val(itemFee)); 
-		if (parseInt(itemFee)>0){
+		if (parseInt(itemFee)>0){ //&& itemType<>0
 			document.getElementsByName("Fees")[rowNo].setAttribute("readonly",'readonly');
 		}
 		else {
@@ -391,6 +391,10 @@ function mask(src,ev){
 						invTable.getElementsByTagName("tr")[rowNo].getElementsByTagName("td")[1].getElementsByTagName("Input")[3].value = 1;
 					else 
 						invTable.getElementsByTagName("tr")[rowNo].getElementsByTagName("td")[1].getElementsByTagName("Input")[3].value = 0;
+				}
+				if (parseInt(Arguments[1])=0) {
+					invTable.getElementsByTagName("tr")[rowNo].getElementsByTagName("td")[7].getElementsByTagName("Input")[0].removeAttribute('readonly');
+					invTable.getElementsByTagName("tr")[rowNo].getElementsByTagName("td")[7].getElementsByTagName("Input")[0].readOnly=false;
 				}
 				//setFeeQtty(invTable.getElementsByTagName("tr")[rowNo].getElementsByTagName("td")[2].getElementsByTagName("Input")[0])
 
