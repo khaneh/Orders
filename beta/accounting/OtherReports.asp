@@ -329,6 +329,7 @@ elseif request("act")="finState" then
 '-----------------------------------------------------------------------------------------------------
 '-----------------------------------------------------------------------------------------------------
 elseif request("act")="cash" then 
+	myMonth = replace(request("month"),"-","/")
 	dim fmonth(12)
 	fmonth(0)="›—Ê—œÌ‰"
 	fmonth(1)="«—œÌ»Â‘ "
@@ -381,8 +382,13 @@ elseif request("act")="cash" then
 			end if
 		case else
 			if mid(sys,1,4)="bank" then 
-				result = result & "<a target=î_blankî href=""../bank/CheqBook.asp?act=showBook&GLAccount=" & mid(sys,5,5) & "&FromDate="
-				result = result & Server.URLEncode(Ref2&"01")&"&ToDate=" & Server.URLEncode(Ref2&"31")&"&ShowRemained=&displayMode=0"">" 
+				if myMonth<>"" then 
+					result = result & "<a title='" & desc & "' target=î_blankî href=""../bank/CheqBook.asp?act=showBook&GLAccount=" & mid(sys,5,5) & "&FromDate="
+					result = result & Server.URLEncode(Ref2)&"&ToDate=" & Server.URLEncode(Ref2)&"&ShowRemained=&displayMode=0"">" 		
+				else
+					result = result & "<a target=î_blankî href=""../bank/CheqBook.asp?act=showBook&GLAccount=" & mid(sys,5,5) & "&FromDate="
+					result = result & Server.URLEncode(Ref2&"01")&"&ToDate=" & Server.URLEncode(Ref2&"31")&"&ShowRemained=&displayMode=0"">" 
+				end if
 			end if
 		end select
 		result = result & Separate(num) 
@@ -390,13 +396,17 @@ elseif request("act")="cash" then
 		result = result & "</td>"
 		echoTD = result
 	end function
-	mySQL="select * from (select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17003 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17004 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42001 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42004 group by SUBSTRING(Ref2,1,8),GLAccount) drv order by Ref2,GLAccount"
+	if myMonth<>"" then 
+		mySQL="select * from (select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) union select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) union select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) union select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) dev order by Ref2,GLAccount"
+	else
+		mySQL="select * from (select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17003 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17004 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42001 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42004 group by SUBSTRING(Ref2,1,8),GLAccount) drv order by Ref2,GLAccount"
+	end if
 	'response.write mySQL
 	set rs=Conn.Execute(mySQL)
-	If rs.EOF then
-		Conn.Close
-		response.redirect "?errMsg=" & Server.URLEncode("Œÿ«Ì ⁄ÃÌ»! çÌ“Ì ÅÌœ« ‰‘œ")
-	end if
+	
+		'Conn.Close
+		'response.redirect "?errMsg=" & Server.URLEncode("Œÿ«Ì ⁄ÃÌ»! çÌ“Ì ÅÌœ« ‰‘œ")
+	
 	sub setValue()
 		select case rs("GLAccount")
 			case "17003":
@@ -408,6 +418,11 @@ elseif request("act")="cash" then
 			case "42004":
 				amount42004 = CDbl(rs("Amount"))			
 		end select
+		if myMonth<>"" then 
+			desc=rs("description")
+		else
+			desc=""
+		end if
 		rs.MoveNext
 		if not rs.eof then 
 			if ref2=rs("Ref2") then
@@ -416,69 +431,84 @@ elseif request("act")="cash" then
 			end if
 		end if
 	end sub
-%>
-<table>
-	<tr class="RepTableHeader">
-		<td rowspan="2" colspan="2">&nbsp;</td>
-		<td colspan="2">œ— Ã—Ì«‰ Ê’Ê·</td>
-		<td rowspan="2">Ã„⁄ œ— Ã—Ì«‰</td>
-		<td colspan="2">«”‰«œ Å—œ«Œ ‰Ì</td>
-		<td rowspan="2">Ã„⁄ «”‰«œ Å—œ«Œ ‰Ì</td>
-		<td rowspan="2">ﬂ”—Ì</td>
-	</tr>
-	<tr class="RepTableHeader">
-		<td>17003</td>
-		<td>17004</td>
-		<td>42001</td>
-		<td>42004</td>
-	</tr>
-	<%
-	rowColor="RepTR0"
-	do while not rs.eof
-	ref2=rs("Ref2")
-	if rowColor="RepTR0" then 
-		rowColor="RepTR1"
-	else
-		rowColor="RepTR0"
-	end if
+	If not rs.EOF then
 	%>
-	<tr class="<%=rowColor%>">
+	<table>
+		<tr class="RepTableHeader">
+			<td rowspan="2" colspan="2">&nbsp;</td>
+			<td colspan="2">œ— Ã—Ì«‰ Ê’Ê·</td>
+			<td rowspan="2">Ã„⁄ œ— Ã—Ì«‰</td>
+			<td colspan="2">«”‰«œ Å—œ«Œ ‰Ì</td>
+			<td rowspan="2">Ã„⁄ «”‰«œ Å—œ«Œ ‰Ì</td>
+			<td rowspan="2">ﬂ”—Ì</td>
+		</tr>
+		<tr class="RepTableHeader">
+			<td>17003</td>
+			<td>17004</td>
+			<td>42001</td>
+			<td>42004</td>
+		</tr>
 		<%
-		yyyy=mid(ref2,1,4)
-		mm=fmonth(cint(mid(ref2,6,2))-1)
-		amount17003=0
-		amount17004=0
-		amount42001=0
-		amount42004=0
-		
-		call setValue()
+		rowColor="RepTR0"
+		do while not rs.eof
+		ref2=rs("Ref2")
+		if rowColor="RepTR0" then 
+			rowColor="RepTR1"
+		else
+			rowColor="RepTR0"
+		end if
 		%>
-		<td title="<%=ref2%>"><%=yyyy%></td>
-		<td><%=mm%></td>
+		<tr class="<%=rowColor%>">
+			<%
+			yyyy=mid(ref2,1,4)
+			if myMonth<>"" then 
+				mm=ref2
+			else
+				mm=fmonth(cint(mid(ref2,6,2))-1)
+			end if
+			amount17003=0
+			amount17004=0
+			amount42001=0
+			amount42004=0
+			
+			call setValue()
+			%>
+			<td title="<%=ref2%>"><%=yyyy%></td>
+			<%if myMonth<>"" then%>
+			<td><%=mm%></td>
+			<%else%>
+			<td title='»—«Ì „‘«ÂœÂ Ã“∆Ì«  ﬂ·Ìﬂ ﬂ‰Ìœ'><a href="otherReports.asp?act=cash&month=<%=replace(mid(ref2,1,8),"/","-")%>"><%=mm%></a></td>
+			<%
+			end if
+			response.write echoTD(amount17003,"bank17003")
+			response.write echoTD(amount17004,"bank17003")
+			response.write echoTD(amount17003+amount17004,"")
+			response.write echoTD(amount42001,"bank42001")
+			response.write echoTD(amount42004,"bank42004")
+			response.write echoTD(amount42001+amount42004,"")
+			response.write echoTD(amount17003+amount17004-(amount42001+amount42004),"")
+			%>
+			
+		</tr>
 		<%
-		response.write echoTD(amount17003,"bank17003")
-		response.write echoTD(amount17004,"bank17003")
-		response.write echoTD(amount17003+amount17004,"")
-		response.write echoTD(amount42001,"bank42001")
-		response.write echoTD(amount42004,"bank42004")
-		response.write echoTD(amount42001+amount42004,"")
-		response.write echoTD(amount17003+amount17004-(amount42001+amount42004),"")
-		%>
-		
-	</tr>
-	<%
-	loop
-
-	mySQL="select * from (select sum(RemainedAmount) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(RemainedAmount) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ap' as sys from APItems where FullyApplied=0 and Voided=0 and APItems.Type=6 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(amountOriginal) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ar-full' as sys from ARItems where  Voided=0 and ARItems.Type=1 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(amountOriginal) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ap-full' as sys from APItems where Voided=0 and APItems.Type=6 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8)) dev order by EffectiveDate,sys"
-	
+		loop
+	%>
+</table>
+<%
+	end if
+	if myMonth<>"" then 
+		mySQL="select * from (select RemainedAmount, EffectiveDate, 'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and SUBSTRING(EffectiveDate,1,8)='" & myMonth & "' UNION select RemainedAmount, EffectiveDate, 'ap' as sys from APItems where FullyApplied=0 and Voided=0 and APItems.Type=6 and SUBSTRING(EffectiveDate,1,8)='" & myMonth & "' UNION select amountOriginal as RemainedAmount, EffectiveDate, 'ar-full' as sys from ARItems where  Voided=0 and ARItems.Type=1 and SUBSTRING(EffectiveDate,1,8)='" & myMonth & "' UNION select amountOriginal as RemainedAmount, EffectiveDate, 'ap-full' as sys from APItems where Voided=0 and APItems.Type=6 and SUBSTRING(EffectiveDate,1,8)='" & myMonth & "' ) dev order by EffectiveDate,sys"
+	else
+		mySQL="select * from (select sum(RemainedAmount) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(RemainedAmount) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ap' as sys from APItems where FullyApplied=0 and Voided=0 and APItems.Type=6 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(amountOriginal) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ar-full' as sys from ARItems where  Voided=0 and ARItems.Type=1 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(amountOriginal) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ap-full' as sys from APItems where Voided=0 and APItems.Type=6 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8)) dev order by EffectiveDate,sys"
+	end if
 	mySQLold="select sum(RemainedAmount) as RemainedAmount,'old' as EffectiveDate,'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and EffectiveDate<'1388/01/01' UNION select sum(RemainedAmount) as RemainedAmount, 'old' as EffectiveDate,'ap' as sys from APItems where FullyApplied=0 and Voided=0 and APItems.Type=6 and EffectiveDate<'1388/01/01' UNION select sum(amountOriginal) as RemainedAmount,'old' as EffectiveDate,'ar-full' as sys from ARItems where Voided=0 and ARItems.Type=1 and EffectiveDate<'1388/01/01' UNION select sum(amountOriginal) as RemainedAmount, 'old' as EffectiveDate,'ap-full' as sys from APItems where Voided=0 and APItems.Type=6 and EffectiveDate<'1388/01/01'"
 
 	set rs=Conn.Execute(mySQL)
 	set rsOLD=conn.Execute(mySQLold)
-	If rs.EOF or rsOLD.EOF then
-		Conn.Close
-		response.redirect "?errMsg=" & Server.URLEncode("Œÿ«Ì ⁄ÃÌ»! çÌ“Ì ÅÌœ« ‰‘œ")
-	end if
+	
+		'Conn.Close
+		'response.redirect "?errMsg=" & Server.URLEncode("Œÿ«Ì ⁄ÃÌ»! çÌ“Ì ÅÌœ« ‰‘œ")
+	
 	sub setAXValue(RSs)
 		select case RSs("sys")
 			case "ap"
@@ -498,101 +528,119 @@ elseif request("act")="cash" then
 			end if
 		end if
 	end sub
-
+	If not rs.EOF and not rsOLD.EOF then
 	%>
-</table>
-<table>
-	<tr class="RepTableHeader">
-		<td colspan="2">&nbsp;</td>
-		<td>›—Ê‘</td>
-		<td>ﬂ· ›—Ê‘</td>
-		<td>œ—’œ „«‰œÂ</td>
-		<td>Œ—Ìœ</td>
-		<td>ﬂ· Œ—Ìœ</td>
-		<td>œ—’œ „«‰œÂ</td>
-	</tr>
-	
-	<%
-	rowColor="RepTR0"
-	do while not rsOLD.eof
-		EffectiveDate=rsOLD("EffectiveDate")
-		%>
-		<tr class="<%=rowColor%>">
-			<%
-			arRemainedAmount=0
-			apRemainedAmount=0	
-			arTotal=0
-			apTotal=0		
-			call setAXValue(rsOLD)
-			%>
-			<td colspan="2">„«‰œÂ ﬁœÌ„Ì</td>
-			<%
-			response.write echoTD(arRemainedAmount, "ar")
-			response.write echoTD(arTotal, "ar-full")
-			response.write echoTD(round(arRemainedAmount/arTotal*100), "")
-			response.write echoTD(apRemainedAmount, "ap")
-			response.write echoTD(apTotal, "ap-full")
-			response.write echoTD(round(apRemainedAmount/apTotal*100), "")
-			%>
+	<table>
+		<tr class="RepTableHeader">
+			<td colspan="2">&nbsp;</td>
+			<td>„«‰œÂ ›—Ê‘</td>
+			<td>ﬂ· ›—Ê‘</td>
+			<td>œ—’œ „«‰œÂ</td>
+			<td>„«‰œÂ Œ—Ìœ</td>
+			<td>ﬂ· Œ—Ìœ</td>
+			<td>œ—’œ „«‰œÂ</td>
 		</tr>
+		
 		<%
-			
-	loop
-	arRemainedAmountSum=0
-	apRemainedAmountSum=0
-	arTotalAmountSum=0
-	apTotalAmountSum=0
-	do while not rs.eof
-		EffectiveDate=rs("EffectiveDate")
+		rowColor="RepTR0"
+		if myMonth="" then 
+			do while not rsOLD.eof
+				EffectiveDate=rsOLD("EffectiveDate")
+				%>
+				<tr class="<%=rowColor%>">
+					<%
+					arRemainedAmount=0
+					apRemainedAmount=0	
+					arTotal=0
+					apTotal=0		
+					call setAXValue(rsOLD)
+					%>
+					<td colspan="2">„«‰œÂ ﬁœÌ„Ì</td>
+					<%
+					response.write echoTD(arRemainedAmount, "ar")
+					response.write echoTD(arTotal, "ar-full")
+					response.write echoTD(round(arRemainedAmount/arTotal*100), "")
+					response.write echoTD(apRemainedAmount, "ap")
+					response.write echoTD(apTotal, "ap-full")
+					response.write echoTD(round(apRemainedAmount/apTotal*100), "")
+					%>
+				</tr>
+				<%
+					
+			loop
+		end if
+		arRemainedAmountSum=0
+		apRemainedAmountSum=0
+		arTotalAmountSum=0
+		apTotalAmountSum=0
+		do while not rs.eof
+			EffectiveDate=rs("EffectiveDate")
+			if rowColor="RepTR0" then 
+				rowColor="RepTR1"
+			else
+				rowColor="RepTR0"
+			end if
+			%>
+			<tr class="<%=rowColor%>">
+				<%
+				yyyy=mid(EffectiveDate,1,4)
+				if myMonth<>"" then 
+					mm= mid(EffectiveDate,6,5)
+				else
+					mm=fmonth(cint(mid(EffectiveDate,6,2))-1)
+				end if
+				arRemainedAmount=0
+				apRemainedAmount=0
+				call setAXValue(rs)
+				arRemainedAmountSum=arRemainedAmountSum+arRemainedAmount
+				apRemainedAmountSum=apRemainedAmountSum+apRemainedAmount
+				arTotalAmountSum=arTotalAmountSum+arTotal
+				apTotalAmountSum=apTotalAmountSum+apTotal
+				%>
+				<td title="<%=EffectiveDate%>"><%=yyyy%></td>
+				<%if myMonth<>"" then%>
+				<td><%=mm%></td>
+				<%else%>
+				<td title='»—«Ì „‘«ÂœÂ Ã“∆Ì«  ﬂ·Ìﬂ ﬂ‰Ìœ'><a href="otherReports.asp?act=cash&month=<%=replace(mid(effectiveDate,1,8),"/","-")%>"><%=mm%></a></td>
+				<%
+				end if
+				response.write echoTD(arRemainedAmount, "ar")
+				response.write echoTD(arTotal, "ar-full")
+				if arTotal>0 then 
+					response.write echoTD(round(arRemainedAmount/arTotal*100), "")
+				else
+					response.write echoTD(0,"")
+				end if
+				response.write echoTD(apRemainedAmount, "ap")
+				response.write echoTD(apTotal, "ap-full")
+				if apTotal>0 then 
+					response.write echoTD(round(apRemainedAmount/apTotal*100), "")
+				else
+					response.write echoTD(0,"")
+				end if
+				%>
+			</tr>
+			<%
+		loop
 		if rowColor="RepTR0" then 
 			rowColor="RepTR1"
 		else
 			rowColor="RepTR0"
 		end if
-		%>
-		<tr class="<%=rowColor%>">
-			<%
-			yyyy=mid(EffectiveDate,1,4)
-			mm=fmonth(cint(mid(EffectiveDate,6,2))-1)
-			arRemainedAmount=0
-			apRemainedAmount=0
-			call setAXValue(rs)
-			arRemainedAmountSum=arRemainedAmountSum+arRemainedAmount
-			apRemainedAmountSum=apRemainedAmountSum+apRemainedAmount
-			arTotalAmountSum=arTotalAmountSum+arTotal
-			apTotalAmountSum=apTotalAmountSum+apTotal
-			%>
-			<td title="<%=EffectiveDate%>"><%=yyyy%></td>
-			<td><%=mm%></td>
-			<%
-			response.write echoTD(arRemainedAmount, "ar")
-			response.write echoTD(arTotal, "ar-full")
-			response.write echoTD(round(arRemainedAmount/arTotal*100), "")
-			response.write echoTD(apRemainedAmount, "ap")
-			response.write echoTD(apTotal, "ap-full")
-			response.write echoTD(round(apRemainedAmount/apTotal*100), "")
-			%>
-		</tr>
-		<%
-	loop
-	if rowColor="RepTR0" then 
-		rowColor="RepTR1"
-	else
-		rowColor="RepTR0"
-	end if
-	
-%>
-		<tr class="<%=rowColor%>">
-			<td colspan="2">Ã„⁄ »œÊ‰ „«‰œÂùÂ«</td>
-			<td><%=Separate(arRemainedAmountSum)%></td>
-			<td><%=Separate(arTotalAmountSum)%></td>
-			<td><%=Round(arRemainedAmountSum/arTotalAmountSum*100)%></td>
-			<td><%=Separate(apRemainedAmountSum)%></td>
-			<td><%=Separate(apTotalAmountSum)%></td>
-			<td><%=Round(apRemainedAmountSum/apTotalAmountSum*100)%></td>
-		</tr>
-</table>
+		
+	%>
+			<tr class="<%=rowColor%>">
+				<td colspan="2">Ã„⁄ »œÊ‰ „«‰œÂùÂ«</td>
+				<td><%=Separate(arRemainedAmountSum)%></td>
+				<td><%=Separate(arTotalAmountSum)%></td>
+				<td><%=Round(arRemainedAmountSum/arTotalAmountSum*100)%></td>
+				<td><%=Separate(apRemainedAmountSum)%></td>
+				<td><%=Separate(apTotalAmountSum)%></td>
+				<td><%=Round(apRemainedAmountSum/apTotalAmountSum*100)%></td>
+			</tr>
+	</table>
 <%
+	end if
 elseif request("act")="MoeenRep" then
 
 	ON ERROR RESUME NEXT
