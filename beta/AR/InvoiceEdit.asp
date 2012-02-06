@@ -278,7 +278,7 @@ elseif request("act")="editInvoice" then
 
 <%		
 	i=0
-	mySQL="SELECT *,InvoiceLines.ID as lineID FROM InvoiceLines LEFT OUTER JOIN invoiceItems ON InvoiceLines.item = invoiceItems.id WHERE (Invoice='"& InvoiceID & "') "
+	mySQL="SELECT *,InvoiceLines.ID as lineID,isnull(invoiceItems.fee,0) as ItemFee FROM InvoiceLines LEFT OUTER JOIN invoiceItems ON InvoiceLines.item = invoiceItems.id WHERE (Invoice='"& InvoiceID & "') "
 	Set RS1 = conn.Execute(mySQL)
 	while not(RS1.eof) 
 	if RS1("Item") <> 39999 then
@@ -288,7 +288,7 @@ elseif request("act")="editInvoice" then
 				<td align='center' width="25px"><%=i%></td>
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Items" value="<%=RS1("Item")%>" size="3" Maxlength="6" onKeyPress="return mask(this,event);" onfocus="setCurrentRow(this.parentNode.parentNode.rowIndex);" onChange='return check(this);'>
 				<INPUT TYPE="hidden" name="type" value="<%=RS1("type")%>">
-				<INPUT TYPE="hidden" name="fee" value="<%=RS1("fee")%>">
+				<INPUT TYPE="hidden" name="fee" value="<%=RS1("ItemFee")%>">
 				<input type='hidden' name='hasVat' value='<%=text2value(RS1("hasVat"))%>'>
 				<input type='hidden' name='lineID' value='<%=RS1("lineID")%>'>
 				</td>
@@ -298,7 +298,7 @@ elseif request("act")="editInvoice" then
 				<td dir="LTR"><INPUT class="InvRowInput2" TYPE="text" NAME="Qttys" value="<%=RS1("Qtty")%>" size="3" onBlur="setFeeQtty(this);"></td>
 				<td dir="LTR"><INPUT class="InvRowInput2" TYPE="text" NAME="Sets" value="<%=RS1("Sets")%>" size="2" onBlur="setFeeQtty(this);"></td>
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="AppQttys" value="<%=Separate(RS1("AppQtty"))%>" size="6" onBlur="setPrice(this);"></td>
-				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Fees" <%if (cdbl(rs1("price"))>0 and cint(RS1("type"))<>0) then response.write " readonly='readonly' "%> value="<%if RS1("AppQtty") <> 0 then response.write Separate(RS1("Price")/RS1("AppQtty")) else response.write "0"%>" size="7" onBlur="setPrice(this);"></td>
+				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Fees" <% if (cdbl(rs1("ItemFee"))>0 and cint(RS1("type"))<>0) then response.write " readonly='readonly' "%> value="<%if RS1("AppQtty") <> 0 then response.write Separate(RS1("Price")/RS1("AppQtty")) else response.write "0"%>" size="7" onBlur="setPrice(this);"></td>
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Prices" value="<%=Separate(RS1("Price"))%>" size="9" readonly tabIndex="9999"></td>
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Discounts" value="<%=Separate(RS1("Discount"))%>" size="7" onBlur="setPrice(this);"></td><!-- S A M -->
 				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Reverses" value="<%=Separate(RS1("Reverse"))%>" size="5" onBlur="setPrice(this);" onfocus="setCurrentRow(this.parentNode.parentNode.rowIndex);"></td><!-- S A M -->
