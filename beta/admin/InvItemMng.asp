@@ -136,8 +136,8 @@ function checkValidation(){
 		<TD><INPUT TYPE="text" NAME="from_box" value='<%=request.form("from_box")%>' size="10" tabIndex="3"></TD>
 		<TD>ÊÇ ÔãÇÑå</TD>
 		<TD><INPUT TYPE="text" NAME="to_box" value='<%=request.form("to_box")%>' size="10" tabIndex="4"></TD>
-		<TD>İŞØ ˜ÏåÇí İÚÇá äãÇíÔ ÏÇÏå ÔæäÏ</TD>
-		<TD><INPUT type='checkbox' <%if request.form("enable_chk") = "on" then response.write("checked")%>' name='enable_chk'></TD>
+		<TD>İŞØ ßÏåÇí İÚÇá äãÇíÔ ÏÇÏå ÔæäÏ</TD>
+		<TD><INPUT type='checkbox' <%if request.form("enable_chk") = "on" then response.write("checked='checked'")%> name='enable_chk'></TD>
 		<TD><INPUT TYPE="submit" Name="Submit" Value="ÌÓÊÌæ" style="width:100px; font-family:tahoma,arial;"></TD>
 	</TR>
 	</TABLE></TD></FORM>
@@ -171,7 +171,7 @@ function checkValidation(){
 	</TR>
 	<TR>
 		<TD>
-			˜Ï ÂíÊã: &nbsp;<INPUT TYPE="Text" NAME="id_box">
+			ßÏ ÂíÊã: &nbsp;<INPUT TYPE="Text" NAME="id_box">
 		</TD>
 		<TD>ßÏ ßÇáÇ/ÓÑæíÓ ãÑÊÈØ: </TD>
 		<TD><INPUT TYPE="Text" NAME="InvItm_box" dir=LTR style="text-align:right"></TD>
@@ -270,7 +270,7 @@ if request("act")="add" AND request.form("name_box")<>"" AND isnumeric(request.f
 		RS1.close
 	end if
 
-	response.write "<B>Updated...</B><BR>"
+	response.write "<B>Updated…</B><BR>"
 
 	myCriteria= "[name] LIKE N'"& ItemName & "'"
 end if
@@ -281,8 +281,8 @@ if request("act")="search" OR request("act")="add" then
 	isEnabled = ""
 	if isnumeric(request.form("from_box")) Then fromCode = cdbl(request.form("from_box"))
 	if isnumeric(request.form("to_box")) then toCode = cdbl(request.form("to_box"))
-	if fromCode < 30000 then fromCode = 30000
-	if toCode > 999999 or toCode < 30000 then toCode = 99999
+	'if fromCode < 30000 then fromCode = 30000
+	if toCode > 999999 then toCode = 99999
 	if request.form("enable_chk") = "on" then isEnabled = " AND (Enabled = 1) "
 	'response.write(toCode)
 	mySQL="SELECT * FROM InvoiceItems WHERE ("& myCriteria & ") AND ([ID] BETWEEN " & fromCode & " AND " & toCode & ")" & isEnabled & "ORDER BY [ID]"
@@ -294,7 +294,7 @@ if request("act")="search" OR request("act")="add" then
 		<br>
 		<TABLE border="1" cellspacing="0" cellpadding="2" dir="RTL" borderColor="#555588" width="60%" id="result">
 			<TR bgcolor="#CCCCFF">
-				<TD style="height:50px;">˜Ï ÂíÊã</TD>
+				<TD style="height:50px;">ßÏ ÂíÊã</TD>
 				<TD>äÇã ÂíÊã</TD>
 				<TD>İÚÇá</TD>
 				<TD width=120>äæÚ ŞíãÊ ĞÇÑí</TD>
