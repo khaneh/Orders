@@ -131,7 +131,75 @@ if request("act")="" then
 	 %>
 	</TD>
 </TR>
+<TR>
+	<TD width="130">
+	<%
+	if Auth(8,"G") then 
+	%>
+		<table class="RepTable2">
+			<tr>
+				<td colspan="2">ê“«—‘  Ã“ÌÂ «”‰«œ</td>
+			</tr>
+			<tr>
+				<td><a href="otherReports.asp?act=sepPay">«”‰«œ Å—œ«Œ ‰Ì</a></td>
+				<td><a href="otherReports.asp?act=sepRec">«”‰«œ œ—Ì«› ‰Ì</a></td>
+			</tr>
+		</table>
+	<%	
+	end if
+	%>
+	</td>
+	<td></td>
 </TABLE>
+<%
+'-----------------------------------------------------------------------------------------------------
+'-----------------------------------------------------------------------------------------------------
+'-----------------------------------------------------------------------------------------------------
+elseif request("act")="sepPay" or request("act")="sepRec" then 
+	if request("act")="sepPay" then 
+		mySQL="select g42.*, case when g41.glAccount=41001 then N' Ã«—Ì' else N'€Ì—  Ã«—Ì' end as state from EffectiveGLRows as g42 inner join EffectiveGLRows as g41 on g41.glDoc=g42.glDoc and g41.sys=g42.sys and g41.link=g42.link where g42.GL=" & openGL & " and g42.glAccount between 42000 and 42999 and g41.glAccount between 41000 and 41999"
+	else
+		mySQL="select g17.*, case when g13.glAccount=13003 then N' Ã«—Ì' else N'€Ì—  Ã«—Ì' end as state from EffectiveGLRows as g17 inner join EffectiveGLRows as g13 on g17.glDoc=g13.glDoc and g17.sys=g13.sys and g17.link=g13.link where g17.GL=" & openGL & " and g17.glAccount between 17000 and 17999 and g17.ref1<>'' and not g13.glAccount between 17000 and 17999 "
+	end if
+	set rs=Conn.Execute(mySQL)
+%>
+<table class="RepTable">
+	<tr class="RepTableHeader">
+		<th>‘„«—Â ”‰œ</th>
+		<th> «—ÌŒ ”‰œ</th>
+		<th>„⁄Ì‰</th>
+		<th>„»·€</th>
+		<th>‘—Õ</th>
+		<th>‘„«—Â çﬂ</th>
+		<th> «—ÌŒ çﬂ</th>
+		<th>Ê÷⁄Ì </th>
+	</tr>
+<%
+	rowColor="RepTR0"
+	while not rs.eof
+		theLink = "ShowItem.asp?sys=" & rs("sys") & "&Item=" & rs("Link")
+		if rowColor="RepTR0" then 
+			rowColor="RepTR1"
+		else
+			rowColor="RepTR0"
+		end if
+	%>
+	<tr class="<%=rowColor%>">
+		<td style="cursor:hand;" title="»—«Ì ‰„«Ì‘ ”‰œ Õ”«»œ«—Ì „—»ÊÿÂ ﬂ·Ìﬂ ﬂ‰Ìœ." onclick="window.open('GLMemoDocShow.asp?id=<%=rs("glDoc")%>');"><%=rs("glDocID")%></td>
+		<td><%=rs("glDocDate")%></td>
+		<td><%=rs("glAccount")%></td>
+		<td><%=Separate(rs("amount"))%></td>
+		<td style="cursor:hand;" title="»—«Ì ‰„«Ì‘ ”‰œ “Ì— ”Ì” „ „—»ÊÿÂ ﬂ·Ìﬂ ﬂ‰Ìœ." onclick="window.open('<%=theLink%>');"><%=rs("description")%></td>
+		<td style="cursor:hand;" title="»—«Ì ‰„«Ì‘ çﬂ „—»ÊÿÂ ﬂ·Ìﬂ ﬂ‰Ìœ." onclick="window.open('../bank/CheqBook.asp?act=findCheq&cheque=<%=rs("ref1")%>&amount=<%=rs("amount")%>');"><%=rs("ref1")%></td>
+		<td><%=rs("ref2")%></td>
+		<td><%=rs("state")%></td>
+
+	</tr>
+	<%
+		rs.moveNext
+	wend
+%>
+</table>
 <%
 '-----------------------------------------------------------------------------------------------------
 '-----------------------------------------------------------------------------------------------------
@@ -220,20 +288,37 @@ elseif request("act")="finState" then
 	</tr>
 </table>
 <%	
-	elseif request("rep")=" —«“ ‰«„Â" then 
+	elseif request("rep")=" —«“ ‰«„Â" then
+		'mySQL="select sum(g42.amount) as amount from EffectiveGLRows as g42 inner join EffectiveGLRows as g41 on g41.glDoc=g42.glDoc and g41.sys=g42.sys and g41.link=g42.link where g42.GL=" & openGL & " and g42.glAccount between 42000 and 42999 and g41.glAccount between 41000 and 41999 and g42.isCredit=1 and g41.glAccount=41001"
+		mySQL="select isnull(sum(amount),0) as amount from (select sum(amount)/count(id) as amount from EffectiveGLRows inner join (select g42.ref1,g42.ref2 from EffectiveGLRows as g42 inner join EffectiveGLRows as g41 on g41.glDoc=g42.glDoc and g41.sys=g42.sys and g41.link=g42.link where g42.GL=" & openGL & " and g42.glAccount between 42000 and 42999 and g41.glAccount between 41000 and 41999 and g42.isCredit=1 and g41.glAccount=41001 and g42.ref1<>'' and g42.glDocDate between '" & fromDate & "' and '" & toDate & "') as drv on EffectiveGLRows.Ref1=drv.ref1 and EffectiveGLRows.ref2=drv.ref2 where EffectiveGLRows.gl=" & openGL & " and glAccount between 42000 and 42999 and glDocDate between '" & fromDate & "' and '" & toDate & "' group by GLAccount, Tafsil, Amount,EffectiveGLRows.ref1,EffectiveGLRows.ref2 having count(EffectiveGLRows.ref1) % 2 =1) as d"
+		rs=conn.Execute(mySQL)
+		accountsPayableTej = cdbl(rs("amount"))
+		'mySQL="select sum(g42.amount) as amount from EffectiveGLRows as g42 inner join EffectiveGLRows as g41 on g41.glDoc=g42.glDoc and g41.sys=g42.sys and g41.link=g42.link where g42.GL=" & openGL & " and g42.glAccount between 42000 and 42999 and g41.glAccount between 41000 and 41999 and g42.isCredit=1 and g41.glAccount<>41001"
+		mySQL="select isnull(sum(amount),0) as amount from (select sum(amount)/count(id) as amount from EffectiveGLRows inner join (select g42.ref1,g42.ref2 from EffectiveGLRows as g42 inner join EffectiveGLRows as g41 on g41.glDoc=g42.glDoc and g41.sys=g42.sys and g41.link=g42.link where g42.GL=" & openGL & " and g42.glAccount between 42000 and 42999 and g41.glAccount between 41000 and 41999 and g42.isCredit=1 and g41.glAccount<>41001 and g42.ref1<>'' and g42.glDocDate between '" & fromDate & "' and '" & toDate & "') as drv on EffectiveGLRows.Ref1=drv.ref1 and EffectiveGLRows.ref2=drv.ref2 where EffectiveGLRows.gl=" & openGL & " and glAccount between 42000 and 42999 and glDocDate between '" & fromDate & "' and '" & toDate & "' group by GLAccount, Tafsil, Amount,EffectiveGLRows.ref1,EffectiveGLRows.ref2 having count(EffectiveGLRows.ref1) % 2 =1) as d"
+		rs=conn.Execute(mySQL)
+		accountsPayableNonTej = cdbl(rs("amount"))
+		'mySQL="select sum(g17.amount) as amount from EffectiveGLRows as g17 inner join EffectiveGLRows as g13 on g17.glDoc=g13.glDoc and g17.sys=g13.sys and g17.link=g13.link where g17.GL=" & openGL & " and g17.glAccount between 17000 and 17999 and g17.ref1<>'' and not g13.glAccount between 17000 and 17999 and g17.isCredit=0 and g13.glAccount <> 13003"
+		mySQL="select isnull(sum(amount),0) as amount from (select sum(amount)/count(id) as amount from EffectiveGLRows inner join (select g17.ref1,g17.ref2 from EffectiveGLRows as g17 inner join EffectiveGLRows as g13 on g17.glDoc=g13.glDoc and g17.sys=g13.sys and g17.link=g13.link where g17.GL=" & openGL & " and g17.glAccount between 17000 and 17999 and g17.ref1<>'' and not g13.glAccount between 17000 and 17999 and g17.isCredit=0 and g13.glAccount <> 13003 and g17.glDocDate between '" & fromDate & "' and '" & toDate & "') as drv on EffectiveGLRows.Ref1=drv.ref1 and EffectiveGLRows.ref2=drv.ref2 where EffectiveGLRows.gl=" & openGL & " and glAccount between 17000 and 17999 and glDocDate between '" & fromDate & "' and '" & toDate & "' group by GLAccount, Tafsil, Amount,EffectiveGLRows.ref1,EffectiveGLRows.ref2 having count(EffectiveGLRows.ref1) % 2 =1) as d"
+		rs=conn.Execute(mySQL) 
+		accountsReceviableNonTej = cdbl(rs("amount"))
+		'mySQL="select sum(g17.amount) as amount from EffectiveGLRows as g17 inner join EffectiveGLRows as g13 on g17.glDoc=g13.glDoc and g17.sys=g13.sys and g17.link=g13.link where g17.GL=" & openGL & " and g17.glAccount between 17000 and 17999 and g17.ref1<>'' and not g13.glAccount=13003 and g17.isCredit=0"
+		mySQL="select isnull(sum(amount),0) as amount from (select sum(amount)/count(id) as amount from EffectiveGLRows inner join (select g17.ref1,g17.ref2 from EffectiveGLRows as g17 inner join EffectiveGLRows as g13 on g17.glDoc=g13.glDoc and g17.sys=g13.sys and g17.link=g13.link where g17.GL=" & openGL & " and g17.glAccount between 17000 and 17999 and g17.ref1<>'' and not g13.glAccount=13003 and g17.isCredit=0 and g17.glDocDate between '" & fromDate & "' and '" & toDate & "') as drv on EffectiveGLRows.Ref1=drv.ref1 and EffectiveGLRows.ref2=drv.ref2 where EffectiveGLRows.gl=" & openGL & " and glAccount between 17000 and 17999 and glDocDate between '" & fromDate & "' and '" & toDate & "' group by GLAccount, Tafsil, Amount,EffectiveGLRows.ref1,EffectiveGLRows.ref2 having count(EffectiveGLRows.ref1) % 2 =1) as d"
+		rs=conn.Execute(mySQL)
+		accountsReceviableTej = cdbl(rs("amount"))
+		
 		cash=abs(getRem(11000,"group")) + abs(getRem(12000,"group"))
-		accountsReceviable = abs(getRem(13000,"group")) + abs(getRem(15000,"group")) + abs(getRem(17000,"group")) + abs(getRem(18000,"group"))
+		'accountsReceviable = abs(getRem(13000,"group")) + abs(getRem(15000,"group")) + abs(getRem(17000,"group")) + abs(getRem(18000,"group"))
 		inventory = abs(getRem(14000,"group"))
 		orders = abs(getRem(16000,"group"))
 		plant = abs(getRem(26000,"group"))-abs(getRem(26100,"group"))
 		properties = abs(getRem(27000,"group"))-abs(getRem(27100,"group"))
 		otherAsset = abs(getRem(29000,"group"))
-		totalAsset = cash + accountsReceviable + inventory + orders + plant + properties + otherAsset
-		accountsPayable = abs(getRem(41000,"group"))+abs(getRem(42000,"group"))
+		totalAsset = cash + accountsReceviableTej + accountsReceviableNonTej + inventory + orders + plant + properties + otherAsset
+		'accountsPayable = abs(getRem(41000,"group"))+abs(getRem(42000,"group"))
 		bankDebit = abs(getRem(46000,"group"))
 		personsDebit = abs(getRem(44000,"group"))
 		otherDebit =  abs(getRem(43000,"group")) + abs(getRem(45000,"group")) + abs(getRem(47000,"group")) + abs(getRem(49000,"group")) + abs(getRem(71000,"group"))
-		totalDebit = accountsPayable + bankDebit + personsDebit + otherDebit
+		totalDebit = accountsPayableTej + accountsPayableNonTej + bankDebit + personsDebit + otherDebit
 		equity = abs(getRem(50100,"group"))
 		retainedEarnings = getRem(51000,"group") + getRem(52000,"group") + getRem(53000,"group") + getRem(54000,"group") + getRem(55000,"group") + getRem(59000,"group")
 		periodEarnings = 0
@@ -250,11 +335,11 @@ elseif request("act")="finState" then
 	</tr>
 	<tr>
 		<td>Õ”«»Â« Ê «”‰«œ œ—Ì«› ‰Ìù  Ã«—Ìù</td>
-		<td rowspan="2"><%=Separate(accountsReceviable)%></td>
+		<td><%=Separate(accountsReceviableTej)%></td>
 	</tr>
 	<tr>
 		<td>Õ”«»Â« Ê «”‰«œ œ—Ì«› ‰Ìù €Ì—  Ã«—Ì</td>
-		<!--td></td-->
+		<td><%=Separate(accountsReceviableNonTej)%></td>
 	</tr>
 	<tr>
 		<td>„ÊÃÊœÌ «‰»«— „Ê«œ «Ê·ÌÂ Ê ﬂ«·«Ì ”«Œ Â ‘œÂ</td>
@@ -282,11 +367,11 @@ elseif request("act")="finState" then
 	</tr>
 	<tr>
 		<td>Õ”«»Â« Ê «”‰«œ Å—œ«Œ ‰Ìù  Ã«—Ìù</td>
-		<td rowspan="2"><%=Separate(accountsPayable)%></td>
+		<td><%=Separate(accountsPayableTej)%></td>
 	</tr>
 	<tr>
 		<td>Õ”«»Â« Ê «”‰«œ Å—œ«Œ ‰Ìù €Ì—  Ã«—Ìù</td>
-<!-- 		<td></td> -->
+		<td><%=Separate(accountsPayableNonTej)%></td>
 	</tr>
 	<tr>
 		<td> ”ÂÌ·« ù „«·Ì »«‰ﬂÌ</td>
@@ -362,7 +447,11 @@ elseif request("act")="cash" then
 		case "ap" '------------ AP Items
 			result = result & "<a target=î_blankî href=""../AP/report.asp?fromDate="
 			if EffectiveDate<>"old" then 
-				result = result & Server.URLEncode(EffectiveDate&"01")&"&toDate=" & Server.URLEncode(EffectiveDate&"31")&"&vouchers=on&payments=on"">" 
+				if myMonth<>"" then 
+					result = result & Server.URLEncode(EffectiveDate)&"&toDate=" & Server.URLEncode(EffectiveDate)&"&vouchers=on&payments=on&Effective=on"">"
+				else
+					result = result & Server.URLEncode(EffectiveDate&"01")&"&toDate=" & Server.URLEncode(EffectiveDate&"31")&"&vouchers=on&payments=on&Effective=on"">" 
+				end if
 			else
 				result = result & Server.URLEncode(shamsiDate(DateAdd("m",-10,Date)))&"&toDate=" & Server.URLEncode(mid(shamsiDate(DateAdd("m",-6,Date)),1,8)) & "31" &"&vouchers=on&payments=on"">" 
 			end if
@@ -375,15 +464,25 @@ elseif request("act")="cash" then
 			end if
 		case "ap-full"
 			result = result & "<a target=î_blankî href=""../AP/report.asp?fromDate="
-			if EffectiveDate<>"old" then 
-				result = result & Server.URLEncode(EffectiveDate&"01")&"&toDate=" & Server.URLEncode(EffectiveDate&"31")&"&vouchers=on&payments=on"">" 
+			if EffectiveDate<>"old" then
+				if myMonth<>"" then 
+					result = result & Server.URLEncode(EffectiveDate)&"&toDate=" & Server.URLEncode(EffectiveDate)&"&vouchers=on&payments=on&Effective=on"">" 
+				else 
+					result = result & Server.URLEncode(EffectiveDate&"01")&"&toDate=" & Server.URLEncode(EffectiveDate&"31")&"&vouchers=on&payments=on&Effective=on"">" 
+				end if
 			else
 				result = result & Server.URLEncode(shamsiDate(DateAdd("m",-10,Date)))&"&toDate=" & Server.URLEncode(mid(shamsiDate(DateAdd("m",-6,Date)),1,8)) & "31" &"&vouchers=on&payments=on"">" 
+			end if
+		case "cash"
+			if myMonth<>"" then 
+				result = result & "<a target=î_blankî href=""AccountInfo.asp?act=account&id=11000&fromDate=" & Server.URLEncode(ref2) & "&DateTo=" & Server.URLEncode(ref2) & """>"
+			else
+				result = result & "<a target=î_blankî href=""AccountInfo.asp?act=account&id=11000&fromDate=" & Server.URLEncode(ref2&"01") & "&DateTo=" & Server.URLEncode(ref2&"31") & """>"
 			end if
 		case else
 			if mid(sys,1,4)="bank" then 
 				if myMonth<>"" then 
-					result = result & "<a title='" & desc & "' target=î_blankî href=""../bank/CheqBook.asp?act=showBook&GLAccount=" & mid(sys,5,5) & "&FromDate="
+					result = result & "<a  target=î_blankî href=""../bank/CheqBook.asp?act=showBook&GLAccount=" & mid(sys,5,5) & "&FromDate="
 					result = result & Server.URLEncode(Ref2)&"&ToDate=" & Server.URLEncode(Ref2)&"&ShowRemained=&displayMode=0"">" 		
 				else
 					result = result & "<a target=î_blankî href=""../bank/CheqBook.asp?act=showBook&GLAccount=" & mid(sys,5,5) & "&FromDate="
@@ -392,14 +491,16 @@ elseif request("act")="cash" then
 			end if
 		end select
 		result = result & Separate(num) 
-		if sys="ar" or sys="ar-full" or sys="ap" or sys="ap-full" then result = result & "</a>"
+		if sys="ar" or sys="ar-full" or sys="ap" or sys="ap-full" or sys="cash" then result = result & "</a>"
 		result = result & "</td>"
 		echoTD = result
 	end function
 	if myMonth<>"" then 
-		mySQL="select * from (select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) union select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) union select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) union select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) dev order by Ref2,GLAccount"
+		mySQL="select * from (select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17003 group by Ref2,glAccount union select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17004 group by Ref2,glAccount union select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42001 group by Ref2,glAccount union select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42004 group by Ref2,glAccount union select sum(Amount) as Amount, GLDocDate collate SQL_Latin1_General_CP1_CI_AS as ref2,11000 as glGroup from EffectiveGLRows where gl=" & OpenGL & " and SUBSTRING(GLDocDate,1,8)='" & myMonth & "' and isCredit=0 and glAccount in (11004,11005,11006,11007) group by GLDocDate) dev order by Ref2,GLAccount"
+		
+		'"select * from (select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) union select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) union select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) union select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) dev order by Ref2,GLAccount"
 	else
-		mySQL="select * from (select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17003 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17004 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42001 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42004 group by SUBSTRING(Ref2,1,8),GLAccount) drv order by Ref2,GLAccount"
+		mySQL="select * from (select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17003 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17004 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42001 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42004 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(GLDocDate,1,8) collate SQL_Latin1_General_CP1_CI_AS as ref2,11000 as glGroup from EffectiveGLRows where gl=" & OpenGL & " and isCredit=0 and glAccount in (11004,11005,11006,11007) group by SUBSTRING(GLDocDate,1,8)) drv order by Ref2,GLAccount"
 	end if
 	'response.write mySQL
 	set rs=Conn.Execute(mySQL)
@@ -416,13 +517,11 @@ elseif request("act")="cash" then
 			case "42001":
 				amount42001 = CDbl(rs("Amount"))
 			case "42004":
-				amount42004 = CDbl(rs("Amount"))			
+				amount42004 = CDbl(rs("Amount"))	
+			case "11000":
+				amount11000 = CDbl(rs("Amount"))		
 		end select
-		if myMonth<>"" then 
-			desc=rs("description")
-		else
-			desc=""
-		end if
+		
 		rs.MoveNext
 		if not rs.eof then 
 			if ref2=rs("Ref2") then
@@ -438,6 +537,7 @@ elseif request("act")="cash" then
 			<td rowspan="2" colspan="2">&nbsp;</td>
 			<td colspan="2">œ— Ã—Ì«‰ Ê’Ê·</td>
 			<td rowspan="2">Ã„⁄ œ— Ã—Ì«‰</td>
+			<td rowspan="2">’‰œÊﬁ</td>
 			<td colspan="2">«”‰«œ Å—œ«Œ ‰Ì</td>
 			<td rowspan="2">Ã„⁄ «”‰«œ Å—œ«Œ ‰Ì</td>
 			<td rowspan="2">ﬂ”—Ì</td>
@@ -470,6 +570,7 @@ elseif request("act")="cash" then
 			amount17004=0
 			amount42001=0
 			amount42004=0
+			amount11000=0
 			
 			call setValue()
 			%>
@@ -481,8 +582,9 @@ elseif request("act")="cash" then
 			<%
 			end if
 			response.write echoTD(amount17003,"bank17003")
-			response.write echoTD(amount17004,"bank17003")
+			response.write echoTD(amount17004,"bank17004")
 			response.write echoTD(amount17003+amount17004,"")
+			response.write echoTD(amount11000,"cash")
 			response.write echoTD(amount42001,"bank42001")
 			response.write echoTD(amount42004,"bank42004")
 			response.write echoTD(amount42001+amount42004,"")
@@ -497,11 +599,11 @@ elseif request("act")="cash" then
 <%
 	end if
 	if myMonth<>"" then 
-		mySQL="select * from (select RemainedAmount, EffectiveDate, 'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and SUBSTRING(EffectiveDate,1,8)='" & myMonth & "' UNION select RemainedAmount, EffectiveDate, 'ap' as sys from APItems where FullyApplied=0 and Voided=0 and APItems.Type=6 and SUBSTRING(EffectiveDate,1,8)='" & myMonth & "' UNION select amountOriginal as RemainedAmount, EffectiveDate, 'ar-full' as sys from ARItems where  Voided=0 and ARItems.Type=1 and SUBSTRING(EffectiveDate,1,8)='" & myMonth & "' UNION select amountOriginal as RemainedAmount, EffectiveDate, 'ap-full' as sys from APItems where Voided=0 and APItems.Type=6 and SUBSTRING(EffectiveDate,1,8)='" & myMonth & "' ) dev order by EffectiveDate,sys"
+		mySQL="select * from (select RemainedAmount, EffectiveDate, 'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and SUBSTRING(EffectiveDate,1,8)='" & myMonth & "' UNION select RemainedAmount, Vouchers.EffectiveDate, 'ap' as sys from APItems inner join Vouchers on apItems.link=Vouchers.id where FullyApplied=0 and apItems.Voided=0 and APItems.Type=6 and SUBSTRING(Vouchers.EffectiveDate,1,8)='" & myMonth & "' UNION select amountOriginal as RemainedAmount, EffectiveDate, 'ar-full' as sys from ARItems where  Voided=0 and ARItems.Type=1 and SUBSTRING(EffectiveDate,1,8)='" & myMonth & "' UNION select amountOriginal as RemainedAmount, EffectiveDate, 'ap-full' as sys from APItems where Voided=0 and APItems.Type=6 and SUBSTRING(EffectiveDate,1,8)='" & myMonth & "' ) dev order by EffectiveDate,sys"
 	else
-		mySQL="select * from (select sum(RemainedAmount) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(RemainedAmount) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ap' as sys from APItems where FullyApplied=0 and Voided=0 and APItems.Type=6 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(amountOriginal) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ar-full' as sys from ARItems where  Voided=0 and ARItems.Type=1 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(amountOriginal) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ap-full' as sys from APItems where Voided=0 and APItems.Type=6 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8)) dev order by EffectiveDate,sys"
+		mySQL="select * from (select sum(RemainedAmount) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(RemainedAmount) as RemainedAmount, SUBSTRING(Vouchers.EffectiveDate,1,8) as EffectiveDate, 'ap' as sys from APItems inner join Vouchers on apItems.link=Vouchers.id where FullyApplied=0 and apItems.Voided=0 and APItems.Type=6 and Vouchers.EffectiveDate>='1388/01/01' group by SUBSTRING(Vouchers.EffectiveDate,1,8) UNION select sum(amountOriginal) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ar-full' as sys from ARItems where  Voided=0 and ARItems.Type=1 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8) UNION select sum(amountOriginal) as RemainedAmount, SUBSTRING(EffectiveDate,1,8) as EffectiveDate, 'ap-full' as sys from APItems where Voided=0 and APItems.Type=6 and EffectiveDate>='1388/01/01' group by SUBSTRING(EffectiveDate,1,8)) dev order by EffectiveDate,sys"
 	end if
-	mySQLold="select sum(RemainedAmount) as RemainedAmount,'old' as EffectiveDate,'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and EffectiveDate<'1388/01/01' UNION select sum(RemainedAmount) as RemainedAmount, 'old' as EffectiveDate,'ap' as sys from APItems where FullyApplied=0 and Voided=0 and APItems.Type=6 and EffectiveDate<'1388/01/01' UNION select sum(amountOriginal) as RemainedAmount,'old' as EffectiveDate,'ar-full' as sys from ARItems where Voided=0 and ARItems.Type=1 and EffectiveDate<'1388/01/01' UNION select sum(amountOriginal) as RemainedAmount, 'old' as EffectiveDate,'ap-full' as sys from APItems where Voided=0 and APItems.Type=6 and EffectiveDate<'1388/01/01'"
+	mySQLold="select sum(RemainedAmount) as RemainedAmount,'old' as EffectiveDate,'ar' as sys from ARItems where FullyApplied=0 and Voided=0 and ARItems.Type=1 and EffectiveDate<'1388/01/01' UNION select sum(RemainedAmount) as RemainedAmount, 'old' as EffectiveDate,'ap' as sys from APItems inner join Vouchers on apItems.link=Vouchers.id where FullyApplied=0 and apItems.Voided=0 and APItems.Type=6 and Vouchers.EffectiveDate<'1388/01/01' UNION select sum(amountOriginal) as RemainedAmount,'old' as EffectiveDate,'ar-full' as sys from ARItems where Voided=0 and ARItems.Type=1 and EffectiveDate<'1388/01/01' UNION select sum(amountOriginal) as RemainedAmount, 'old' as EffectiveDate,'ap-full' as sys from APItems where Voided=0 and APItems.Type=6 and EffectiveDate<'1388/01/01'"
 
 	set rs=Conn.Execute(mySQL)
 	set rsOLD=conn.Execute(mySQLold)
@@ -633,14 +735,18 @@ elseif request("act")="cash" then
 				<td colspan="2">Ã„⁄ »œÊ‰ „«‰œÂùÂ«</td>
 				<td><%=Separate(arRemainedAmountSum)%></td>
 				<td><%=Separate(arTotalAmountSum)%></td>
-				<td><%=Round(arRemainedAmountSum/arTotalAmountSum*100)%></td>
+				<td><%if arTotalAmountSum>0 then response.write Round(arRemainedAmountSum/arTotalAmountSum*100)%></td>
 				<td><%=Separate(apRemainedAmountSum)%></td>
 				<td><%=Separate(apTotalAmountSum)%></td>
-				<td><%=Round(apRemainedAmountSum/apTotalAmountSum*100)%></td>
+				<td><%if apTotalAmountSum>0 then response.write Round(apRemainedAmountSum/apTotalAmountSum*100)%></td>
 			</tr>
 	</table>
 <%
 	end if
+'-----------------------------------------------------------------------------------------------------
+'-----------------------------------------------------------------------------------------------------
+'-----------------------------------------------------------------------------------------------------
+
 elseif request("act")="MoeenRep" then
 
 	ON ERROR RESUME NEXT
