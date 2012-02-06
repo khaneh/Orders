@@ -15,19 +15,20 @@ if not Auth(4 , 4) then NotAllowdToViewThisPage()
 <!--#include File="../include_UtilFunctions.asp"-->
 <SCRIPT LANGUAGE="JavaScript">
 <!--
-function edit_order_id(reqID)
-{
+function edit_order_id(reqID) {
 	tmp = document.getElementById("orderID_span").innerText
 	document.getElementById("orderID_span").innerHTML="<INPUT id='orderID_edit_field' style='border:0pt; width:40pt' Type='text' value='"+tmp+"'> <input type='hidden' id='ireqID' value='"+reqID+"'>"
 	document.getElementById("orderID_edit_field").select()
-	document.getElementById("dokme_sabt").innerHTML=" &nbsp;<A HREF='javascript:xmlsend()'>[À» ]</A>"
+	document.getElementById("dokme_sabt").innerHTML=' &nbsp;<A HREF="javascript:xmlsend(\'RelatedOrder\',\'ireqID\',\'orderID_edit_field\')">[À» ]</A>'
 }
-
-function xmlsend()
-{
-	ordID = document.getElementById("orderID_edit_field").value
-	reqID = document.getElementById("ireqID").value
-	url = "/beta/purchase/XMLchangeRelatedOrder.asp?ordID="+ordID + "&reqID="+ reqID
+function edit_purchase_price(reqID) {
+	tmp = document.getElementById("purchase_price").innerText;
+	document.getElementById("purchase_price").innerHTML="<input id='purchase_price_value' style='border:0pt; width:40pt' Type='text' value='"+tmp+"'> <input type='hidden' id='purchaseID' value='"+reqID+"'>";
+	document.getElementById("purchase_price_value").select();
+	document.getElementById("purchase_price_submit").innerHTML=" &nbsp;<A HREF='javascript:xmlsend(\"PurchasePrice\",\"purchaseID\",\"purchase_price_value\")'>[À» ]</A>";
+}
+function xmlsend(myFile,myID,myValue) {
+	url = "/beta/purchase/XMLchange" + myFile + ".asp?value=" + document.getElementById(myValue).value + "&id="+ document.getElementById(myID).value;
 	if (window.XMLHttpRequest) {
 		var xmldoc=new XMLHttpRequest();
 	} else if (window.ActiveXObject) {
@@ -53,10 +54,10 @@ function xmlsend()
 		}
 		if (returnobj=="ok") 
 		{
-		document.getElementById("orderID_span").innerHTML="<a href='../shopfloor/manageOrder.asp?radif="+ordID+"'>"+ordID+"</a>"
-		document.getElementById("dokme_sabt").innerHTML=""	
-		alert(returnobj)
-		
+		document.getElementById("orderID_span").innerHTML="<a href='../shopfloor/manageOrder.asp?radif="+document.getElementById(myID).value+"'>"+document.getElementById(myID).value+"</a>";
+		document.getElementById("dokme_sabt").innerHTML="";
+		//alert(returnobj)
+		//document.getElementById()
 		} else {alert("Ê—ÊœÌ ‰«œ—”  «” ")};
 		
 	};
@@ -105,7 +106,19 @@ if request("od")<>"" then
 		<TR bgcolor="#CCCCCC">
 			<TD width=50%>
 				<li>‰Ê⁄ ﬂ«—: <%=otypeName%><br>
-				<li>ﬁÌ„ : <%=Price%><br>
+				<li>ﬁÌ„ : <%
+				if auth(4,7) then 
+				%>
+				<span id='purchase_price'><%=price%></span>
+				<span id='purchase_price_submit'>
+					&nbsp;<A HREF="javascript:edit_purchase_price(<%=ordID%>)">[ €ÌÌ—]</A>
+				</span>
+				<%	
+				else
+					response.write Price
+				end if
+				%>
+				<br>
 				<li> ⁄œ«œ: <%=qtty%><br>
 				<li> Ê÷ÌÕ« : <%=comment%><br>
 				<li>Ê÷⁄Ì : <%=status%><br>
