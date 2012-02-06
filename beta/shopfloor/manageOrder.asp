@@ -402,7 +402,8 @@ end if %>
 	</TR>
 	<%
 	'Gets Request for services list from DB
-set RS3=Conn.Execute ("SELECT dbo.InventoryItemRequests.Comment, dbo.InventoryItemRequests.ID, dbo.InventoryItemRequests.Status, dbo.InventoryItemRequests.ItemName, dbo.InventoryItemRequests.CustomerHaveInvItem, dbo.InventoryItemRequests.Qtty, dbo.InventoryItemRequests.unit, dbo.InventoryItemRequests.ReqDate FROM dbo.InventoryPickuplists FULL OUTER JOIN dbo.InventoryPickuplistItems ON dbo.InventoryPickuplists.id = dbo.InventoryPickuplistItems.pickupListID FULL OUTER JOIN dbo.InventoryItemRequests ON dbo.InventoryPickuplistItems.RequestID = dbo.InventoryItemRequests.ID WHERE (dbo.InventoryItemRequests.Order_ID = "& request("radif") & ") AND (NOT (dbo.InventoryItemRequests.Status = 'del')) GROUP BY dbo.InventoryItemRequests.Comment, dbo.InventoryItemRequests.ID, dbo.InventoryItemRequests.Status, dbo.InventoryItemRequests.ItemName, dbo.InventoryItemRequests.CustomerHaveInvItem, dbo.InventoryItemRequests.Qtty, dbo.InventoryItemRequests.unit, dbo.InventoryItemRequests.ReqDate")
+'set RS3=Conn.Execute ("SELECT dbo.InventoryItemRequests.Comment, dbo.InventoryItemRequests.ID, dbo.InventoryItemRequests.Status, dbo.InventoryItemRequests.ItemName, dbo.InventoryItemRequests.CustomerHaveInvItem, dbo.InventoryItemRequests.Qtty, dbo.InventoryItemRequests.unit, dbo.InventoryItemRequests.ReqDate FROM dbo.InventoryPickuplists FULL OUTER JOIN dbo.InventoryPickuplistItems ON dbo.InventoryPickuplists.id = dbo.InventoryPickuplistItems.pickupListID FULL OUTER JOIN dbo.InventoryItemRequests ON dbo.InventoryPickuplistItems.RequestID = dbo.InventoryItemRequests.ID WHERE (dbo.InventoryItemRequests.Order_ID = "& request("radif") & ") AND (NOT (dbo.InventoryItemRequests.Status = 'del')) GROUP BY dbo.InventoryItemRequests.Comment, dbo.InventoryItemRequests.ID, dbo.InventoryItemRequests.Status, dbo.InventoryItemRequests.ItemName, dbo.InventoryItemRequests.CustomerHaveInvItem, dbo.InventoryItemRequests.Qtty, dbo.InventoryItemRequests.unit, dbo.InventoryItemRequests.ReqDate")
+	set RS3=Conn.Execute ("SELECT InventoryItemRequests.*,InventoryPickuplistItems.pickupListID  FROM InventoryItemRequests left outer join InventoryPickuplistItems on InventoryItemRequests.ID=InventoryPickuplistItems.RequestID WHERE InventoryItemRequests.order_ID="& request("radif") )
 
 	'set RS3=Conn.Execute ("SELECT * FROM InventoryItemRequests WHERE (order_ID="& request("radif") & " ) and not status = 'del'")
 	%>
@@ -426,12 +427,26 @@ set RS3=Conn.Execute ("SELECT dbo.InventoryItemRequests.Comment, dbo.InventoryIt
 			end if
 			%>><%=RS3("ItemName")%> 
 			<%
+			if (not isNull(RS3("pickupListID"))) then 
+				response.write "<a href='../inventory/default.asp?ed="&RS3("pickupListID")&"'>"
+			end if
+		%>
+			<%
 			if RS3("CustomerHaveInvItem")  then
 				response.write "<b style='color:red'> гясгАМ </b>" 
 			end if 
 			%>
-			<small dir=ltr>(йзого: <%=RS3("qtty")%> <%=RS3("unit")%> - йгяМн: <span dir=ltr><%=RS3("ReqDate")%></span>)</small></td>
-			<td align=left width=5%><%
+			
+			<small dir=ltr>(йзого: <%=RS3("qtty")%> <%=RS3("unit")%> - йгяМн: <span dir=ltr><%=RS3("ReqDate")%></span>)</small>
+			<%
+			if (not isNull(RS3("pickupListID"))) then 
+				response.write "</a>"
+			end if
+		%>
+			</td>
+			<td align=left width=5%>
+			<%
+			
 			if RS3("status") = "new" then
 			%><a href="manageOrder.asp?di=y&i=<%=RS3("id")%>&r=<%=request("radif")%>&relatedApprovedInvoiceID=<%=relatedApprovedInvoiceID%>&relatedApprovedInvoiceBy=<%=relatedApprovedInvoiceBy%>"><b>мпщ</b></a><%
 			end if %></td>
@@ -504,7 +519,8 @@ set RS3=Conn.Execute ("SELECT dbo.InventoryItemRequests.Comment, dbo.InventoryIt
 	</TR>
 	<%
 	'Gets Request for services list from DB
-	set RS3=Conn.Execute ("SELECT * FROM purchaseRequests WHERE (order_ID="& request("radif") & " ) and not status = 'del'")
+	'set RS3=Conn.Execute ("SELECT * FROM purchaseRequests WHERE (order_ID="& request("radif") & " ) and not status = 'del'")
+	set RS3=Conn.Execute ("SELECT * FROM purchaseRequests LEFT OUTER JOIN PurchaseRequestOrderRelations ON PurchaseRequests.id = PurchaseRequestOrderRelations.Req_ID WHERE (order_ID="& request("radif") & " )")
 	%>
 		
 		<%
@@ -525,7 +541,19 @@ set RS3=Conn.Execute ("SELECT dbo.InventoryItemRequests.Comment, dbo.InventoryIt
 			else 
 				response.write " disabled "
 			end if
-			%>><%=RS3("typeName")%>  <small >(йзого: <%=RS3("qtty")%> - йгяМн: <span dir=ltr><%=RS3("ReqDate")%></span>)</small></td>
+			%>>
+			<%
+			if (not isNull(RS3("Ord_ID"))) then 
+				response.write "<a href='../purchase/outServiceTrace.asp?od="&RS3("Ord_ID")&"'>"
+			end if
+			%>
+			<%=RS3("typeName")%>  <small >(йзого: <%=RS3("qtty")%> - йгяМн: <span dir=ltr><%=RS3("ReqDate")%></span>)</small>
+			<%
+			if (not isNull(RS3("Ord_ID"))) then 
+				response.write "</a>"
+			end if
+			%>
+			</td>
 			<td align=left width=5%><%
 			if RS3("status") = "new" then
 			%><a href="manageOrder.asp?d=y&i=<%=RS3("id")%>&r=<%=request("radif")%>&relatedApprovedInvoiceID=<%=relatedApprovedInvoiceID%>&relatedApprovedInvoiceBy=<%=relatedApprovedInvoiceBy%>"><b>мпщ</b></a><%
