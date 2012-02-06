@@ -134,6 +134,7 @@ if request("act") = "reply" then
 	sendTo			= RSM("MsgFrom")
 	RelatedTable	= trim(RSM("RelatedTable"))
 	RelatedID		= trim(RSM("RelatedID"))
+	'response.write RelatedTable
 	%>
 	<H3>Å«”Œ »Â ÅÌ«„</H3>
 	<TABLE style="border: solid 1pt black; width:220">
@@ -159,6 +160,8 @@ elseif request("act") = "forward" then
 		response.end
 	end if
 	sendTo = RSM("MsgFrom")
+	RelatedTable	= trim(RSM("RelatedTable"))
+	RelatedID		= trim(RSM("RelatedID"))
 	msgBody= "[ÅÌ«„ «—Ã«⁄Ì «“ "& RSM("RealName")& "] " & RSM("MsgBody")
 	MsgTitle = "FWD"
 	%>
@@ -177,8 +180,10 @@ end if
 '-----------------------------------------------------------------------------------------------------
 '------------------------------------------------------------------------------------ New Message Form
 '-----------------------------------------------------------------------------------------------------
-RelatedID=request("RelatedID")
-RelatedTable=LCase(request("RelatedTable"))
+if request("act")<>"reply" and request("act")<>"forward" then 
+	RelatedID=request("RelatedID")
+	RelatedTable=LCase(request("RelatedTable"))
+end if
 Select Case RelatedTable
 Case "orders":
 	RelatedTableName = "”›«—‘ ‘„«—Â"
@@ -191,6 +196,9 @@ Case "quotes":
 Case else:
 	RelatedTableName = RelatedTable
 End Select
+if request("sendTo") <> "" then sendTo = request("sendTo")
+'response.write sendTo
+'response.write RelatedTable
 %>
 <TD  valign=top>
 <FORM METHOD=POST ACTION="message.asp">
@@ -201,13 +209,13 @@ End Select
 	<TD align=left>êÌ—‰œÂ:</TD>
 	<TD align=right>
 		<INPUT TYPE="hidden" NAME="retURL" value="<%=request("retURL")%>">
-		<% if not (request("act") = "reply"  or  request("sendTo") <> "") then %>
+		<% if not (request("act") = "reply") then %>
 		<select name="MsgTo" class=inputBut >
 		<% set RSV=Conn.Execute ("SELECT * FROM Users WHERE Display=1 ORDER BY RealName") 
 		Do while not RSV.eof
 		%>
 			<option value="<%=RSV("ID")%>" <%
-				if RSV("ID")=sendTo then
+				if cint(RSV("ID"))=cint(sendTo) then
 					response.write " selected "
 				end if
 				%>><%=RSV("RealName")%></option>
