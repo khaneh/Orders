@@ -235,7 +235,7 @@ StartOfTheYear = left(shamsiToday(),4) & "/01/01"
 			<FORM METHOD=POST ACTION="Rep_BInvoices.asp?act=show">
 			<table class="RepTable2" id="AInvoices">
 			<tr>
-				<th colspan="2">ê“«—‘ ›«ò Ê—Â« (»)</td>
+				<th colspan="2">ê“«—‘ ›«ﬂ Ê—Â« (»)</td>
 			</tr>
 			<tr>
 				<td align=left>«“  «—ÌŒ</td>
@@ -294,7 +294,7 @@ StartOfTheYear = left(shamsiToday(),4) & "/01/01"
 			<FORM METHOD=POST ACTION="Rep_CustomerNoCredit.asp?act=show">
 			<table class="RepTable2" id="col8">
 			<tr>
-				<th colspan="2">ê“«—‘ „‘ —Ì«‰Ì òÂ «⁄ »«— ¬‰Â« ’›— ‰Ì” </td>
+				<th colspan="2">ê“«—‘ „‘ —Ì«‰Ì ﬂÂ «⁄ »«— ¬‰Â« ’›— ‰Ì” </td>
 			</tr>
 			<tr>
 				<td colspan="2">&nbsp;</td>
@@ -308,8 +308,25 @@ StartOfTheYear = left(shamsiToday(),4) & "/01/01"
 		</TD>
 		<!------------------------------------------------------------>
 		<TD align=center>
-		
 		&nbsp;
+		<% if Auth("C", "A") then %>
+			<form method="post" action="rep_reversSales.asp?act=show">
+				<table class="RepTable2">
+					<tr>
+						<th colspan="2">ê“«—‘ »—ê‘  «“ ›—Ê‘</th>
+					</tr>
+					<tr>
+						<td>«“  «—ÌŒ</td>
+						<td><input type="text" name="fromDate" value="<%=shamsiToday()%>" style="width:75px;direction:LTR;" maxlength=10 OnBlur="return acceptDate(this);"></td>
+					</tr>
+					<tr>
+						<td> «  «—ÌŒ</td>
+						<td><input type="text" name="toDate" value="<%=shamsiToday()%>" style="width:75px;direction:LTR;" maxlength=10 OnBlur="return acceptDate(this);"></td>
+					</tr>
+				</table>
+				<INPUT Class="GenButton" style="border:1 solid black;" TYPE="submit" value=" ‰„«Ì‘ ">&nbsp;
+			</form>
+		<%end if%>
 		</TD>
 		<!------------------------------------------------------------>
 	</TR>

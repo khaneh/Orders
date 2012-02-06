@@ -350,14 +350,14 @@ if request("act")="show" then
 				SumSales =	SumPrice - SumDiscount - SumReverse '+ SumVat
 
 %>
-				<TR bgcolor="<%=tmpColor%>" style="cursor: hand; height:30px;" onMouseOver="this.style.backgroundColor='<%=tmpColor2%>'" onMouseOut="this.style.backgroundColor='<%=tmpColor%>'" onclick="drill('<%=RS1("ID")%>');">
+				<TR bgcolor="<%=tmpColor%>">
 					<TD><%=tmpCounter%></TD>
-					<TD><%=RS1("Name")%></TD>
+					<TD style="cursor: hand; height:30px;" onMouseOver="this.style.backgroundColor='<%=tmpColor2%>'" onMouseOut="this.style.backgroundColor='<%=tmpColor%>'" onclick="drill('<%=RS1("ID")%>');"><%=RS1("Name")%></TD>
 					<TD dir=LTR align=right><%=Separate(A4Qtty)%></TD>
 					<TD dir=LTR align=right><%=Separate(SumAppQtty)%></TD>
 					<TD dir=LTR align=right><%=Separate(SumPrice)%></TD>
 					<TD dir=LTR align=right><%=Separate(SumDiscount)%></TD>
-					<TD dir=LTR align=right><%=Separate(SumReverse)%></TD>
+					<TD dir=LTR align=right><a href="rep_reversSales.asp?act=show&fromDate=<%=escape(fromDate)%>&toDate=<%=escape(toDate)%>&<%if Category=0 then response.write "cat" else response.write "item"%>=<%=rs1("id")%>"><%=Separate(SumReverse)%></a></TD>
 					<TD dir=LTR align=right><%=Separate(SumVat)%></TD>
 					<TD dir=LTR align=right><%=Separate(SumSales)%></TD>
 					<td dir=LTR align=center><%=RS1("CategoryName")%></td>
@@ -619,10 +619,10 @@ elseif request("act")="showItemDetails" then
 %>					</tr>
 					</table>
 <div>
-I: ›«ò Ê— ‘«„· ¬&#1740; „ ò«€–
+I: ›«ﬂ Ê— ‘«„· ¬Ì „ ﬂ«€–
 </div>
 <div>
-II: ›«ò Ê— ‘«„· ÕÊ«·Â ò«€–
+II: ›«ﬂ Ê— ‘«„· ÕÊ«·Â ﬂ«€–
 </div>
 					<SCRIPT LANGUAGE="JavaScript">
 					<!--

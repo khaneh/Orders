@@ -1,6 +1,6 @@
 <%@LANGUAGE="VBSCRIPT" CODEPAGE="1256"%><%
 'Order (2)
-PageTitle="ÒÇÑÔ ãÔÊÑíÇäí ˜å ÇÚÊÈÇÑ ÂäåÇ ÕÝÑ äíÓÊ"
+PageTitle="ÒÇÑÔ ãÔÊÑíÇäí ßå ÇÚÊÈÇÑ ÂäåÇ ÕÝÑ äíÓÊ"
 SubmenuItem=11
 if not Auth("C" , 9) then NotAllowdToViewThisPage()
 %>
