@@ -15,6 +15,8 @@
 	.CusTD3 {background-color: #DDDDDD; direction: LTR; text-align: center; font-size:9pt;}
 	.CusTD4 {background-color: #CCCC66; direction: LTR; text-align: center; font-size:9pt;}
 	.CusTD5 {background-color: yellow; direction: LTR; text-align: center; font-size:9pt;}
+	.from {color: blue;}
+	.to {color: red;}
 </STYLE>
 
 
@@ -191,7 +193,7 @@
 					<td colspan="3" class="CusTableHeader"><span style="width:350;text-align:center;">Ì«œœ«‘  Â«</span><span style="width:80;text-align:left;background-color:red;"><input class="GenButton" type="button" value="‰Ê‘ ‰ Ì«œœ«‘ "onclick="window.location = '../home/message.asp?sendTo=<%=RS1("CSR")%>&RelatedTable=accounts&RelatedID=<%=cusID%>&retURL=<%=Server.URLEncode("../CRM/AccountInfo.asp?act=show&selectedCustomer="&RS1("ID"))%>';"></span></td>
 				</tr>
 				<%
-				mySQL="SELECT Messages.*, users.realName, message_types.name as messageTypeName FROM Messages INNER JOIN Users ON Messages.MsgFrom = Users.ID inner join message_types on message_types.id= messages.type WHERE (Messages.RelatedTable = 'accounts') AND (Messages.RelatedID = "& cusID & ") ORDER BY Messages.ID DESC"
+				mySQL="SELECT Messages.*, users.realName as fromName,userTo.realName as toName, message_types.name as messageTypeName FROM Messages INNER JOIN Users ON Messages.MsgFrom = Users.ID inner join Users as userTo on Messages.MsgTo=userTo.id inner join message_types on message_types.id= messages.type WHERE (Messages.RelatedTable = 'accounts') AND (Messages.RelatedID = "& cusID & ") ORDER BY Messages.ID DESC"
 				Set RS1 = conn.execute(mySQL)
 				if RS1.eof then
 				%>
@@ -206,7 +208,7 @@
 				%>
 					<tr class="<%if (tmpCounter MOD 2) = 1 then response.write "CusTD3" else response.write "CusTD4" %>">
 						<td><%=rs1("messageTypeName")%></td>
-						<td>«“ <%=RS1("RealName")%><br>
+						<td>«“ <span class="from"><%=RS1("fromName")%></span><br>»Â <span class="to"><%=rs1("toName")%></span><br>
 							<%=RS1("MsgDate")%> <BR> <%=RS1("MsgTime")%>
 						</td>
 						<td dir='RTL'><%=replace(RS1("MsgBody"),chr(13),"<br>")%></td>
