@@ -133,17 +133,19 @@ if request("act")="" then
 	end if
 	if request("accountGroup")="" or request("accountGroup")="-1" then 
 		myCond=""
-		mySQLCool="select count(Accounts.id) as [count] from Accounts where Accounts.type=2 and Accounts.id not in (select distinct customer from Orders where createdDate<'" & faDate & "' union select distinct customer from quotes where order_date<'" & faDate & "')"
-		mySQLWarm="select count(customer) as [count] from (select distinct customer from Quotes where order_date<'" & faDate & "' and Customer not in (select distinct customer from Orders where createdDate<'" & faDate & "')) drv"
+		mySQLCool="select count(Accounts.id) as [count] from Accounts where Accounts.type in (2,4) and Accounts.id not in (select distinct customer from Orders where createdDate<'" & faDate & "' union select distinct customer from quotes where order_date<'" & faDate & "' union select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'" & faDate & "')"
+		'select * from Accounts where type in (2,4) and id not in (select distinct customer from Orders where createdDate<'1390/10/21' union select distinct customer from quotes where order_date<'1390/10/21' union select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'1390/10/21') order by id
+		mySQLWarm="select count(id) as [count] from accounts where id in (select distinct customer from (select customer from Quotes where order_date<'" & faDate & "' union select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'" & faDate & "') as ddr where Customer not in (select distinct customer from Orders where createdDate<'" & faDate & "'))"
+		'select * from accounts where id in (select customer from (select distinct customer from (select customer from Quotes where order_date<'1390/10/21' union select relatedID as customer from messages where RelatedTable='accounts' and msgDate<'1390/10/21') as ddr where Customer not in (select distinct customer from Orders where createdDate<'1390/10/21')) drv) order by id
 		mySQLThreshold="select count(customer) as [count] from Orders where Customer in (select customer from invoices where Issued=0 and voided=0 and customer not in (select customer from Invoices where Voided=0 and issued=1))"
 	else 
 		myCond=" inner join AccountGroupRelations on AccountGroupRelations.account = R.customer  where AccountGroupRelations.accountGroup=" & request("accountGroup")
-		mySQLCool="select count(Accounts.id) as [count] from Accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & request("accountGroup") & " and Accounts.type in (2,4) and Accounts.id not in (select distinct customer from Orders where createdDate<'" & faDate & "' union select distinct customer from quotes where order_date<'" & faDate & "')"
-		mySQLWarm="select count(accounts.id) as [count] from accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & request("accountGroup") & " and id in (select customer from (select distinct customer from Quotes where order_date<'" & faDate & "' and Customer not in (select distinct customer from Orders where createdDate<'" & faDate & "')) drv)"
+		mySQLCool="select count(Accounts.id) as [count] from Accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & request("accountGroup") & " and Accounts.type in (2,4) and Accounts.id not in (select distinct customer from Orders where createdDate<'" & faDate & "' union select distinct customer from quotes where order_date<'" & faDate & "') and accounts.id not in (select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'" & faDate & "')"
+		mySQLWarm="select count(accounts.id) as [count] from accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & request("accountGroup") & " and id in (select customer from (select distinct customer from (select customer from Quotes where order_date<'" & faDate & "' union select  relatedID as customer from messages where RelatedTable='accounts' and msgDate<'" & faDate & "') as ddr where Customer not in (select distinct customer from Orders where createdDate<'" & faDate & "')) drv)"
 		mySQLThreshold="select count(customer) as [count] from Orders inner join AccountGroupRelations on AccountGroupRelations.account=orders.customer where orders.createdDate<'" & faDate & "' and AccountGroupRelations.accountGroup=" & request("accountGroup") & "  and Customer in (select customer from invoices where Issued=0 and voided=0 and customer not in (select customer from Invoices where Voided=0 and issued=1))"
 	end if
 	
-	response.write mydate
+	'response.write mydate
 	'response.end 
 	'mySQL="select count(R.customer) as c, V.Value, R.Recency, F.Frequency from dbo.rfm_recency('" & myDate & "') as R left outer join dbo.rfm_frequency('" & myDate & "') as F on F.customer = R.customer left outer join dbo.rfm_value('" & myDate & "') as V on R.customer = V.customer " & myCond & " group by V.Value, R.Recency, F.Frequency order by" & ord
 	mySQL="declare @todate datetime; set @todate=" & myDate & "; select count(R.customer) as c, V.Value, R.Recency, F.Frequency from (select customer, case when datediff(day,max(issuedDate_en),@toDate) > 365 then 0 when datediff(day,max(issuedDate_en),@toDate) between 181 and 365 then 1 when datediff(day,max(issuedDate_en),@toDate) between 91 and 180 then 2 when datediff(day,max(issuedDate_en),@toDate) between 31 and 90 then 3 when datediff(day,max(issuedDate_en),@toDate) between 0 and 30 then 4 end as Recency, datediff(day,max(issuedDate_en),@toDate) as [Day] from Invoices where Voided=0 and Issued=1 and issuedDate_en <=@toDate group by Customer) as R left outer join ("
@@ -190,7 +192,7 @@ if request("act")="" then
 	set rs=Conn.execute(mySQLCool)
 %>
 	<tr>
-		<td title="„‘ —ÌùÂ«ÌÌ ﬂÂ ‰Â ”›«—‘ œ«—‰œ Ê ‰Â «” ⁄·«„" colspan="3">—«»ÿÂ ”—œ</td>
+		<td title="„‘ —ÌùÂ«ÌÌ ﬂÂ ‰Â ”›«—‘ œ«—‰œ Ê ‰Â «” ⁄·«„ Ê ‰Â Ì«œœ«‘ Ì »—«Ì ¬‰Â« À»  ‘œÂ" colspan="3">—«»ÿÂ ”—œ</td>
 		<td><a href="rfmModel.asp?act=showCool&accountGroup=<%=request("accountGroup")%>&faDate=<%=Server.URLEncode(faDate)%>"><%=Separate(rs("count"))%></a></td>
 	</tr>
 <%
@@ -198,7 +200,7 @@ if request("act")="" then
 	set rs=Conn.execute(mySQLWarm)
 %>
 	<tr>
-		<td title="„‘ —ÌùÂ«ÌÌ ﬂÂ «” ⁄·«„ œ«—‰œ «„« ”›«—‘ ‰œ«—‰œ" colspan="3">—«»ÿÂ ê—„</td>
+		<td title="„‘ —ÌùÂ«ÌÌ ﬂÂ «” ⁄·«„ Ê Ì« Ì«œœ«‘ Ì œ«—‰œ «„« ”›«—‘ ‰œ«—‰œ" colspan="3">—«»ÿÂ ê—„</td>
 		<td><a href="rfmModel.asp?act=showWarm&accountGroup=<%=request("accountGroup")%>&faDate=<%=Server.URLEncode(faDate)%>"><%=Separate(rs("count"))%></a></td>
 	</tr>
 <%
@@ -347,10 +349,11 @@ elseif request("act")="showCool" then '---------------------------- C O O L ----
 	</tr>
 <%
 	if request("accountGroup")="" or request("accountGroup")="-1" then 
-		mySQL="select * from Accounts where type in (2,4) and id not in (select distinct customer from Orders where createdDate<'" & request("faDate")& "' union select distinct customer from quotes where order_date<'" & request("faDate") & "') order by " & ord
+		mySQL="select * from Accounts where type in (2,4) and id not in (select distinct customer from Orders where createdDate<'" & request("faDate")& "' union select distinct customer from quotes where order_date<'" & request("faDate") & "' union select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'" & request("faDate") & "') order by " & ord
 	else 
-		mySQL="select Accounts.* from Accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & request("accountGroup") & " and type in (2,4) and id not in (select distinct customer from Orders where createdDate<'" & request("faDate")& "' union select distinct customer from quotes where order_date<'" & request("faDate") & "') order by " & ord
+		mySQL="select Accounts.* from Accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & request("accountGroup") & " and type in (2,4) and id not in (select distinct customer from Orders where createdDate<'" & request("faDate")& "' union select distinct customer from quotes where order_date<'" & request("faDate") & "' union select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'" & request("faDate") & "') order by " & ord
 	end if
+	'response.write mySQL
 	set rs=Conn.Execute(mySQL)
 	i=0
 	while not rs.eof  
@@ -403,9 +406,9 @@ elseif request("act")="showWarm" then '---------------------------------- W A R 
 	</tr>
 <%
 	if request("accountGroup")="" or request("accountGroup")="-1" then 
-		mySQL="select * from accounts where id in (select customer from (select distinct customer from Quotes where order_date<'" & request("faDate") & "' and Customer not in (select distinct customer from Orders where createdDate<'" & request("faDate")& "')) drv) order by " & ord
+		mySQL="select * from accounts where id in (select customer from (select distinct customer from (select customer from Quotes where order_date<'" & request("faDate") & "' union select relatedID as customer from messages where RelatedTable='accounts' and msgDate<'" & request("faDate") & "') as ddr where Customer not in (select distinct customer from Orders where createdDate<'" & request("faDate")& "')) drv) order by " & ord
 	else
-		mySQL="select accounts.* from accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & request("accountGroup") & " and id in (select customer from (select distinct customer from Quotes where order_date<'" & request("faDate") & "' and Customer not in (select distinct customer from Orders where createdDate<'" & request("faDate")& "')) drv) order by " & ord
+		mySQL="select accounts.* from accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & request("accountGroup") & " and id in (select customer from (select distinct customer from (select customer from Quotes where order_date<'" & request("faDate") & "' union select relatedID as customer from messages where RelatedTable='accounts' and msgDate<'" & request("faDate") & "') as ddr where Customer not in (select distinct customer from Orders where createdDate<'" & request("faDate") & "')) drv) order by " & ord
 	end if
 	'response.write mySQL
 	'response.end
