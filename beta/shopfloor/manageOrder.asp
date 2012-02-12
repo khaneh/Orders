@@ -520,7 +520,7 @@ end if %>
 	<%
 	'Gets Request for services list from DB
 	'set RS3=Conn.Execute ("SELECT * FROM purchaseRequests WHERE (order_ID="& request("radif") & " ) and not status = 'del'")
-	set RS3=Conn.Execute ("SELECT * FROM purchaseRequests LEFT OUTER JOIN PurchaseRequestOrderRelations ON PurchaseRequests.id = PurchaseRequestOrderRelations.Req_ID WHERE (order_ID="& request("radif") & " )")
+	set RS3=Conn.Execute ("SELECT PurchaseRequestOrderRelations.*,purchaseRequests.*,case when isnull(PurchaseOrders.price,-1)=-1 then purchaseRequests.price else purchaseOrders.price end as thisPrice  FROM purchaseRequests LEFT OUTER JOIN PurchaseRequestOrderRelations ON PurchaseRequests.id = PurchaseRequestOrderRelations.Req_ID left outer join PurchaseOrders on PurchaseOrders.ID=PurchaseRequestOrderRelations.ord_id WHERE (order_ID="& request("radif") & " )")
 	%>
 		
 		<%
@@ -547,7 +547,7 @@ end if %>
 				response.write "<a href='../purchase/outServiceTrace.asp?od="&RS3("Ord_ID")&"'>"
 			end if
 			%>
-			<%=RS3("typeName")%>  <small >(йзого: <%=RS3("qtty")%> - йгяМн: <span dir=ltr><%=RS3("ReqDate")%></span>)</small>
+			<%=RS3("typeName")%>  <small >(йзого: <%=RS3("qtty")%>║ чМЦй: <%=RS3("thisPrice")%> - йгяМн: <span dir=ltr><%=RS3("ReqDate")%></span>)</small>
 			<%
 			if (not isNull(RS3("Ord_ID"))) then 
 				response.write "</a>"

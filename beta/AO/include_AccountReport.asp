@@ -1726,7 +1726,7 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 	<br>
 	<table align=center><tr>
 <%
-	mySQL="SELECT InvoiceOrderRelations.*, PurchaseOrders.ID AS PurchaseOrdersID, PurchaseOrders.Status AS PurchaseOrdersStatus, PurchaseOrders.TypeName AS TypeName FROM PurchaseOrders FULL OUTER JOIN PurchaseRequestOrderRelations RIGHT OUTER JOIN PurchaseRequests INNER JOIN InvoiceOrderRelations ON PurchaseRequests.Order_ID = InvoiceOrderRelations.[Order] ON PurchaseRequestOrderRelations.Req_ID = PurchaseRequests.ID ON PurchaseOrders.ID = PurchaseRequestOrderRelations.Ord_ID WHERE (InvoiceOrderRelations.Invoice ='"& InvoiceID & "') and PurchaseRequests.Status<> 'del'"
+	mySQL="SELECT PurchaseRequests.TypeName as requestTypeName,PurchaseRequests.Price as requestPrice, PurchaseRequests.Qtty as requestQtty, InvoiceOrderRelations.*, PurchaseOrders.ID AS PurchaseOrdersID, PurchaseOrders.Status AS PurchaseOrdersStatus, PurchaseOrders.TypeName AS TypeName, PurchaseOrders.price, PurchaseOrders.qtty FROM PurchaseOrders FULL OUTER JOIN PurchaseRequestOrderRelations RIGHT OUTER JOIN PurchaseRequests INNER JOIN InvoiceOrderRelations ON PurchaseRequests.Order_ID = InvoiceOrderRelations.[Order] ON PurchaseRequestOrderRelations.Req_ID = PurchaseRequests.ID ON PurchaseOrders.ID = PurchaseRequestOrderRelations.Ord_ID WHERE (InvoiceOrderRelations.Invoice ='"& InvoiceID & "') and PurchaseRequests.Status<> 'del'"
 	Set RS1 = conn.Execute(mySQL)
 	tempWriteAnd = "Œ—Ìœ Œœ„«  „—»Êÿ »Â «Ì‰ ›«ﬂ Ê—: <hr>"
 	if not(RS1.eof) then
@@ -1747,7 +1747,11 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 			elseif PurchaseOrdersStatus="OK" then
 				status = " «ÌÌœ ‘œÂ"
 			end if
-			response.write tempWriteAnd & "<li> <a target='_blank' href='../purchase/outServiceTrace.asp?od="&RS1("PurchaseOrdersID")&"'>" & RS1("TypeName") & "</a> - " & status
+			if IsNull(RS1("PurchaseOrdersID")) then 
+				response.write tempWriteAnd & "<li><span title=' ⁄œ«œ: " & RS1("requestQtty")&"° ﬁÌ„   Ê«›ﬁÌ:"&RS1("requestPrice")&"'> ”›«—‘ Œ—Ìœ <b>"& RS1("requestTypeName")&"</b> Â‰Ê“ «ÌÃ«œ ‰‘œÂ</span>"
+			else
+				response.write tempWriteAnd & "<li> <a target='_blank' href='../purchase/outServiceTrace.asp?od="&RS1("PurchaseOrdersID")&"'>" & RS1("TypeName") & "</a> - " & status & " ( ⁄œ«œ: " & RS1("qtty") & "° ﬁÌ„   Ê«›ﬁÌ: " & RS1("Price") & ")"
+			end if
 			tempWriteAnd=""
 			RS1.moveNext
 		wend
