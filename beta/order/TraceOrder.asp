@@ -242,7 +242,47 @@ elseif request("act")="show" then
 	'set RS_STEP = nothing
 %>
 	<tr>
-		<td colspan="5" align="center"><A HREF="../shopfloor/default.asp?orderNum=<%=order%>"> €ÌÌ— „—Õ·Â</A></td>
+		<td  align="center"><A HREF="../shopfloor/default.asp?orderNum=<%=order%>"> €ÌÌ— „—Õ·Â</A></td>
+		<td colspan="2" title="»« ﬂ·Ìﬂ —ÊÌ «Ì‰ œﬂ„Â »Â ’Ê—  ŒÊœﬂ«— Ìﬂ «Ì„Ì· »Â „‘ —Ì «—”«· ŒÊ«Âœ ‘œ ﬂÂ Õ«ÊÌ ‘„«—Â „‘ —Ì Ê ‘„«—Â ”›«—‘ ŒÊ«Âœ »Êœ">
+			<%
+			set rsEmail=Conn.Execute("select accounts.AccountTitle, accounts.Dear1, accounts.FirstName1, accounts.LastName1, orders.ID, orders.Customer,accounts.Email1, orders_trace.order_title from Orders inner join Accounts on orders.Customer=accounts.ID inner join orders_trace on orders_trace.radif_sefareshat=orders.ID where orders.ID=" & Order & " and accounts.EMail1 <> ''")
+			if not rsEmail.eof then 
+			%>
+			<span>
+				<form method="post" action="http://my.pdhco.com/sendMail.php">
+					<input type="hidden" name="order_id" value="<%=rsEmail("ID")%>">
+					<input type="hidden" name="customer_id" value="<%=rsEmail("customer")%>">
+					<input type="hidden" name="order_title" value="<%=rsEmail("order_title")%>">
+					<input type="hidden" name="Email" value="<%=rsEmail("Email1")%>">
+					<input type="hidden" name="AccountTitle" value="<%=rsEmail("AccountTitle")%>">
+					<input type="hidden" name="Dear" value="<%=rsEmail("Dear1")%>">
+					<input type="hidden" name="FirstName" value="<%=rsEmail("FirstName1")%>">
+					<input type="hidden" name="LastName" value="<%=rsEmail("LastName1")%>">
+					<input type="submit" name="orderSend" title='<%=rsEmail("email1")%>' value="»Â <%=rsEmail("Dear1") & " " & rsEmail("firstName1") & " " & rsEmail("LastName1")%> «Ì„Ì· ‘Êœ">
+				</form>
+			</span>
+			<%end if%>
+		</td>
+		<td colspan="2" title="»« ﬂ·Ìﬂ —ÊÌ «Ì‰ œﬂ„Â »Â ’Ê—  ŒÊœﬂ«— Ìﬂ «Ì„Ì· »Â „‘ —Ì «—”«· ŒÊ«Âœ ‘œ ﬂÂ Õ«ÊÌ ‘„«—Â „‘ —Ì Ê ‘„«—Â ”›«—‘ ŒÊ«Âœ »Êœ">
+			<%
+			set rsEmail=Conn.Execute("select accounts.AccountTitle, accounts.Dear2, accounts.FirstName2, accounts.LastName2, orders.ID, orders.Customer,accounts.Email2, orders_trace.order_title from Orders inner join Accounts on orders.Customer=accounts.ID inner join orders_trace on orders_trace.radif_sefareshat=orders.ID where orders.ID=" & Order & " and accounts.EMail2 <> ''")
+			if not rsEmail.eof then 
+			%>
+			<span>
+				<form method="post" action="http://my.pdhco.com/sendMail.php">
+					<input type="hidden" name="order_id" value="<%=rsEmail("ID")%>">
+					<input type="hidden" name="customer_id" value="<%=rsEmail("customer")%>">
+					<input type="hidden" name="order_title" value="<%=rsEmail("order_title")%>">
+					<input type="hidden" name="Email" value="<%=rsEmail("Email2")%>">
+					<input type="hidden" name="AccountTitle" value="<%=rsEmail("AccountTitle")%>">
+					<input type="hidden" name="Dear" value="<%=rsEmail("Dear2")%>">
+					<input type="hidden" name="FirstName" value="<%=rsEmail("FirstName2")%>">
+					<input type="hidden" name="LastName" value="<%=rsEmail("LastName2")%>">
+					<input type="submit" name="orderSend" title='<%=rsEmail("email2")%>' value="»Â <%=rsEmail("Dear2") & " " & rsEmail("firstName2") & " " & rsEmail("LastName2")%> «Ì„Ì· ‘Êœ">
+				</form>
+			</span>
+			<%end if%>
+		</td>
 	</tr>
 	</TABLE><BR>
 	<BR>
