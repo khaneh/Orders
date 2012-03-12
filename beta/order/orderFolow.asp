@@ -141,7 +141,7 @@ wend
 		for s= 1 to stepCount
 			if cint(steps(s,i))>0 then
 				fromDate=""
-				toDate=shamsiToday()
+				toDate=""
 				orderTypes=""
 				condition="" 
 				if request("submit")="ÊÇííÏ" then 
@@ -178,13 +178,17 @@ wend
 							condition = condition & " or orders_trace.return_date > '" & shamsiDate(dateadd("d",7,date())) & "'"
 							if fromDate = "" then fromDate = shamsiDate(dateadd("d",8,date()))
 							toDate = "9999/99/99"
+							'response.write toDate
 						end if
 						condition = condition & ")"
 					end if
 				end if
+				'response.write request("moreNextWeek")
 				if fromDate="" then fromDate="1389/01/01"
+				if toDate="" then toDate="9999/99/99"
 				mySQL = "select orderTraceSteps.name,isnull(drv.orderCount,0) as orderCount from orderTraceSteps left outer join (select orders_trace.step, count(orders_trace.radif_sefareshat) as orderCount from orders_trace inner join Orders on orders_trace.radif_sefareshat=orders.id and orders.Closed=0 where 1=1 and orders_trace.return_date >'1389/01/01' " & condition & " group by orders_trace.step) drv on orderTraceSteps.id=drv.step where orderTraceSteps.id=" & steps(s,i)
 				set rs=Conn.Execute(mySQL)
+				'response.write mySQL
 	%>
 			<td title="ÈÑÇí ãÔÇåÏå ÌÒÆíÇÊ ßáíß ßäíÏ">
 			<center>
