@@ -499,17 +499,17 @@ elseif request("act")="submitReceipt" then
 			for i=1 to request("DebitItems").count
 				mySQL="select isnull(invoices.IsA,2) as isA from ARItems inner join Invoices on arItems.link=invoices.ID where arItems.type=1 and arItems.id=" & request("DebitItems")(i)
 				set RSSS=conn.Execute(mySQL)
-				if RSSS("isA") = "True" then 
-					isAlast = 1
-				elseif RSSS("isA") = "False" then 
-					isAlast = 0
-				else 
+				if RSSS.eof then 
 					isAlast = 2
+				else
+					if RSSS("isA") = "True" then 
+						isAlast = 1
+					elseif RSSS("isA") = "False" then 
+						isAlast = 0
+					else 
+						isAlast = 2
+					end if
 				end if
-'				response.write mySQL & "<br>"
-'				response.write isAlast & "<br>"
-'				response.write RSSS("isA") & "<br>"
-'				response.end
 				if isAlast =2 then 
 					if request("isA")<>"-1" then 
 						isA=CInt(request("isA"))

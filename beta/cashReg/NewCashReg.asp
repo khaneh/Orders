@@ -37,8 +37,8 @@ if request("act")="submitNew" then
 		response.redirect "./NewCashReg.asp?errmsg=" & server.urlencode("Çíä ÂŞÇí ÕäÏæŞÏÇÑ ÔãÇ ŞÈáÇ íå ÕäÏæŞ ÈÇÒ ÏÇÑäÏ!<br>Çæá ÇÒ åãå Êßáíİ Çæä Ñæ ÑæÔä ßäíÏ.")
 	end if
 	OpeningAmount=text2value(request("OpeningAmount"))
-	mySQL="INSERT INTO CashRegisters (Cashier, Banker, OpenDate, NameDate, OpenedBy, IsOpen, IsApproved, OpeningAmount, CashAmount, ChequeAmount, ChequeQtty, ShortOverAmount) VALUES ('" &_ 
-	request("Cashier") & "', '"& request("Banker") & "', N'"& shamsiToday() & "', N'"& request("NameDate") & "', '"& session("ID") & "', '"& 1 & "', '"& 0 & "', '"& OpeningAmount & "', '"& OpeningAmount & "', '"& 0 & "', '"& 0 & "', '"& 0 & "')"
+	mySQL="INSERT INTO CashRegisters (Cashier, Banker, OpenDate, NameDate, OpenedBy, IsOpen, IsApproved, OpeningAmount, CashAmountA, CashAmountB, ChequeAmount, ChequeQtty, ShortOverAmount) VALUES ('" &_ 
+	request("Cashier") & "', '"& request("Banker") & "', N'"& shamsiToday() & "', N'"& request("NameDate") & "', '"& session("ID") & "', '"& 1 & "', '"& 0 & "', '"& OpeningAmount & "', '"& OpeningAmount & "', 0,0,0,0)"
 	conn.Execute(mySQL)
 %><br><br>
 	<TABLE width='70%' align='center'>

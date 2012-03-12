@@ -173,7 +173,7 @@ end if
 		do while not rsv.eof
 		%>
 		<a href="?id=<%=rsv("bid")%>">
-		<tr style="cursor:hand" onMouseOver="this.style.backgroundColor='<%=tmpColor2%>'" onMouseOut="this.style.backgroundColor='<%=tmpColor%>'" ><!onclick="copyInfo(this.rowIndex)">
+		<tr style="cursor:hand" onMouseOver="this.style.backgroundColor='<%=tmpColor2%>'" onMouseOut="this.style.backgroundColor='<%=tmpColor%>'" onclick="copyInfo(this.rowIndex);">
 			<td><INPUT TYPE="hidden" name="idList" value="<%=rsv("id")%>"><%=rsv("Name")%></td>
 			<td><%=rsv("RealName")%> <INPUT TYPE="hidden" name=IDLIST value="<%=rsv("ID")%>"></td>
 			<td><%=rsv("CurrentBalance")%></td>
@@ -210,7 +210,7 @@ rsv.close
 %></tr></table>"
 
 
-/*
+
 function copyInfo(index){
 	var myObj=document.getElementsByTagName("table").item('result').getElementsByTagName("tr").item(index);
 	document.all.bname.value				=myObj.getElementsByTagName("td").item(0).innerText;
@@ -226,7 +226,7 @@ function copyInfo(index){
 	document.all.bname.select();
 	document.all.bname.focus();
 }
-*/
+
 
 function changeGLsTD(){
 	if (document.all.IsBankAccount.checked)

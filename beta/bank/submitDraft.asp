@@ -223,7 +223,7 @@ elseif request("act")="" then
 		<select name="Bank" class=inputBut style="width:250; ">
 		<option value="-1">«‰ Œ«» ﬂ‰Ìœ</option>
 		<option value="-1">---------------------------------</option>
-		<% set RSV=Conn.Execute ("SELECT * FROM Bankers WHERE (IsBankAccount = 1)") 
+		<% set RSV=Conn.Execute ("SELECT * FROM Bankers WHERE (IsBankAccount = 1 AND isActive=1)") 
 		Do while not RSV.eof
 		%>
 			<option value="<%=RSV("id")%>"><%=RSV("Name")%> </option>
