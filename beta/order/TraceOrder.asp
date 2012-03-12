@@ -23,6 +23,14 @@ if not Auth(2 , 3) then NotAllowdToViewThisPage()
 	a.aYellow:link {color: yellow;}
 	a.aYellow:visited {color: green;}
 	a.aYellow:hover {color: gray;}
+	.mySection{border: 1px #F90 dashed;margin: 15px 10px 0 15px;}
+	.myRow{border: 2px #F05 dashed;margin: 10px 0 10px 0;padding: 0 3px 5px 0;}
+	.exteraArea{border: 1px #33F dotted;margin: 5px 0 0 5px;padding: 0 3px 5px 0;}
+	.myLabel {margin: 0 3px 0 0;white-space: nowrap;}
+	.myProp {font-weight: bold;color: #40F; margin: 0 3px 0 3px;}
+	div.btn label{background-color:yellow;color: blue;padding: 3px 30px 3px 30px;cursor: pointer;}
+	div.btn{margin: -5px 250px 0px 5px;}
+	div.btn img{margin: 0px 20px -5px 0;cursor: pointer;}
 </STYLE>
 <SCRIPT LANGUAGE='JavaScript'>
 <!--
@@ -37,7 +45,7 @@ function checkValidation(){
 }
 //-->
 </SCRIPT>
-<font face="tahoma">
+
 <%
 if request("act")="" then
 %>
@@ -349,6 +357,106 @@ elseif request("act")="show" then
 		<TD colspan="6" align="center"><input type="button" value="«’·«Õ" onclick="window.location='OrderEdit.asp?e=y&radif=<%=Order %>';"></TD>
 	</TR-->
 	</TABLE><BR>
+<%
+if (not (IsNull(rs1("property")) or rs1("property")="")) then
+%>
+	<div>Ã“∆Ì«  ”›«—‘</div>
+
+<%
+	set rs=Conn.Execute("select * from OrderTraceTypes where id="&rs1("type"))
+	set typeProp = server.createobject("MSXML2.DomDocument")
+	set orderProp = server.createobject("MSXML2.DomDocument")
+	
+	orderProp.loadXML(rs1("property"))
+	typeProp.loadXML(rs("property"))
+	set rs=nothing
+sub showKey(key)
+	oldGroup="---first---"
+	oldLabel="---first---"
+	maxID=-1
+	oldID=-1
+	rowEmpty=false
+	for each mykey in orderProp.SelectNodes(key)
+		id=myKey.GetAttribute("id")
+		if maxID<id then maxID=id
+	next
+	thisRow = "<div class='myRow'>"'<div class='exteraArea' id='" & Replace(key,"/","-") & "-0'>"
+	for id = 0 to maxID
+		For Each myKey In orderProp.SelectNodes(key & "[@id='" & id & "']")
+			thisName = myKey.GetAttribute("name")
+			set typeKey = typeProp.selectNodes(key & "[@name='" & thisName & "']")(0)
+			thisType = typeKey.GetAttribute("type") 
+			thisLabel= typeKey.GetAttribute("label")
+			thisGroup= typeKey.GetAttribute("group")
+			isRow =false
+			if Replace(key,"/","-")="keys-service-key" then response.write "::--------::" & myKey.text
+			if thisName<>"" then 
+				isRow=true
+				if oldID<>id then thisRow = thisRow & "<div class='exteraArea' id='" & Replace(key,"/","-") & "-" & id & "'>"
+				if (oldGroup<>thisGroup and oldID=id and oldGroup <> "---first---") then thisRow = thisRow &  "</div>"
+				if oldGroup<>thisGroup or oldID<>id then 
+					thisRow = thisRow & "<div class='mySection'>"
+					if typeKey.GetAttribute("grouplabel")<>"" then thisRow = thisRow & "<b>" & typeKey.GetAttribute("grouplabel") & "</b>"
+				end if
+				if oldLabel<>thisLabel then thisRow = thisRow &  "<label class='myLabel'>" & thisLabel & ": </label>"
+				
+				if left(thisType,6)="option" then set myOptions=typeKey
+				myText=""
+				select case thisType
+					case "option"
+						for each optKey in myOptions.selectNodes("option")
+							if optKey.text=myKey.text then 
+								myText = optKey.GetAttribute("label")
+								exit for
+							end if
+						next
+					case "option-other"
+						if left(myKey.text,6)="other:" then 
+							myText = mid(myKey.text,7)
+						else
+							for each optKey in myOptions.selectNodes("option")
+								if optKey.text=myKey.text then 
+									myText = optKey.GetAttribute("label")
+									exit for
+								end if
+							next
+						end if
+						if myText="" then myText = myKey.text
+					case "check"
+						if left(myKey.text,2)="on" then myText = "<img src='/images/Checkmark-32.png' width='15px'>"
+					case else
+						myText = myKey.text
+				end select
+				set myOptions=nothing
+				thisRow = thisRow & "<span class='myProp'>" & myText & "</span>"		
+			else
+				if id=0 then 
+					thisRow=""
+					rowEmpty=true
+				end if
+			end if
+			oldGroup=thisGroup
+			oldLabel=thisLabel
+			oldID=id
+			
+		Next
+		if isRow then thisRow = thisRow & "</div></div>"
+	next
+	'response.write maxID
+	if not rowEmpty then thisRow = thisRow & "</div>" '"<div id='extreArea" &Replace(key,"/","-")& "'></div>"
+	response.write thisRow 'prependTo 
+'	response.write 
+end sub
+	oldTmp="---first---"
+	for each tmp in orderProp.selectNodes("//key")
+		if oldTmp<>tmp.parentNode.nodeName then 
+			oldTmp=tmp.parentNode.nodeName
+			call showKey("/keys/" & oldTmp & "/key")
+		end if
+	next
+end if
+%>
+<br><br>
 
 	<table class="CustTable" cellspacing='1' align=center style="width:700; ">
 		<tr>
@@ -443,7 +551,7 @@ elseif request("act")="show" then
 						response.write "</a>"
 					end if
 				%>
-					</td>
+					</font></td>
 					<td align=left width=5%><%
 					if RS3("status") = "del" then
 						response.write "<b><small>Õ–› ‘œÂ</b></small>"
@@ -497,7 +605,7 @@ elseif request("act")="show" then
 						response.write "</a>"
 					end if
 					%>				
-					</td>
+					</font></td>
 					<td align=left width=5%><%
 					if RS3("status") = "del" then
 						response.write "<b><small>Õ–› ‘œÂ</b></small>"
@@ -1088,5 +1196,5 @@ End If
 
 Conn.Close
 %>
-</font>
+
 <!--#include file="tah.asp" -->

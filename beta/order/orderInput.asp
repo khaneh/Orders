@@ -9,7 +9,16 @@ if not Auth(2 , 1) then NotAllowdToViewThisPage()
 <!--#include file="top.asp" -->
 <!--#include File="../include_farsiDateHandling.asp"-->
 <!--#include File="../include_JS_InputMasks.asp"-->
-
+<style >
+	.mySection{border: 1px #F90 dashed;margin: 15px 10px 0 15px;}
+	.myRow{border: 2px #F05 dashed;margin: 10px 0 10px 0;padding: 0 3px 5px 0;}
+	.exteraArea{border: 1px #33F dotted;margin: 5px 0 0 5px;padding: 0 3px 5px 0;}
+	.myLabel {margin: 0 3px 0 0;white-space: nowrap;}
+	.myProp {font-weight: bold;color: #40F; margin: 0 3px 0 3px;}
+	div.btn label{background-color:yellow;color: blue;padding: 3px 30px 3px 30px;cursor: pointer;}
+	div.btn{margin: -5px 250px 0px 5px;}
+	div.btn img{margin: 0px 20px -5px 0;cursor: pointer;}
+</style>
 <%
 if request("act")="submitsearch" then
 	if isnumeric(request("CustomerNameSearchBox")) then
@@ -31,11 +40,50 @@ if request("act")="submitsearch" then
 		SA_StepText="ê«„ œÊ„ : «‰ Œ«» Õ”«»"
 %>
 		<br>
-		<FORM METHOD=POST ACTION="?act=getorder">
+		<FORM METHOD=POST ACTION="?act=getType">
 			<!--#include File="../AR/include_SelectAccount.asp"-->
 		</FORM>
 <%
 	end if
+elseif Request.QueryString("act")="getType" then 
+	customerID=request("selectedCustomer")
+	mySQL="SELECT * FROM Accounts WHERE (ID='"& CustomerID & "')"
+	Set RS1 = conn.Execute(mySQL)
+
+	if (RS1.eof) then 
+		conn.close
+		response.redirect "?errmsg=" & Server.URLEncode("ç‰Ì‰ Õ”«»Ì ÅÌœ« ‰‘œ.<br><a href='..//CRM/AccountEdit.asp?act=getAccount'>Õ”«» ÃœÌœø</a>")
+	end if 
+%>
+		<br>
+		<div dir='rtl'>
+			<B>ê«„ ”Ê„ : ê—› ‰ ‰Ê⁄ ”›«—‘</B>
+		</div>
+		<form method="post" action="?act=getorder">
+			<input name="selectedCustomer" type="hidden" value="<%=customerID%>">
+			<SELECT NAME="OrderType" style='font-family: tahoma,arial ; font-size: 9pt; font-weight: bold; width: 100px' tabIndex="7">
+			<OPTION value="-1" style='color:red;'>«‰ Œ«» ﬂ‰Ìœ</option>
+<%
+			Set RS2 = conn.Execute("SELECT [User] as ID, DefaultOrderType FROM UserDefaults WHERE ([User] = "& session("ID") & ") OR (UserDefaults.[User] = 0) ORDER BY ABS(UserDefaults.[User]) DESC")
+			defaultOrderType=RS2("DefaultOrderType")
+			RS2.close
+			Set RS2 = Nothing
+
+			set RS_TYPE=Conn.Execute ("SELECT ID, Name FROM OrderTraceTypes WHERE (IsActive=1) ORDER BY ID")
+			Do while not RS_TYPE.eof	
+%>
+				<OPTION value="<%=RS_TYPE("ID")%>" <%if RS_TYPE("ID")=defaultOrderType then response.write "selected"%>><%=RS_TYPE("Name")%></option>
+<%
+			RS_TYPE.moveNext
+			loop
+			RS_TYPE.close
+			set RS_TYPE = nothing
+%>		
+			</SELECT>
+			<input type="submit" value="«œ«„Â">
+		</form>
+<%	
+
 elseif request("act")="getorder" then
 	customerID=request("selectedCustomer")
 	mySQL="SELECT * FROM Accounts WHERE (ID='"& CustomerID & "')"
@@ -51,7 +99,21 @@ elseif request("act")="getorder" then
 	companyName=RS1("CompanyName")
 	customerName=RS1("Dear1")& " " & RS1("FirstName1")& " " & RS1("LastName1")
 	Tel=RS1("Tel1")
-	
+	set rs=Conn.Execute("select * from OrderTraceTypes where id=" & request("orderType"))
+	if rs.eof then 
+		conn.close
+		response.redirect "?errmsg=" & server.urlEncode("‰Ê⁄ ”›«—‘ —«  ⁄ÌÌ‰ ﬂ‰Ìœ")
+	end if
+	orderTypeID=rs("id")
+	orderTypeName=rs("name")
+	set orderProp = server.createobject("MSXML2.DomDocument")
+	hasProperty=false
+	if rs("property")<>"" then 
+		orderProp.loadXML(rs("property"))
+		hasProperty=true
+	end if
+	rs.close
+	set rs=nothing
 	creationDate=shamsiToday()
 	creationTime=time
 	creationTime=Hour(creationTime)&":"&Minute(creationTime)
@@ -59,7 +121,7 @@ elseif request("act")="getorder" then
 	if len(creationTime)<5 then creationTime=Left(creationTime,3) & "0" & Right(creationTime,1)
 %>
 	<br>
-	<div dir='rtl'><B>ê«„ ”Ê„ : ê—› ‰ ”›«—‘</B>
+	<div dir='rtl'><B>ê«„ çÂ«—„ : ê—› ‰ ”›«—‘</B>
 	</div>
 	<br>
 <!-- ê—› ‰ ”›«—‘ -->
@@ -68,10 +130,15 @@ elseif request("act")="getorder" then
 	<FORM METHOD=POST ACTION="?act=submitorder" onSubmit="return checkValidation();">
 	<TR bgcolor="black">
 		<TD align="left"><FONT COLOR="YELLOW">Õ”«»:</FONT></TD>
-		<TD align="right" colspan=5 height="25px">
+		<TD align="right" colspan=3 height="25px">
 			<FONT COLOR="YELLOW"><%=customerID & " - "& AccountTitle%></FONT>
 			<INPUT TYPE="hidden" NAME="customerID" value="<%=customerID%>">
 		</TD>
+		<td align="left"><font color="yellow">‰Ê⁄ «” ⁄·«„:</font></td>
+		<td>
+			<font color="red"><b><%=orderTypeName%></b></font>
+			<input type="hidden" name="orderType" value="<%=orderTypeID%>">
+		</td>
 	</TR>
 	<TR bgcolor="black">
 		<TD align="left"><FONT COLOR="YELLOW">‘„«—Â ”›«—‘:</FONT></TD>
@@ -114,27 +181,9 @@ elseif request("act")="getorder" then
 		<TD align="right">
 			<!-- CustomerName -->
 			<INPUT TYPE="text" NAME="CustomerName" maxlength="50" size="25" tabIndex="3" value="<%=customerName%>"></TD>
-		<TD align="left">‰Ê⁄ ”›«—‘:</TD>
+		<TD align="left"></TD>
 		<TD>
-		<SELECT NAME="OrderType" style='font-family: tahoma,arial ; font-size: 9pt; font-weight: bold; width: 100px' tabIndex="7">
-			<OPTION value="-1" style='color:red;'>«‰ Œ«» ﬂ‰Ìœ</option>
-<%
-			Set RS2 = conn.Execute("SELECT [User] as ID, DefaultOrderType FROM UserDefaults WHERE ([User] = "& session("ID") & ") OR (UserDefaults.[User] = 0) ORDER BY ABS(UserDefaults.[User]) DESC")
-			defaultOrderType=RS2("DefaultOrderType")
-			RS2.close
-			Set RS2 = Nothing
-
-			set RS_TYPE=Conn.Execute ("SELECT ID, Name FROM OrderTraceTypes WHERE (IsActive=1) ORDER BY ID")
-			Do while not RS_TYPE.eof	
-%>
-				<OPTION value="<%=RS_TYPE("ID")%>" <%if RS_TYPE("ID")=defaultOrderType then response.write "selected"%>><%=RS_TYPE("Name")%></option>
-<%
-			RS_TYPE.moveNext
-			loop
-			RS_TYPE.close
-			set RS_TYPE = nothing
-%>		
-		</SELECT></TD>
+		</TD>
 		<TD align="left">”›«—‘ êÌ—‰œÂ:</TD>
 		<TD><INPUT Type="Text" readonly NAME="SalesPerson" value="<%=CSRName%>" style='font-family: tahoma,arial ; font-size: 9pt; font-weight: bold; width: 100px' tabIndex="888">
 		</TD>
@@ -150,6 +199,83 @@ elseif request("act")="getorder" then
 	<TR bgcolor="#CCCCCC">
 		<TD colspan="6" height="30px">&nbsp;</TD>
 	</TR>
+	<tr bgcolor="#CCCCCC">
+	<td colspan="6">
+<%
+if hasProperty then 
+sub fetchKeys(key)
+	oldGroup="---first---"
+	oldLabel="---first---"
+	thisRow="<div class='myRow'>"
+	thisRow = thisRow & "<input type='hidden' value='0' id='" & Replace(key,"/","-") & "-maxID'>"
+	thisRow = thisRow & "<div class='exteraArea' id='" & Replace(key,"/","-") & "-0'>"
+' 	thisRow = thisRow & "<img title='Õ–› «Ì‰ Œÿ' src='/images/cancelled.gif' onclick='$(""#" & Replace(key,"/","-") & "-0"").remove();'>"
+' 	thisRow = thisRow & "<img title='Õ–› «Ì‰ Œÿ' src='/images/cancelled.gif' onclick='$(this).parent().remove();'>" 
+	For Each myKey In orderProp.SelectNodes(key)
+	  thisType = myKey.GetAttribute("type")
+	  thisName = myKey.GetAttribute("name")
+	  thisLabel= myKey.GetAttribute("label")
+	  thisGroup= myKey.GetAttribute("group")
+	  'response.write thisName & ": " & thisLabel &"(" &thisType& ")" & "<br>"
+	  if (oldGroup<>thisGroup and oldGroup <> "---first---") then thisRow = thisRow &  "</div>"
+	  if oldGroup<>thisGroup then 
+	  	thisRow = thisRow & "<div class='mySection' groupName='" & thisGroup & "'>"
+	  	if myKey.GetAttribute("disable")="1" then 
+			thisRow = thisRow &  "<input type='checkbox' name='" & thisName & "-disBtn' onchange='disGroup(this);'>"
+			disText=" disabled='disabled' "
+		else
+			disText=""
+		end if
+	  end if
+	  if oldLabel<>thisLabel then thisRow = thisRow &  "<label class='myLabel'>" & thisLabel & "</label>"
+		
+	  select case thisType
+	  	case "option"
+	  		thisRow = thisRow &  "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "'>"
+	  		for each myOption in myKey.getElementsByTagName("option")
+	  			thisRow = thisRow &  "<option value='" & myOption.text & "'>" & myOption.GetAttribute("label") & "</option>"
+		  	next
+		  	thisRow = thisRow &  "</select>"
+		case "option-other"
+			thisRow = thisRow &  "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "' onchange='checkOther(this);'>"
+	  		for each myOption in myKey.getElementsByTagName("option")
+	  			thisRow = thisRow &  "<option value='" & myOption.text & "'>" & myOption.GetAttribute("label") & "</option>"
+		  	next
+		  	thisRow = thisRow &  "<option value='-1'>”«Ì—</option></select>"	
+		  	thisRow = thisRow & "<input type='text' name='" &thisName & "-addValue' onblur='addOther(this);'>"	  	
+		case "text"
+			thisRow = thisRow &  "<input " & disText & " type='text' style='margin:0;padding:0;' size='" & myKey.text & "' name='" & thisName & "'>"
+		case "textarea"
+			thisRow = thisRow &  "<textarea name='" & thisName & "' style='width:600px;' cols='" & myKey.text & "'></textarea>"
+		case "check"
+			thisRow = thisRow & "<input type='checkbox' value='on-0' name='" & thisName & "' "
+			if myKey.text="checked" then thisRow = thisRow & "checked='checked'"
+			thisRow = thisRow & ">"
+	  end select
+	  if myKey.GetAttribute("force")="yes" then thisRow = thisRow &  "<span style='color:red;margin:0 0 0 2px;padding:0;'>*</span>"
+	  oldGroup=thisGroup
+	  oldLabel=thisLabel
+	Next
+	thisRow = thisRow & "</div></div><div id='extreArea" &Replace(key,"/","-")& "'></div>"
+	response.write thisRow 'prependTo 
+	response.write "<div class='btn'><img title='«÷«›Â' src='/images/Plus-32.png' width='20px' onclick='cloneRow(""" & key & """);'><img title='Õ–› ¬Œ—Ì‰ Œÿ' src='/images/cancelled.gif' onclick='removeRow(""" & key & """);'></div></div>"
+end sub
+	oldTmp="---first---"
+	for each tmp in orderProp.selectNodes("//key")
+		if oldTmp<>tmp.parentNode.nodeName then 
+			oldTmp=tmp.parentNode.nodeName
+			call fetchKeys("/keys/" & oldTmp & "/key")
+		end if
+	next
+' 	call fetchKeys("/keys/printing/key")
+' 	call fetchKeys("keys/binding/key")
+' 	call fetchKeys("keys/service/key")
+' 	call fetchKeys("keys/delivery/key")
+end if
+%>			
+
+	</td>
+	</tr>
 	<TR bgcolor="#CCCCCC">
 		<TD colspan="6">
 		<TABLE align="center" width="50%" border="0">
@@ -163,7 +289,64 @@ elseif request("act")="getorder" then
 	</TR>
 	</FORM>
 	</TABLE>
+	<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
 	<SCRIPT LANGUAGE="JavaScript">
+		function disGroup (e){
+			groupName=$(e).parent(".mySection").attr("groupname");
+			if (e.checked) {
+				$(e).parent(".mySection").children('[name^="'+groupName+'"]').prop("disabled", false);
+			} else {
+				$(e).parent(".mySection").children('[name^="'+groupName+'"]').prop("disabled", true);
+				$(e).parent(".mySection").children('[name$="disBtn"]').prop("disabled", false);
+			}
+		}
+		
+		$(document).ready(function () {
+			$('[name$=-addValue]').hide();
+		});
+		function cloneRow(key){
+			maxID = $("#" + key.replace(/\//gi,"-") + "-maxID").val()
+			newRow = $("#" + key.replace(/\//gi,"-") + "-"+maxID).clone().attr('id', key.replace(/\//gi,"-") + "-" + (parseInt(maxID)+1));
+			$('input:checkbox',newRow).each(function (){
+				if ($(this).val().substr(0,3)=='on-')
+					$(this).val('on-'+(parseInt(maxID)+1));
+			});
+			
+			newRow.appendTo("#extreArea" + key.replace(/\//gi,"-") );
+			$("#" + key.replace(/\//gi,"-") + "-maxID").val(parseInt(maxID)+1);
+		}
+		function removeRow(key){
+			maxID = parseInt($("#" + key.replace(/\//gi,"-") + "-maxID").val());
+			if (maxID>0) {
+				$("#" + key.replace(/\//gi,"-") + "-"+maxID).remove();
+			}
+			$("#" + key.replace(/\//gi,"-") + "-maxID").val(maxID-1);
+		}
+		function checkOther(e){
+			
+			if ($(e).val()==-1 || $(e).val().substr(0,6)=="other:") {
+				if ($(e).find("option:selected").text()=="”«Ì—") {
+					$(e).next().val("„ﬁœ«— —« Ê«—œ ﬂ‰Ìœ");
+				} else {
+					$(e).next().val(
+						$(e).find("option:selected").text());
+				}
+				$(e).next().show();
+				$(e).next().focus();
+			} else {
+				$(e).next().hide();
+			}
+		}
+		function addOther(e){
+			if ($(e).val()!="" && $(e).val()!="„ﬁœ«— —« Ê«—œ ﬂ‰Ìœ" && $(e).val()!="‰„Ìù‘Â ﬂÂ Œ«·Ì »«‘Â!"){
+				$(e).prev().find("option:selected").text($(e).val());
+				$(e).prev().find("option:selected").val('other:'+$(e).val());
+				$(e).hide();
+			} else {
+				$(e).val("‰„Ìù‘Â ﬂÂ Œ«·Ì »«‘Â!");
+				$(e).focus();
+			}
+		}
 	<!--
 		function checkValidation(){
 		//TRIM : str = str.replace(/^\s*|\s*$/g,""); 
