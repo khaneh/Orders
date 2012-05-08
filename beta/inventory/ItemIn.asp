@@ -39,29 +39,32 @@ end if
 '----------------------------------------------------------------------- Show Inventory Log In Reciept
 '-----------------------------------------------------------------------------------------------------
 if request("act")="showReceipt" then
-
-	item = request("item")
-	qtty = request("qtty")
 	response.write "<br><br><br><br><center>"
+	if request("id")<>"" then 
+		LogItem_ID=request("id")
+		set rs=Conn.Execute("select inventoryLog.*,InventoryItems.unit,InventoryItems.name from inventoryLog inner join InventoryItems on inventoryLog.itemID=InventoryItems.id where inventoryLog.id=" & LogItem_ID)
+		response.write "<li> " & rs("qtty") & " " & RS("unit") & " "  & RS("Name") & " " 
+		if cdbl(rs("owner"))>0 then 
+			response.write " Ê”ÿ " & rs("owner") & " "
+		end if
+		response.write " („ÊÃÊœÌ ÃœÌœ: " & rs("sumQtty") & " " & RS("unit") & "° «—”«·Ì „‘ —Ì: " & rs("sumCusQtty") & " " & rs("unit") &")"
+		rs.close
+		set rs=nothing
+	else
+		item = request("item")
+		qtty = request("qtty")
+		set RSW=Conn.Execute ("SELECT * FROM InventoryItems WHERE (OldItemID = "& item & ")" )
+		ItemID = RSW("id")
+		
+		
+		oldItemQtty = RSW("qtty")
+		newItemQtty = oldItemQtty ' + qtty
+		response.write "<li> " & RSW("Name") & " " & qtty & " " & RSW("unit") & " („ÊÃÊœÌ ÃœÌœ: " & newItemQtty & " " & RSW("unit") & ")"
 
-	set RSW=Conn.Execute ("SELECT * FROM InventoryItems WHERE (OldItemID = "& item & ")" )
-	ItemID = RSW("id")
-	
-	
-	oldItemQtty = RSW("qtty")
-	newItemQtty = oldItemQtty ' + qtty
-	response.write "<li> " & RSW("Name") & " " & qtty & " " & RSW("unit") & " („ÊÃÊœÌ ÃœÌœ: " & newItemQtty & " " & RSW("unit") & ")"
-
+		set RSW=Conn.Execute ("SELECT * FROM InventoryLog WHERE (ItemID = "& ItemID & " and Qtty="& Qtty & ") order by id DESC" )
+		LogItem_ID = RSW("id")
+	end if
 	response.write "<br><br>ﬂ«·«Ì ›Êﬁ »Â «‰»«— «÷«›Â ‘œ."
-	
-	set RSW=Conn.Execute ("SELECT * FROM InventoryLog WHERE (ItemID = "& ItemID & " and Qtty="& Qtty & ") order by id DESC" )
-	LogItem_ID = RSW("id")
-
-	catItem1 = "-1"
-	goodItem1 = "-1"
-	purchaseOrderID = "-1"
-
-	PickupListID=54
 	%>
 	<BR>	<BR>
 	<CENTER>
@@ -222,11 +225,18 @@ end if
 '-----------------------------------------------------------------------------------------------------
 if request.form("Submit")="Ê—Êœ ﬂ«·« »Â «‰»«—" then
 	item = trim(request.form("item"))
-	qtty = trim(request.form("qtty"))
-	purchaseOrderID = trim(request.form("purchaseOrderID"))
-	ownerAcc = request.form("accountID")
+	qtty = CDbl(request.form("qtty"))
+	purchaseOrderID = CDbl(request.form("purchaseOrderID"))
+	ownerAcc = CDbl(request.form("accountID"))
 	comments = request.form("comments")
 	entryDate = request.form("entryDate")
+	price= request.form("price")
+	if price<>"" then 
+		price = CDbl(price)
+	else
+		price = 0
+	end if
+	gl_update = request.form("gl_update")
 
 	if Auth(5 , "C") AND "" & entryDate <> "" then ' À»  Ê—Êœ/Œ—ÊÃ œ—  «—ÌŒ œ·ŒÊ«Â
 		logDate=entryDate
@@ -240,7 +250,7 @@ if request.form("Submit")="Ê—Êœ ﬂ«·« »Â «‰»«—" then
 			purchaseOrderID = "-1"
 		end if
 
-		if item="-1" or qtty="" or qtty="0" then
+		if item="-1" or qtty=0 then
 			response.write "<br><br><br>"
 			CALL showAlert ("<B>Œÿ«! </B><BR>ÂÌç ﬂ«·«ÌÌ «‰ Œ«» ‰ﬂ—œÂ «Ìœ<br><br><A HREF='itemIn.asp'>»—ê‘ </A>",CONST_MSG_ALERT) 
 			response.end
@@ -251,19 +261,50 @@ if request.form("Submit")="Ê—Êœ ﬂ«·« »Â «‰»«—" then
 			CALL showAlert ("<B>Œÿ«! </B><BR>„ﬁœ«— ﬂ«·« ‰„Ì  Ê«‰œ „‰›Ì »«‘œ<br><br><A HREF='itemIn.asp'>»—ê‘ </A>",CONST_MSG_ALERT) 
 			response.end
 		end if
-
-		response.write "<br><br><br><br><center>"
-
+		
+		if price<=0 and ownerAcc=-1 and purchaseOrderID<>-9 then
+			response.write "<br><br><br>"
+			CALL showAlert ("<B>Œÿ«! </B><BR>ﬁÌ„  —« »Â ’Ê—  ’ÕÌÕ Ê«—œ ‰„«ÌÌœ<br><br><A HREF='itemIn.asp'>»—ê‘ </A>",CONST_MSG_ALERT) 
+			response.end
+		end if
+		
 		set RSW=Conn.Execute ("SELECT * FROM InventoryItems WHERE (OldItemID = "& item & ")" )
 		ItemID = RSW("id")
+		if ownerAcc=-1 then 
+			mySQL = "select * from inventoryLog where owner=-1 and itemID=" & itemID & " and isInput=0 and logDate>='" & logDate & "' and pricedQtty is not null order by logDate desc"
+	'		response.write mySQL
+			set rs=conn.Execute(mySQL)
+			if not rs.eof then 
+				response.write "<br><br><br>"
+				CALL showAlert ("<B>Œÿ«! </B><BR>»⁄œ «“ «Ì‰  «—ÌŒ Œ—ÊÃ À»  ‘œÂ «” ° ·ÿ›« »⁄œ «“  «—ÌŒ " & rs("logDate") & " Ê—Êœ À»  ﬂ‰Ìœ<br><br><A HREF='itemIn.asp'>»—ê‘ </A>",CONST_MSG_ALERT) 
+				response.end
+			end if
+		end if
+		response.write "<br><br><br><br><center>"
+
+		
 		type1 = 1 
 		if purchaseOrderID < 0 then type1 = -1 * purchaseOrderID
-		mySql="INSERT INTO InventoryLog (ItemID, RelatedID, logDate, Qtty, owner, CreatedBy, IsInput, comments, type) VALUES ("& ItemID & ", "& purchaseOrderID & ",N'"& logDate & "', "& Qtty & ", "& ownerAcc & ", "& session("id") & ", 1, N'" & comments & "', " & type1 & " )"
-		conn.Execute mySql
-		'RS1.close
-		
-		response.redirect "ItemIn.asp?act=showReceipt&item=" & item & "&qtty=" & qtty
-
+		if purchaseOrderID = -8 then 
+			type1 = 1
+			purchaseOrderID = request.form("customerItemRequest")
+		end if
+		if CDbl(price)>0 then 
+			pricedQtty = qtty
+		else
+			pricedQtty = "null"
+		end if
+		mySql="SET NOCOUNT ON;INSERT INTO InventoryLog (ItemID, RelatedID, logDate, Qtty, owner, CreatedBy, IsInput, comments, type, price, gl_update, pricedQtty) VALUES ("& ItemID & ", "& purchaseOrderID & ",N'"& logDate & "', "& Qtty & ", "& ownerAcc & ", "& session("id") & ", 1, N'" & comments & "', " & type1 & "," & price & " ,0," & pricedQtty & " );select @@identity as newID;"
+		'response.write mySQL
+		set rs = conn.Execute(mySql)
+		newID = rs.Fields("newID").value
+		RS.close
+		set rs = nothing
+		if ownerAcc = -1 then 
+			Conn.Execute("insert into InventoryPriceLog (logID,logDate,userID,price) values(" & newID & ",'" & logDate & "'," & session("id") &"," & price & ")")
+		end if
+		'response.redirect "ItemIn.asp?act=showReceipt&item=" & item & "&qtty=" & qtty
+		response.redirect "ItemIn.asp?act=showReceipt&id=" & newID
 	end if
 
 '-----------------------------------------------------------------------------------------------------
@@ -291,18 +332,90 @@ if(document.all.aaa2.value==2)
 //-->
 </SCRIPT>
 <%
+customerItemRequest = -1
+comment=""
 purchaseOrderID = request.form("purchaseOrderID")
 if purchaseOrderID = "" then purchaseOrderID = -1
+purchaseOrderID = CInt(purchaseOrderID)
 'set RSA=Conn.Execute ("SELECT * FROM purchaseOrders WHERE (Status = 'OUT' and ID="& purchaseOrderID & ")" )
-set RSA=Conn.Execute ("SELECT * FROM purchaseOrders WHERE (ID="& purchaseOrderID & ")" )
-if not (RSA.eof) then
-	preQtty = RSA("Qtty")
+if purchaseOrderID > 0 then 
+	set RSA=Conn.Execute ("SELECT * FROM purchaseOrders WHERE (ID="& purchaseOrderID & ")" )
+	if not (RSA.eof) then
+		set rs = Conn.Execute("select * from VoucherLines where RelatedPurchaseOrderID = " & purchaseOrderID)
+		if not rs.eof then 
+			qtty = rs("qtty")
+			price = rs("price")
+			msg = "<a href='../AP/AccountReport.asp?act=showVoucher&voucher=" & rs("voucher_ID") & "'>›Ì„  À»  ‘œÂ œ— ›«ﬂ Ê—</a>"
+			gl_update=0
+		else
+			Qtty = RSA("Qtty")
+			price = RSA ("price")
+			msg = "<a href='../purchase/outServiceTrace.asp?od=" & purchaseOrderID & "'>ﬁÌ„   Ê«›ﬁÌ À»  ‘œÂ œ— ”›«—‘ Œ—Ìœ</a>"
+			gl_update=-1
+		end if
+		rs.close
+	else
+		call showAlert ("Œÿ«Ì ⁄ÃÌ»! ”›«—‘ Œ—Ìœ „—»ÊÿÂ ÅÌœ« ‰‘œ" , CONST_MSG_ERROR )
+		response.end
+	end if
+	RSA.close
+elseif purchaseOrderID = -1 then 
+	price = request.form("price")
+	msg="œﬁ  ﬂ‰Ìœ ﬁÌ„  —« ’ÕÌÕ Ê«—œ ‰„«ÌÌœ"
+elseif purchaseOrderID = -3 then 
+	set rs = Conn.Execute("select * from InventoryLog where id = " & request.form("retID"))
+	price = rs("price")
+	qtty = rs("qtty")
+	gl_update=0
+	rs.close
+elseif purchaseOrderID = -7 then 
+	set rs = Conn.Execute("select * from InventoryLog where id = " & request.form("outID"))
+	price = rs("price")
+	qtty = rs("qtty")
+	gl_update=0
+	rs.close
+elseif purchaseOrderID = -2 then 
+	gl_update=0
+	price = request.form("price")
+	'------------------------------------------------------------------------------------------------
+	' NOT COMPLITED!!!!!!!!!!!!!!!!!!!!!!
+	'------------------------------------------------------------------------------------------------
+elseif purchaseOrderID = -6 then 
+	gl_update=0
+	price = request.form("price")
+	'------------------------------------------------------------------------------------------------
+	' NOT COMPLITED!!!!!!!!!!!!!!!!!!!!!!
+	'------------------------------------------------------------------------------------------------
+elseif purchaseOrderID = -8 then 
+	customerItemRequest = request.form("customerItemRequest")
+	mySQL="select InventoryItemRequests.*, Orders.Customer, Accounts.accountTitle from InventoryItemRequests inner join Orders on InventoryItemRequests.order_id=orders.id inner join Accounts on Orders.customer=Accounts.id where InventoryItemRequests.id=" & customerItemRequest
+	'response.write mySQL
+	set rs = Conn.Execute(mySQL)
+	if rs.eof then 
+		call showAlert ("Œÿ«Ì ⁄ÃÌ»! ﬂ«·«Ì «—”«·Ì „Ê—œ ‰Ÿ— ÅÌœ« ‰‘œ" , CONST_MSG_ERROR )
+		response.end
+	end if
+	if rs("comment")<>"" then comment=" Ê÷ÌÕ: " & rs("comment")
+	owner=rs("customer")
+	qtty=rs("qtty")
+	accountName = rs("accountTitle")
+	
+	rs.close
+	set rs = Conn.Execute("select * from InventoryLog where owner>0 and voided=0 and IsInput=1 and RelatedId=" & customerItemRequest)
+	if not rs.eof then 
+		call showAlert ("Œÿ«Ì ⁄ÃÌ»! «Ì‰ ﬂ«·« ﬁ»·« Œ«—Ã ‘œÂ" , CONST_MSG_ERROR )
+		response.end
+	end if
+elseif purchaseOrderID = -9 then
+	owner=-1
+	price=0
 end if
-RSA.close
 
+'response.write purchaseOrderID 
 %>
 <FORM METHOD=POST ACTION="itemin.asp">
 <INPUT TYPE="hidden" name="item" value="<%=request.form("item")%>">
+<INPUT TYPE="hidden" name="customerItemRequest" value="<%=customerItemRequest%>">
 <INPUT TYPE="hidden" name="purchaseOrderID" value="<%=request.form("purchaseOrderID")%>"><BR><BR>
 <TABLE border=0 align=center>
 <TR>
@@ -312,17 +425,32 @@ RSA.close
 
 <TR>
 	<TD align=left> ⁄œ«œ</TD>
-	<TD align=right><INPUT dir=ltr TYPE="text" NAME="qtty" size=25 value="<%=preQtty%>" ><!onKeyPress="return maskNumber(this);" ><br></TD>
+	<TD align=right>
+		<INPUT dir=ltr TYPE="text" NAME="qtty" size=25 value="<%=Qtty%>" ><onKeyPress="return maskNumber(this);" >
+	</TD>
 </TR>
+<%if customerItemRequest=-1 then %>
+<TR>
+	<TD align=left>ﬁÌ„ </TD>
+	<TD align=right>
+		<INPUT dir=ltr TYPE="text" NAME="price" size=25 value="<%=price%>" ><onKeyPress="return maskNumber(this);" >
+		<small style="color:red;">*  ÊÃÂ œ«‘ Â »«‘Ìœ ﬂÂ «Ì‰ ﬂ«·« »« «Ì‰ ﬁÌ„  »Â «‰»«— Ê«—œ „Ìù‘Êœ. Å” œ— À»  ¬‰ œ›  »›—„«ÌÌœ</small>
+		<br><%=msg%><small style="color:red;">* ﬁÌ„  ﬂ· —« À»  ﬂ‰Ìœ</small>
+	</TD>
+</TR>
+<%end if%>
 <TR>
 	<TD align=left valign=top>„«·ﬂÌ </TD>
 	<TD align=right>
+<%if customerItemRequest=-1 then %>
 	<SELECT NAME="aaa2" onchange="hideIT()" >
 		<option value=1 >Œ«‰Â ç«Å Ê ÿ—Õ</option>
 		<option value=2 <%if owner<>"-1" then response.write " selected" %>>œÌê—«‰ (‘„«—Â Õ”«»)</option>
 	</SELECT>
+<%end if%>
 	<BR>
 	<span name="aaa1" id="aaa1" <% if owner="-1" then response.write "style=""visibility:'hidden'"""%>>
+	<input type="hidden" name="gl_update" value="<%=gl_update%>">
 	<input type="hidden" Name='tmpDlgArg' value=''>
 	<input type="hidden" Name='tmpDlgTxt' value=''>
 	<INPUT  dir="LTR"  TYPE="text" NAME="accountID" maxlength="10" size="13"  value="<%=owner%>" onKeyPress='return mask(this);' onBlur='check(this);'> &nbsp;&nbsp; <INPUT TYPE="text" NAME="accountName" size=30 readonly  value="<%=accountName%>" style="background-color:transparent">
@@ -341,7 +469,7 @@ RSA.close
 %>
 <TR>
 	<TD align=left> Ê÷ÌÕ« </TD>
-	<TD align=right><TEXTAREA NAME="comments" ROWS="" COLS=""></TEXTAREA>
+	<TD align=right><TEXTAREA NAME="comments" ROWS="" COLS=""><%=comment%></TEXTAREA>
 	<br><br></TD>
 </TR>
 <TR>
@@ -427,8 +555,8 @@ elseif request.form("Submit")="Ã” ÃÊ" then
 	<TD align=right>
 	<span disabled><%=goodName%></span><BR>
 	<BR>
-	”›«—‘ Œ—Ìœ —« «‰ Œ«» ﬂ‰Ìœ:<br>
-	<br></TD>
+	<br>
+	</TD>
 </TR>
 <INPUT TYPE="hidden" name="goodName" value="<%=goodName%>">
 <TR>
@@ -438,26 +566,92 @@ elseif request.form("Submit")="Ã” ÃÊ" then
 				set RSA=Conn.Execute ("SELECT * FROM purchaseOrders WHERE (Status = 'OUT' and TypeID="& goodItem1& ") order by OrdDate" )
 				'set RSA=Conn.Execute ("SELECT * FROM purchaseOrders WHERE (TypeID="& goodItem1& ") order by OrdDate" )
 				flg = false
-				while not (RSA.eof) %>
-					<INPUT TYPE="radio" NAME="purchaseOrderID" value="<%=RSA("ID")%>"<%
-					if trim(purchaseOrderID) = trim(RSA("ID")) then
-						response.write " chcecked "
-						preQtty = RSA("Qtty")
-						flg = true
-					end if
-					%>> ‘„«—Â <%=RSA("ID")%> (<%=RSA("Qtty")%>&nbsp;<%=goodUnit%>&nbsp;<%=goodName%>) <BR>
-<%					RSA.MoveNext
-				wend
-				RSA.close
+				if not RSA.eof then 
+					response.write("”›«—‘ Œ—Ìœ —« «‰ Œ«» ﬂ‰Ìœ:<br>")
+					while not (RSA.eof) %>
+						<INPUT TYPE="radio" NAME="purchaseOrderID" value="<%=RSA("ID")%>"<%
+						if trim(purchaseOrderID) = trim(RSA("ID")) then
+							response.write " chcecked "
+							preQtty = RSA("Qtty")
+							flg = true
+						end if
+						%>> ‘„«—Â <%=RSA("ID")%> (<%=RSA("Qtty")%>&nbsp;<%=goodUnit%>&nbsp;<%=goodName%>) <BR>
+	<%					RSA.MoveNext
+					wend
+					RSA.close
+				end if
+				if Auth(5,"E") then 
+					response.write ("<input type='hidden' NAME='customerItemRequest' id='customerItemRequest'>")
+					set rs=Conn.Execute ("select InventoryItemRequests.*,Accounts.accountTitle from InventoryItemRequests inner join Orders on InventoryItemRequests.order_id=orders.id inner join Accounts on Orders.customer=Accounts.id where InventoryItemRequests.status='new' and CustomerHaveInvItem=1 and InventoryItemRequests.id not in(select RelatedId from InventoryLog where owner>0 and voided=0 and IsInput=1 and ItemID=" & goodItem1 & ") and itemID=" & goodItem1)
+					if not rs.eof then response.write ("<br>œ—ŒÊ«” ùÂ«Ì „‘ —Ì:<br>")
+					while not rs.eof
+						response.write("<INPUT TYPE='radio' name='purchaseOrderID' value='-8' onclick='document.all.customerItemRequest.value=" & rs("id") & "';>")
+						response.write ("<a href='../shopfloor/manageOrder.asp?radif=" & rs("order_id") & "'>œ—ŒÊ«”  ÿÌ ”›«—‘ " & rs("order_id") & "</a> Ê”ÿ " & rs("accountTitle") & " <span title='" & rs("comment") & "'>(" & RS("Qtty") &"&nbsp;" & goodUnit &"&nbsp;"& goodName & ")</span> <BR>")
+						rs.moveNext
+					wend
+					rs.close
+					set rs = nothing
+				end if
+				'rs.close
+				if Auth(5,"G") then 
+				'-------------------------------------------------------------------------------------------------
+				'--------------------------------------- NOT IMPLIMENTED!!!!--------------------------------------
+				'-------------------------------------------------------------------------------------------------
+				set rs=Conn.Execute("select [log].*,InventoryItems.unit from InventoryLog as [log] inner join (select top 1  logDate from InventoryLog where ItemID=" & goodItem1 & " and sumQtty=0 order by logDate desc) as date on [log].logDate>date.logDate inner join InventoryItems on [log].itemID=InventoryItems.ID where isInput = 0 and [log].ItemID=" & goodItem1)
+				if not rs.eof then 
 				%>
-				<INPUT TYPE="radio" NAME="purchaseOrderID" value="-1" <% if not flg then%>checked<% end if%>> „—»Êÿ »Â ”›«—‘ Œ—Ìœ Œ«’Ì ‰Ì” .<br>
-
-				<INPUT TYPE="radio" NAME="purchaseOrderID" value="-3"> ﬂ«·«Ì „—ÃÊ⁄Ì <br>
-				<INPUT TYPE="radio" NAME="purchaseOrderID" value="-6"> Ê—Êœ «“  Ê·Ìœ<br>
-				<INPUT TYPE="radio" NAME="purchaseOrderID" value="-7"> Ê—Êœ «“  «‰»«— ‘Â—Ì«— / œ› — ⁄»«” ¬»«œ<br>
-				<% if Auth(5 , 7) then %>
+				<INPUT TYPE="radio" NAME="purchaseOrderID" value="-3"> ﬂ«·«Ì „—ÃÊ⁄Ì <select name="retID">
+					<%
+					while not rs.eof
+					%>
+					<option value="<%=rs("id")%>"><%=rs("Qtty") & rs("unit") & " œ—  «—ÌŒ " & rs("logDate")%></option>
+					<%
+						rs.moveNext
+					wend
+					%>
+				</select><br>
+				<%
+				end if
+				rs.close
+				end if
+				if Auth(5,"F") then
+				'-------------------------------------------------------------------------------------------------
+				'--------------------------------------- NOT IMPLIMENTED!!!!--------------------------------------
+				'------------------------------------------------------------------------------------------------- 
+				%>
+				<INPUT TYPE="radio" NAME="purchaseOrderID" value="-6"> Ê—Êœ «“  Ê·Ìœ<small> ‘„«—Â ”›«—‘:<input name="orderID" type="text" size="6"></small><br>
+				<%
+				end if
+				if Auth(5,"H") then 
+				'-------------------------------------------------------------------------------------------------
+				'--------------------------------------- NOT IMPLIMENTED!!!!--------------------------------------
+				'-------------------------------------------------------------------------------------------------
+				set rs=Conn.Execute("select [log].*,InventoryItems.unit from InventoryLog as [log] inner join (select top 1  logDate from InventoryLog where ItemID=" & goodItem1 & " and sumQtty=0 order by logDate desc) as date on [log].logDate>date.logDate inner join InventoryItems on [log].itemID=InventoryItems.ID where isInput = 0 and [log].ItemID=" & goodItem1)
+				if not rs.eof then 
+				%>
+				<INPUT TYPE="radio" NAME="purchaseOrderID" value="-7"> Ê—Êœ «“  «‰»«— ‘Â—Ì«— / œ› — ⁄»«” ¬»«œ<select name="outID">
+				<%
+					while not rs.eof
+					%>
+					<option value="<%=rs("id")%>"><%=rs("Qtty") & rs("unit") & " œ—  «—ÌŒ " & rs("logDate")%></option>
+					<%
+						rs.moveNext
+					wend
+					%>
+				</select><br>
+				<%
+				end if
+				rs.close
+				end if
+				if Auth(5 , 7) then %>
 				<INPUT TYPE="radio" NAME="purchaseOrderID" value="-2"> «’·«Õ „ÊÃÊœÌ<br>
-				<% end if %>
+				<% end if 
+				if Auth(5,"I") then
+				%>
+				<INPUT TYPE="radio" NAME="purchaseOrderID" value="-9">Ê—Êœ ÷«Ì⁄« <br>
+				<%
+				end if
+				%>
 			<br><br></TD>
 </TR>
 <TR>

@@ -232,8 +232,15 @@ end if
 '-----------------------------------------------------------------------------------------------------
 '---------------------------------------------------------------------------------- Details of an item
 '-----------------------------------------------------------------------------------------------------
-
 if isNumeric(oldItemID) then
+	if CInt(oldItemID)=-1 then 
+		itemDetail = request("itemID")
+		set rs = Conn.Execute("select * from InventoryItems where id=" & itemDetail)
+		oldItemID = rs("oldItemID")
+		rs.close
+	end if
+
+'response.write oldItemID
 	set RS3 = conn.Execute ("SELECT * from InventoryItems WHERE (InventoryItems.OldItemID = "&  Clng(oldItemID) & ")")
 	if not RS3.EOF then
 		itemDetail = RS3("id")
@@ -353,28 +360,30 @@ if isNumeric(itemDetail) then
 	End if 
 	HRs.Close
 
-	sqlstr = "SELECT InventoryLog.type, InventoryLog.Voided, InventoryLog.VoidedBy, InventoryLog.comments, InventoryLog.VoidedDate, InventoryLog.IsInput, InventoryItems.Unit, InventoryItems.Name, InventoryItems.OldItemID, InventoryLog.logDate, InventoryLog.Qtty, InventoryLog.RelatedID, InventoryLog.ItemID, InventoryLog.ID, InventoryLog.CreatedBy, InventoryLog.owner, Users.RealName FROM InventoryLog INNER JOIN InventoryItems ON InventoryLog.ItemID = InventoryItems.ID INNER JOIN Users ON InventoryLog.CreatedBy = Users.ID WHERE (InventoryItems.ID = "&  itemDetail & ") and InventoryLog.logDate>= N'"&dateFrom&"' and InventoryLog.logDate<= N'"&dateTo&"' ORDER BY InventoryLog.Logdate DESC, InventoryLog.ID DESC"
+	sqlstr = "SELECT InventoryLog.type, InventoryLog.Voided, InventoryLog.VoidedBy, InventoryLog.comments, InventoryLog.VoidedDate, InventoryLog.IsInput, InventoryItems.Unit, InventoryItems.Name, InventoryItems.OldItemID, InventoryLog.logDate, InventoryLog.Qtty, InventoryLog.RelatedID, InventoryLog.ItemID, InventoryLog.ID, InventoryLog.CreatedBy, InventoryLog.owner, Users.RealName, InventoryLog.price FROM InventoryLog INNER JOIN InventoryItems ON InventoryLog.ItemID = InventoryItems.ID INNER JOIN Users ON InventoryLog.CreatedBy = Users.ID WHERE (InventoryItems.ID = "&  itemDetail & ") and InventoryLog.logDate>= N'"&dateFrom&"' and InventoryLog.logDate<= N'"&dateTo&"' ORDER BY InventoryLog.Logdate DESC, InventoryLog.ID DESC"
 	set RSS=Conn.Execute (sqlstr)	
 
 	%><BR><BR>
-	<table align=center width=90%>
+	<table align=center width=95%>
 	<TR bgcolor="eeeeee" >
 		<FORM METHOD=POST ACTION="">
-		<TD colspan=9>
+		<TD colspan=10>
 		<INPUT TYPE="hidden" NAME="OldItemID" value="<%=RS3("OldItemID")%>"><H4>
 		ÓÇÈŞå æÑæÏ æ ÎÑæÌ ßÇáÇ  (ÇÒ ÊÇÑíÎ <INPUT TYPE="text" NAME="dateFrom" style="border:0pt" size=10 value="<%=dateFrom%>" dir=ltr onKeyPress="return maskDate(this);" onblur="acceptDate(this)" > ÊÇ ÊÇÑíÎ  <INPUT TYPE="text" NAME="dateTo" style="border:0pt" size=10 value="<%=dateTo%>" dir=ltr onKeyPress="return maskDate(this);" onblur="acceptDate(this)" >) <INPUT TYPE="submit" value="äãÇíÔ">
 		</H4></TD>
 		</FORM>
 	</TR>
 	<TR bgcolor="eeeeee" >
-		<TD><SMALL>æÑæÏ</SMALL></A></TD>
-		<TD><SMALL>ÎÑæÌ</SMALL></A></TD>
-		<TD><SMALL>ÊÑÇÒ ßá</SMALL></A></TD>
-		<TD><SMALL>ÊÑÇÒ ßá ÇÑÓÇáí</SMALL></A></TD>
-		<TD><SMALL>æÇÍÏ</SMALL></A></TD>
+		<td align="center"><small>ÑÏíİ</small></td>
+		<TD align="center"><SMALL>æÑæÏ</SMALL></A></TD>
+		<TD align="center"><SMALL>ÎÑæÌ</SMALL></A></TD>
+		<td align="center"><small>ÈåÇ</small></td>
+		<TD align="center"><SMALL>ÊÑÇÒ ßá</SMALL></A></TD>
+		<TD align="center"><SMALL>ÊÑÇÒ ßá<br>ÇÑÓÇáí</SMALL></A></TD>
+		<TD align="center"><SMALL>æÇÍÏ</SMALL></A></TD>
 		<TD align=center><SMALL>ÊÇÑíÎ </SMALL></A></TD>
-		<TD><SMALL>ÊæÖíÍÇÊ</SMALL></A></TD>
-		<TD><SMALL>ÊæÓØ</SMALL></A></TD>
+		<TD align="center"><SMALL>ÊæÖíÍÇÊ</SMALL></A></TD>
+		<TD align="center"><SMALL>ÊæÓØ</SMALL></A></TD>
 	</TR>
 	<%
 	tmpCounter=0
@@ -392,8 +401,10 @@ if isNumeric(itemDetail) then
 		end if
 	%>
 	<TR bgcolor="<%=tmpColor%>"  style="height:25pt" <% if RSS("voided") then%> disabled title="ÍÏİ ÔÏå ÏÑ ÊÇÑíÎ <%=RSS("VoidedDate")%>"<% end if %>>
+		<td align=right dir=ltr><span style="font-size:10pt"><%=RSS("id")%></span></td>
 		<TD align=right dir=ltr><span style="font-size:10pt"><% if RSS("IsInput") then %><%=RSS("Qtty")%><% end if %></span></TD>
 		<TD align=right dir=ltr style="position:relative;"><% if RSS("voided") then%><div style="right:0px;position:absolute;width:520;"><hr style="color:red;"></div><% end if %><span style="font-size:10pt"><% if not RSS("IsInput") then %><%=RSS("Qtty")%><% end if %></span></TD>
+		<td align=right dir=ltr title="İí: <%if not isNull(rss("price")) then response.write cdbl(rss("price"))/cdbl(rss("qtty"))%>"><span style="font-size:10pt"><%=rss("price")%></span></td>
 		<TD align=right dir=ltr><span style="font-size:10pt"><%=mySumQtty%></span></TD>
 		<TD align=right dir=ltr><span style="font-size:10pt"><%=urSumQtty%></span></TD>
 		<TD align=right dir=ltr ><%=RSS("Unit")%></TD>
@@ -410,6 +421,8 @@ if isNumeric(itemDetail) then
 					response.write "<font color=#6699CC><b>æÑæÏ ÇÒ ÊæáíÏ</b></font>"
 				elseif RSS("type")= "7" then
 					response.write "<font color=#FF9966><b>æÑæÏ ÇÒ ÇäÈÇÑ ÔåÑíÇÑ</b></font>"
+				elseif RSS("type")="9" then
+					response.write "<font color=#AAAA00><b>æÑæÏ ÖÇíÚÇÊ</b></font>"
 				elseif RSS("RelatedID")= "-1" then %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			   <% else 
 					if RSS("IsInput") then 
@@ -423,8 +436,44 @@ if isNumeric(itemDetail) then
 			   end if %>
 			<% if trim(RSS("comments"))<> "-" and RSS("comments")<> "" then
 				response.write " <br><br><B>ÊæÖíÍ:</B>  " & RSS("comments") 
-			   end if %>
-
+			   end if 
+			   set rs=Conn.Execute("select logDate,realName,price from InventoryPriceLog inner join users on InventoryPriceLog.userID = users.id where logID=" & rss("id") & " group by logDate,realName,price having count(price)>1")
+			   if not rs.eof then response.write("<br><b>ÊÛííÑÇÊ ŞíãÊ:</b><br>")
+			   while not rs.eof
+			   	response.write("<small>ÏÑ ÊÇÑíÎ " & rs("logDate") & "¡ ÊæÓØ " & rs("realName") & " " & rs("price") & " ÑíÇá" &"</small>")
+			   	rs.moveNext
+			   wend
+			   rs.close
+			   set rs=nothing
+			   if CDbl(rss("qtty"))>0 and not rss("voided") then 
+				   if rss("isInput") then 
+				   	mySQL = "select * from InventoryFIFORelations where inID=" & rss("id")
+				   	msg1="áíÓÊ ÎÑæÌåÇ ÇÒ Çíä æÑæÏ:"
+				   	msg2="åäæÒ ÇÒ Çíä æÑæÏ ÎÑæÌ ÇäÌÇã äÔÏå"
+				   else
+				   	mySQL = "select * from InventoryFIFORelations where outID=" & rss("id")
+				 	msg1="áíÓÊ æÑæÏåÇ ÈÑÇí Çíä ÎÑæÌ:"
+				 	msg2="Çíä ÎÑæÌ ŞíãÊ ĞÇÑí äÔÏå! áØİÇ æÑæÏåÇí ŞÈáí ÑÇ ŞíãÊ ĞÇÑí ßäíÏ"
+				   end if
+				   set rs = Conn.Execute(mySQL)
+				   if rs.eof then 
+				   	response.write ("<br><b>" & msg2&"</b><br>")
+				   else
+				   	response.write ("<br><b>" & msg1&"</b><br>")
+				   end if
+				   while not rs.eof
+				   	if rss("isInput") then 
+				   		link = rs("outID")
+				   	else
+				   		link = rs("inID")
+				   	end if
+				   	response.write ("<small>" & rs("qtty") & " ÚÏÏ ÇÒ " & link & "</small><br>")
+				   	rs.moveNext
+				   wend
+				   rs.close
+				   set rs=nothing
+			   end if
+			   %>
 		</TD>
 		<TD><%=RSS("RealName")%></TD>
 		<%
@@ -468,31 +517,35 @@ if isNumeric(itemDetail) then
 	Loop
 	%>
 	<TR bgcolor="666666" height=25 style="color:white;">
+		<td></td>
 		<TD align=right dir=ltr><%=inputs+urinputs%></A></TD>
 		<TD align=right dir=ltr><%=outputs+uroutputs%></A></TD>
-		<TD colspan=6>ÑÏÔ æÑæÏ æ ÎÑæÌ  ÇÒ ÊÇÑíÎ <span dir=ltr><%=dateFrom%></span> ÊÇ ÊÇÑíÎ <span dir=ltr><%=dateTo%></span></A></TD>
+		<TD colspan=7>ÑÏÔ æÑæÏ æ ÎÑæÌ  ÇÒ ÊÇÑíÎ <span dir=ltr><%=dateFrom%></span> ÊÇ ÊÇÑíÎ <span dir=ltr><%=dateTo%></span></A></TD>
 	</TR>
 	<TR bgcolor="cccccc" height=25 style="color:black;">
+		<td></td>
 		<TD align=right dir=ltr><%=inputs%></A></TD>
 		<TD align=right dir=ltr><%=outputs%></A></TD>
-		<TD colspan=6>ÑÏÔ æÑæÏ æ ÎÑæÌ  ÇÒ ÊÇÑíÎ <span dir=ltr><%=dateFrom%></span> ÊÇ ÊÇÑíÎ <span dir=ltr><%=dateTo%></span> ÎæÏãÇä</A></TD>
+		<TD colspan=7>ÑÏÔ æÑæÏ æ ÎÑæÌ  ÇÒ ÊÇÑíÎ <span dir=ltr><%=dateFrom%></span> ÊÇ ÊÇÑíÎ <span dir=ltr><%=dateTo%></span> ÎæÏãÇä</A></TD>
 	</TR>
 	<TR bgcolor="cccccc" height=25 style="color:black;">
+		<td></td>
 		<TD align=right dir=ltr><%=urinputs%></A></TD>
 		<TD align=right dir=ltr><%=uroutputs%></A></TD>
-		<TD colspan=6>ÑÏÔ æÑæÏ æ ÎÑæÌ  ÇÒ ÊÇÑíÎ <span dir=ltr><%=dateFrom%></span> ÊÇ ÊÇÑíÎ <span dir=ltr><%=dateTo%> </span> ÏíÑÇä</A></TD>
+		<TD colspan=7>ÑÏÔ æÑæÏ æ ÎÑæÌ  ÇÒ ÊÇÑíÎ <span dir=ltr><%=dateFrom%></span> ÊÇ ÊÇÑíÎ <span dir=ltr><%=dateTo%> </span> ÏíÑÇä</A></TD>
 	</TR>
 	<% 
 		sqlstr = "SELECT ROUND(ISNULL((SELECT Sum(Qtty) From InventoryLog Where (Voided=0) And (ItemID = "&  itemDetail & ") And Logdate<'"&dateFrom&"' And isInput=1),0),2) As InputQtty, ROUND(ISNULL((SELECT Sum(Qtty) From InventoryLog Where (Voided=0) And (ItemID = "&  itemDetail & ") And Logdate<'"&dateFrom&"' And isInput=0 ),0), 2) As OutputQtty"
 		set DRS1 = conn.Execute(sqlstr)
 		if (not DRS1.EOF) then
 		%>
-	<Tr><td colspan=8 Height=20 ></td></tr>
+	<Tr><td colspan=11 Height=20 ></td></tr>
 	<TR bgcolor="#FFFFFF"  style="height:25pt;" >
+		<td></td>
 		<TD align=right dir=ltr ><span style="font-size:10pt"><%=DRS1("InputQtty")%></span></TD>
 		<TD align=right dir=ltr ><span style="font-size:10pt"><%=DRS1("OutputQtty")%></span></TD>
 		<TD align=right dir=ltr ><span style="font-size:10pt"><%=cdbl(DRS1("InputQtty")) - cdbl(DRS1("OutputQtty")) %></span></TD>
-		<TD align=right Colspan=5  >
+		<TD align=right Colspan=6  >
 		ãæÌæÏ æ ÑÏÔ ÊÇ ŞÈá ÇÒ ÊÇÑíÎ <span dir=ltr><%=dateFrom%></span>
 		</TD>
 	</TR>
