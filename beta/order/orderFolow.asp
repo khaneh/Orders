@@ -225,6 +225,7 @@ elseif request("act")="show" then
 	set RS1=Conn.Execute (mySQL)
 	if not RS1.eof then
 		tmpCounter=0
+		totalSum=0
 'response.write mySQL
 %>
 	<div align="center" dir="LTR">
@@ -275,13 +276,16 @@ elseif request("act")="show" then
 			<td><%if isnull(RS1("price")) then response.write "----" else response.write Separate(RS1("price")) end if %></td>
 		</TR>
 		<TR bgcolor="#FFFFFF">
-			<TD colspan="10" style="height:10px"></TD>
+			<TD colspan="11" style="height:10px"></TD>
 		</TR>
-<%					RS1.moveNext
+<%			
+		if not IsNull(rs1("price")) then totalSum = totalSum + CDbl(RS1("price"))
+			RS1.moveNext
 		Loop
 
 %>					<TR bgcolor="#ccccFF">
-				<TD colspan="10">йзого ДйгМл лсйлФ: <%=tmpCounter%></TD>
+				<TD colspan="9">йзого ДйгМл лсйлФ: <%=tmpCounter%></TD>
+				<td colspan="2" align="center"><%=Separate(totalSum)%></td>
 			</TR>
 	</TABLE>
 	</div>
