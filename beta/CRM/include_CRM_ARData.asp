@@ -111,18 +111,31 @@
 						<td class="CusTD3">‘„«—Â ›«ﬂ Ê—</td>
 						<td class="CusTD3">«ÌÃ«œ ﬂ‰‰œÂ</td>
 						<td class="CusTD3"> «—ÌŒ</td>
-						<td class="CusTD3">„—»Êÿ »Â ”›«—‘ Â«Ì</td>
+						<td class="CusTD3">„—»Êÿ »Â ”›«—‘ùÂ«Ì</td>
+						<td class="CusTD3">„—»Êÿ »Â «” ⁄·«„ùÂ«Ì</td>
 						<td class="CusTD3">„»·€</td>
 					</tr>
 <%					tmpCounter=0
 					Do while not RS1.eof 
 						RelatedOrders = ""
+						RelatedQuotes=""
 						tmpsep=""
 						mySQL="SELECT [Order] FROM InvoiceOrderRelations WHERE Invoice='"& RS1("ID") & "'"
 						Set RS2 = conn.execute(mySQL)
 						Do While not RS2.eof 
 '							RelatedOrders = RelatedOrders & tmpsep & "<a href='../order/TraceOrder.asp?act=show&order="& RS2("Order") & "' target='_blank'>"& RS2("Order") & "</a>"
 							RelatedOrders = RelatedOrders & tmpsep & RS2("Order")
+							tmpsep=", "
+							RS2.Movenext
+						Loop
+						RS2.close
+						Set Rs2=Nothing
+						tmpsep=""
+						mySQL="SELECT Quote FROM InvoiceQuoteRelations WHERE Invoice='"& RS1("ID") & "'"
+						Set RS2 = conn.execute(mySQL)
+						Do While not RS2.eof 
+'							RelatedOrders = RelatedOrders & tmpsep & "<a href='../order/TraceOrder.asp?act=show&order="& RS2("Order") & "' target='_blank'>"& RS2("Order") & "</a>"
+							RelatedQuotes = RelatedQuotes & tmpsep & RS2("Quote")
 							tmpsep=", "
 							RS2.Movenext
 						Loop
@@ -144,6 +157,7 @@
 							<TD><%=RS1("ûCreator")%>&nbsp;</TD>
 							<TD dir="LTR" align='right'><%=RS1("CreatedDate")%>&nbsp;</TD>
 							<TD dir="LTR" align='right'><%=RelatedOrders%>&nbsp;</TD>
+							<TD dir="LTR" align='right'><%=RelatedQuotes%>&nbsp;</TD>
 							<TD><%=Separate(RS1("TotalReceivable"))%>&nbsp;</TD>
 						</TR>
 <%						RS1.moveNext
@@ -278,3 +292,105 @@
 			</table>
 		</Td>
 	  </Tr>
+	  <Tr>
+		<Td colspan="2" valign="top" align="center">
+			<table class="CustTable" cellspacing='1' style='width:90%;'>
+				<tr>
+					<td colspan="10" class="CusTableHeader" style="background-color:#3AC;">”›«—‘ùÂ«</td>
+				</tr>
+				<%
+				mySQL="select orders.id,orders_trace.order_title,orders_trace.qtty,orders_trace.order_date,invoices.issuedDate,invoices.totalReceivable,orders_trace.vazyat,orders_trace.marhale,invoices.id as invoice from orders inner join orders_trace on orders.id=orders_trace.radif_sefareshat left outer join InvoiceOrderRelations on InvoiceOrderRelations.[Order] = orders.id left outer join Invoices on InvoiceOrderRelations.Invoice=invoices.ID where orders.Customer=" & cusID & " order by orders_trace.order_date desc"
+				set rs=Conn.Execute(mySQL)
+				if rs.eof then 
+				%>
+				<tr>
+					<td colspan="10" class="CusTD3">ÂÌç</td>
+				</tr>
+				<%
+				else
+				%>
+				<tr>
+					<td class="CusTD3">‘„«—Â ”›«—‘</td>
+					<td class="CusTD3">‘—Õ ”›«—‘</td>
+					<td class="CusTD3"> Ì—«é</td>
+					<td class="CusTD3"> «—ÌŒ ”›«—‘</td>
+					<td class="CusTD3"> «—ÌŒ ’œÊ—</td>
+					<td class="CusTD3" colspan=4>„»·€</td>
+				</tr>
+				<%
+				tmpColor=""
+				while not rs.eof
+					if tmpColor<>"#FFFFFF" then
+						tmpColor="#FFFFFF"
+						tmpColor2="#FFFFBB"
+					Else
+						tmpColor="#DDDDDD"
+						tmpColor2="#EEEEBB"
+					End if 
+				%>
+				<tr bgcolor="<%=tmpColor%>" onMouseOver="this.style.backgroundColor='<%=tmpColor2%>'" onMouseOut="this.style.backgroundColor='<%=tmpColor%>'">
+					<td title="<%=rs("vazyat") & "° " & rs("marhale")%>"><a href='../order/TraceOrder.asp?act=show&order=<%=rs("id")%>'><%=rs("id")%></a></td>
+					<td><%=rs("order_title")%></td>
+					<td><%=rs("qtty")%></td>
+					<td><%=rs("order_date")%></td>
+					<td title="‰„«Ì‘ ›«ﬂ Ê—"><a href="../AR/AccountReport.asp?act=showInvoice&invoice=<%=rs("invoice")%>"><%=rs("issuedDate")%></a></td>
+					<td colspan=4><%=Separate(rs("totalReceivable"))%></td>
+				</tr>
+				<%	
+					rs.moveNext
+				wend
+				end if
+				rs.close
+				%>
+			</table>
+		</td>
+	   </tr>
+	   <Tr>
+		<Td colspan="2" valign="top" align="center">
+			<table class="CustTable" cellspacing='1' style='width:90%;'>
+				<tr>
+					<td colspan="10" class="CusTableHeader" style="background-color:#AAAAEE;">«” ⁄·«„ùÂ«</td>
+				</tr>
+				<%
+				mySQL="select * from Quotes where Customer=" & cusID
+				set rs=Conn.Execute(mySQL)
+				if rs.eof then 
+				%>
+				<tr>
+					<td colspan="10" class="CusTD3">ÂÌç</td>
+				</tr>
+				<%
+				else
+				tmpColor=""					
+				%>
+				<tr>
+					<td class="CusTD3">‘„«—Â «” ⁄·«„</td>
+					<td class="CusTD3">‘—Õ «” ⁄·«„</td>
+					<td class="CusTD3"> «—ÌŒ «” ⁄·«„</td>
+					<td class="CusTD3" colspan="6"> Ê÷ÌÕ« </td>
+				</tr>
+				<%
+				
+				while not rs.eof
+					if tmpColor<>"#FFFFFF" then
+						tmpColor="#FFFFFF"
+						tmpColor2="#FFFFBB"
+					Else
+						tmpColor="#DDDDDD"
+						tmpColor2="#EEEEBB"
+					End if 
+				%>
+				<tr bgcolor="<%=tmpColor%>" onMouseOver="this.style.backgroundColor='<%=tmpColor2%>'" onMouseOut="this.style.backgroundColor='<%=tmpColor%>'">
+					<td title="<%=rs("vazyat") & "° " & rs("marhale")%>"><a href="../order/Inquiry.asp?act=show&quote=<%=rs("id")%>"><%=rs("id")%></a></td>
+					<td><%=rs("order_title")%></td>
+					<td><%=rs("order_date")%></td>
+					<td colspan="6"><%=rs("Notes")%></td>
+				</tr>
+				<%
+					rs.moveNext
+				wend
+				end if
+				%>
+			</table>
+		</td>
+	   </tr>
