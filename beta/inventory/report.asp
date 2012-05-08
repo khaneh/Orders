@@ -52,28 +52,38 @@ if request("act") = "del" and isNumeric(request("rowID")) then
 		response.write "<br><br>" 
 		call showAlert ("Œÿ«! ç‰Ì‰ ”ÿ—Ì „ÊÃÊœ ‰Ì”  Ì« ﬁ»·« Õ–› ‘œÂ «” ." , CONST_MSG_ERROR)
 	else
-		type1 = RSS("type")
-		RelatedID = RSS("RelatedID")
-		isInput = RSS("isInput")
-
-		if type1 = 1 and not isInput then
-			Conn.Execute ("UPDATE InventoryPickuplists SET Status = 'new' WHERE (id = " & RelatedID & ")")
+		if rss("gl_update")="1" then 
 			response.write "<br><br>" 
-			call showAlert ("ÕÊ«·Â Œ—Ìœ „—»ÊÿÂ »Â ’› ¬„«œÂ Œ—ÊÃ »«“ê‘ ." , CONST_MSG_INFORM)
-		end if
-
-		if (not isInput) and (RelatedID > 0) then
-			set RSB=Conn.Execute ("SELECT id from InventoryLog where (RelatedID = " & RelatedID & " and isInput=0) and voided = 0 ")
-			Do while not RSB.eof
-				Conn.Execute ("UPDATE InventoryLog SET Voided =1, VoidedBy =" & session("id") & ", VoidedDate =N'" & shamsiToday() & "', comments = LEFT(comments + '<br>[œ·Ì· Õ–›: " & desc & "]', 250) WHERE (ID = " & RSB("id") & ")")
-				RSB.movenext
-			loop
+			call showAlert ("Œÿ«! »—«Ì «Ì‰ ”ÿ— ﬁ»·« ”‰œ Õ”«»œ«—Ì ’«œ— ‘œÂ° ›·–« ›⁄·« ﬁ«œ— »Â Õ–› ¬‰ ‰Ì” Ìœ!." , CONST_MSG_ERROR)
 		else
-			Conn.Execute ("UPDATE InventoryLog SET Voided =1, VoidedBy =" & session("id") & ", VoidedDate =N'" & shamsiToday() & "', comments = LEFT(comments + '<br>[œ·Ì· Õ–›: " & desc & "]', 250) WHERE (ID = " & rowID & ") AND (voided = 0)")
-		end if 
-
-		response.write "<br><br>" 
-		call showAlert ("Õ–› ”ÿ— «‰Ã«„ ‘œ." , CONST_MSG_INFORM)
+			type1 = RSS("type")
+			RelatedID = RSS("RelatedID")
+			isInput = RSS("isInput")
+	
+			if type1 = 1 and not isInput then
+				Conn.Execute ("UPDATE InventoryPickuplists SET Status = 'new' WHERE (id = " & RelatedID & ")")
+				response.write "<br><br>" 
+				call showAlert ("ÕÊ«·Â Œ—Ìœ „—»ÊÿÂ »Â ’› ¬„«œÂ Œ—ÊÃ »«“ê‘ ." , CONST_MSG_INFORM)
+			end if
+	
+			if (not isInput) and (RelatedID > 0) then
+				set RSB=Conn.Execute ("SELECT id from InventoryLog where (RelatedID = " & RelatedID & " and isInput=0) and voided = 0 ")
+				Do while not RSB.eof
+					Conn.Execute ("UPDATE InventoryLog SET Voided =1, VoidedBy =" & session("id") & ", VoidedDate =N'" & shamsiToday() & "', comments = LEFT(comments + '<br>[œ·Ì· Õ–›: " & desc & "]', 250) WHERE (ID = " & RSB("id") & ")")
+					RSB.movenext
+				loop
+			else
+				Conn.Execute ("UPDATE InventoryLog SET Voided =1, VoidedBy =" & session("id") & ", VoidedDate =N'" & shamsiToday() & "', comments = LEFT(comments + '<br>[œ·Ì· Õ–›: " & desc & "]', 250) WHERE (ID = " & rowID & ") AND (voided = 0)")
+			end if 
+	
+			response.write "<br><br>" 
+			call showAlert ("Õ–› ”ÿ— «‰Ã«„ ‘œ." , CONST_MSG_INFORM)
+			Conn.Execute("update InventoryLog set price=null, pricedQtty=null where isInput=0 and owner=-1 and voided=0 and itemID=" & rss("itemID"))
+			Conn.Execute("update InventoryLog set pricedQtty = qtty where isInput=1 and owner=-1 and voided=0 and itemID=" & rss("itemID"))
+			Conn.Execute("delete from InventoryFIFORelations where inID in (select id from InventoryLog where isInput=1 and owner=-1 and voided=0 and itemID=" & rss("itemID")) &")"
+			Conn.Execute("delete from InventoryFIFORelations where outID in (select id from InventoryLog where isInput=0 and owner=-1 and voided=0 and itemID=" & rss("itemID")) &")"
+			Conn.Execute("execute dbo.outFIFO")
+		end if
 	end if
 
 end if
@@ -127,7 +137,7 @@ if request("submit")="„‘«ÂœÂ"then
 	if outRep = "on" then
 '		mySQL="SELECT InventoryLog.ID, InventoryLog.comments, InventoryLog.Voided, InventoryLog.VoidedBy, InventoryLog.VoidedDate, InventoryItems.Unit, InventoryItems.Name, InventoryItems.OldItemID, InventoryLog.logDate, InventoryLog.Qtty, InventoryLog.RelatedID, InventoryLog.ItemID, InventoryLog.type, InventoryLog.CreatedBy, InventoryLog.owner, Users.RealName, Users_1.RealName AS GiveTo FROM InventoryLog INNER JOIN InventoryItems ON InventoryLog.ItemID = InventoryItems.ID INNER JOIN Users ON InventoryLog.CreatedBy = Users.ID INNER JOIN InventoryPickuplists ON InventoryLog.RelatedID = InventoryPickuplists.id INNER JOIN Users Users_1 ON InventoryPickuplists.GiveTo = Users_1.ID WHERE (InventoryLog.logDate >= N'"& fromDate & "' and InventoryLog.logDate <= N'"& toDate & "' and IsInput=0) ORDER BY InventoryLog.ID DESC"
 
-		mySQL="SELECT InventoryLog.ID, InventoryLog.comments, InventoryLog.Voided, InventoryLog.VoidedDate, InventoryItems.Unit, InventoryItems.Name, InventoryItems.OldItemID, InventoryLog.logDate, InventoryLog.Qtty, InventoryLog.RelatedID, InventoryLog.ItemID, InventoryLog.type, InventoryLog.CreatedBy, InventoryLog.owner, Users.RealName, Users_1.RealName AS GiveTo, Users_2.RealName AS VoidedBy FROM InventoryLog INNER JOIN InventoryItems ON InventoryLog.ItemID = InventoryItems.ID INNER JOIN Users ON InventoryLog.CreatedBy = Users.ID INNER JOIN InventoryPickuplists ON InventoryLog.RelatedID = InventoryPickuplists.id INNER JOIN Users Users_1 ON InventoryPickuplists.GiveTo = Users_1.ID LEFT OUTER JOIN Users Users_2 ON InventoryLog.VoidedBy = Users_2.ID WHERE (InventoryLog.logDate >= N'"& fromDate & "') AND (InventoryLog.logDate <= N'"& toDate & "') AND (InventoryLog.IsInput = 0) ORDER BY InventoryLog.ID DESC"
+		mySQL="SELECT InventoryLog.ID, InventoryLog.comments, InventoryLog.Voided, InventoryLog.VoidedDate, InventoryItems.Unit, InventoryItems.Name, InventoryItems.OldItemID, InventoryLog.logDate, InventoryLog.Qtty, InventoryLog.RelatedID, InventoryLog.ItemID, InventoryLog.type, InventoryLog.CreatedBy, InventoryLog.owner, Users.RealName, Users_1.RealName AS GiveTo, Users_2.RealName AS VoidedBy, InventoryFIFORelations.inID,InventoryFIFORelations.qtty as inQtty FROM InventoryLog INNER JOIN InventoryItems ON InventoryLog.ItemID = InventoryItems.ID INNER JOIN Users ON InventoryLog.CreatedBy = Users.ID INNER JOIN InventoryPickuplists ON InventoryLog.RelatedID = InventoryPickuplists.id INNER JOIN Users Users_1 ON InventoryPickuplists.GiveTo = Users_1.ID LEFT OUTER JOIN Users Users_2 ON InventoryLog.VoidedBy = Users_2.ID left outer join InventoryFIFORelations on inventoryLog.id = InventoryFIFORelations.outID WHERE (InventoryLog.logDate >= N'"& fromDate & "') AND (InventoryLog.logDate <= N'"& toDate & "') AND (InventoryLog.IsInput = 0) ORDER BY InventoryLog.ID DESC"
 
 		set RSS=Conn.Execute (mySQL)	
 		%>
@@ -179,7 +189,13 @@ if request("submit")="„‘«ÂœÂ"then
 				 end if %>
 				<% if RSS("comments")<> "-" and RSS("comments")<> "" then
 					response.write " <br><br><B> Ê÷ÌÕ:</B> " & RSS("comments") 
-				 end if %>
+				 end if 
+				 if not isNull(rss("inID")) then 
+				 	response.write("<br>ﬁÌ„  ê–«—Ì ‘œÂ°" & rss("inQtty") & " «“ Ê—Êœ <b>" & rss("inID") & "</b>")
+				 else
+				 	response.write("<br><b>ﬁÌ„  ê–«—Ì ‰‘œÂ!</b>")
+				 end if
+				 %>
 
 			</TD>
 			<TD><%=RSS("RealName")%></TD>
@@ -192,7 +208,7 @@ if request("submit")="„‘«ÂœÂ"then
 
 	if inRep = "on" then
 
-		mySQL="SELECT InventoryLog.RelatedInvoiceID, InventoryLog.ID, InventoryLog.comments, InventoryLog.Voided, InventoryLog.VoidedDate, InventoryLog.CreatedBy, InventoryLog.owner, InventoryLog.logDate, InventoryLog.type, InventoryLog.Qtty, InventoryLog.RelatedID, InventoryLog.ItemID, InventoryItems.OldItemID, InventoryItems.Name, InventoryItems.Unit, Users.RealName, Users_1.RealName AS VoidedBy FROM InventoryLog INNER JOIN InventoryItems ON InventoryLog.ItemID = InventoryItems.ID INNER JOIN Users ON InventoryLog.CreatedBy = Users.ID LEFT OUTER JOIN Users Users_1 ON InventoryLog.VoidedBy = Users_1.ID WHERE (InventoryLog.logDate >= N'"& fromDate & "') AND (InventoryLog.logDate <= N'"& toDate & "') AND (InventoryLog.IsInput = 1) ORDER BY InventoryLog.ID DESC"
+		mySQL="SELECT InventoryLog.RelatedInvoiceID, InventoryLog.ID, InventoryLog.comments, InventoryLog.Voided, InventoryLog.VoidedDate, InventoryLog.CreatedBy, InventoryLog.owner, InventoryLog.logDate, InventoryLog.type, InventoryLog.Qtty, InventoryLog.RelatedID, InventoryLog.ItemID, InventoryItems.OldItemID, InventoryItems.Name, InventoryItems.Unit, Users.RealName, Users_1.RealName AS VoidedBy, InventoryFIFORelations.outID, InventoryFIFORelations.qtty as outQtty FROM InventoryLog INNER JOIN InventoryItems ON InventoryLog.ItemID = InventoryItems.ID INNER JOIN Users ON InventoryLog.CreatedBy = Users.ID LEFT OUTER JOIN Users Users_1 ON InventoryLog.VoidedBy = Users_1.ID left outer join InventoryFIFORelations on inventoryLog.id = InventoryFIFORelations.inID WHERE (InventoryLog.logDate >= N'"& fromDate & "') AND (InventoryLog.logDate <= N'"& toDate & "') AND (InventoryLog.IsInput = 1) ORDER BY InventoryLog.ID DESC"
 
 		set RSS=Conn.Execute (mySQL)	
 
@@ -259,7 +275,13 @@ if request("submit")="„‘«ÂœÂ"then
 				 end if %>
 				<% if RSS("comments")<> "-" and RSS("comments")<> "" then
 					response.write " <br><br><B> Ê÷ÌÕ:</B> " & RSS("comments") 
-				 end if %>
+				 end if 
+				 if not isNull(rss("outID")) then 
+				 	response.write("<br>ﬁÌ„  ê–«—Ì ‘œÂ°" & rss("outQtty") & " «“ Œ—Êç<b> " & rss("outID") & "</b>")
+				 else
+				 	response.write("<br><b>ﬁÌ„  ê–«—Ì ‰‘œÂ!</b>")
+				 end if
+				 %>
 				 </TD>
 			<TD dir='LTR' align='right'><%=RSS("RealName")%></TD>
 		</TR>

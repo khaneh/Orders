@@ -33,9 +33,12 @@ if request.form("Submit")=" «ÌÌœ" then
 	set RSS=Conn.Execute ("SELECT * FROM InventoryPickuplists WHERE (id = "& PickID & " and status='new') " )
 	if RSS.eof then 
 		response.write "<BR><BR><BR><BR><center>Œÿ«! <BR><BR>«Ì‰ ÕÊ«·Â ﬁ»·« «“ «‰»«— Œ«—Ã ‘œÂ «” . </center>"
+		'response.write pickID
 		response.end
 	end if
-	Conn.Execute ("update InventoryPickuplists set status='done' where (id = "& PickID & ")")
+	mySQL = "update InventoryPickuplists set status='done' where (id = "& PickID & ")"
+'	response.write mySQL
+	Conn.Execute (mySQL)
 
 
 	'===================================================
@@ -68,8 +71,13 @@ if request.form("Submit")=" «ÌÌœ" then
 		else
 			owner	= "-1"
 		end if
-
-		Conn.Execute ("INSERT INTO InventoryLog (ItemID, RelatedID, Qtty, logDate, CreatedBy, owner, IsInput, comments, type, RelatedInvoiceID) VALUES ("& ItemID & ","& PickID& ","& Qtty& ",N'"& logDate& "', "& session("ID") & ", " & owner & " , 0, N'" & comments & "', 1, "& RelatedInvoiceID & ")")
+		mySQL = "SET NOCOUNT ON;INSERT INTO InventoryLog (ItemID, RelatedID, Qtty, logDate, CreatedBy, owner, IsInput, comments, type, RelatedInvoiceID,price,gl_update) VALUES ("& ItemID & ","& PickID& ","& Qtty& ",N'"& logDate& "', "& session("ID") & ", " & owner & " , 0, N'" & comments & "', 1, "& RelatedInvoiceID & ", null,0);select @@identity as newID;SET NOCOUNT OFF;"
+		'response.write mySQL 
+		'response.end
+		set rs = Conn.Execute(mySQL)
+		newOut = rs.Fields("newID").value
+		rs.close
+		set rs= nothing
 		if RSI("CustomerHaveInvItem") then
 			set RSW=Conn.Execute ("SELECT SUM((CONVERT(tinyint, dbo.InventoryLog.IsInput) - .5) * 2 * dbo.InventoryLog.Qtty) AS sumQtty, dbo.Accounts.AccountTitle FROM dbo.Orders INNER JOIN dbo.InventoryLog ON dbo.Orders.Customer = dbo.InventoryLog.owner INNER JOIN dbo.Accounts ON dbo.Orders.Customer = dbo.Accounts.ID WHERE (dbo.InventoryLog.ItemID = " & ItemID & " and dbo.InventoryLog.voided=0) GROUP BY dbo.Orders.ID, dbo.Accounts.AccountTitle HAVING (dbo.Orders.ID = " & order_ID  & ")")
 			newItemQtty = RSW("sumQtty")
@@ -87,11 +95,17 @@ if request.form("Submit")=" «ÌÌœ" then
 			response.end
 		end if
 '		Conn.Execute ("update InventoryItems set qtty="& newItemQtty & " where (id = "& ItemID & ")")
+		Conn.Execute("execute dbo.outFIFO")
+		set rs=conn.Execute("select * from InventoryFIFORelations where outID=" & newOut)
+		while not rs.eof
+			response.write("<li> Œ—ÊÃ «“ Ê—Êœ <a href='invReport.asp?oldItemID=-1&itemID=" & itemID & "'>" & rs("inID") & "</a> »Â  ⁄œ«œ " & rs("qtty") & " «‰Ã«„ ‘œ.<br>")
+			rs.moveNext
+		wend
 		RSI.moveNext
 	loop 
 	RSI.close
 	response.write "</center>"
-
+	
 %>
 	<BR>	
 	<CENTER>
