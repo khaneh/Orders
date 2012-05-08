@@ -116,7 +116,7 @@ elseif request("act")="edit" then '------------------- EDIT --------------------
 		msg="⁄„·Ì«  „Ê—œ ‰Ÿ— »—Ê“ —”«‰Ì ‘œ"
 		response.redirect "?step=driver&act=show&id="&request("centerID")&"&msg=" & Server.URLEncode(msg)
 	end if
-elseif request("act")="show" then
+elseif request("act")="show" then '---------------------- SHOW ------------------------------------
 	if request("step")="driver" then	
 		if isNumeric(request("id")) then 
 			id=request("id")

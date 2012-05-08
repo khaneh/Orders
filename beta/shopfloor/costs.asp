@@ -2,347 +2,410 @@
 'shopfloor (3)
 PageTitle="Ê—Êœ ⁄„·ﬂ—œ"
 SubmenuItem=7
-if not Auth(3 , 6) then NotAllowdToViewThisPage()
+if not Auth(3 , 7) then NotAllowdToViewThisPage()
 %>
 <!--#include file="top.asp" -->
 <!--#include File="../include_farsiDateHandling.asp"-->
-<link type="text/css" href="/css/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+<!--#include File="../include_UtilFunctions.asp"-->
 
 <script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
-<script type="text/javascript" src="/js/jquery-ui-1.8.16.custom.min.js"></script>
-<!--script type="text/javascript" src="/js/jquery.ui.core.js"></script-->
+<script type="text/javascript" src="/js/jalaliCalendar.js"></script>
 <script type="text/javascript" src="/js/jquery.dateFormat-1.0.js"></script>
-<script type="text/javascript" src="/js/jquery.ui.datepicker-cc.js"></script>
-<script type="text/javascript" src="/js/calendar.js"></script>
-<script type="text/javascript" src="/js/jquery.ui.datepicker-cc-ar.js"></script>
-<script type="text/javascript" src="/js/jquery.ui.datepicker-cc-fa.js"></script>
-
-<script type="text/javascript" src="/js/jquery-ui-timepicker-addon.js"></script>
-
 <script type="text/javascript">
-		//alert(new Date(Date.parse("2011/11/26 03:00 ")));
-		//2011/11/26 03:00 
-	$(document).ready(function() {
-		$.ajaxSetup({
-			cache: false
-		});
-		addFunctions2Row(0);
-		$("button#addRow").click(function () {
-			$('span#msg').html("");
-			myRow = $("table#myTable tr:last").html();
-			//checkRow();
-			//myID = $("table#myTable tr:last").attr("id");
-			myID = $("table#myTable tr:last").index();
-			//myID = myIDtext.substr(myIDtext.indexOf("-n-"), myIDtext.indexOf("-", myIDtext.indexOf("-n-") + 4));
-			disableOldRow(myID);
-			newID= parseInt(myID)+1;
-			newID = "-" + newID;
-			myID = "-" + myID;
-			newRow="<tr>" + $("table#myTable tr:last").html().replace(RegExp(myID, "g"), newID).replace(RegExp('class="hasDatepicker"', "g"), '') + "</tr>";
-			//console.log(newRow);
-			$("table#myTable tr:last").after(newRow);
-			myID=$("table#myTable tr:last").index();
-			addFunctions2Row(myID);
-			$(this).prop('disabled', true);
-			return false;
-			
-		});
-		//-------------------------------- DISABLE OLD ROW ---------------------------
-		function disableOldRow(rowID){
-			//$("input#startDate-fa-"+rowID).readOnly=true;
-			$("input#startDate-fa-" + rowID).prop("disabled", true);
-	    	$("input#startDateTime-" + rowID).prop("disabled", true);
-	    	$("input#startTime-" + rowID).prop("disabled", true);
-	    	$("input#endDate-fa-" + rowID).prop("disabled", true);
-	    	$("input#endDateTime-" + rowID).prop("disabled", true);
-	    	$("input#endTime-" + rowID).prop("disabled", true);
-	    	$("input#startCounter-" + rowID).prop("disabled", true);
-	    	$("input#endCounter-" + rowID).prop("disabled", true);
-			$("select#operationType-" + rowID).prop("disabled", true);
-			$("select#costCenter-" + rowID).prop("disabled", true);
-		}
-		// --------------------------------- ADD EVENTS ------------------------------
-		function addFunctions2Row(rowID) {
-			//if (rowID>0)  disableOldRow(rowID-1)
-			$("select#costCenter-" + rowID).prop("disabled", false);
-			console.log("ID: "+ rowID);
-			$("input#startDate-fa-" + rowID).datepicker({
-				onSelect: function(dateText,inst) {
-					$("input#endDate-fa-" + rowID).datepicker('option', 'minDate', new JalaliDate(inst['selectedYear'], inst['selectedMonth'], inst['selectedDay']));
-					$("input#startDateTime-" + rowID).val($.format.date(new JalaliDate(inst['selectedYear'], inst['selectedMonth'], inst['selectedDay']).getGregorianDate(), "yyyy/MM/dd")+ ' ' + $('input#startTime-'+rowID).val());
-					checkRow(rowID);
-					//$('#startDate-0').val($.datepicker.formatDate("dd/MM/yyyy",'2009-12-18 10:54:50.546'));
-	
-				},
-				dateFormat: "d MM yy"
-			});
-			
-			$("input#endDate-fa-" + rowID).datepicker({
-				dateFormat: "d MM yy",
-				onSelect: function(dateText,inst) { 
-					$("input#endDateTime-" + rowID).val($.format.date(new JalaliDate(inst['selectedYear'], inst['selectedMonth'], inst['selectedDay']).getGregorianDate(), "yyyy/MM/dd")+' '+$('input#endTime-' + rowID).val());
-					checkRow(rowID);
-				}
-			});
-		    $('input#startTime-' + rowID).timepicker({
-		    	timeOnlyTitle: "“„«‰ ‘—Ê⁄",
-		    	timeText: "“„«‰",
-		    	hourText: "”«⁄ ",
-		    	minuteText: "œﬁÌﬁÂ",
-		    	currentText: "Õ«·«",
-		    	closeText: "«‰Ã«„",
-		    	stepMinute: 10,
-		    	onOpen: function() {$(this.val(''))},
-		    	onClose: function() {
-		    		if ($('input#startDateTime-' + rowID).val().length > 10)
-		    			$('input#startDateTime-' + rowID).val($('input#startDateTime-' + rowID).val().substring(0,10) + ' ' + $('input#startTime-' + rowID).val());
-		    			checkRow(rowID);
-		    	}
-		    });
-		    $('input#endTime-' + rowID).timepicker({
-		    	timeOnlyTitle: "“„«‰ Å«Ì«‰",
-		    	timeText: "“„«‰",
-		    	hourText: "”«⁄ ",
-		    	minuteText: "œﬁÌﬁÂ",
-		    	currentText: "Õ«·«",
-		    	closeText: "«‰Ã«„",
-		    	stepMinute: 10,
-		    	onClose: function() {
-		    		if ($('input#endDateTime-' + rowID).val().length > 10)
-		    			$('input#endDateTime-' + rowID).val($('input#endDateTime-' + rowID).val().substring(0,10) + ' ' + $('input#endTime-' + rowID).val());
-		    			checkRow(rowID);
-		    	}
-		    }); 
-		    $("select#operationType-" + rowID).ready(function () {
-		    	//$(this).change();
-				$("select#operationType-" + rowID).change(function () {
-					console.log('operation change!');
-					//checkRow();
-				});
-			});
-		    //$('input#startDate-fa-' + rowID).change(function () {checkRow(rowID);});
-		    //$('input#endDate-fa-' + rowID).change(function () {checkRow(rowID);});
-		    //$('input#startTime-' + rowID).change(function () {checkRow(rowID);});
-		    //$('input#endTime-' + rowID).change(function () {checkRow(rowID);});
-		    $('input#order-' + rowID).change(function () {
-		    	checkRow(rowID);
-		    });
-		    $('input#description-'+rowID).focus(function() {
-		    	checkRow(rowID);
-		    });
-		    $("select#costCenter-" + rowID).change(function (){
-		    	$("div#costType-" + rowID)
-		    		.html("<img src='/css/images/ajax-loader.gif' width='20px' alt='Loading ...'>")
-		    		.load("costCenterType.asp", {centerID: $("select#costCenter-" + rowID).val(), row: rowID});
-		    });
-		    $("select#costCenter-" + rowID).ready(function (){
-		    	$("div#costType-" + rowID)
-		    		.html("<img src='/css/images/ajax-loader.gif' width='20px' alt='Loading ...'>")
-		    		.load("costCenterType.asp", {centerID: $("select#costCenter-" + rowID).val(),row: rowID});
-		    });
-		    $("input#isDirect-" + rowID).change(function (){
-		    	$("input#order-" + rowID).prop("disabled", $("input#isDirect-" + rowID).val()=='False');
-		    });
-		    $("input#type-" + rowID).change(function (){
-		    	$("input#startDate-fa-" + rowID).prop("disabled", $("input#type-" + rowID).val()=='1');
-		    	$("input#startDateTime-" + rowID).prop("disabled", $("input#type-" + rowID).val()=='1');
-		    	$("input#startTime-" + rowID).prop("disabled", $("input#type-" + rowID).val()=='1');
-		    	$("input#endDate-fa-" + rowID).prop("disabled", $("input#type-" + rowID).val()=='1');
-		    	$("input#endDateTime-" + rowID).prop("disabled", $("input#type-" + rowID).val()=='1');
-		    	$("input#endTime-" + rowID).prop("disabled", $("input#type-" + rowID).val()=='1');
-		    	$("input#startCounter-" + rowID).prop("disabled", $("input#type-" + rowID).val()=='2');
-		    	$("input#endCounter-" + rowID).prop("disabled", $("input#type-" + rowID).val()=='2');
-		    	
-		    });
-		    $("input#isCountiuous-" + rowID).change(function (){ 
-		    	//----------------------------- is countinuos flag set ------------------------------
-		    	if ($("input#isCountiuous-" + rowID).val()=="True") {
-		    		//-------------------------- check type is count --------------------------------
-		    		if ($("input#type-" + rowID).val()=='1') { 
-		    			hasAny=false;
-		    			$('input[id*="endCounter-"]').each(function (i){
-				    		if ($("input#driverID-" + rowID).val()==$('input#' + $(this).attr('id').replace('endCounter', 'driverID')).val()) {
-				    			if ($(this).attr('id').replace('endCounter-','') != rowID) hasAny=true;
-				    		}});
-				    	if (!hasAny) { 
-				    		// ------------- if first row of this DRIVER -------------
-				    		console.log("first row of this driver, temporary do nothing!");
-				    		$('input#startDate-fa-'+rowID).val('');
-				    		$('input#startTime-'+rowID).val('');
-				    		$('input#startDateTime-'+rowID).val('');
-				    	} else {
-				    		var lastCounter=0;
-				    		$('input[id*="endCounter-"]').each(function (i){
-				    			if ($("input#driverID-" + rowID).val()==$('input#' + $(this).attr('id').replace('endCounter', 'driverID')).val()) {
-				    				if ($(this).attr('id').replace('endCounter-','') < rowID) lastCounter = $(this).val();
-				    				console.log('last: ' + i + '-' + lastCounter);
-				    			} else {
-				    				console.log('nothing!!');
-				    			}
-				    		});
-				    		$('input#startCounter-'+rowID).val(lastCounter);
-				    		$('input#startCounter-'+rowID).prop('disabled', true);
-				    		$('input#startDate-fa-'+rowID).val('');
-				    		$('input#startTime-'+rowID).val('');
-				    		$('input#startDateTime-'+rowID).val('');
-				    	}
-				    }
-				    //------------------------- check type is time --------------------------------------
-				    if ($("input#type-" + rowID).val()=='2') { 
-				    	console.log('this is time :)');
-				    	hasAny=false;
-		    			$('input[id*="endCounter-"]').each(function (i){
-				    		if ($("input#driverID-" + rowID).val()==$('input#' + $(this).attr('id').replace('endCounter', 'driverID')).val()) {
-				    			if ($(this).attr('id').replace('endCounter-','') != rowID) hasAny=true;
-				    		}});
-				    	if (!hasAny) { 
-				    		// ------------- if first row of this DRIVER -------------
-				    		console.log("first row of this driver, temporary do nothing!");
-				    		$('input#startCounter-'+rowID).val('');
-				    	} else {
-				    		var lastDate = '';
-				    		var lastTime = '';
-				    		var lastDateTime=new Date();
-				    		$('input[id*="endDateTime-"]').each(function (i){
-				    			if ($("input#driverID-" + rowID).val()==$('input#' + $(this).attr('id').replace('endDateTime', 'driverID')).val()) {
-				    				if ($(this).attr('id').replace('endDateTime-','') < rowID) {
-				    					lastDateTime = $(this).val();
-				    					lastDate =	$('input#' + $(this).attr('id').replace('endDateTime', 'endDate-fa')).val();
-				    					lastTime =	$('input#' + $(this).attr('id').replace('endDateTime', 'endTime')).val();
-				    					console.log($(this).attr('id'));
-				    				}
-				    				console.log('last: ' + i + '-' + lastDate);
-				    				
-				    			} else {
-				    				console.log('nothing found!!');
-				    			}
-				    		});
-				    		$('input#startDate-fa-'+rowID).val(lastDate);
-				    		$('input#startTime-'+rowID).val(lastTime);
-				    		$('input#startDateTime-'+rowID).val(lastDateTime);
-				    		$('input#startCounter-'+rowID).val('');
-				    		$('input#startDate-fa-'+rowID).prop('disabled', true);
-				    		$('input#startTime-'+rowID).prop('disabled', true);
-				    		$('input#startDateTime-'+rowID).prop('disabled', true);
-				    		$('input#startCounter-'+rowID).val('');
-				    	}
-				    }
-				};
-		    });
-		};
-		
-		function checkRow(rowID){
-			var result = true;
-			if ($('input[id$="-' + rowID + '"]').length=0) {
-				result = false;
-			}
-			$('input[id$="-' + rowID + '"]').each(function (i) {
-				if ($(this).attr('disabled')!='disabled') {
-					if ($(this).val().length > 0) {
-						result = result && true;
-					} else {
-						result = false;
-					}
-				} 
-			
-			});
-			if ($("input#type-" + rowID).val()=='2')
-				if (result) {
-					var startDate = new Date(Date.parse($('input#startDateTime-' + rowID).val()));
-					var endDate = new Date(Date.parse($('input#endDateTime-' + rowID).val()));
-					console.log("start: " + startDate);
-					console.log("endDate: " + endDate);
-					if ((endDate - startDate)<=0) result=false;
-					//$('span#msg').html("test! " + ((endDate - startDate)/3600000));
-				}
-			if (result) $('span#msg').html("·ÿ›« ﬁ»· «“ «Ì‰ﬂÂ Œÿ ÃœÌœ —« «÷«›Â ﬂ‰Ìœ° Ìﬂ »«— œÌê— çﬂ ﬂ‰Ìœ. çÊ‰ «Ì‰ Œÿ »⁄œ «“ «÷«›Â ‘œ‰ Œÿ »⁄œÌ €Ì— ﬁ«»· ÊÌ—«Ì‘ ŒÊ«Âœ »Êœ!");
-			$("button#addRow").prop('disabled', !result);
-			console.log('---------------------------------------');
-		};
+$(document).ready(function(){
+	$.ajaxSetup({
+		cache: false
 	});
-</script>
-<style>
-	.ltrInput {direction: ltr;}
+	function dateDiff( str1, str2 ) {
+	    var diff = Date( str2 ) - Date( str1 ); 
+	    return isNaN( diff ) ? NaN : {
+	        diff : diff,
+	        ms : Math.floor( diff            % 1000 ),
+	        s  : Math.floor( diff /     1000 %   60 ),
+	        m  : Math.floor( diff /    60000 %   60 ),
+	        h  : Math.floor( diff /  3600000 %   24 ),
+	        d  : Math.floor( diff / 86400000        )
+	    };
+	}
 	
-</style>
+	function checkBut(obj){
+		var ret = false;
+		switch ($("#type").val()){
+			case '1':
+				if ($("#is_countinuous").val()=="True"){
+					ret = ($.isNumeric($("#startCounter").val()) && $.isNumeric($("#endCounter").val()) && $.isNumeric($("#order").val()))
+				} else {
+					ret = ($.isNumeric($("#qtty").val()) && $.isNumeric($("#order").val()));
+				}
+			break;
+			case '2':
+				if ($("#is_countinuous").val()=="True") {
+					var lastTime = new Date($("#lastTime").val());
+					var startTime = new Date($("#start_time").val());
+					if (lastTime > startTime) {
+						ret = false;
+						$("#result").html("‘„« ﬁ»·« œ— «Ì‰ “„«‰ ›⁄«·Ì Ì Ê«—œ ﬂ—œÂù«Ìœ!");
+						$("#startTime").val(lastTime.getHours()+':'+lastTime.getMinutes());
+						$("#startDate").val($.format.date(lastTime,"yyyy/MM/dd"));
+						$("#startDate").focus();
+					}
+				}
+				if ($("#startDate").val()!="" && $("#startTime").val()!="" && $("#endDate").val()!="" && $("#endTime").val()!="") {
+					var diff = dateDiff(Date($("#start_time").val()+":00"), Date($("#end_time").val()+":00"));
+					if (diff.diff>0){
+						var result = "⁄„·ﬂ—œ ‘„«: ";
+						result += (diff.d>0)? diff.d + "—Ê“ ":"";
+						result += (diff.h>0)? diff.h + "”«⁄  ":"";
+						result += (diff.m>0)? diff.m + "œﬁÌﬁÂ ":"";
+						if (obj.attr('id')!="order") 
+							$("#result").html(result);
+						console.log(obj.attr('id'));
+						if ($("#order_found").val()=="0"){
+							ret = false;
+						} else {
+							ret=true;
+						}
+					} else {
+						if (obj.attr('id')!="order") 
+							$("#result").html(" «—ÌŒ Ê ”«⁄  Å«Ì«‰ »«Ìœ «“ ‘—Ê⁄ »“—ê — »«‘œ.");
+						ret=false;
+					}
+				}
+			break;
+		}
+		//console.log('checked!' + ret);
+		if (ret)
+			$("#save").prop("disabled", false);
+		else
+			$("#save").prop("disabled", true);
+	}
+	function acceptDate(obj){ 
+		if (obj.val()=="") {
+			$("#result").html("·ÿ›«  «—ÌŒ —« Ê«—œ ﬂ‰Ìœ");
+			obj.focus();
+		}
+		else if (obj.val()=="//") {
+			var today = new Date();
+			obj.val($.format.date(today,"yyyy/MM/dd"));
+		} else {
+			//var myRegExp = new RegExp("^(13)?[7-9][0-9]/[0-1]?[0-9]/[0-3]?[0-9]$");
+			var rege=/^(13)?[7-9][0-9]\/[0-1]?[0-9]\/[0-3]?[0-9]$/;
+
+			if( rege.test(obj.val()) ) {
+				var SP = obj.val().split("/");
+				if (SP[0].length == 2) SP[0] = "13" + SP[0] ;
+				if (SP[1].length == 1) SP[1] = "0"  + SP[1] ;
+				if (SP[2].length == 1) SP[2] = "0"  + SP[2] ;
+				obj.val(SP.join("/"));
+				if (obj.attr('id')=="startDate"){
+					$("#start_time").val($.jalaliCalendar.jalaliToGregorianStr($("#startDate").val()) + " " + $("#startTime").val());
+					checkBut(obj);
+				} else if (obj.attr('id')=="endDate"){
+					$("#end_time").val($.jalaliCalendar.jalaliToGregorianStr($("#endDate").val()) + " " + $("#endTime").val());
+					checkBut(obj);
+				}
+			}
+			if(!rege.test(obj.val())||( SP[0]<'1376' || SP[1]>'12' || SP[2]>'31' )) {
+				$("#result").html("›—„   «—ÌŒ »«Ìœ YYYY/MM/DD »«‘œ.");
+				//obj.select();
+				obj.focus();
+			};
+		}
+		
+	}
+	function acceptTime(obj) {
+		if (obj.val()=="") {
+			$("#result").html("·ÿ›« ”«⁄  —« Ê«—œ ﬂ‰Ìœ.");
+			obj.focus();
+		} else if (obj.val()==":"){
+			var now = new Date();
+			obj.val(now.getHours()+':'+now.getMinutes());
+			//var myRegExp = new RegExp("^[0-2]?[0-9]:[0-5]?[0-9]$");
+			var rege = /^[0-2]?[0-9]:[0-5]?[0-9]$/;
+			if( rege.test(obj.val()) ) {
+				var SP = obj.val().split(":");
+				if (SP[0].length == 1) SP[0] = "0" + SP[0] ;
+				if (SP[1].length == 1) SP[1] = "0"  + SP[1] ;
+				obj.val(SP.join(":"));
+	
+				if (obj.attr('id')=="startTime"){
+					$("#start_time").val($.jalaliCalendar.jalaliToGregorianStr($("#startDate").val()) + " " + $("#startTime").val());
+					checkBut(obj);
+				} else if (obj.attr('id')=="endTime"){
+					$("#end_time").val($.jalaliCalendar.jalaliToGregorianStr($("#endDate").val()) + " " + $("#endTime").val());
+					checkBut(obj);
+				}
+			}
+		} else {
+			//var myRegExp = new RegExp("^[0-2]?[0-9]:[0-5]?[0-9]$");
+			var rege = /^[0-2]?[0-9]:[0-5]?[0-9]$/;
+			if( rege.test(obj.val()) ) {
+				var SP = obj.val().split(":");
+				if (SP[0].length == 1) SP[0] = "0" + SP[0] ;
+				if (SP[1].length == 1) SP[1] = "0"  + SP[1] ;
+				obj.val(SP.join(":"));
+	
+				if (obj.attr('id')=="startTime"){
+					$("#start_time").val($.jalaliCalendar.jalaliToGregorianStr($("#startDate").val()) + " " + $("#startTime").val());
+					checkBut(obj);
+				} else if (obj.attr('id')=="endTime"){
+					$("#end_time").val($.jalaliCalendar.jalaliToGregorianStr($("#endDate").val()) + " " + $("#endTime").val());
+					checkBut(obj);
+				}
+			}
+			if(!rege.test(obj.val())||( SP[0]>23 || SP[1]>59)) {
+				$("#result").html("›—„  ”«⁄  »«Ìœ HH:MM »«‘œ.");
+				obj.focus();
+			};
+		}
+	}
+	if ($("#is_countinuous").val()=="True" && $("#type").val()=="1"){
+		$("#result").html(ajax_load);
+		$("#startCounter").ready(function(){
+			$.getJSON(loadUrl,
+				{act:"counter",operation_type:$("#operation_type").val(),driver_id:$("#driver_id").val()},
+				function(json){
+					if (json.lastCounter>0) {
+						$("#result").html("¬Œ—Ì‰ ﬂ‰ Ê— ÅÌœ« ‘œ");
+						$("#startCounter").val(json.lastCounter+1);
+						$("#endCounter").focus();
+					} else{
+						$("#result").html("”«»ﬁÂù«Ì «“ ¬Œ—Ì‰ ﬂ‰ Ê— ÅÌœ« ‰‘œ");
+						$("#startCounter").val(json.lastCounter);
+						$("#startCounter").focus();
+					}
+				}
+			);
+			
+		});
+	} else if ($("#is_countinuous").val()=="True" && $("#type").val()=="2"){
+		$("#result").html(ajax_load);
+		$("#start_time").ready(function(){
+			$.getJSON(loadUrl,
+				{act:"time",operation_type:$("#operation_type").val()},
+				function(json){
+					if (json.foundLastTime=='0') {
+						$("#result").html("‘„«  «ﬂ‰Ê‰ »—«Ì «Ì‰ „—ﬂ“ Â“Ì‰Â “„«‰Ì Ê«—œ ‰ﬂ—œÂù«Ìœ!");
+						today =new Date();
+						//$("#start_time").val($.jalaliCalendar.gregorianToJalaliStr('2012/4/17'));
+						//$("#startDate").val($.jalaliCalendar.jalaliToGregorianStr('1391/1/29'));
+						
+						$("#startDate").val($.format.date(today,"yyyy/MM/dd"));
+						$("#start_time").val($.jalaliCalendar.jalaliToGregorianStr($("#startDate").val()));
+						$("#endDate").val($.format.date(today,"yyyy/MM/dd"));
+						$("#end_time").val($.jalaliCalendar.jalaliToGregorianStr($("#endDate").val()));
+						$("#startDate").focus();
+						console.log('today');
+					} else{
+						if (json.isNewDay=='1'){
+							$("#result").html("»Â ‰Ÿ— „Ì«œ ﬂÂ ‘„« —Ê“ ÃœÌœÌ —Ê ¬€«“ ﬂ—œÌœ° —Ê“ ŒÊ»Ì œ«‘ Â »«‘Ìœ.");	
+							$("#startDate").focus();
+							$("#lastTime").val(json.lastTime.replace(RegExp('-','g'),'/'));
+							
+						} else {
+							$("#lastTime").val(json.lastTime.replace(RegExp('-','g'),'/'));
+							var lastTime = new Date($("#lastTime").val());
+							$("#startDate").val($.jalaliCalendar.gregorianToJalaliStr(json.lastTime));
+							$("#startTime").val(lastTime.getHours()+':'+lastTime.getMinutes());
+							$("#startTime").blur();
+							$("#endDate").focus();
+							$("#result").html("¬Œ—Ì‰ “„«‰ Ê«—œ ‘œÂ œ— «Ì‰ „—ﬂ“ Â“Ì‰Â œ— «—ÌŒ <b>" +$("#startDate").val() + "</b> Ê œ— ”«⁄  <b>" + $("#startTime").val() + "</b> „Ìù»«‘œ° Õ „« »«Ìœ «œ«„Â «Ì‰ “„«‰ —« Ê«—œ ﬂ‰Ìœ");
+							
+						}
+						
+					}
+				}
+			);
+			$("#endCounter").focus();
+		});
+	}
+	var loadUrl="cost_ajax_check.asp";
+	var ajax_load = "<img src=\'/css/images/ajax-loader.gif\' width='20px' alt='Loading Ö'>";
+	$("#startCounter").blur(function(){
+		//$("#result").html(ajax_load).load(loadUrl,"act=counter");
+		if ($.isNumeric($("#startCounter").val()) && parseFloat($("#startCounter").val())>0){
+			$("#endCounter").focus();
+		} else {
+			$("#startCounter").val("");
+			$("#startCounter").focus();
+		}
+	});
+	$("#startDate").blur(function(){
+		acceptDate($(this));
+	});
+	$("#endDate").blur(function(){
+		acceptDate($(this));
+	});
+	$("#startTime").blur(function(){
+		acceptTime($(this));
+	});
+	$("#endTime").blur(function(){
+		acceptTime($(this));
+	});
+	$("#endCounter").blur(function(){
+		if ($(this).val()!=''){
+			if ($.isNumeric($(this).val())) {
+				var endCounter = parseFloat($("#endCounter").val()); 
+				var startCounter = parseFloat($("#startCounter").val());
+				if (startCounter >= endCounter){
+					$(this).val("");
+					$("#result").html("ﬂ‰ Ê— Å«Ì«‰ »«Ìœ »“—ê — «“ ﬂ‰ Ê— ‘—Ê⁄ »«‘œ!");
+					$(this).focus();
+				} else {
+					var myCounter = parseFloat($("#endCounter").val()) - parseFloat($("#startCounter").val()); 
+					$("#result").html("⁄„·ﬂ—œ ‘„«: " + myCounter + " ﬂ·Ìﬂ");
+					checkBut($(this));
+				}
+			} else {
+				$(this).focus();
+				$("#result").html("·ÿ›« ⁄œœ Ê«—œ ﬂ‰Ìœ!");
+				$("#save").prop("disabled", true);
+			}
+		} else {
+			$(this).focus();
+		}
+	});
+	$("#order").blur(function(){
+		$("#result").html(ajax_load);
+		var id=$("#order").val();
+		$.getJSON(loadUrl,
+			{act:"order",orderID:id},
+			function(json){
+				if (json.order>0){
+					var result = "”›«—‘: " + json.orderKind + "° " + "<b>" + json.orderTitle + "</b>" + "<br>";
+					result += " Ê”ÿ: " + "<b>" + json.customerName + "</b>" + "<br>" ;
+					result += "œ— „—Õ·Â: " + "<b>" + json.orderStep + "</b>";
+					$("#result").html(result);
+					$("#order_found").val("1");
+					checkBut($("#order"));
+				} else {
+					$("#result").html("ç‰Ì‰ ”›«—‘Ì ÊÃÊœ ‰œ«œ° ·ÿ›« œﬁ  ﬂ‰Ìœ!");
+					$("#order").val("");
+					$("#order").focus();
+					$("#save").prop("disabled", true);
+					$("#order_found").val("0");
+				}
+			}
+		);
+	});
+});
+</script>
+<br>
 <%
 if request("act")="" then 
-%>
-<form>
-	<table id="myTable">
-		<thead>
-			<td colspan="3" align="center">‘—Ê⁄</td>
-			<td colspan="3" align="center">Å«Ì«‰</td>
-			<td colspan="3" align="center"> Œ’Ì’ Â“Ì‰Â</td>
-			<td> Ê÷ÌÕ« </td>
-		</thead>
-		<thead>
-			<td> «—ÌŒ</td>
-			<td>”«⁄ </td>
-			<td>ﬂ‰ Ê—</td>
-			<td> «—ÌŒ</td>
-			<td>”«⁄ </td>
-			<td>ﬂ‰ Ê—</td>
-			<td>„—ﬂ“ Â“Ì‰Â</td>
-			<td>‰Ê⁄ ⁄„·Ì« </td>
-			<td>‘„«—Â ”›«—‘</td>
-			<td> Ê÷ÌÕ« </td>
-		</thead>
-		<tr>
-			<td>
-				<input name="startDate-fa-0" id='startDate-fa-0' type="text" size="10">
-				<input name="startDateTime-0" id='startDateTime-0' type="hidden">
-				<input name="driverID-0" id='driverID-0' type="hidden">
-				<input name="type-0" id='type-0' type="hidden">
-				<input name="isDirect-0" id='isDirect-0' type="hidden">
-				<input name="isCountiuous-0" id='isCountiuous-0' type="hidden">
-			</td>
-			<td><input name="startTime-0" id='startTime-0' type="text" size="5"></td>
-			<td><input name="startCounter-0" id='startCounter-0' type="text" size="6"></td>
-			<td>
-				<input name="endDate-fa-0" id='endDate-fa-0' type="text" size="10">
-				<input name="endDateTime-0" id='endDateTime-0' type="hidden" size="10">
-			</td>
-			<td><input name="endTime-0" id='endTime-0' type="text" size="5"></td>
-			<td><input name="endCounter-0" id='endCounter-0' type="text" size="6"></td>
-			<td>
-				<select name="costCenter-0" id="costCenter-0">
-<%
-mySQL="select distinct cost_centers.* from cost_drivers inner join cost_centers on cost_drivers.cost_center_id=cost_centers.id inner join cost_user_relations on cost_user_relations.driver_id=cost_drivers.id inner join cost_operation_type on cost_drivers.id=cost_operation_type.driver_id where cost_user_relations.user_id=" & session("id")
-set rs=Conn.Execute(mySQL)
-while not rs.eof
-%>
-					<option value="<%=rs("id")%>"><%=rs("name")%></option>
-<%
-	rs.MoveNext
-wend
-rs.close
-%>
-				</select>
-			</td>
-			<td><div id="CostType-0"></div></td>
-			<td><input name="order-0" id='order-0' type="text" size="6"></td>
-			<td><input name="description-0" type="text" size="20"></td>
-		</tr>
-	</table>
+	mySQL="select cost_centers.name as centerName,cost_drivers.name as driverName, cost_operation_type.* from cost_drivers inner join cost_centers on cost_drivers.cost_center_id=cost_centers.id inner join cost_user_relations on cost_user_relations.driver_id=cost_drivers.id inner join cost_operation_type on cost_drivers.id=cost_operation_type.driver_id where cost_user_relations.user_id=" & session("id")
+	set rs=Conn.Execute(mySQL)
+	while not rs.eof
+	%>
+	<li><a href='costs.asp?act=add&ID=<%=rs("id")%>'><%=rs("centerName") &" - "& rs("driverName") & " - " & rs("name")%></a><br>
+	<%
+		rs.MoveNext
+	wend
+	rs.close
+elseif request("act")="add" then '-------------------------------- A D D
+	today=shamsiToday()
+	mySQL="select cost_drivers.type,cost_drivers.rate,cost_drivers.is_direct,cost_drivers.is_countinuous, cost_operation_type.id as operation_type, cost_drivers.id as driver_id, cost_drivers.name as driverName, cost_operation_type.name as operationName from cost_operation_type inner join cost_drivers on cost_operation_type.driver_id=cost_drivers.id where cost_operation_type.id=" & request("id")
+	set rs=Conn.Execute(mySQL)
+	if rs.eof then 
+		msg="ÌÂ « ›«ﬁ ⁄ÃÌ» —Œ œ«œÂ!"
+		response.redirect "?errmsg=" & Server.URLEncode(msg)
+	end if
+	currTime=now()
+	startTime=FormatDateTime(dateAdd("n",-30,currTime),4)
+	endDate=FormatDateTime(currTime,4)
+	%>
+<a href="costs.asp">»«“ê‘ </a><br>
+<b><%=rs("driverName") & " - " & rs("operationName")%></b>
+<br><br>
+<form method="post" action="?act=insert">
+	<input type="hidden" name="operation_type" value="<%=rs("operation_type")%>" id='operation_type'>
+	<input type="hidden" name="driver_id" value="<%=rs("driver_id")%>" id='driver_id'>
+	<input type="hidden" name="type" id='type' value="<%=rs("type")%>">
+	<input type="hidden" name="is_direct" id='is_direct' value="<%=rs("is_direct")%>">
+	<input type="hidden" name="is_countinuous" id='is_countinuous' value="<%=rs("is_countinuous")%>">
+	<input type="hidden" name="lastTime" id='lastTime'>
+	<%
+	select case rs("type")
+		case "1":
+			if rs("is_countinuous")="True" then 
+		%>
+		<span>ﬂ‰ Ê— ‘—Ê⁄:</span>
+		<input type="text" name="startCounter" size="7" id='startCounter'>
+		<span>ﬂ‰ Ê— Å«Ì«‰:</span>
+		<input type="text" name="endCounter" size="7" id='endCounter'>
+		<%	
+			else
+		%>
+		<span>„›œ«— —« Ê«—œ ﬂ‰Ìœ:</span>
+		<input type="text" name="qtty" size="3" id='qtty'>
+		<%
+			end if
+		case "2":
+		%>
+		<input type="hidden" name="start_time" id='start_time'>
+		<input type="hidden" name="end_time" id='end_time'>
+		<span> «—ÌŒ ‘—Ê⁄:</span>
+		<input type="text" name="startDate" id='startDate' size="10" maxlength="10" value="" >
+		<span>”«⁄  ‘—Ê⁄:</span>
+		<input type="text" name="startTime" id='startTime' size="5" value="">
+		<span> «—ÌŒ Å«Ì«‰:</span>
+		<input type="text" name="endDate" id='endDate' size="10" maxlength="10" value="">
+		<span>”«⁄  Å«Ì«‰:</span>
+		<input type="text" name="endTime" id='endTime' size="5" value="">
+		<%
+		
+	end select
+	if rs("is_direct")="True" then 
+	%>
+	<span>‘„«—Â ”›«—‘ —« Ê«—œ ﬂ‰Ìœ:</span>
+	<input type="text" name="order" id='order' size="6">
+	<input type="hidden" name="order_found" id='order_found' value="0">
+	<%
+	end if
+	%>
+	<br>
+	<span> Ê÷ÌÕ: </span>
+	<input type="text" name="description">
+	<input type="submit" value="–ŒÌ—Â" disabled="disabled" id='save'>
 </form>
+<div id='result'></div>
+	<%
+	rs.close
+elseif request("act")="edit" then '-------------------------------- E D I T
 
-<button id='addRow' disabled="disabled">«÷«›Â</button>
-<span id='msg'></span>
-<%	
-elseif request("act")="setDriver" then 
-	
-	set rs=Conn.Execute("select * from cost_drivers where id="&request.form("driver"))
-	%>
-<form method=post action='?act=addCost'>
-	<span><%=rs("name")%></span>
-	<input name='diverValue' type=text>
-	<%
-	if rs("has_order")="True" then response.write("<input name='order' type=text>")
-	%>
-	<span><%=rs("unitSize")%></span>
-</form>
-	<%
+elseif request("act")="insert" then '-------------------------------- I N S E R T
+	startCounter = "null"
+	endCounter = "null"
+	startTime = "null"
+	endTime = "null"
+	order = "null"
+	if request("startCounter")<>"" then startCounter=request("startCounter")
+	if request("endCounter")<>"" then endCounter=request("endCounter")
+	if request("start_time")<>"" then startTime= "'" & request("start_time") & "'"
+	if request("end_time")<>"" then endTime= "'" & request("end_time") & "'"
+	if request("order")<>"" then order=request("order")
+	if request("qtty")<>"" then 
+		startCounter = 0
+		endCounter = CDbl(request("qtty"))
+	end if
+	operationType = request("operation_type")
+	mySQL = "select * from cost_drivers where id=" & request("driver_id")
+	set rs=Conn.Execute(mySQL)
+	if not rs.eof then 
+		rate = CDbl(rs("rate"))
+		mySQL="INSERT INTO costs (operation_type, start_counter, end_counter, rate, start_time, end_time, [order], user_id, description) VALUES (" & operationType & ", " & startCounter & ", " & endCounter & ", " & rate & ", " & startTime & ", "& endTime &", " & order & ", " & session("id") & ", N'" & request("description") & "');"
+		response.write(mySQL)
+		Conn.Execute(mySQL)
+		response.redirect "?msg="&Server.URLEncode("»Â ”·«„ Ì° ⁄„·ﬂ—œ Ê‰ —Ê Ê«—œ ﬂ—œÌœ")
+	else
+		response.redirect "?errmsg="&Server.URLEncode("ÌÂ Œÿ«Ì ‰«„„ﬂ‰ —Œ œ«œÂ° »Â ’„Ì„Ì «ÿ·«⁄ »œÌœ!!!")
+	end if
+	rs.close
+	set rs=nothing
+elseif request("act")="update" then '-------------------------------- U P D A T E
 end if
+
 %>
+
+
 <!--#include file="tah.asp" -->

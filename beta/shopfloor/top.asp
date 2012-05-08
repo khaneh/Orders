@@ -58,7 +58,7 @@ menuItem=3
 				<TD width=10><img src='/images/LTS.gif'></td>
 			<%end if %>
 			<%end if %>
-			<%if Auth(3 , 6) then %>
+			<%if Auth(3 , 7) then %>
 
 			<%if SubmenuItem="7" then %> 
 				<TD width=10><img src='/images/RTB.gif'></td>
