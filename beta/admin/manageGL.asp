@@ -111,7 +111,7 @@ elseif request("act")="submitNew" then
 		GLID=RS2("id")
 		conn.Execute("INSERT INTO GLAccountSuperGroups SELECT ID, Name, " & GLID & " AS GL, Type FROM GLAccountSuperGroups WHERE (GL = "& SourceGL & ")")
 		conn.Execute("INSERT INTO GLAccountGroups SELECT ID, GLSuperGroup, Name, " & GLID & " AS GL FROM GLAccountGroups WHERE (GL = "& SourceGL & ")")
-		conn.Execute("INSERT INTO GLAccounts SELECT ID, GLGroup, Name, " & GLID & " AS GL,HasAppendix, IsChequeAccount FROM GLAccounts WHERE (GL = "& SourceGL & ")")
+		conn.Execute("INSERT INTO GLAccounts SELECT ID, GLGroup, Name, " & GLID & " AS GL,HasAppendix, IsChequeAccount, accountType FROM GLAccounts WHERE (GL = "& SourceGL & ")")
 		response.write "<BR><BR>"
 		Call showAlert ("Õ”«» Â« Ê ê—ÊÂ Â« «“ " & SourceGL_Name & " ﬂÅÌ ‘œ",CONST_MSG_INFORM)
 
