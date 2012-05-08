@@ -178,9 +178,9 @@ if request("submit")="ãÔÇåÏå"then
 			<TD><%=RSS("GiveTo")%></TD>
 			<TD align=center><% 
 					if RSS("type")= "2" then
-					response.write "<font color=red><b>ÇÕáÇÍ ãæÌæÏí</b></font>"
+						response.write "<font color=red><b>ÇÕáÇÍ ãæÌæÏí</b></font>"
 					elseif RSS("type")= "5" then
-					response.write "<font color=orang><b>ÇäÊŞÇá</b></font>"
+						response.write "<font color=orang><b>ÇäÊŞÇá</b></font>"
 				 else %>
 			<A HREF="default.asp?ed=<%=RSS("RelatedID")%>"><%=RSS("RelatedID")%></A>
 				<% end if %>
@@ -259,13 +259,15 @@ if request("submit")="ãÔÇåÏå"then
 				 elseif RSS("type")= "3" then
 					response.write "<font color=green><b>ãÑÌæÚí</b></font> (ÔãÇÑå İÇßÊæÑ :<font color=green> "& RSS("RelatedInvoiceID") & "</font>)"
 					elseif RSS("type")= "4" then
-					response.write "<font color=blue><b>ÊÚÑíİ ßÇáÇí ÌÏíÏ </b></font>"
+						response.write "<font color=blue><b>ÊÚÑíİ ßÇáÇí ÌÏíÏ </b></font>"
 					elseif RSS("type")= "5" then
-					response.write "<font color=orang><b>ÇäÊŞÇá</b></font>"
+						response.write "<font color=orang><b>ÇäÊŞÇá</b></font>"
 					elseif RSS("type")= "6" then
-					response.write "<font color=#6699CC><b>æÑæÏ ÇÒ ÊæáíÏ</b></font>"
+						response.write "<font color=#6699CC><b>æÑæÏ ÇÒ ÊæáíÏ</b></font>"
 					elseif RSS("type")= "7" then
-					response.write "<font color=#FF9966><b>æÑæÏ ÇÒ ÇäÈÇÑ ÔåÑíÇÑ</b></font>"
+						response.write "<font color=#FF9966><b>æÑæÏ ÇÒ ÇäÈÇÑ ÔåÑíÇÑ</b></font>"
+					elseif RSS("type")="9" then 
+						response.write "<font color=#AAAA00><b>æÑæÏ ÖÇíÚÇÊ</b></font>"
 				 else 
 					response.write " "
 				 end if	%>
