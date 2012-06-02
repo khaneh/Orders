@@ -19,12 +19,12 @@ select case request("act")
 			rs.close
 		end if
 	case "counter":
-		set rs=Conn.Execute("select max(end_counter) as lastCounter from costs where operation_type=" & request("operation_type"))
+		set rs=Conn.Execute("select max(end_counter) as lastCounter from costs where operation_type in (select id from cost_operation_type where driver_id=" & request("driver_id") & ")")
 		result("lastCounter")=0
 		if not IsNull(rs("lastCounter")) then result("lastCounter")=CDbl(rs("lastCounter"))
 		rs.close
 	case "time":
-		set rs=Conn.Execute("select convert(varchar, max(end_time), 120) as lastTime from costs where operation_type in (select id from cost_operation_type where driver_id in ( select driver_id from cost_operation_type where id=" & request("operation_type") & ")) and user_id=" & session("id"))
+		set rs=Conn.Execute("select convert(varchar, max(end_time), 120) as lastTime from costs where operation_type in (select id from cost_operation_type where driver_id=" & request("driver_id") & ") and user_id=" & session("id"))
 		result("foundLastTime")=0
 		current=now()
 		if not IsNull(rs("lastTime")) then 
