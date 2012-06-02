@@ -166,6 +166,7 @@ if true then
 'SELECT * FROM orders_trace LEFT OUTER JOIN u81DAY ON orders_trace.radif_sefareshat = u81DAY.Field3 WHERE (u81DAY.Field2 IS NULL) AND (orders_trace.order_date > N'1381/00')
 
 %>
+
 	<FORM METHOD=POST ACTION="default.asp?act=setStatus" onSubmit="return checkValidation();">
 	<INPUT TYPE="hidden" NAME="clearToGo">
 	<br>
@@ -272,7 +273,17 @@ if true then
 	End if
 %>
 	</FORM>
-
+<div>
+<div> џнн— г—«Ќб Р“«—‘ д‘ѕе</div>
+<%
+	mySQL="declare @date varchar(10);set @date =dbo.udf_date_dateToSolarWithSlash(dateadd(day,-7,getdate()));select * from OrderTraceLog where insertedDate > @date"
+	set rs=conn.Execute(mySQL)
+	while not rs.eof
+		response.write rs("stepText")
+		rs.moveNext
+	wend
+%>
+</div>
 <%
 end if
 
