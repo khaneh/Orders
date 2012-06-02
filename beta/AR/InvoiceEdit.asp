@@ -950,10 +950,31 @@ elseif request("act")="IssueInvoice" then
 
 	if (issueDate < session("OpenGLStartDate")) OR (issueDate > session("OpenGLEndDate")) then
 		Conn.close
-		response.redirect "AccountReport.asp?act=showInvoice&invoice="& InvoiceID & "&errmsg=" & Server.URLEncode("Œÿ«!<br> «—ÌŒ ’œÊ— „⁄ »— ‰Ì” . <br>(œ— ”«· „«·Ì Ã«—Ì ‰Ì” )")
+		response.redirect "AccountReport.asp?act=showInvoice&invoice=" & InvoiceID & "&errmsg=" & Server.URLEncode("Œÿ«!<br> «—ÌŒ ’œÊ— „⁄ »— ‰Ì” . <br>(œ— ”«· „«·Ì Ã«—Ì ‰Ì” )")
 	end if 
 	'----
-
+	'---- CHECK pickup list
+	mySQL="select distinct sales.item, sales.description, sales.appQtty,pik.itemID,pik.itemName,pik.qtty from (select invoiceLines.item,max(invoiceLines.description) as description,sum(invoiceLines.appQtty) as appQtty, InventoryInvoiceRelations.inventoryItem from InvoiceLines inner join Invoices on invoices.ID=invoiceLines.Invoice inner join InvoiceOrderRelations on InvoiceOrderRelations.invoice=invoices.id inner join InventoryInvoiceRelations on InventoryInvoiceRelations.invoiceItem=invoiceLines.Item WHERE Invoices.id=" & InvoiceID & " group by invoiceLines.item, InventoryInvoiceRelations.inventoryItem) as sales full outer join (SELECT InventoryPickuplistItems.itemID, max(InventoryPickuplistItems.ItemName) AS ItemName, sum(InventoryPickuplistItems.Qtty) AS Qtty, InventoryInvoiceRelations.invoiceItem FROM InventoryPickuplistItems INNER JOIN InventoryPickuplists ON InventoryPickuplistItems.pickupListID = InventoryPickuplists.id INNER JOIN InvoiceOrderRelations ON InventoryPickuplistItems.Order_ID = InvoiceOrderRelations.[Order] inner join invoices on InvoiceOrderRelations.invoice=invoices.id inner join InventoryInvoiceRelations on InventoryInvoiceRelations.inventoryItem=InventoryPickuplistItems.itemID WHERE NOT InventoryPickuplists.Status = N'del' and InventoryPickuplistItems.CustomerHaveInvItem=0 and Invoices.id=" & InvoiceID & " group by InventoryPickuplistItems.itemID, InventoryInvoiceRelations.invoiceItem  ) as pik on pik.itemID=sales.inventoryItem or pik.invoiceItem=sales.item"
+	set rs=Conn.Execute (mySQL)
+	msg=""
+	while not rs.eof
+		if IsNull(rs("appQtty")) then 
+			msg = msg & "»—«Ì ÕÊ«·ÂùÌ "  & rs("itemName") & " ‘„« ÂÌç ¬Ì „Ì œ— ›«ﬂ Ê— À»  ‰ﬂ—œÌœ<br>"
+		else
+			if IsNull(rs("qtty")) then 
+				msg = msg & "»—«Ì " & rs("description") & " ‘„« ÂÌç ÕÊ«·Âù«Ì ’«œ— ‰ﬂ—œÂù«Ìœ<br>"
+			else
+				if CDbl(rs("qtty")) <> CDbl(rs("appQtty")) then msg = msg & " ⁄œ«œ ÕÊ«·Â <b>" & rs("itemName") & "</b> »«  ⁄œ«œ <b>" & rs("description") & "</b> „€«Ì— «” .<br>" 
+			end if
+		end if
+		
+		rs.moveNext
+	wend
+	if (msg<>"") then
+		Conn.close
+		response.redirect "?errMsg=" & Server.URLEncode(msg)
+	end if 
+	
 	mySQL="SELECT * FROM Invoices WHERE (ID='"& InvoiceID & "')"
 	Set RS1 = conn.Execute(mySQL)
 	if RS1.eof then
