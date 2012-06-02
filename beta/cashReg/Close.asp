@@ -65,6 +65,7 @@ if request("act")="Report" AND request("CashReg")<>"" then
 	end if
 
 	if OpenningDate > session("OpenGLEndDate") then
+'		response.write session("OpenGLEndDate")
 		response.write "<br>" 
 		call showAlert ("’‰œÊﬁ „—»Êÿ »Â ”«· „«·Ì »⁄œ «“ «Ì‰ «” .",CONST_MSG_ERROR) 
 		response.end
@@ -357,8 +358,8 @@ elseif request("act")="submitClose" then
 		' AOMemoType = 1 means (miscellaneous)
 		mySQL="INSERT INTO AOMemo (CreatedDate, CreatedBy, Type, Account, IsCredit, Amount, Description) VALUES (N'"& closeDate & "' , "& session("ID") & ", 1, "& cashAcceptorAccount & ", 0, "& totalRemainedCashA & ", N'«„«‰  „ÊÃÊœÌ ‰ﬁœ ’‰œÊﬁ «·› " & nameDate & "');SELECT @@Identity AS NewMemoID"
 		set RS1 = Conn.execute(mySQL).NextRecordSet
-		MemoID = RS1 ("NewMemoID")
-		RemainedCashMemo = MemoID
+		cashMemoA = RS1 ("NewMemoID")
+		RemainedCashMemo = cashMemoA
 		RS1.close
 
 		'**************************** Creating AOItem for Memo  ****************
@@ -387,8 +388,8 @@ elseif request("act")="submitClose" then
 		' AOMemoType = 1 means (miscellaneous)
 		mySQL="INSERT INTO AOMemo (CreatedDate, CreatedBy, Type, Account, IsCredit, Amount, Description) VALUES (N'"& closeDate & "' , "& session("ID") & ", 1, "& cashAcceptorAccount & ", 0, "& totalRemainedCashB & ", N'«„«‰  „ÊÃÊœÌ ‰ﬁœ ’‰œÊﬁ » " & nameDate & "');SELECT @@Identity AS NewMemoID"
 		set RS1 = Conn.execute(mySQL).NextRecordSet
-		MemoID = RS1 ("NewMemoID")
-		RemainedCashMemo = MemoID
+		cashMemoB = RS1 ("NewMemoID")
+		RemainedCashMemo = cashMemoB
 		RS1.close
 
 		'**************************** Creating AOItem for Memo  ****************
@@ -468,8 +469,9 @@ elseif request("act")="submitClose" then
 	'*************************************************************************
 	'*****		Closing the Cash Register
 	'*************************************************************************
-
-	mySQL="UPDATE CashRegisters SET CloseDate=N'"& closeDate & "', CloseTime=N'"& closeTime & "', ClosedBy='"& session("ID") & "', IsOpen = '0', CashAcceptor='" & CashAcceptor & "', RemainedCashMemo='" & RemainedCashMemo & "', ChequesNewBanker = '" & ChequesNewBanker & "', ShortOverAmount='"& ShortOverAmount & "', ShortOverMemo='" & ShortOverMemo & "' WHERE (ID='"& CashRegID & "')"
+	if cashMemoA="" then cashMemoA="null"
+	if cashMemoB="" then cashMemoB="null"
+	mySQL="UPDATE CashRegisters SET CloseDate=N'"& closeDate & "', CloseTime=N'"& closeTime & "', ClosedBy='"& session("ID") & "', IsOpen = '0', CashAcceptor='" & CashAcceptor & "', RemainedCashMemo='" & RemainedCashMemo & "', ChequesNewBanker = '" & ChequesNewBanker & "', ShortOverAmount='"& ShortOverAmount & "', ShortOverMemo='" & ShortOverMemo & "',cashMemoA=" & cashMemoA & ",cashMemoB=" & cashMemoB & " WHERE (ID='"& CashRegID & "')"
 	conn.Execute(mySQL)
 	theResultReport="’‰œÊﬁ »Â ”·«„ Ì »” Â ‘œ.<br>"
 
