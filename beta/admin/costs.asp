@@ -48,15 +48,18 @@ elseif request("act")="add" then  '------------------ ADD ACTION ---------------
 		response.redirect "?act=show&step=driver&id="&request("centerID")&"&msg=" & Server.URLEncode(msg)
 	elseif request("step")="driver" then
 		'------------------ add driver ---------------------
+		isTime="0"
+		isCount="0"
 		isDirect="0"
 		isContinuous="0"
+		if request.form("isTime")="on" then isTime="1"
+		if request.form("isCount")="on" then isCount="1"
 		if request.form("isDirect")="on" then isDirect="1"
 		if request.form("isContinuous")="on" then isContinuous="1"
 		driverName=sqlsafe(request.form("driverName"))
 		id=cint(request("centerID"))
 		rate=cdbl(request("rate"))
-		theType=cint(request("type"))
-		sql="INSERT INTO cost_drivers ([name],[cost_center_id],[rate],[is_direct],is_countinuous,[type]) VALUES (N'"& driverName & "'," & id & "," & rate & "," & isDirect & ","&isContinuous&", " & theType & ")"
+		sql="INSERT INTO cost_drivers ([name],[cost_center_id],[rate],[is_direct],is_countinuous,is_time,is_count) VALUES (N'"& driverName & "'," & id & "," & rate & "," & isDirect & ","&isContinuous&", " & isTime & "," & isCount & ")"
 		response.write(sql)
 		Conn.Execute(sql)
 		msg="œ—«ÌÊ— „Ê—œ ‰Ÿ— »Â „—ﬂ“ Â“Ì‰Â «÷«›Â ‘œ"
@@ -96,8 +99,12 @@ elseif request("act")="del" then '----------------------- DELETE ---------------
 	end if
 elseif request("act")="edit" then '------------------- EDIT -----------------------
 	if request("step")="driver" then 
+		isTime="0"
+		isCount="0"
 		isDirect="0"
 		isContinuous="0"
+		if request.form("isTime")="on" then isTime="1"
+		if request.form("isCount")="on" then isCount="1"
 		if request.form("isDirect")="on" then isDirect="1"
 		if request.form("isContinuous")="on" then isContinuous="1"
 		driverName=sqlsafe(request.form("driverName"))
@@ -105,7 +112,7 @@ elseif request("act")="edit" then '------------------- EDIT --------------------
 		rate=cdbl(request("rate"))
 		unitSize=sqlsafe(request.form("unitSize"))
 		rowID=request.form("rowID")
-		sql="update cost_drivers SET [name]=N'"& driverName & "',[rate]=" & rate & ", [is_direct]=" & isDirect & ", is_countinuous="&isContinuous &",type="&request("type")&" WHERE id="&rowID
+		sql="update cost_drivers SET [name]=N'"& driverName & "',[rate]=" & rate & ", [is_direct]=" & isDirect & ", is_countinuous="&isContinuous &",is_time=" & isTime & ", is_count=" & isCount & " WHERE id="&rowID
 		'response.write(sql)
 		Conn.Execute(sql)
 		msg="œ—«ÌÊ— „Ê—œ ‰Ÿ— »—Ê“ —”«‰Ì ‘œ"
@@ -136,7 +143,8 @@ elseif request("act")="show" then '---------------------- SHOW -----------------
 			<table border="0" cellpadding="0" cellspacing="0">
 				<tr>
 					<td align="center"><b>‰«„</b></td>
-					<td align="center"><b>Ê«Õœ «‰œ«“Â êÌ—Ì</b></td>
+					<td align="center"><b>“„«‰</b></td>
+					<td align="center"><b>ﬂ‰ Ê—</b></td>
 					<td align="center"><b>÷—Ì»</b></td>
 					<td align="center"><b>„” ﬁÌ„</b></td>
 					<td align="center"><b>ÅÌÊ” êÌ</b></td>
@@ -150,10 +158,10 @@ elseif request("act")="show" then '---------------------- SHOW -----------------
 							<td><input type="text" name="driverName" value="<%=rs("name")%>"></td>
 							<td>
 								<input type=hidden name='rowID' value='<%=rs("id")%>'>
-								<select name="type">
-									<option value="1" <%if cint(rs("type"))=1 then response.write(" selected='selected'")%>>⁄œœ</option>
-									<option value="2" <%if cint(rs("type"))=2 then response.write(" selected='selected'")%>>“„«‰</option>
-								</select>
+								<input type="checkbox" name="isTime" <%if rs("is_time") then response.write "checked='checked'"%>>
+							</td>
+							<td>
+								<input type="checkbox" name="isCount" <%if rs("is_count") then response.write "checked='checked'"%>>
 							</td>
 							<td><input type=text name='rate' value='<%=rs("rate")%>' style='direction:LTR;'></td>
 							<td><input type=checkbox name='isDirect' <% if rs("is_direct")="True" then response.write "checked" %>></td>
@@ -163,14 +171,14 @@ elseif request("act")="show" then '---------------------- SHOW -----------------
 						</form>
 					</tr>
 					<tr bgcolor="#AAFFFF">
-						<td colspan="7" align="center"><b>⁄„·Ì« ùÂ«</b></td>
+						<td colspan="8" align="center"><b>⁄„·Ì« ùÂ«</b></td>
 					</tr>
 					<%
 					set rsop=Conn.Execute("select * from cost_operation_type where driver_id=" & rs("id"))
 					if rsop.eof then 
 					%>
 					<tr bgcolor="#AAFFFF">
-						<td colspan="7" align="center"><font color="red">ÂÌç ⁄„·Ì« Ì ÅÌœ« ‰‘œ! </font></td>
+						<td colspan="8" align="center"><font color="red">ÂÌç ⁄„·Ì« Ì ÅÌœ« ‰‘œ! </font></td>
 					</tr>
 					
 					<%
@@ -179,7 +187,7 @@ elseif request("act")="show" then '---------------------- SHOW -----------------
 					%>
 					<tr bgcolor="#AAFFFF">
 						<form method="post" action="?act=edit&step=operationType&centerID=<%=id%>">
-							<td colspan="5">
+							<td colspan="6">
 								<input type="hidden" name="id" value="<%=rsop("id")%>">
 								<input name="opName" type="text" value="<%=rsop("name")%>">
 							</td>
@@ -195,7 +203,7 @@ elseif request("act")="show" then '---------------------- SHOW -----------------
 					<tr bgcolor="#AAAAFF">
 						<form method="post" action="?act=add&step=operationType&centerID=<%=id%>">
 							<td colspan="1" align="center">‰«„ ⁄„·Ì«  —« Ê«—œ ﬂ‰Ìœ</td>
-							<td colspan="4">
+							<td colspan="5">
 								<input type="text" name="opName">
 								<input type="hidden" name="driverID" value="<%=rs("id")%>">
 							</td>
@@ -212,12 +220,8 @@ elseif request("act")="show" then '---------------------- SHOW -----------------
 				<tr>
 					<form method=post action='?act=add&step=driver&centerID=<%=id%>'>
 						<td><input type="text" name="driverName"></td>
-						<td>
-							<select name="type">
-								<option value='1'>⁄œœ</option>
-								<option value='2'>“„«‰</option>
-							</select>
-						</td>
+						<td><input type="checkbox" name="isTime" checked='checked'></td>
+						<td><input type="checkbox" name="isCount" checked='checked'></td>
 						<td><input type=text name='rate' style='direction:LTR;'></td>
 						<td><input type=checkbox name='isDirect'></td>
 						<td><input type=checkbox name='isContinuous'></td>

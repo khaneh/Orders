@@ -7,7 +7,9 @@ if not Auth(3 , 7) then NotAllowdToViewThisPage()
 <!--#include file="top.asp" -->
 <!--#include File="../include_farsiDateHandling.asp"-->
 <!--#include File="../include_UtilFunctions.asp"-->
-
+<STYLE>
+	li{margin: 8px 10px 0 0;}
+</STYLE>
 <script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
 <script type="text/javascript" src="/js/jalaliCalendar.js"></script>
 <script type="text/javascript" src="/js/jquery.dateFormat-1.0.js"></script>
@@ -29,50 +31,49 @@ $(document).ready(function(){
 	}
 	
 	function checkBut(obj){
-		var ret = false;
-		switch ($("#type").val()){
-			case '1':
-				if ($("#is_countinuous").val()=="True"){
-					ret = ($.isNumeric($("#startCounter").val()) && $.isNumeric($("#endCounter").val()) && $.isNumeric($("#order").val()))
-				} else {
-					ret = ($.isNumeric($("#qtty").val()) && $.isNumeric($("#order").val()));
-				}
-			break;
-			case '2':
-				if ($("#is_countinuous").val()=="True") {
-					var lastTime = new Date($("#lastTime").val());
-					var startTime = new Date($("#start_time").val());
-					if (lastTime > startTime) {
-						ret = false;
-						$("#result").html("ÔãÇ ŞÈáÇ ÏÑ Çíä ÒãÇä İÚÇáíÊí æÇÑÏ ßÑÏåÇíÏ!");
-						$("#startTime").val(lastTime.getHours()+':'+lastTime.getMinutes());
-						$("#startDate").val($.format.date(lastTime,"yyyy/MM/dd"));
-						$("#startDate").focus();
-					}
-				}
-				if ($("#startDate").val()!="" && $("#startTime").val()!="" && $("#endDate").val()!="" && $("#endTime").val()!="") {
-					var diff = dateDiff(Date($("#start_time").val()+":00"), Date($("#end_time").val()+":00"));
-					if (diff.diff>0){
-						var result = "ÚãáßÑÏ ÔãÇ: ";
-						result += (diff.d>0)? diff.d + "ÑæÒ ":"";
-						result += (diff.h>0)? diff.h + "ÓÇÚÊ ":"";
-						result += (diff.m>0)? diff.m + "ÏŞíŞå ":"";
-						if (obj.attr('id')!="order") 
-							$("#result").html(result);
-						console.log(obj.attr('id'));
-						if ($("#order_found").val()=="0"){
-							ret = false;
-						} else {
-							ret=true;
-						}
-					} else {
-						if (obj.attr('id')!="order") 
-							$("#result").html("ÊÇÑíÎ æ ÓÇÚÊ ÇíÇä ÈÇíÏ ÇÒ ÔÑæÚ ÈÒÑÊÑ ÈÇÔÏ.");
-						ret=false;
-					}
-				}
-			break;
+		var ret = true;
+		if ($("#is_count").val()=="True"){
+			if ($("#is_countinuous").val()=="True"){
+				ret = ret && ($.isNumeric($("#startCounter").val()) && $.isNumeric($("#endCounter").val()) && $.isNumeric($("#order").val()))
+			} else {
+				ret = ret && ($.isNumeric($("#qtty").val()) && $.isNumeric($("#order").val()));
+			}
 		}
+		if ($("#is_time").val()=="True"){
+			if ($("#is_countinuous").val()=="True") {
+				var lastTime = new Date($("#lastTime").val());
+				var startTime = new Date($("#start_time").val());
+				if (lastTime > startTime) {
+					ret = false;
+					$("#result").html("ÔãÇ ŞÈáÇ ÏÑ Çíä ÒãÇä İÚÇáíÊí æÇÑÏ ßÑÏåÇíÏ!");
+					$("#startTime").val(lastTime.getHours()+':'+lastTime.getMinutes());
+					$("#startDate").val($.format.date(lastTime,"yyyy/MM/dd"));
+					$("#startDate").focus();
+				}
+			}
+			if ($("#startDate").val()!="" && $("#startTime").val()!="" && $("#endDate").val()!="" && $("#endTime").val()!="") {
+				var diff = dateDiff(Date($("#start_time").val()+":00"), Date($("#end_time").val()+":00"));
+				if (diff.diff>0){
+					var result = "ÚãáßÑÏ ÔãÇ: ";
+					result += (diff.d>0)? diff.d + "ÑæÒ ":"";
+					result += (diff.h>0)? diff.h + "ÓÇÚÊ ":"";
+					result += (diff.m>0)? diff.m + "ÏŞíŞå ":"";
+					if (obj.attr('id')!="order") 
+						$("#result").html(result);
+					console.log(obj.attr('id'));
+					if ($("#order_found").val()=="0"){
+						ret = false;
+					} else {
+						ret = ret && true;
+					}
+				} else {
+					if (obj.attr('id')!="order") 
+						$("#result").html("ÊÇÑíÎ æ ÓÇÚÊ ÇíÇä ÈÇíÏ ÇÒ ÔÑæÚ ÈÒÑÊÑ ÈÇÔÏ.");
+					ret=false;
+				}
+			}
+		}
+		
 		//console.log('checked!' + ret);
 		if (ret)
 			$("#save").prop("disabled", false);
@@ -159,11 +160,11 @@ $(document).ready(function(){
 			};
 		}
 	}
-	if ($("#is_countinuous").val()=="True" && $("#type").val()=="1"){
+	if ($("#is_countinuous").val()=="True" && $("#is_count").val()=="True"){
 		$("#result").html(ajax_load);
 		$("#startCounter").ready(function(){
 			$.getJSON(loadUrl,
-				{act:"counter",operation_type:$("#operation_type").val(),driver_id:$("#driver_id").val()},
+				{act:"counter",operation_type:$("input[name=operation_type]:checked").val(),driver_id:$("#driver_id").val()},
 				function(json){
 					if (json.lastCounter>0) {
 						$("#result").html("ÂÎÑíä ßäÊæÑ íÏÇ ÔÏ");
@@ -178,11 +179,12 @@ $(document).ready(function(){
 			);
 			
 		});
-	} else if ($("#is_countinuous").val()=="True" && $("#type").val()=="2"){
+	}  
+	if ($("#is_countinuous").val()=="True" && $("#is_time").val()=="True"){
 		$("#result").html(ajax_load);
 		$("#start_time").ready(function(){
 			$.getJSON(loadUrl,
-				{act:"time",operation_type:$("#operation_type").val()},
+				{act:"time",operation_type:$("input[name=operation_type]:checked").val(),driver_id:$("#driver_id").val()},
 				function(json){
 					if (json.foundLastTime=='0') {
 						$("#result").html("ÔãÇ ÊÇßäæä ÈÑÇí Çíä ãÑßÒ åÒíäå ÒãÇäí æÇÑÏ äßÑÏåÇíÏ!");
@@ -293,21 +295,27 @@ $(document).ready(function(){
 <br>
 <%
 if request("act")="" then 
-	mySQL="select cost_centers.name as centerName,cost_drivers.name as driverName, cost_operation_type.* from cost_drivers inner join cost_centers on cost_drivers.cost_center_id=cost_centers.id inner join cost_user_relations on cost_user_relations.driver_id=cost_drivers.id inner join cost_operation_type on cost_drivers.id=cost_operation_type.driver_id where cost_user_relations.user_id=" & session("id")
+	mySQL="select cost_centers.name as centerName,cost_drivers.name as driverName,cost_drivers.ID from cost_drivers inner join cost_centers on cost_drivers.cost_center_id=cost_centers.id inner join cost_user_relations on cost_user_relations.driver_id=cost_drivers.id where cost_user_relations.user_id=" & session("id")
 	set rs=Conn.Execute(mySQL)
 	while not rs.eof
 	%>
-	<li><a href='costs.asp?act=add&ID=<%=rs("id")%>'><%=rs("centerName") &" - "& rs("driverName") & " - " & rs("name")%></a><br>
+	<li><a href='costs.asp?act=add&ID=<%=rs("id")%>'><%="<b>" & rs("centerName") &"</b> - "& rs("driverName") %></a><br>
 	<%
 		rs.MoveNext
 	wend
 	rs.close
 elseif request("act")="add" then '-------------------------------- A D D
 	today=shamsiToday()
-	mySQL="select cost_drivers.type,cost_drivers.rate,cost_drivers.is_direct,cost_drivers.is_countinuous, cost_operation_type.id as operation_type, cost_drivers.id as driver_id, cost_drivers.name as driverName, cost_operation_type.name as operationName from cost_operation_type inner join cost_drivers on cost_operation_type.driver_id=cost_drivers.id where cost_operation_type.id=" & request("id")
+	mySQL="select * from cost_drivers where id=" & request("id")
 	set rs=Conn.Execute(mySQL)
 	if rs.eof then 
 		msg="íå ÇÊİÇŞ ÚÌíÈ ÑÎ ÏÇÏå!"
+		response.redirect "?errmsg=" & Server.URLEncode(msg)
+	end if
+	mySQL = "select * from cost_operation_type where driver_id=" & request("id")
+	set rsOP=Conn.Execute(mySQL)
+	if rs.eof then 
+		msg="åí İÚÇáíÊí ÈÑÇí Çíä ÏÑÇíæÑ ËÈÊ äÔÏå"
 		response.redirect "?errmsg=" & Server.URLEncode(msg)
 	end if
 	currTime=now()
@@ -315,46 +323,56 @@ elseif request("act")="add" then '-------------------------------- A D D
 	endDate=FormatDateTime(currTime,4)
 	%>
 <a href="costs.asp">ÈÇÒÔÊ</a><br>
-<b><%=rs("driverName") & " - " & rs("operationName")%></b>
-<br><br>
 <form method="post" action="?act=insert">
-	<input type="hidden" name="operation_type" value="<%=rs("operation_type")%>" id='operation_type'>
-	<input type="hidden" name="driver_id" value="<%=rs("driver_id")%>" id='driver_id'>
-	<input type="hidden" name="type" id='type' value="<%=rs("type")%>">
+<b><%=rs("Name")%></b>
+<%
+i=0
+while not rsOP.eof
+	i=i+1
+%>
+	<input type="radio" name="operation_type" value="<%=rsOP("id")%>" <%if i=1 then response.write "checked='checked'"%>>
+	<span><%=rsOP("name")%></span>
+<%
+	rsOP.moveNext
+wend
+%>
+<br><br>
+
+	<input type="hidden" name="driver_id" value="<%=rs("id")%>" id='driver_id'>
+	<input type="hidden" name="is_count" id='is_count' value="<%=rs("is_count")%>">
+	<input type="hidden" name="is_time" id='is_time' value="<%=rs("is_time")%>">
 	<input type="hidden" name="is_direct" id='is_direct' value="<%=rs("is_direct")%>">
 	<input type="hidden" name="is_countinuous" id='is_countinuous' value="<%=rs("is_countinuous")%>">
 	<input type="hidden" name="lastTime" id='lastTime'>
+<%	if rs("is_count")="True" then 
+		if rs("is_countinuous")="True" then 
+	%>
+	<span>ßäÊæÑ ÔÑæÚ:</span>
+	<input type="text" name="startCounter" size="7" id='startCounter'>
+	<span>ßäÊæÑ ÇíÇä:</span>
+	<input type="text" name="endCounter" size="7" id='endCounter'><br>
+	<%	
+		else
+	%>
+	<span>ãİÏÇÑ ÑÇ æÇÑÏ ßäíÏ:</span>
+	<input type="text" name="qtty" size="3" id='qtty'><br>
 	<%
-	select case rs("type")
-		case "1":
-			if rs("is_countinuous")="True" then 
-		%>
-		<span>ßäÊæÑ ÔÑæÚ:</span>
-		<input type="text" name="startCounter" size="7" id='startCounter'>
-		<span>ßäÊæÑ ÇíÇä:</span>
-		<input type="text" name="endCounter" size="7" id='endCounter'>
-		<%	
-			else
-		%>
-		<span>ãİÏÇÑ ÑÇ æÇÑÏ ßäíÏ:</span>
-		<input type="text" name="qtty" size="3" id='qtty'>
-		<%
-			end if
-		case "2":
-		%>
-		<input type="hidden" name="start_time" id='start_time'>
-		<input type="hidden" name="end_time" id='end_time'>
-		<span>ÊÇÑíÎ ÔÑæÚ:</span>
-		<input type="text" name="startDate" id='startDate' size="10" maxlength="10" value="" >
-		<span>ÓÇÚÊ ÔÑæÚ:</span>
-		<input type="text" name="startTime" id='startTime' size="5" value="">
-		<span>ÊÇÑíÎ ÇíÇä:</span>
-		<input type="text" name="endDate" id='endDate' size="10" maxlength="10" value="">
-		<span>ÓÇÚÊ ÇíÇä:</span>
-		<input type="text" name="endTime" id='endTime' size="5" value="">
-		<%
-		
-	end select
+		end if
+	end if 
+	if rs("is_time")="True" then 
+	%>
+	<input type="hidden" name="start_time" id='start_time'>
+	<input type="hidden" name="end_time" id='end_time'>
+	<span>ÊÇÑíÎ ÔÑæÚ:</span>
+	<input type="text" name="startDate" id='startDate' size="10" maxlength="10" value="" >
+	<span>ÓÇÚÊ ÔÑæÚ:</span>
+	<input type="text" name="startTime" id='startTime' size="5" value="">
+	<span>ÊÇÑíÎ ÇíÇä:</span>
+	<input type="text" name="endDate" id='endDate' size="10" maxlength="10" value="">
+	<span>ÓÇÚÊ ÇíÇä:</span>
+	<input type="text" name="endTime" id='endTime' size="5" value=""><br>
+	<%		
+	end if
 	if rs("is_direct")="True" then 
 	%>
 	<span>ÔãÇÑå ÓİÇÑÔ ÑÇ æÇÑÏ ßäíÏ:</span>
@@ -371,6 +389,7 @@ elseif request("act")="add" then '-------------------------------- A D D
 <div id='result'></div>
 	<%
 	rs.close
+	rsOP.close
 elseif request("act")="edit" then '-------------------------------- E D I T
 
 elseif request("act")="insert" then '-------------------------------- I N S E R T
