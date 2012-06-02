@@ -360,7 +360,7 @@ if isNumeric(itemDetail) then
 	End if 
 	HRs.Close
 
-	sqlstr = "SELECT InventoryLog.type, InventoryLog.Voided, InventoryLog.VoidedBy, InventoryLog.comments, InventoryLog.VoidedDate, InventoryLog.IsInput, InventoryItems.Unit, InventoryItems.Name, InventoryItems.OldItemID, InventoryLog.logDate, InventoryLog.Qtty, InventoryLog.RelatedID, InventoryLog.ItemID, InventoryLog.ID, InventoryLog.CreatedBy, InventoryLog.owner, Users.RealName, InventoryLog.price FROM InventoryLog INNER JOIN InventoryItems ON InventoryLog.ItemID = InventoryItems.ID INNER JOIN Users ON InventoryLog.CreatedBy = Users.ID WHERE (InventoryItems.ID = "&  itemDetail & ") and InventoryLog.logDate>= N'"&dateFrom&"' and InventoryLog.logDate<= N'"&dateTo&"' ORDER BY InventoryLog.Logdate DESC, InventoryLog.ID DESC"
+	sqlstr = "SELECT InventoryLog.type, InventoryLog.Voided, InventoryLog.VoidedBy, InventoryLog.comments, InventoryLog.VoidedDate, InventoryLog.IsInput, InventoryItems.Unit, InventoryItems.Name, InventoryItems.OldItemID, InventoryLog.logDate, InventoryLog.Qtty, InventoryLog.RelatedID, InventoryLog.ItemID, InventoryLog.ID, InventoryLog.CreatedBy, InventoryLog.owner, Users.RealName, InventoryLog.price FROM InventoryLog INNER JOIN InventoryItems ON InventoryLog.ItemID = InventoryItems.ID INNER JOIN Users ON InventoryLog.CreatedBy = Users.ID WHERE (InventoryItems.ID = "&  itemDetail & ") and InventoryLog.logDate>= N'"&dateFrom&"' and InventoryLog.logDate<= N'"&dateTo&"' ORDER BY InventoryLog.Logdate DESC,InventoryLog.isInput, InventoryLog.ID DESC"
 	set RSS=Conn.Execute (sqlstr)	
 
 	%><BR><BR>
@@ -404,8 +404,8 @@ if isNumeric(itemDetail) then
 		<td align=right dir=ltr><span style="font-size:10pt"><%=RSS("id")%></span></td>
 		<TD align=right dir=ltr><span style="font-size:10pt"><% if RSS("IsInput") then %><%=RSS("Qtty")%><% end if %></span></TD>
 		<TD align=right dir=ltr style="position:relative;"><% if RSS("voided") then%><div style="right:0px;position:absolute;width:520;"><hr style="color:red;"></div><% end if %><span style="font-size:10pt"><% if not RSS("IsInput") then %><%=RSS("Qtty")%><% end if %></span></TD>
-		<td align=right dir=ltr title="έν: <%if not isNull(rss("price")) then response.write cdbl(rss("price"))/cdbl(rss("qtty"))%>"><span style="font-size:10pt"><%=rss("price")%></span></td>
-		<TD align=right dir=ltr><span style="font-size:10pt"><%=mySumQtty%></span></TD>
+		<td align=right dir=ltr title="έν: <%if not isNull(rss("price")) and cdbl(rss("qtty"))>0  then response.write cdbl(rss("price"))/cdbl(rss("qtty")) else response.write "---" end if%>"><span style="font-size:10pt"><%=rss("price")%></span></td>
+		<TD align=right dir=ltr><span style="font-size:10pt"><% if mySumQtty<0 then response.write "<span style='color:red;'>" & mySumQtty & "</span>" else response.write mySumQtty end if%></span></TD>
 		<TD align=right dir=ltr><span style="font-size:10pt"><%=urSumQtty%></span></TD>
 		<TD align=right dir=ltr ><%=RSS("Unit")%></TD>
 		<TD dir=ltr align=center><%=RSS("logDate")%></span></TD>

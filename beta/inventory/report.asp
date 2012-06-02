@@ -82,7 +82,7 @@ if request("act") = "del" and isNumeric(request("rowID")) then
 			Conn.Execute("update InventoryLog set pricedQtty = qtty where isInput=1 and owner=-1 and voided=0 and itemID=" & rss("itemID"))
 			Conn.Execute("delete from InventoryFIFORelations where inID in (select id from InventoryLog where isInput=1 and owner=-1 and voided=0 and itemID=" & rss("itemID")) &")"
 			Conn.Execute("delete from InventoryFIFORelations where outID in (select id from InventoryLog where isInput=0 and owner=-1 and voided=0 and itemID=" & rss("itemID")) &")"
-			Conn.Execute("execute dbo.outFIFO")
+			'Conn.Execute("execute dbo.outFIFO")
 		end if
 	end if
 
@@ -137,8 +137,8 @@ if request("submit")="„‘«ÂœÂ"then
 	if outRep = "on" then
 '		mySQL="SELECT InventoryLog.ID, InventoryLog.comments, InventoryLog.Voided, InventoryLog.VoidedBy, InventoryLog.VoidedDate, InventoryItems.Unit, InventoryItems.Name, InventoryItems.OldItemID, InventoryLog.logDate, InventoryLog.Qtty, InventoryLog.RelatedID, InventoryLog.ItemID, InventoryLog.type, InventoryLog.CreatedBy, InventoryLog.owner, Users.RealName, Users_1.RealName AS GiveTo FROM InventoryLog INNER JOIN InventoryItems ON InventoryLog.ItemID = InventoryItems.ID INNER JOIN Users ON InventoryLog.CreatedBy = Users.ID INNER JOIN InventoryPickuplists ON InventoryLog.RelatedID = InventoryPickuplists.id INNER JOIN Users Users_1 ON InventoryPickuplists.GiveTo = Users_1.ID WHERE (InventoryLog.logDate >= N'"& fromDate & "' and InventoryLog.logDate <= N'"& toDate & "' and IsInput=0) ORDER BY InventoryLog.ID DESC"
 
-		mySQL="SELECT InventoryLog.ID, InventoryLog.comments, InventoryLog.Voided, InventoryLog.VoidedDate, InventoryItems.Unit, InventoryItems.Name, InventoryItems.OldItemID, InventoryLog.logDate, InventoryLog.Qtty, InventoryLog.RelatedID, InventoryLog.ItemID, InventoryLog.type, InventoryLog.CreatedBy, InventoryLog.owner, Users.RealName, Users_1.RealName AS GiveTo, Users_2.RealName AS VoidedBy, InventoryFIFORelations.inID,InventoryFIFORelations.qtty as inQtty FROM InventoryLog INNER JOIN InventoryItems ON InventoryLog.ItemID = InventoryItems.ID INNER JOIN Users ON InventoryLog.CreatedBy = Users.ID INNER JOIN InventoryPickuplists ON InventoryLog.RelatedID = InventoryPickuplists.id INNER JOIN Users Users_1 ON InventoryPickuplists.GiveTo = Users_1.ID LEFT OUTER JOIN Users Users_2 ON InventoryLog.VoidedBy = Users_2.ID left outer join InventoryFIFORelations on inventoryLog.id = InventoryFIFORelations.outID WHERE (InventoryLog.logDate >= N'"& fromDate & "') AND (InventoryLog.logDate <= N'"& toDate & "') AND (InventoryLog.IsInput = 0) ORDER BY InventoryLog.ID DESC"
-
+		mySQL="SELECT InventoryLog.ID, InventoryLog.comments, InventoryLog.Voided, InventoryLog.VoidedDate, InventoryItems.Unit, InventoryItems.Name, InventoryItems.OldItemID, InventoryLog.logDate, InventoryLog.Qtty, InventoryLog.RelatedID, InventoryLog.ItemID, InventoryLog.type, InventoryLog.CreatedBy, InventoryLog.owner, Users.RealName, Users_1.RealName AS GiveTo, Users_2.RealName AS VoidedBy, InventoryFIFORelations.inID,InventoryFIFORelations.qtty as inQtty FROM InventoryLog INNER JOIN InventoryItems ON InventoryLog.ItemID = InventoryItems.ID INNER JOIN Users ON InventoryLog.CreatedBy = Users.ID left outer JOIN InventoryPickuplists ON InventoryLog.RelatedID = InventoryPickuplists.id and InventoryLog.RelatedID>0 left outer JOIN Users Users_1 ON InventoryPickuplists.GiveTo = Users_1.ID LEFT OUTER JOIN Users Users_2 ON InventoryLog.VoidedBy = Users_2.ID left outer join InventoryFIFORelations on inventoryLog.id = InventoryFIFORelations.outID WHERE (InventoryLog.logDate >= N'"& fromDate & "') AND (InventoryLog.logDate <= N'"& toDate & "') AND (InventoryLog.IsInput = 0) ORDER BY InventoryLog.ID DESC"
+'response.write mySQL
 		set RSS=Conn.Execute (mySQL)	
 		%>
 		<TR bgcolor="eeeeee" >
@@ -169,7 +169,7 @@ if request("submit")="„‘«ÂœÂ"then
 
 		%>
 		<TR bgcolor="<%=tmpColor%>" style="height:25pt" <% if RSS("voided") then%> disabled title="Õœ› ‘œÂ œ—  «—ÌŒ <%=RSS("VoidedDate")%>  Ê”ÿ <%=RSS("VoidedBy")%>"<% end if %>>
-			<TD align=center dir=ltr><% if not RSS("voided") then%><A HREF="javascript:confirmDelete(<%=RSS("ID")%>);">X</A> <small disabled><%=RSS("id")%></small><% end if %></TD>
+			<TD align=center dir=ltr><small disabled><%=RSS("id")%></small><% if not RSS("voided") then%><A HREF="javascript:confirmDelete(<%=RSS("ID")%>);">X</A> <% end if %></TD>
 			<TD align=right dir=ltr><INPUT TYPE="hidden" name="id" value="<%=RSS("ID")%>"><A HREF="invReport.asp?oldItemID=<%=RSS("oldItemID")%>&logRowID=<%=RSS("ID")%>" target="_blank"><%=RSS("OldItemID")%></A></TD>
 			<TD><% if RSS("voided") then%><div style="position:absolute;width:520;"><hr style="color:red;"></div><% end if %><!A HREF="default.asp?itemDetail=<%=RSS("ID")%>"><span style="font-size:10pt"><%=RSS("Name")%></A></TD>
 			<TD align=right dir=ltr><span style="font-size:10pt"><%=RSS("Qtty")%></span></TD>
