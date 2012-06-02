@@ -1075,7 +1075,21 @@ elseif request("act")="showPayment" AND request("payment") <> "" then
 		<td align='right' style="font-size: 9pt; direction:LTR; background-color=#C0D0F0;"><%=Separate(TotalAmount)%></td>
 	</tr>
 		<tr bgcolor='#CCCC88' height='30px'>
-			<td colspan="6" align='center'>
+			<td colspan="2" align="center">
+			<%
+			set rs=conn.execute("select * from effectiveGlRows where sys='" & sys & "' and link=" & AnyItemID)
+			if not rs.eof then 
+			%>
+			<a href="../accounting/GLMemoDocShow.asp?id=<%=rs("glDoc")%>">‰„«Ì‘ ”‰œ Õ”«»œ«—Ì</a>
+			<%	
+			else
+				response.write ("Â‰Ê“ ”‰œ ‰‘œÂ!")
+			end if
+			rs.close
+			set rs = nothing
+			%>
+			</td>
+			<td colspan="4" align='center'>
 <%	if Auth(9 , 7) AND NOT voided then			' Has the Priviledge to VOID the RECEIPT/PAYMENT %>
 				<INPUT class="GenButton" TYPE="button" Value=" «»ÿ«· " onclick="VoidPayment();">
 <%	end if '--------------------------------------------------EDIT BY SAM---------------------------------------------------%>
@@ -2514,11 +2528,29 @@ elseif request("act")="showReceipt" then
 		<td colspan="5" align="left"> Ã„⁄:&nbsp;&nbsp;</td>
 		<td align='right' style="font-size: 9pt; direction:LTR; background-color=#C0D0F0;"><%=Separate(TotalAmount)%></td>
 	</tr>
-<%	if Auth(9 , 7) AND NOT voided then			' Has the Priviledge to VOID the RECEIPT/PAYMENT %>
+
 		<tr bgcolor='#CCCC88' height='30px'>
-			<td colspan="6" align='center'><INPUT class="GenButton" TYPE="button" Value=" «»ÿ«· " onclick="VoidReceipt();"></td>
-		</tr>
+			<td colspan="2" align="center">
+			<%
+			set rs=conn.execute("select * from effectiveGlRows where sys='" & sys & "' and link=" & AnyItemID)
+			if not rs.eof then 
+			%>
+			<a href="../accounting/GLMemoDocShow.asp?id=<%=rs("glDoc")%>">‰„«Ì‘ ”‰œ Õ”«»œ«—Ì</a>
+			<%	
+			else
+				response.write ("Â‰Ê“ ”‰œ ‰‘œÂ!")
+			end if
+			rs.close
+			set rs = nothing
+			%>
+			</td>
+			<td colspan="4" align='center'>
+<%	if Auth(9 , 7) AND NOT voided then			' Has the Priviledge to VOID the RECEIPT/PAYMENT %>			
+			<INPUT class="GenButton" TYPE="button" Value=" «»ÿ«· " onclick="VoidReceipt();">
 <%	end if%>
+			</td>
+		</tr>
+
 	</TABLE>
 	<Br>
 	<SCRIPT LANGUAGE="JavaScript">
