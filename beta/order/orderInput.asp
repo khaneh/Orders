@@ -52,8 +52,13 @@ elseif Request.QueryString("act")="getType" then
 
 	if (RS1.eof) then 
 		conn.close
-		response.redirect "?errmsg=" & Server.URLEncode("ç‰Ì‰ Õ”«»Ì ÅÌœ« ‰‘œ.<br><a href='..//CRM/AccountEdit.asp?act=getAccount'>Õ”«» ÃœÌœø</a>")
+		response.redirect "?errmsg=" & Server.URLEncode("ç‰Ì‰ Õ”«»Ì ÅÌœ« ‰‘œ.<br><a href='../CRM/AccountEdit.asp?act=getAccount'>Õ”«» ÃœÌœø</a>")
 	end if 
+	'if (cdbl(rs1("arBalance"))+cdbl(rs1("apBalance"))+cdbl(rs1("aoBalance"))+cdbl(rs1("creditLimit")) < 0) then 
+	if (cdbl(rs1("arBalance"))+cdbl(rs1("creditLimit")) < 0) then 
+		conn.close
+		response.redirect "?errmsg=" & Server.URLEncode("»œÂÌ «Ì‰ Õ”«» «“ „Ì“«‰ «⁄ »«— ¬‰ »Ì‘ — ‘œÂ°<br> ·ÿ›« »« ”—Å—”  ›—Ê‘ Â„«Â‰ê ﬂ‰Ìœ.<br><a href='../CRM/AccountInfo.asp?act=show&selectedCustomer=" & CustomerID & "'>‰„«Ì‘ Õ”«»</a>")
+	end if
 %>
 		<br>
 		<div dir='rtl'>
@@ -134,7 +139,7 @@ elseif request("act")="getorder" then
 			<FONT COLOR="YELLOW"><%=customerID & " - "& AccountTitle%></FONT>
 			<INPUT TYPE="hidden" NAME="customerID" value="<%=customerID%>">
 		</TD>
-		<td align="left"><font color="yellow">‰Ê⁄ «” ⁄·«„:</font></td>
+		<td align="left"><font color="yellow">‰Ê⁄ ”›«—‘:</font></td>
 		<td>
 			<font color="red"><b><%=orderTypeName%></b></font>
 			<input type="hidden" name="orderType" value="<%=orderTypeID%>">
@@ -197,6 +202,20 @@ elseif request("act")="getorder" then
 		<TD align="right" colspan="4"><INPUT TYPE="text" NAME="OrderTitle" maxlength="255" size="50" tabIndex="9"></TD>
 	</TR>
 	<TR bgcolor="#CCCCCC">
+		<td align="left">”«Ì“:</td>
+		<td>
+			<input type="text" name="paperSize" tabindex="11">
+		</td>
+		<td align="left"> Ì—«é:</td>
+		<td>
+			<input type="text" name="qtty" tabindex="12">
+		</td>
+		<td align="left">ﬁÌ„  ﬂ·:</td>
+		<td colspan="3">
+			<input type="text" name="totalPrice" id='totalPrice' style="background-color:#FED;border-width:0;" readonly="readonly">
+		</td>
+	</TR>
+	<TR bgcolor="#CCCCCC">
 		<TD colspan="6" height="30px">&nbsp;</TD>
 	</TR>
 	<tr bgcolor="#CCCCCC">
@@ -221,7 +240,9 @@ sub fetchKeys(key)
 	  if oldGroup<>thisGroup then 
 	  	thisRow = thisRow & "<div class='mySection' groupName='" & thisGroup & "'>"
 	  	if myKey.GetAttribute("disable")="1" then 
-			thisRow = thisRow &  "<input type='checkbox' name='" & thisName & "-disBtn' onchange='disGroup(this);'>"
+			thisRow = thisRow &  "<input type='checkbox' value='0' name='" & thisGroup & "-disBtn' onclick='disGroup(this);"
+			if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " calc_" & myKey.GetAttribute("group") & "(this);"
+			thisRow = thisRow & "'>"
 			disText=" disabled='disabled' "
 		else
 			disText=""
@@ -231,35 +252,60 @@ sub fetchKeys(key)
 		
 	  select case thisType
 	  	case "option"
-	  		thisRow = thisRow &  "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "'>"
+	  		thisRow = thisRow &  "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "'"
+	  		if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onchange='calc_" & myKey.GetAttribute("group") & "(this);' "
+	  		thisRow = thisRow & ">"
 	  		for each myOption in myKey.getElementsByTagName("option")
-	  			thisRow = thisRow &  "<option value='" & myOption.text & "'>" & myOption.GetAttribute("label") & "</option>"
+	  			thisRow = thisRow &  "<option value='" & myOption.text & "'"
+	  			if myOption.GetAttribute("price")<>"" then 
+	  				thisRow = thisRow & " price='" & myOption.GetAttribute("price") & "' "
+	  			end if 
+	  			thisRow = thisRow &">" & myOption.GetAttribute("label") & "</option>"
 		  	next
 		  	thisRow = thisRow &  "</select>"
 		case "option-other"
-			thisRow = thisRow &  "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "' onchange='checkOther(this);'>"
+			thisRow = thisRow &  "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "' onchange='checkOther(this);"
+			if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " calc_" & myKey.GetAttribute("group") & "(this);"
+			thisRow = thisRow & "'>"
 	  		for each myOption in myKey.getElementsByTagName("option")
-	  			thisRow = thisRow &  "<option value='" & myOption.text & "'>" & myOption.GetAttribute("label") & "</option>"
+	  			thisRow = thisRow &  "<option value='" & myOption.text & "'"
+	  			if myOption.GetAttribute("price")<>"" then 
+	  				thisRow = thisRow & " price='" & myOption.GetAttribute("price") & "' "
+	  			end if
+	  			thisRow = thisRow & ">" & myOption.GetAttribute("label") & "</option>"
 		  	next
 		  	thisRow = thisRow &  "<option value='-1'>”«Ì—</option></select>"	
 		  	thisRow = thisRow & "<input type='text' name='" &thisName & "-addValue' onblur='addOther(this);'>"	  	
 		case "text"
-			thisRow = thisRow &  "<input " & disText & " type='text' style='margin:0;padding:0;' size='" & myKey.text & "' name='" & thisName & "'>"
-		case "textarea"
+			thisRow = thisRow &  "<input " & disText & " type='text' class='myInput' size='" & myKey.text & "' name='" & thisName & "' "
+			if myKey.GetAttribute("readonly")="yes" then thisRow =thisRow & " readonly='readonly' "
+			if myKey.GetAttribute("default")<>"" then thisRow = thisRow & "value='" & myKey.GetAttribute("default") & "'"
+			if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onblur='calc_" & myKey.GetAttribute("group") & "(this);' "
+			thisRow = thisRow & ">"
+		case "text area"
 			thisRow = thisRow &  "<textarea name='" & thisName & "' style='width:600px;' cols='" & myKey.text & "'></textarea>"
 		case "check"
 			thisRow = thisRow & "<input type='checkbox' value='on-0' name='" & thisName & "' "
 			if myKey.text="checked" then thisRow = thisRow & "checked='checked'"
+			if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onclick='calc_" & myKey.GetAttribute("group") & "(this);' "
+			if IsNumeric(myKey.GetAttribute("price")) then thisRow = thisRow & " price='" & myKey.GetAttribute("price") & "' "
 			thisRow = thisRow & ">"
+		case "radio":
+				thisRow = thisRow & "<input " & disText & " type='radio' value='" & myKey.text & "' name='" & thisName & "'" 
+				if myKey.GetAttribute("default")="yes" then thisRow = thisRow & " checked='checked' "
+				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onchange='calc_" & myKey.GetAttribute("group") & "(this);' "
+				thisRow = thisRow & ">"
 	  end select
 	  if myKey.GetAttribute("force")="yes" then thisRow = thisRow &  "<span style='color:red;margin:0 0 0 2px;padding:0;'>*</span>"
 	  oldGroup=thisGroup
 	  oldLabel=thisLabel
+	  if myKey.GetAttribute("br")="yes" then thisRow = thisRow & "<br>"
 	Next
 	thisRow = thisRow & "</div></div><div id='extreArea" &Replace(key,"/","-")& "'></div>"
 	response.write thisRow 'prependTo 
 	response.write "<div class='btn'><img title='«÷«›Â' src='/images/Plus-32.png' width='20px' onclick='cloneRow(""" & key & """);'><img title='Õ–› ¬Œ—Ì‰ Œÿ' src='/images/cancelled.gif' onclick='removeRow(""" & key & """);'></div></div>"
 end sub
+
 	oldTmp="---first---"
 	for each tmp in orderProp.selectNodes("//key")
 		if oldTmp<>tmp.parentNode.nodeName then 
@@ -290,63 +336,9 @@ end if
 	</FORM>
 	</TABLE>
 	<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
+	<script type="text/javascript" src="calcOrder.js"></script>
 	<SCRIPT LANGUAGE="JavaScript">
-		function disGroup (e){
-			groupName=$(e).parent(".mySection").attr("groupname");
-			if (e.checked) {
-				$(e).parent(".mySection").children('[name^="'+groupName+'"]').prop("disabled", false);
-			} else {
-				$(e).parent(".mySection").children('[name^="'+groupName+'"]').prop("disabled", true);
-				$(e).parent(".mySection").children('[name$="disBtn"]').prop("disabled", false);
-			}
-		}
 		
-		$(document).ready(function () {
-			$('[name$=-addValue]').hide();
-		});
-		function cloneRow(key){
-			maxID = $("#" + key.replace(/\//gi,"-") + "-maxID").val()
-			newRow = $("#" + key.replace(/\//gi,"-") + "-"+maxID).clone().attr('id', key.replace(/\//gi,"-") + "-" + (parseInt(maxID)+1));
-			$('input:checkbox',newRow).each(function (){
-				if ($(this).val().substr(0,3)=='on-')
-					$(this).val('on-'+(parseInt(maxID)+1));
-			});
-			
-			newRow.appendTo("#extreArea" + key.replace(/\//gi,"-") );
-			$("#" + key.replace(/\//gi,"-") + "-maxID").val(parseInt(maxID)+1);
-		}
-		function removeRow(key){
-			maxID = parseInt($("#" + key.replace(/\//gi,"-") + "-maxID").val());
-			if (maxID>0) {
-				$("#" + key.replace(/\//gi,"-") + "-"+maxID).remove();
-			}
-			$("#" + key.replace(/\//gi,"-") + "-maxID").val(maxID-1);
-		}
-		function checkOther(e){
-			
-			if ($(e).val()==-1 || $(e).val().substr(0,6)=="other:") {
-				if ($(e).find("option:selected").text()=="”«Ì—") {
-					$(e).next().val("„ﬁœ«— —« Ê«—œ ﬂ‰Ìœ");
-				} else {
-					$(e).next().val(
-						$(e).find("option:selected").text());
-				}
-				$(e).next().show();
-				$(e).next().focus();
-			} else {
-				$(e).next().hide();
-			}
-		}
-		function addOther(e){
-			if ($(e).val()!="" && $(e).val()!="„ﬁœ«— —« Ê«—œ ﬂ‰Ìœ" && $(e).val()!="‰„Ìù‘Â ﬂÂ Œ«·Ì »«‘Â!"){
-				$(e).prev().find("option:selected").text($(e).val());
-				$(e).prev().find("option:selected").val('other:'+$(e).val());
-				$(e).hide();
-			} else {
-				$(e).val("‰„Ìù‘Â ﬂÂ Œ«·Ì »«‘Â!");
-				$(e).focus();
-			}
-		}
 	<!--
 		function checkValidation(){
 		//TRIM : str = str.replace(/^\s*|\s*$/g,""); 
@@ -416,7 +408,11 @@ end if
 		conn.close
 		response.redirect "?act=getorder&selectedCustomer=" & CustomerID & "&errMsg=" & Server.URLEncode("Œÿ« œ— ‰Ê⁄ ”›«—‘<br>«ÿ·«⁄«  Ê«—œ ‰‘œ...<BR>")
 	end if
-
+	set rs=Conn.Execute("select * from OrderTraceTypes where id=" & orderType)
+	if rs.eof then 
+		conn.close
+		response.redirect "?errmsg=" & server.urlEncode("‰Ê⁄ ”›«—‘ —«  ⁄ÌÌ‰ ﬂ‰Ìœ")
+	end if
 	set RS1=Conn.Execute ("SELECT Name FROM OrderTraceTypes WHERE (ID='"& orderType & "') AND (IsActive=1)")
 	if RS1.eof then
 		conn.close
@@ -425,6 +421,67 @@ end if
 		orderTypeName=RS1("Name")
 	end if
 	RS1.close
+	'----------------------------------------------------------------------------
+	'----------------------------------------------------------------------------
+	'----------------------------------------------------------------------------
+	orderTypeID=rs("id")
+	orderTypeName=rs("name")
+	set orderProp = server.createobject("MSXML2.DomDocument")
+	if rs("property")<>"" then 
+		orderProp.loadXML(rs("property"))
+		myXML = fetchKeyValues()
+	end if
+	rs.close
+	set rs=nothing
+	
+function fetchKeyValues()
+	key="---first---"
+	thisRow="<?xml version=""1.0""?><keys>"
+	for each tmp in orderProp.selectNodes("//key")
+		if key<>tmp.parentNode.nodeName then 
+			key=tmp.parentNode.nodeName
+			thisRow = thisRow & "<" & key & ">"
+			hasValue=0
+			For Each myKey In orderProp.SelectNodes("/keys/" & key & "/key")
+				thisName = myKey.GetAttribute("name")
+				thisGroup= myKey.GetAttribute("group")
+				id=0
+'					response.write oldName& "<br>"
+				if thisName<>oldName then 
+					for each value in request.form(thisName)
+						if value <> "" then 
+							thisRow = thisRow & "<key name=""" & thisName & """ id=""" 
+							select case myKey.GetAttribute("type") 
+								case "check"
+									thisRow = thisRow & mid(value,4)
+								case else
+									if request.form(thisGroup & "-disBtn")<>"" then 
+										thisRow = thisRow & trim(split(request.form(thisGroup & "-disBtn"),",")(id))
+									else
+										thisRow = thisRow & id 
+									end if
+							end select
+							thisRow = thisRow & """>" & value & "</key>"
+							hasValue=hasValue +1
+						end if
+						id=id+1
+					next
+				end if
+				oldName = thisName
+			Next
+			
+			if hasValue>0 then 
+				thisRow = thisRow & "</" & key & ">"
+			else
+				thisRow = Replace(thisRow,"<" & key & ">","")
+			end if
+		end if
+	Next
+	thisRow = thisRow & "</keys>"
+	fetchKeyValues = thisRow 
+	'response.write thisRow
+	'response.end
+end function
 
 	mySQL="INSERT INTO Orders (CreatedDate, CreatedBy, Customer) VALUES ('"& CreationDate & "', '"& session("ID") & "', '"& CustomerID & "');SELECT @@Identity AS NewOrder"
 	set RS1 = Conn.execute(mySQL).NextRecordSet
@@ -437,8 +494,13 @@ end if
 	'set f = nothing
 	'set fs = nothing
 	'----------------------------------------------------------------------------
-	mySQL="INSERT INTO orders_trace (radif_sefareshat, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, marhale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy) VALUES ('"&_
-	OrderID & "', N'"& sqlSafe(request.form("OrderDate")) & "', N'"& sqlSafe(request.form("OrderTime")) & "', N'"& sqlSafe(request.form("ReturnDate")) & "', N'"& sqlSafe(request.form("ReturnTime")) & "', N'"& sqlSafe(request.form("CompanyName")) & "', N'"& sqlSafe(request.form("CustomerName")) & "', N'"& sqlSafe(request.form("Telephone")) & "', N'"& sqlSafe(request.form("OrderTitle")) & "', N'"& orderTypeName & "', '"& orderType & "', N'œ— Ã—Ì«‰', N'œ— ’› ‘—Ê⁄', N'"& sqlSafe(request.form("SalesPerson")) & "', 1, 1, N'"& CreationDate & "',  N'"& currentTime10() & "', "& session("ID") & " )"	
+	qtty = 0
+	if IsNumeric(request.form("qtty")) then 
+		qtty = CInt(request.form("qtty"))
+	end if
+	mySQL="INSERT INTO orders_trace (radif_sefareshat, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, marhale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy,property,qtty,paperSize,price) VALUES ('"&_
+	OrderID & "', N'"& sqlSafe(request.form("OrderDate")) & "', N'"& sqlSafe(request.form("OrderTime")) & "', N'"& sqlSafe(request.form("ReturnDate")) & "', N'"& sqlSafe(request.form("ReturnTime")) & "', N'"& sqlSafe(request.form("CompanyName")) & "', N'"& sqlSafe(request.form("CustomerName")) & "', N'"& sqlSafe(request.form("Telephone")) & "', N'"& sqlSafe(request.form("OrderTitle")) & "', N'"& orderTypeName & "', '"& orderType & "', N'œ— Ã—Ì«‰', N'œ— ’› ‘—Ê⁄', N'"& sqlSafe(request.form("SalesPerson")) & "', 1, 1, N'"& CreationDate & "',  N'"& currentTime10() & "', "& session("ID") & " ,N'" & myXML& "'," & qtty & ",'" & request.form("paperSize") & "','" & request.form("totalPrice") & "')"	
+	response.write mySQL
 	conn.Execute(mySQL)
 
 	conn.close

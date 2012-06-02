@@ -23,15 +23,19 @@ if not Auth(2 , 3) then NotAllowdToViewThisPage()
 	a.aYellow:link {color: yellow;}
 	a.aYellow:visited {color: green;}
 	a.aYellow:hover {color: gray;}
-	.mySection{border: 1px #F90 dashed;margin: 15px 10px 0 15px;}
+	.mySection{border: 1px #F90 dashed;margin: 15px 10px 0 15px;padding: 5px 0 5px 0;}
 	.myRow{border: 2px #F05 dashed;margin: 10px 0 10px 0;padding: 0 3px 5px 0;}
 	.exteraArea{border: 1px #33F dotted;margin: 5px 0 0 5px;padding: 0 3px 5px 0;}
-	.myLabel {margin: 0 3px 0 0;white-space: nowrap;}
-	.myProp {font-weight: bold;color: #40F; margin: 0 3px 0 3px;}
+	.myLabel {margin: 0px 3px 0 0px;white-space: nowrap;padding: 5px 0 5px 0;}
+	.myProp {font-weight: bold;color: #40F; margin: 0px 3px 0 0px;padding: 5px 0 5px 0;}
 	div.btn label{background-color:yellow;color: blue;padding: 3px 30px 3px 30px;cursor: pointer;}
 	div.btn{margin: -5px 250px 0px 5px;}
 	div.btn img{margin: 0px 20px -5px 0;cursor: pointer;}
+	div.report{visibility: collapse; height: 0px;}
+	div.price{float: left;border: 1px solid #999;margin: 0 0 0 10px;color: black;background-color: yellow;padding: 1px 3px 1px 3px;}
 </STYLE>
+<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
+<script type="text/javascript" src="/js/jquery.printElement.min.js"></script>
 <SCRIPT LANGUAGE='JavaScript'>
 <!--
 function checkValidation(){
@@ -43,7 +47,9 @@ function checkValidation(){
 		return false;
 	}
 }
+
 //-->
+
 </SCRIPT>
 
 <%
@@ -217,7 +223,9 @@ elseif request("act")="show" then
 	<CENTER>
 		<input type="button" value="«’·«Õ" Class="GenButton" onclick="window.location='OrderEdit.asp?e=y&radif=<%=Order%>';">&nbsp;
 		<% 	ReportLogRow = PrepareReport ("OrderForm.rpt", "Order_ID", Order, "/beta/dialog_printManager.asp?act=Fin") %>
-		<INPUT TYPE="button" value=" ç«Å " Class="GenButton" style="border:1 solid blue;" onclick="printThisReport(this,<%=ReportLogRow%>);">
+		<!--INPUT TYPE="button" value=" ç«Å " Class="GenButton" style="border:1 solid blue;" onclick="printThisReport(this,<%=ReportLogRow%>);"-->
+		<input type="button" value=" ç«Å " class="GenButton" style="border:1 solid blue;" onclick="$('#orderProperty').printElement({overrideElementCSS:['/css/order_property.css'],pageTitle:'›—„ ”›«—‘ - <%=Order%>',printMode:'popup'});">
+		<!-- ,leaveOpen:true,printMode:'popup' -->
 		<input type="button" value="›«ﬂ Ê—" Class="GenButton" onclick="window.location='../AR/InvoiceInput.asp?act=submitsearch&query=<%=Order%>';">
 		<!-----------------------SAM----------------------------
 		<INPUT type='button' value='›«Ì·Â«' class='GenButton' style='border:1 solid blue;' onclick=''-->
@@ -292,8 +300,12 @@ elseif request("act")="show" then
 			<%end if%>
 		</td>
 	</tr>
-	</TABLE><BR>
+	</TABLE>
+
 	<BR>
+	<BR>
+<div id='orderProperty' style="direction:rtl;">	
+
 	<TABLE class="" border="0" cellspacing="0" cellpadding="2" align="center" style="background-color:#CCCCCC; color:black; direction:RTL; width:700; border: 2 solid black;">
 	<TR bgcolor="black">
 		<TD align="left"><FONT COLOR="YELLOW">Õ”«»:</FONT></TD>
@@ -357,9 +369,11 @@ elseif request("act")="show" then
 		<TD colspan="6" align="center"><input type="button" value="«’·«Õ" onclick="window.location='OrderEdit.asp?e=y&radif=<%=Order %>';"></TD>
 	</TR-->
 	</TABLE><BR>
+
 <%
 if (not (IsNull(rs1("property")) or rs1("property")="")) then
 %>
+
 	<div>Ã“∆Ì«  ”›«—‘</div>
 
 <%
@@ -388,17 +402,24 @@ sub showKey(key)
 			thisType = typeKey.GetAttribute("type") 
 			thisLabel= typeKey.GetAttribute("label")
 			thisGroup= typeKey.GetAttribute("group")
+			if thisType="radio" then 
+				radioID = CInt(myKey.text)
+				set typeKey = typeProp.selectNodes(key & "[@name='" & thisName & "']")(radioID - 1)
+				thisType = typeKey.GetAttribute("type") 
+				thisLabel= typeKey.GetAttribute("label")
+				thisGroup= typeKey.GetAttribute("group")
+			end if
 			isRow =false
 			if Replace(key,"/","-")="keys-service-key" then response.write "::--------::" & myKey.text
 			if thisName<>"" then 
 				isRow=true
 				if oldID<>id then thisRow = thisRow & "<div class='exteraArea' id='" & Replace(key,"/","-") & "-" & id & "'>"
-				if (oldGroup<>thisGroup and oldID=id and oldGroup <> "---first---") then thisRow = thisRow &  "</div>"
+				if (oldGroup<>thisGroup and oldID=id and oldGroup <> "---first---") then thisRow = thisRow &  "</div><div class='report'>ê“«—‘:</div>"
 				if oldGroup<>thisGroup or oldID<>id then 
 					thisRow = thisRow & "<div class='mySection'>"
 					if typeKey.GetAttribute("grouplabel")<>"" then thisRow = thisRow & "<b>" & typeKey.GetAttribute("grouplabel") & "</b>"
 				end if
-				if oldLabel<>thisLabel then thisRow = thisRow &  "<label class='myLabel'>" & thisLabel & ": </label>"
+				if oldLabel<>thisLabel and thisType<>"radio" then thisRow = thisRow &  "<label class='myLabel'>" & thisLabel & ": </label>"
 				
 				if left(thisType,6)="option" then set myOptions=typeKey
 				myText=""
@@ -424,6 +445,14 @@ sub showKey(key)
 						if myText="" then myText = myKey.text
 					case "check"
 						if left(myKey.text,2)="on" then myText = "<img src='/images/Checkmark-32.png' width='15px'>"
+					case "radio"
+						myText=thisLabel
+					case "text"
+						if right(thisName,5)="price" then 
+							myText = "<div class='price'>" & myKey.text & "</div>"
+						else
+							myText = myKey.text
+						end if
 					case else
 						myText = myKey.text
 				end select
@@ -438,9 +467,9 @@ sub showKey(key)
 			oldGroup=thisGroup
 			oldLabel=thisLabel
 			oldID=id
-			
+			if typeKey.GetAttribute("br")="yes" then thisRow = thisRow & "<br><br>"
 		Next
-		if isRow then thisRow = thisRow & "</div></div>"
+		if isRow then thisRow = thisRow & "</div><div class='report'>ê“«—‘:</div></div>"
 	next
 	'response.write maxID
 	if not rowEmpty then thisRow = thisRow & "</div>" '"<div id='extreArea" &Replace(key,"/","-")& "'></div>"
@@ -456,6 +485,8 @@ end sub
 	next
 end if
 %>
+<div class='report'>«„÷«¡ Ê  Ê÷ÌÕ«  «÷«›Ì ›—Ê‘‰œÂ:</div>
+</div>
 <br><br>
 
 	<table class="CustTable" cellspacing='1' align=center style="width:700; ">
@@ -508,7 +539,7 @@ end if
 		<TD valign=top>
 			<TABLE border="0" cellspacing="0" cellpadding="2" dir="RTL" align="center" width="350" >
 			<TR bgcolor="black" >
-				<TD align="right" colspan=2><FONT COLOR="YELLOW">œ—ŒÊ«” Â«Ì ﬂ«·« «“ «‰»«—:</FONT></TD>
+				<TD align="right" colspan=2 title="ÃÂ  À»  ﬂ·Ìﬂ ﬂ‰Ìœ" onclick="window.location='../shopfloor/manageOrder.asp?radif=<%=order%>'" style='cursor:pointer;'><FONT COLOR="YELLOW">œ—ŒÊ«” Â«Ì ﬂ«·« «“ «‰»«—:</FONT></TD>
 			</TR>
 			<%
 			'Gets Request for services list from DB
@@ -568,7 +599,7 @@ end if
 		<TD  valign=top>
 			<TABLE border="0" cellspacing="0" cellpadding="2" dir="RTL" align="center" width="350" >
 			<TR bgcolor="black" >
-				<TD align="right" colspan=2><FONT COLOR="YELLOW">œ—ŒÊ«” Â«Ì Œ—Ìœ ”—ÊÌ” Ê ﬂ«·«:</FONT></TD>
+				<TD align="right" colspan=2 title="ÃÂ  À»  ﬂ·Ìﬂ ﬂ‰Ìœ" onclick="window.location='../shopfloor/manageOrder.asp?radif=<%=order%>'" style='cursor:pointer;'><FONT COLOR="YELLOW">œ—ŒÊ«” Â«Ì Œ—Ìœ ”—ÊÌ” Ê ﬂ«·«:</FONT></TD>
 			</TR>
 			<%
 			'Gets Request for services list from DB
@@ -586,8 +617,8 @@ end if
 						response.write " Ê÷ÌÕ ‰œ«—œ"
 					End If
 				%>">
-					<TD align="right" valign=top><FONT COLOR="black">
-					<INPUT TYPE="checkbox" NAME="outReq" VALUE="<%=RS3("id")%>" <%
+					<TD align="right" valign=top <%if isnull(rs3("ord_ID")) then response.write " title='”›«—‘ Œ—Ìœ Â‰Ê“ «ÌÃ«œ ‰‘œÂ!' "%>><FONT COLOR="black">
+						<INPUT TYPE="checkbox" NAME="outReq" VALUE="<%=RS3("id")%>" <%
 					if RS3("status") = "new" then
 						response.write " checked disabled "
 					else 
@@ -621,6 +652,40 @@ end if
 		</TD>
 	</TR>
 	</TABLE><BR>
+	<TABLE border="0" cellspacing="0" cellpadding="2" align="center" style=" color:black; direction:RTL; width:700; ">
+	<tr bgcolor="black">
+		<td align="center" colspan="7" style="color:yellow;padding:3px 0 8px 0;">⁄„·Ì« ùÂ«Ì «‰Ã«„ ‘œÂ »—«Ì «Ì‰ ”›«—‘:</td>
+	</tr>
+	<tr bgcolor="black" style="color:yellow;">
+		<td>„—ﬂ“</td>
+		<td>œ—«ÌÊ—</td>
+		<td>⁄„·Ì« </td>
+		<td> ⁄œ«œ</td>
+		<td>“„«‰</td>
+		<td>‘—Õ</td>
+		<td>À»  ﬂ‰‰œÂ</td>
+	</tr>
+	<%
+
+	mySQL="select costs.description,isnull(DATEDIFF(mi,costs.start_time,costs.end_time),0) as theTime,end_counter - start_counter as theCount, cost_operation_type.name as operationName, cost_drivers.name as driverName, cost_centers.name as centerName, users.RealName from costs inner join cost_operation_type on costs.operation_type=cost_operation_type.id inner join cost_drivers on cost_operation_type.driver_id=cost_drivers.id inner join cost_centers on cost_drivers.cost_center_id=cost_centers.id inner join Users on costs.user_id=users.ID where [order]=" & order
+	set rs=Conn.Execute(mySQL)
+	while not rs.eof
+%>
+	<tr bgcolor="#CCCCCC">
+		<td><%=rs("centerName")%></td>
+		<td><%=rs("driverName")%></td>
+		<td><%=rs("operationName")%></td>
+		<td><%=rs("theCount")%></td>
+		<td><%=cint(rs("theTime"))/60 & ":" & cint(rs("theTime")) mod 60%></td>
+		<td><%=rs("description")%></td>
+		<td><%=rs("realName")%></td>
+	</tr>
+<%		
+		rs.moveNext
+	wend
+	rs.close
+	%>
+	</table>
 	<!------------------------------------------------------SAM----------------------------------------------------------->
 
 <%

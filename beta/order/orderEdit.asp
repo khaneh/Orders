@@ -12,8 +12,9 @@ if not Auth(2 , 2) then NotAllowdToViewThisPage()
 	.mySection{border: 1px #F90 dashed;margin: 15px 10px 0 15px;}
 	.myRow{border: 2px #F05 dashed;margin: 10px 0 10px 0;padding: 0 3px 5px 0;}
 	.exteraArea{border: 1px #33F dotted;margin: 5px 0 0 5px;padding: 0 3px 5px 0;}
-	.myLabel {margin: 0 3px 0 0;white-space: nowrap;}
+	.myLabel {margin: 10px 10px 0 5px;white-space: nowrap;}
 	.myProp {font-weight: bold;color: #40F; margin: 0 3px 0 3px;}
+	.myInput {margin: 5px 0 5px 0;}
 	div.btn label{background-color:yellow;color: blue;padding: 3px 30px 3px 30px;cursor: pointer;}
 	div.btn{margin: -5px 250px 0px 5px;}
 	div.btn img{margin: 0px 20px -5px 0;cursor: pointer;}
@@ -115,21 +116,33 @@ function fetchKeyValues()
 			hasValue=0
 			For Each myKey In orderProp.SelectNodes("/keys/" & key & "/key")
 				thisName = myKey.GetAttribute("name")
+				thisGroup= myKey.GetAttribute("group")
 				id=0
-				for each value in request.form(thisName)
-					if value <> "" then 
-						thisRow = thisRow & "<key name=""" & thisName & """ id=""" 
-						if myKey.GetAttribute("type") = "check" then
-							thisRow = thisRow & mid(value,4)
-						else
-							thisRow = thisRow & id 
+'					response.write oldName& "<br>"
+				if thisName<>oldName then 
+					for each value in request.form(thisName)
+						if value <> "" then 
+							thisRow = thisRow & "<key name=""" & thisName & """ id=""" 
+							select case myKey.GetAttribute("type") 
+								case "check"
+									thisRow = thisRow & mid(value,4)
+								case else
+									if request.form(thisGroup & "-disBtn")<>"" then 
+										'response.write (thisGroup & "-" & id & "<br>")
+										thisRow = thisRow & trim(split(request.form(thisGroup & "-disBtn"),",")(id))
+									else
+										thisRow = thisRow & id 
+									end if
+							end select
+							thisRow = thisRow & """>" & value & "</key>"
+							hasValue=hasValue +1
 						end if
-						thisRow = thisRow & """>" & value & "</key>"
-						hasValue=hasValue +1
-					end if
-					id=id+1
-				next
+						id=id+1
+					next
+				end if
+				oldName = thisName
 			Next
+			
 			if hasValue>0 then 
 				thisRow = thisRow & "</" & key & ">"
 			else
@@ -139,6 +152,8 @@ function fetchKeyValues()
 	Next
 	thisRow = thisRow & "</keys>"
 	fetchKeyValues = thisRow 
+	'response.write thisRow
+	'response.end
 end function
 
 
@@ -155,9 +170,31 @@ Vazyat =		sqlSafe(request.form("Vazyat"))
 Marhale =		sqlSafe(request.form("Marhale"))
 SalesPerson =	sqlSafe(request.form("SalesPerson"))
 Qtty =			sqlSafe(request.form("Qtty"))
-Size =			sqlSafe(request.form("Size"))
+Size =			sqlSafe(request.form("paperSize"))
 SimplexDuplex =	sqlSafe(request.form("SimplexDuplex"))
-Price =			sqlSafe(request.form("Price"))
+Price =			sqlSafe(request.form("totalPrice"))
+
+mySQL="select users.id,users.RealName,orders_trace.order_title,orders_trace.customer_name, orders_trace.company_name from orders_trace inner join orderTraceStepAnnonce on orders_trace.step=orderTraceStepAnnonce.stepID inner join Users on orderTraceStepAnnonce.userID=users.ID where orders_trace.radif_sefareshat=" & radif
+set rs=Conn.Execute(mySQL)
+while not rs.eof 
+	msgFrom=session("id")
+	msgTo=rs("id")
+	msgTitle		= " €ÌÌ— „Õ Ê«Ì ”›«—‘"
+	msgBody			= "¬ê«Â »«‘Ìœ Ê »œ«‰Ìœ ﬂÂ ”›«—‘ " & rs("order_title") & "° " & rs("customer_name") & " (" & rs("company_name") & ")  €ÌÌ— ÅÌœ« ﬂ—œ"
+	RelatedTable	= "orders"
+	relatedID		= radif
+	replyTo			= "null"
+	IsReply			= 0
+	urgent			= 1
+	MsgDate			= shamsiToday()
+	MsgTime			= currentTime10()
+	msgType			= 0
+	MySQL = "INSERT INTO Messages (MsgFrom, MsgTo, MsgTime, MsgDate, IsRead, MsgTitle, MsgBody, replyTo, IsReply, relatedID, RelatedTable, urgent, type) VALUES ( "& MsgFrom & ", "& MsgTo & ", N'"& MsgTime & "', N'"& MsgDate & "', 0, N'"& MsgTitle & "', N'"& MsgBody & "', "& replyTo & ", "& IsReply & ", '"& relatedID & "', '"& RelatedTable & "', "& urgent & ", " & msgType & ")"
+	conn.Execute MySQL
+	rs.moveNext
+wend
+rs.close
+set rs=nothing
 
 	mySql="UPDATE orders_trace SET order_date= N'"& OrderDate & "', order_time= N'"& OrderTime & "', return_date= N'"& ReturnDate & "', return_time= N'"& ReturnTime & "', company_name= N'"& CompanyName & "', customer_name= N'"& CustomerName & "', telephone= N'"& Telephone & "', order_title= N'"& OrderTitle & "', order_kind= N'"& orderTypeName & "', Type= '"& orderType & "', vazyat= N'"& statusName & "', status= "& Vazyat & ", step= "& Marhale & ",  marhale= N'"& stepName & "', salesperson= N'"& SalesPerson & "', qtty= N'"& Qtty & "', paperSize= N'"& Size & "', SimplexDuplex= N'"& SimplexDuplex & "', Price= N'"& Price & "' , LastUpdatedDate=N'"& shamsitoday() & "' , LastUpdatedTime=N'"& currentTime10() & "', LastUpdatedBy=N'"& session("ID")& "', property=N'" & myXML & "' WHERE (radif_sefareshat= N'"& radif & "')"	
 	conn.Execute mySql
@@ -168,7 +205,7 @@ Price =			sqlSafe(request.form("Price"))
 		mySql="UPDATE Orders SET Customer='"& request.form("CustomerID") & "' WHERE (ID= N'"& radif & "')"	
 		conn.Execute mySql
 	end if
-
+	
 	if request.form("Marhale")="10" then
 		call InformCSRorderIsReady(radif , RS3("CreatedBy"))
 	end if
@@ -334,7 +371,7 @@ end if
 </TR>
 <TR bgcolor="#CCCCCC">
 	<TD align="left">„—Õ·Â:</TD>
-	<TD colspan="2"><SELECT NAME="Marhale" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px' tabIndex="13" >
+	<TD><SELECT NAME="Marhale" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px' tabIndex="13" >
 	<%
 	set RS_STEP=Conn.Execute ("SELECT * FROM OrderTraceSteps WHERE (IsActive=1)")
 	Do while not RS_STEP.eof	
@@ -348,7 +385,7 @@ end if
 	%>
 	</SELECT></TD>
 	<TD align="left">Ê÷⁄Ì :</TD>
-	<TD colspan="2"><SELECT NAME="Vazyat" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 100px' tabIndex="14">
+	<TD><SELECT NAME="Vazyat" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 100px' tabIndex="14">
 	<%
 	set RS_STATUS=Conn.Execute ("SELECT * FROM OrderTraceStatus WHERE (IsActive=1)")
 	Do while not RS_STATUS.eof	
@@ -361,68 +398,33 @@ end if
 	set RS_STATUS = nothing
 	%>
 	</SELECT></TD>
+	<td align="left">”«Ì“:</td>
+	<td>
+		<input type="text" value="<%=rs2("paperSize")%>" name="paperSize" tabIndex='15'>
+	</td>
 </TR>
+<tr bgcolor="#CCCCCC">
+	<td align="left"> Ì—«é:</td>
+	<td>
+		<input type="text" name="qtty" value="<%=rs2("qtty")%>" tabindex="16">
+	</td>
+	<td align="left">ﬁÌ„  ﬂ·:</td>
+	<td colspan="3">
+		<input type="text" value="<%=rs2("price")%>" name="totalPrice" id='totalPrice' style="background-color:#FED;border-width:0;" readonly="readonly">
+	</td>
+</tr>
 <tr bgcolor="#CCCCCC">
 	<td colspan="6">
 		<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
-		<script type="text/javascript">
-		function disGroup (e){
-			groupName=$(e).parent(".mySection").attr("groupname");
-			if (e.checked) {
-				$(e).parent(".mySection").children('[name^="'+groupName+'"]').prop("disabled", false);
-			} else {
-				$(e).parent(".mySection").children('[name^="'+groupName+'"]').prop("disabled", true);
-				$(e).parent(".mySection").children('[name$="disBtn"]').prop("disabled", false);
-			}
-		}
-		
-		$(document).ready(function () {
-			$('[name$=-addValue]').hide();
-		});
-		function cloneRow(key){
-			maxID = $("#" + key.replace(/\//gi,"-") + "-maxID").val();
-			newRow = $("#" + key.replace(/\//gi,"-") + "-"+maxID).clone().attr('id', key.replace(/\//gi,"-") + "-" + (parseInt(maxID)+1));
-			$('input:checkbox',newRow).each(function (){
-				if ($(this).val().substr(0,3)=='on-')
-					$(this).val('on-'+(parseInt(maxID)+1));
-			});
-			
-			newRow.appendTo("#extreArea" + key.replace(/\//gi,"-") );
-			$("#" + key.replace(/\//gi,"-") + "-maxID").val(parseInt(maxID)+1);
-		}
-		function removeRow(key){
-			maxID = parseInt($("#" + key.replace(/\//gi,"-") + "-maxID").val());
-			if (maxID>0) {
-				$("#" + key.replace(/\//gi,"-") + "-"+maxID).remove();
-			}
-			$("#" + key.replace(/\//gi,"-") + "-maxID").val(maxID-1);
-		}
-		function checkOther(e){
-			if ($(e).val()==-1 || $(e).val().substr(0,6)=="other:") {
-				if ($(e).find("option:selected").text()=="”«Ì—") {
-					$(e).next().val("„ﬁœ«— —« Ê«—œ ﬂ‰Ìœ");
-				} else {
-					$(e).next().val(
-						$(e).find("option:selected").text());
-				}
-				$(e).next().show();
-				$(e).next().focus();
-			} else {
-				$(e).next().hide();
-			}
-		}
-		function addOther(e){
-			if ($(e).val()!="" && $(e).val()!="„ﬁœ«— —« Ê«—œ ﬂ‰Ìœ" && $(e).val()!="‰„Ìù‘Â ﬂÂ Œ«·Ì »«‘Â!"){
-				$(e).prev().find("option:selected").text($(e).val());
-				$(e).prev().find("option:selected").val('other:'+$(e).val());
-				$(e).hide();
-			} else {
-				$(e).val("‰„Ìù‘Â ﬂÂ Œ«·Ì »«‘Â!");
-				$(e).focus();
-			}
-		}
-		</script>
+		<script type="text/javascript" src="/js/jalaliCalendar.js"></script>
+		<script type="text/javascript" src="/js/jquery.dateFormat-1.0.js"></script>
+		<script type="text/javascript" src="calcOrder.js"></script>
 		<div>Ã“∆Ì«  ”›«—‘</div>
+		<div>
+			<br>»—«Ì „Õ«”»Â ŒÊœﬂ«— ﬁÌ„ ùÂ« »«Ìœ —ÊÌ Å«—«„ —Â«Ì Â— ”ÿ— »—ÊÌœ Ê ¬‰—«  €ÌÌ— œÂÌœ Ê Ì« ¬‰ ”·Ê· —«  —ﬂ ‰„«ÌÌœ.
+			<br>Â„ç‰Ì‰ „Ìù Ê«‰Ìœ ﬁÌ„  ŒÊœ —« Ê«—œ ‰„«ÌÌœ «„« œ— ’Ê— Ì ﬂÂ œÊ»«—Â ÌﬂÌ «“ Å«—«„ —Â«Ì „—»ÊÿÂ —Ê  €ÌÌ— »œÌœ œÊ»«—Â ﬁÌ„  „Õ«”»Â ŒÊ«Âœ ‘œ.
+			<br>„Õ«”»Â »—ŒÌ «“ ﬁÌ„ ùÂ« «“ —ÊÌ Å«—«„ —Â«Ì ”«Ì— ŒÿÊÿ ŒÊ«Âœ »Êœ. „À·«  Ì—«é œ— „«‘Ì‰°  Ì—«éÌ ŒÊ«Âœ »Êœ ﬂÂ œ— ”·›Ê‰ Ê ÌÊ ÊÌ Ê Ê—‰Ì „Õ«”»Â „Ìù‘Êœ. Ê œ— ’Ê— Ì ﬂÂ  Ì—«é „«‘Ì‰ —Ê ⁄Ê÷ ﬂ‰Ì„ »«Ìœ ”·Ê·ùÂ«Ì „—»Êÿ »Â «Ì‰ ¬Ì „ùÂ« —Ê  —ﬂ ﬂ‰Ì„  « œÊ»«—Â ﬁÌ„ ù‘Ê‰ „Õ«”»Â »‘Â
+		</div>
 <%
 	set rs=Conn.Execute("select * from OrderTraceTypes where id="&rs2("type"))
 	set typeProp = server.createobject("MSXML2.DomDocument")
@@ -457,15 +459,17 @@ sub showKeyEdit(key)
 		  thisName = myKey.GetAttribute("name")
 		  thisLabel= myKey.GetAttribute("label")
 		  thisGroup= myKey.GetAttribute("group")
-		  set thisValue= orderProp.SelectNodes(key & "[@id='" & id & "' and @name='" & thisName & "']")
 		  hasValue=false
-		  if thisValue.length>0 then hasValue=true
+		  	set thisValue= orderProp.SelectNodes(key & "[@id='" & id & "' and @name='" & thisName & "']")
+		  	if thisValue.length>0 then hasValue=true
 ' 		  response.write hasValue & "<br>"
 		  if (oldGroup<>thisGroup and oldID=id and oldGroup <> "---first---") then thisRow = thisRow &  "</div>"
 		  if oldGroup<>thisGroup or oldID<>id then 
 			thisRow = thisRow & "<div class='mySection' groupName='" & thisGroup & "'>"
 			if myKey.GetAttribute("disable")="1" then 
-				thisRow = thisRow & "<input type='checkbox' name='" & thisName & "-disBtn' onchange='disGroup(this);'"
+				thisRow = thisRow & "<input type='checkbox' value='" & id & "' name='" & thisGroup & "-disBtn' onclick='disGroup(this);"
+				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " calc_" & myKey.GetAttribute("group") & "(this);"
+				thisRow = thisRow & "'"
 				if hasValue then 
 					thisRow = thisRow & " checked='checked'"
 					disText=""
@@ -481,21 +485,32 @@ sub showKeyEdit(key)
 			
 		  select case thisType
 		  	case "option"
-		  		thisRow = thisRow &  "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "'>"
+		  		thisRow = thisRow &  "<select " & disText & " class='myInput' name='" & thisName & "'"
+		  		if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onchange='calc_" & myKey.GetAttribute("group") & "(this);' "
+		  		thisRow = thisRow & ">"
 		  		for each myOption in myKey.getElementsByTagName("option")
 		  			thisRow = thisRow & "<option value='" & myOption.text & "'"
 		  			if hasValue then 
 		  				if thisValue(0).text=myOption.text then thisRow = thisRow & " selected='selected' "
 		  			end if
+		  			if myOption.GetAttribute("price")<>"" then 
+		  				thisRow = thisRow & " price='" & myOption.GetAttribute("price") & "' "
+		  			end if
 		  			thisRow = thisRow & ">" & myOption.GetAttribute("label") & "</option>"
 			  	next
 			  	thisRow = thisRow & "</select>"
 			case "option-other"
-				thisRow = thisRow & "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "' onchange='checkOther(this);'>"
+				thisRow = thisRow & "<select " & disText & " class='myInput' name='" & thisName & "' onchange='checkOther(this);"
+				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " calc_" & myKey.GetAttribute("group") & "(this);"
+				thisRow = thisRow & "'"
+				thisRow = thisRow & ">"
 		  		for each myOption in myKey.getElementsByTagName("option")
 		  			thisRow = thisRow & "<option value='" & myOption.text & "'"
 		  			if hasValue then 
 		  				if thisValue(0).text=myOption.text then thisRow = thisRow & " selected='selected' "
+		  			end if
+		  			if myOption.GetAttribute("price")<>"" then 
+		  				thisRow = thisRow & " price='" & myOption.GetAttribute("price") & "' "
 		  			end if
 		  			thisRow = thisRow & ">" & myOption.GetAttribute("label") & "</option>"
 			  	next
@@ -510,8 +525,14 @@ sub showKeyEdit(key)
 				end if
 			  	thisRow = thisRow & "<input type='text' name='" & thisName & "-addValue' onblur='addOther(this);'>"
 			case "text"
-				thisRow = thisRow & "<input " & disText & " type='text' style='margin:0;padding:0;' size='" & myKey.text & "' name='" & thisName & "' "
-				if hasValue then thisRow = thisRow & "value='" & thisValue(0).text & "'"
+				thisRow = thisRow & "<input " & disText & " type='text' class='myInput' size='" & myKey.text & "' name='" & thisName & "' "
+				if myKey.GetAttribute("readonly")="yes" then thisRow =thisRow & " readonly='readonly' "
+				if hasValue then 
+					thisRow = thisRow & "value='" & thisValue(0).text & "'"
+				else
+					if myKey.GetAttribute("default")<>"" then thisRow = thisRow & "value='" & myKey.GetAttribute("default") & "'"
+				end if
+				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onblur='calc_" & myKey.GetAttribute("group") & "(this);' "
 				thisRow = thisRow & ">"
 			case "textarea"
 				thisRow = thisRow & "<textarea name='" & thisName & "' style='width:600px;' cols='" & myKey.text & "'>"
@@ -524,12 +545,28 @@ sub showKeyEdit(key)
 				else
 					if myKey.text="checked" then thisRow = thisRow & "checked='checked'"
 				end if
+				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onclick='calc_" & myKey.GetAttribute("group") & "(this);' "
+				if IsNumeric(myKey.GetAttribute("price")) then 
+		  				thisRow = thisRow & " price='" & myKey.GetAttribute("price") & "' "
+		  			end if
+				thisRow = thisRow & ">"
+			case "radio":
+			'response.write hasValue
+				thisRow = thisRow & "<input " & disText & " type='radio' value='" & myKey.text & "' name='" & thisName & "'" 
+				if hasValue then
+					if myKey.text = thisValue(0).text then thisRow = thisRow & " checked='checked' "
+					
+				else
+					if myKey.GetAttribute("default")="yes" then thisRow = thisRow & " checked='checked' "
+				end if
+				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onchange='calc_" & myKey.GetAttribute("group") & "(this);' "
 				thisRow = thisRow & ">"
 		  end select
 		  if myKey.GetAttribute("force")="yes" then thisRow = thisRow &  "<span style='color:red;margin:0 0 0 2px;padding:0;'>*</span>"
 		  oldGroup=thisGroup
 		  oldLabel=thisLabel
 		  oldID=id
+		  if myKey.GetAttribute("br")="yes" then thisRow = thisRow & "<br>"
 		Next
 		thisRow = thisRow & "</div></div>"
 	next

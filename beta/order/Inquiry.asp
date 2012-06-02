@@ -21,11 +21,11 @@ if not Auth(2 , 9) then NotAllowdToViewThisPage() '«” ⁄·«„
 	.CusTD2 {background-color: #DDDDDD; direction: LTR; text-align: right; font-size:9pt;}
 	.CusTD3 {background-color: #DDDDDD; direction: LTR; text-align: center; font-size:9pt;}
 	.CusTD4 {background-color: #CCCC66; direction: LTR; text-align: center; font-size:9pt;}
-	.mySection{border: 1px #F90 dashed;margin: 15px 10px 0 15px;}
+	.mySection{border: 1px #F90 dashed;margin: 15px 10px 0 15px;padding: 5px 0 5px 0;}
 	.myRow{border: 2px #F05 dashed;margin: 10px 0 10px 0;padding: 0 3px 5px 0;}
 	.exteraArea{border: 1px #33F dotted;margin: 5px 0 0 5px;padding: 0 3px 5px 0;}
-	.myLabel {margin: 3px 3px 3px 0;white-space: nowrap;}
-	.myProp {font-weight: bold;color: #40F; margin: 0 3px 0 3px;}
+	.myLabel {margin: 0px 3px 0 0px;white-space: nowrap;padding: 5px 0 5px 0;}
+	.myProp {font-weight: bold;color: #40F; margin: 0px 3px 0 0px;padding: 5px 0 5px 0;}
 	div.btn label{background-color:yellow;color: blue;padding: 3px 30px 3px 30px;cursor: pointer;}
 	div.btn{margin: -5px 250px 0px 5px;}
 	div.btn img{margin: 0px 20px -5px 0;cursor: pointer;}
@@ -311,21 +311,15 @@ elseif Request.QueryString("act")="show" then
 		<TD align="left">⁄‰Ê«‰ ﬂ«— œ«Œ· ›«Ì·:</TD>
 		<TD colspan="3"><%=RS1("order_title")%></TD>
 	</TR>
-	<!--
-	<TR height=30>
-		<TD align="left"> ⁄œ«œ:</TD>
-		<TD><%=RS1("qtty")%></TD>
-		<TD align="left">”«Ì“:</TD>
-		<TD><%=RS1("PaperSize")%></TD>
-		<TD align="left">Ìﬂ—Ê/œÊ—Ê:</TD>
-		<TD><%=RS1("SimplexDuplex")%></TD>
-	</TR>
+
 	<TR height=30>
 		<TD align="left">ﬁÌ„  ﬂ·:</TD>
 		<TD><%=RS1("Price")%></TD>
-		<TD colspan="4" height="30px">&nbsp;</TD>
+		<TD align="left">”«Ì“:</TD>
+		<TD colspan="3"><%=RS1("PaperSize")%></TD>
+		<!--TD align="left">Ìﬂ—Ê/œÊ—Ê:</TD>
+		<TD><%=RS1("SimplexDuplex")%></TD-->
 	</TR>
-	-->
 	<TR height=30>
 		<TD align="left">„—Õ·Â:</TD>
 		<TD colspan="5"><%=RS1("marhale")%></TD>
@@ -366,6 +360,13 @@ sub showKey(key)
 			thisType = typeKey.GetAttribute("type") 
 			thisLabel= typeKey.GetAttribute("label")
 			thisGroup= typeKey.GetAttribute("group")
+			if thisType="radio" then 
+				radioID = CInt(myKey.text)
+				set typeKey = typeProp.selectNodes(key & "[@name='" & thisName & "']")(radioID - 1)
+				thisType = typeKey.GetAttribute("type") 
+				thisLabel= typeKey.GetAttribute("label")
+				thisGroup= typeKey.GetAttribute("group")
+			end if
 			isRow =false
 			if Replace(key,"/","-")="keys-service-key" then response.write "::--------::" & myKey.text
 			if thisName<>"" then 
@@ -374,9 +375,9 @@ sub showKey(key)
 				if (oldGroup<>thisGroup and oldID=id and oldGroup <> "---first---") then thisRow = thisRow &  "</div>"
 				if oldGroup<>thisGroup or oldID<>id then 
 					thisRow = thisRow & "<div class='mySection'>"
-					if typeKey.GetAttribute("grouplabel")<>"" then thisRow = thisRow & "<b>" & typeKey.GetAttribute("grouplabel") & " </b>"
+					if typeKey.GetAttribute("grouplabel")<>"" then thisRow = thisRow & "<b>" & typeKey.GetAttribute("grouplabel") & "</b>"
 				end if
-				if oldLabel<>thisLabel then thisRow = thisRow &  "<label class='myLabel'>" & thisLabel & " </label>"
+				if oldLabel<>thisLabel and thisType<>"radio" then thisRow = thisRow &  "<label class='myLabel'>" & thisLabel & ": </label>"
 				
 				if left(thisType,6)="option" then set myOptions=typeKey
 				myText=""
@@ -402,6 +403,8 @@ sub showKey(key)
 						if myText="" then myText = myKey.text
 					case "check"
 						if left(myKey.text,2)="on" then myText = "<img src='/images/Checkmark-32.png' width='15px'>"
+					case "radio"
+						myText=thisLabel
 					case else
 						myText = myKey.text
 				end select
@@ -416,7 +419,7 @@ sub showKey(key)
 			oldGroup=thisGroup
 			oldLabel=thisLabel
 			oldID=id
-			
+			if typeKey.GetAttribute("br")="yes" then thisRow = thisRow & "<br><br>"
 		Next
 		if isRow then thisRow = thisRow & "</div></div>"
 	next
@@ -1164,89 +1167,33 @@ elseif Request.QueryString("act")="getQuote" then
 	if len(creationTime)<5 then creationTime=Left(creationTime,3) & "0" & Right(creationTime,1)
 %>
 	<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
+	<script type="text/javascript" src="calcOrder.js"></script>
 	<script type="text/javascript">
-		function disGroup (e){
-			groupName=$(e).parent(".mySection").attr("groupname");
-			if (e.checked) {
-				$(e).parent(".mySection").children('[name^="'+groupName+'"]').prop("disabled", false);
-			} else {
-				$(e).parent(".mySection").children('[name^="'+groupName+'"]').prop("disabled", true);
-				$(e).parent(".mySection").children('[name$="disBtn"]').prop("disabled", false);
-			}
-		}
-		
-		$(document).ready(function () {
-			$('[name$=-addValue]').hide();
-		});
-		function cloneRow(key){
-			maxID = $("#" + key.replace(/\//gi,"-") + "-maxID").val()
-			newRow = $("#" + key.replace(/\//gi,"-") + "-"+maxID).clone().attr('id', key.replace(/\//gi,"-") + "-" + (parseInt(maxID)+1));
-			$('input:checkbox',newRow).each(function (){
-				if ($(this).val().substr(0,3)=='on-')
-					$(this).val('on-'+(parseInt(maxID)+1));
-			});
-			
-			newRow.appendTo("#extreArea" + key.replace(/\//gi,"-") );
-			$("#" + key.replace(/\//gi,"-") + "-maxID").val(parseInt(maxID)+1);
-		}
-		function removeRow(key){
-			maxID = parseInt($("#" + key.replace(/\//gi,"-") + "-maxID").val());
-			if (maxID>0) {
-				$("#" + key.replace(/\//gi,"-") + "-"+maxID).remove();
-			}
-			$("#" + key.replace(/\//gi,"-") + "-maxID").val(maxID-1);
-		}
-		function checkOther(e){
-			
-			if ($(e).val()==-1 || $(e).val().substr(0,6)=="other:") {
-				if ($(e).find("option:selected").text()=="”«Ì—") {
-					$(e).next().val("„ﬁœ«— —« Ê«—œ ﬂ‰Ìœ");
-				} else {
-					$(e).next().val(
-						$(e).find("option:selected").text());
-				}
-				$(e).next().show();
-				$(e).next().focus();
-			} else {
-				$(e).next().hide();
-			}
-		}
-		function addOther(e){
-			if ($(e).val()!="" && $(e).val()!="„ﬁœ«— —« Ê«—œ ﬂ‰Ìœ" && $(e).val()!="‰„Ìù‘Â ﬂÂ Œ«·Ì »«‘Â!"){
-				$(e).prev().find("option:selected").text($(e).val());
-				$(e).prev().find("option:selected").val('other:'+$(e).val());
-				$(e).hide();
-			} else {
-				$(e).val("‰„Ìù‘Â ﬂÂ Œ«·Ì »«‘Â!");
-				$(e).focus();
-			}
-		}
-
 		function checkValidation() {
 			if ($('input[name="CustomerName"]').val().replace(/^\s*|\s*$/g,'')==''){
 				alert("‰«„ „‘ —Ì —« Ê«—œ ﬂ‰Ìœ");
 				$('input[name="CustomerName"]').focus();
-				$("input#Submit").prop("disabled",true);
+				//$("input#Submit").prop("disabled",true);
 				return false;
 			} else if ($('input[name="SalesPerson"]').val().replace(/^\s*|\s*$/g,'')==''){
 				alert("«” ⁄·«„ êÌ—‰œÂ —« Ê«—œ ﬂ‰Ìœ");
 				$('input[name="SalesPerson"]').focus();
-				$("input#Submit").prop("disabled",true);
+				//$("input#Submit").prop("disabled",true);
 				return false;
 			} else if ($('input[name="ReturnDate"]').val().replace(/^\s*|\s*$/g,'')==''){
 				alert("„Ê⁄œ «⁄ »«— —« Ê«—œ ﬂ‰Ìœ");
 				$('input[name="ReturnDate"]').focus();
-				$("input#Submit").prop("disabled",true);
+				//$("input#Submit").prop("disabled",true);
 				return false;
 			} else if ($('input[name="ReturnTime"]').val().replace(/^\s*|\s*$/g,'')==''){
 				alert("“„«‰ (”«⁄ ) «⁄ »«— —« Ê«—œ ﬂ‰Ìœ");
 				$('input[name="ReturnTime"]').focus();
-				$("input#Submit").prop("disabled",true);
+				//$("input#Submit").prop("disabled",true);
 				return false;
 			} else if ($('input[name="OrderTitle"]').val().replace(/^\s*|\s*$/g,'')==''){
 				alert("⁄‰Ê«‰ ﬂ«— œ«Œ· ›«Ì· —« Ê«—œ ﬂ‰Ìœ");
 				$('input[name="OrderTitle"]').focus();
-				$("input#Submit").prop("disabled",true);
+				//$("input#Submit").prop("disabled",true);
 				return false;
 			} else {
 				$("input#Submit").prop("disabled",false);
@@ -1337,11 +1284,22 @@ elseif Request.QueryString("act")="getQuote" then
 				<TD align="right" colspan="3"><INPUT TYPE="text" NAME="OrderTitle" maxlength="255" size="50" tabIndex="9" style="width:100%"></TD>
 			</TR>
 			<TR bgcolor="#CCCCCC">
-				<TD align="left" colspan="3"> Ê÷ÌÕ«  »Ì‘ —:</TD>
-				<TD align="right" colspan="3"><TEXTAREA NAME="Notes" tabIndex="10" style="width:100%"></TEXTAREA></TD>
+				<td align="left">”«Ì“:</td>
+				<td>
+					<input type="text" name="paperSize" tabindex="11">
+				</td>
+				<TD align="left" > Ê÷ÌÕ«  »Ì‘ —:</TD>
+				<TD align="right"colspan="3"><TEXTAREA NAME="Notes" tabIndex="10" style="width:100%"></TEXTAREA></TD>
 			</TR>
 			<TR bgcolor="#CCCCCC">
-				<TD colspan="6" height="30px">&nbsp;</TD>
+				<td align="left"> Ì—«é:</td>
+				<td>
+					<input type="text" name="qtty" tabindex="12">
+				</td>
+				<td align="left">ﬁÌ„  ﬂ·:</td>
+				<td colspan="3">
+					<input type="text" name="totalPrice" id='totalPrice' style="background-color:#FED;border-width:0;" readonly="readonly">
+				</td>
 			</TR>
 			
 			<tr bgcolor="#CCCCCC">
@@ -1366,7 +1324,9 @@ sub fetchKeys(key)
 	  if oldGroup<>thisGroup then 
 	  	thisRow = thisRow & "<div class='mySection' groupName='" & thisGroup & "'>"
 	  	if myKey.GetAttribute("disable")="1" then 
-			thisRow = thisRow &  "<input type='checkbox' name='" & thisName & "-disBtn' onchange='disGroup(this);'>"
+			thisRow = thisRow &  "<input type='checkbox' value='0' name='" & thisGroup & "-disBtn' onclick='disGroup(this);"
+			if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " calc_" & myKey.GetAttribute("group") & "(this);"
+			thisRow = thisRow & "'>"
 			disText=" disabled='disabled' "
 		else
 			disText=""
@@ -1376,30 +1336,54 @@ sub fetchKeys(key)
 		
 	  select case thisType
 	  	case "option"
-	  		thisRow = thisRow &  "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "'>"
+	  		thisRow = thisRow &  "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "'"
+	  		if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onchange='calc_" & myKey.GetAttribute("group") & "(this);' "
+	  		thisRow = thisRow & ">"
 	  		for each myOption in myKey.getElementsByTagName("option")
-	  			thisRow = thisRow &  "<option value='" & myOption.text & "'>" & myOption.GetAttribute("label") & "</option>"
+	  			thisRow = thisRow &  "<option value='" & myOption.text & "'"
+	  			if myOption.GetAttribute("price")<>"" then 
+	  				thisRow = thisRow & " price='" & myOption.GetAttribute("price") & "' "
+	  			end if 
+	  			thisRow = thisRow &">" & myOption.GetAttribute("label") & "</option>"
 		  	next
 		  	thisRow = thisRow &  "</select>"
 		case "option-other"
-			thisRow = thisRow &  "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "' onchange='checkOther(this);'>"
+			thisRow = thisRow &  "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "' onchange='checkOther(this);"
+			if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " calc_" & myKey.GetAttribute("group") & "(this);"
+			thisRow = thisRow & "'>"
 	  		for each myOption in myKey.getElementsByTagName("option")
-	  			thisRow = thisRow &  "<option value='" & myOption.text & "'>" & myOption.GetAttribute("label") & "</option>"
+	  			thisRow = thisRow &  "<option value='" & myOption.text & "'"
+	  			if myOption.GetAttribute("price")<>"" then 
+	  				thisRow = thisRow & " price='" & myOption.GetAttribute("price") & "' "
+	  			end if
+	  			thisRow = thisRow & ">" & myOption.GetAttribute("label") & "</option>"
 		  	next
 		  	thisRow = thisRow &  "<option value='-1'>”«Ì—</option></select>"	
 		  	thisRow = thisRow & "<input type='text' name='" &thisName & "-addValue' onblur='addOther(this);'>"	  	
 		case "text"
-			thisRow = thisRow &  "<input " & disText & " type='text' style='margin:0;padding:0;' size='" & myKey.text & "' name='" & thisName & "'>"
+			thisRow = thisRow &  "<input " & disText & " type='text' class='myInput' size='" & myKey.text & "' name='" & thisName & "' "
+			if myKey.GetAttribute("readonly")="yes" then thisRow =thisRow & " readonly='readonly' "
+			if myKey.GetAttribute("default")<>"" then thisRow = thisRow & "value='" & myKey.GetAttribute("default") & "'"
+			if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onblur='calc_" & myKey.GetAttribute("group") & "(this);' "
+			thisRow = thisRow & ">"
 		case "textarea"
 			thisRow = thisRow &  "<textarea name='" & thisName & "' style='width:600px;' cols='" & myKey.text & "'></textarea>"
 		case "check"
 			thisRow = thisRow & "<input type='checkbox' value='on-0' name='" & thisName & "' "
 			if myKey.text="checked" then thisRow = thisRow & "checked='checked'"
+			if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onclick='calc_" & myKey.GetAttribute("group") & "(this);' "
+			if IsNumeric(myKey.GetAttribute("price")) then thisRow = thisRow & " price='" & myKey.GetAttribute("price") & "' "
 			thisRow = thisRow & ">"
+		case "radio":
+				thisRow = thisRow & "<input " & disText & " type='radio' value='" & myKey.text & "' name='" & thisName & "'" 
+				if myKey.GetAttribute("default")="yes" then thisRow = thisRow & " checked='checked' "
+				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onchange='calc_" & myKey.GetAttribute("group") & "(this);' "
+				thisRow = thisRow & ">"
 	  end select
 	  if myKey.GetAttribute("force")="yes" then thisRow = thisRow &  "<span style='color:red;margin:0 0 0 2px;padding:0;'>*</span>"
 	  oldGroup=thisGroup
 	  oldLabel=thisLabel
+	  if myKey.GetAttribute("br")="yes" then thisRow = thisRow & "<br>"
 	Next
 	thisRow = thisRow & "</div></div><div id='extreArea" &Replace(key,"/","-")& "'></div>"
 	response.write thisRow 'prependTo 
@@ -1464,21 +1448,32 @@ function fetchKeyValues()
 			hasValue=0
 			For Each myKey In orderProp.SelectNodes("/keys/" & key & "/key")
 				thisName = myKey.GetAttribute("name")
+				thisGroup= myKey.GetAttribute("group")
 				id=0
-				for each value in request.form(thisName)
-					if value <> "" then 
-						thisRow = thisRow & "<key name=""" & thisName & """ id=""" 
-						if myKey.GetAttribute("type") = "check" then
-							thisRow = thisRow & mid(value,4)
-						else
-							thisRow = thisRow & id 
+'					response.write oldName& "<br>"
+				if thisName<>oldName then 
+					for each value in request.form(thisName)
+						if value <> "" then 
+							thisRow = thisRow & "<key name=""" & thisName & """ id=""" 
+							select case myKey.GetAttribute("type") 
+								case "check"
+									thisRow = thisRow & mid(value,4)
+								case else
+									if request.form(thisGroup & "-disBtn")<>"" then 
+										thisRow = thisRow & trim(split(request.form(thisGroup & "-disBtn"),",")(id))
+									else
+										thisRow = thisRow & id 
+									end if
+							end select
+							thisRow = thisRow & """>" & value & "</key>"
+							hasValue=hasValue +1
 						end if
-						thisRow = thisRow & """>" & value & "</key>"
-						hasValue=hasValue +1
-					end if
-					id=id+1
-				next
+						id=id+1
+					next
+				end if
+				oldName = thisName
 			Next
+			
 			if hasValue>0 then 
 				thisRow = thisRow & "</" & key & ">"
 			else
@@ -1488,6 +1483,8 @@ function fetchKeyValues()
 	Next
 	thisRow = thisRow & "</keys>"
 	fetchKeyValues = thisRow 
+	'response.write thisRow
+	'response.end
 end function
 
 	
@@ -1689,12 +1686,16 @@ elseif Request.QueryString("act")="editQuote" then
 		<TD align="right" colspan="3"><INPUT TYPE="text" NAME="OrderTitle" maxlength="255" size="50" tabIndex="9" value="<%=RS2("order_title")%>"></TD>
 	</TR>
 	<TR bgcolor="#CCCCCC">
-		<TD align="left" colspan="3"> Ê÷ÌÕ«  »Ì‘ —:</TD>
+		<td align="left"> Ì—«é:</td>
+		<td>
+			<input type="text" name="qtty" value="<%=rs2("qtty")%>" tabindex="9">
+		</td>
+		<TD align="left"> Ê÷ÌÕ«  »Ì‘ —:</TD>
 		<TD align="right" colspan="3"><TEXTAREA NAME="Notes" tabIndex="10" style="width:100%"><%=RS2("Notes")%></TEXTAREA></TD>
 	</TR>
 	<TR bgcolor="#CCCCCC">
 		<TD align="left">„—Õ·Â:</TD>
-		<TD colspan="5"><SELECT NAME="Marhale" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px' tabIndex="13" >
+		<TD ><SELECT NAME="Marhale" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px' tabIndex="13" >
 		<%
 		set RS_STEP=Conn.Execute ("SELECT * FROM QuoteSteps WHERE (IsActive=1)")
 		Do while not RS_STEP.eof	
@@ -1707,70 +1708,25 @@ elseif Request.QueryString("act")="editQuote" then
 		set RS_STEP = nothing
 		%>
 		</SELECT></TD>
-		
+		<td align="left">”«Ì“:</td>
+		<td>
+			<input type="text" value="<%=rs2("paperSize")%>" name="paperSize" tabIndex="14">
+		</td>
+		<td align="left">ﬁÌ„  ﬂ·:</td>
+		<td >
+			<input type="text" value="<%=rs2("price")%>" name="totalPrice" id='totalPrice' style="background-color:#FED;border-width:0;" readonly="readonly">
+		</td>
 	</TR>
 	<tr bgcolor="#CCCCCC">
 		<td colspan="6">
 	<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
-	<script type="text/javascript">
-		function disGroup (e){
-			groupName=$(e).parent(".mySection").attr("groupname");
-			if (e.checked) {
-				$(e).parent(".mySection").children('[name^="'+groupName+'"]').prop("disabled", false);
-			} else {
-				$(e).parent(".mySection").children('[name^="'+groupName+'"]').prop("disabled", true);
-				$(e).parent(".mySection").children('[name$="disBtn"]').prop("disabled", false);
-			}
-		}
-		
-		$(document).ready(function () {
-			$('[name$=-addValue]').hide();
-		});
-		function cloneRow(key){
-			maxID = $("#" + key.replace(/\//gi,"-") + "-maxID").val();
-			newRow = $("#" + key.replace(/\//gi,"-") + "-"+maxID).clone().attr('id', key.replace(/\//gi,"-") + "-" + (parseInt(maxID)+1));
-			$('input:checkbox',newRow).each(function (){
-				if ($(this).val().substr(0,3)=='on-')
-					$(this).val('on-'+(parseInt(maxID)+1));
-			});
-			
-			newRow.appendTo("#extreArea" + key.replace(/\//gi,"-") );
-			$("#" + key.replace(/\//gi,"-") + "-maxID").val(parseInt(maxID)+1);
-		}
-		function removeRow(key){
-			maxID = parseInt($("#" + key.replace(/\//gi,"-") + "-maxID").val());
-			if (maxID>0) {
-				$("#" + key.replace(/\//gi,"-") + "-"+maxID).remove();
-			}
-			$("#" + key.replace(/\//gi,"-") + "-maxID").val(maxID-1);
-		}
-		function checkOther(e){
-			if ($(e).val()==-1 || $(e).val().substr(0,6)=="other:") {
-				if ($(e).find("option:selected").text()=="”«Ì—") {
-					$(e).next().val("„ﬁœ«— —« Ê«—œ ﬂ‰Ìœ");
-				} else {
-					$(e).next().val(
-						$(e).find("option:selected").text());
-				}
-				$(e).next().show();
-				$(e).next().focus();
-			} else {
-				$(e).next().hide();
-			}
-		}
-		function addOther(e){
-			if ($(e).val()!="" && $(e).val()!="„ﬁœ«— —« Ê«—œ ﬂ‰Ìœ" && $(e).val()!="‰„Ìù‘Â ﬂÂ Œ«·Ì »«‘Â!"){
-				$(e).prev().find("option:selected").text($(e).val());
-				$(e).prev().find("option:selected").val('other:'+$(e).val());
-				$(e).hide();
-			} else {
-				$(e).val("‰„Ìù‘Â ﬂÂ Œ«·Ì »«‘Â!");
-				$(e).focus();
-			}
-		}
-	</script>
+	<script type="text/javascript" src="calcOrder.js"></script>
 	<div>Ã“∆Ì«  «” ⁄·«„</div>
-
+	<div>
+		<br>»—«Ì „Õ«”»Â ŒÊœﬂ«— ﬁÌ„ ùÂ« »«Ìœ —ÊÌ Å«—«„ —Â«Ì Â— ”ÿ— »—ÊÌœ Ê ¬‰—«  €ÌÌ— œÂÌœ Ê Ì« ¬‰ ”·Ê· —«  —ﬂ ‰„«ÌÌœ.
+		<br>Â„ç‰Ì‰ „Ìù Ê«‰Ìœ ﬁÌ„  ŒÊœ —« Ê«—œ ‰„«ÌÌœ «„« œ— ’Ê— Ì ﬂÂ œÊ»«—Â ÌﬂÌ «“ Å«—«„ —Â«Ì „—»ÊÿÂ —Ê  €ÌÌ— »œÌœ œÊ»«—Â ﬁÌ„  „Õ«”»Â ŒÊ«Âœ ‘œ.
+		<br>„Õ«”»Â »—ŒÌ «“ ﬁÌ„ ùÂ« «“ —ÊÌ Å«—«„ —Â«Ì ”«Ì— ŒÿÊÿ ŒÊ«Âœ »Êœ. „À·«  Ì—«é œ— „«‘Ì‰°  Ì—«éÌ ŒÊ«Âœ »Êœ ﬂÂ œ— ”·›Ê‰ Ê ÌÊ ÊÌ Ê Ê—‰Ì „Õ«”»Â „Ìù‘Êœ. Ê œ— ’Ê— Ì ﬂÂ  Ì—«é „«‘Ì‰ —Ê ⁄Ê÷ ﬂ‰Ì„ »«Ìœ ”·Ê·ùÂ«Ì „—»Êÿ »Â «Ì‰ ¬Ì „ùÂ« —Ê  —ﬂ ﬂ‰Ì„  « œÊ»«—Â ﬁÌ„ ù‘Ê‰ „Õ«”»Â »‘Â
+	</div>
 <%
 	set rs=Conn.Execute("select * from OrderTraceTypes where id="&rs2("type"))
 	set typeProp = server.createobject("MSXML2.DomDocument")
@@ -1805,14 +1761,17 @@ sub showKeyEdit(key)
 		  thisName = myKey.GetAttribute("name")
 		  thisLabel= myKey.GetAttribute("label")
 		  thisGroup= myKey.GetAttribute("group")
-		  set thisValue= orderProp.SelectNodes(key & "[@id='" & id & "' and @name='" & thisName & "']")
 		  hasValue=false
-		  if thisValue.length>0 then hasValue=true
+		  	set thisValue= orderProp.SelectNodes(key & "[@id='" & id & "' and @name='" & thisName & "']")
+		  	if thisValue.length>0 then hasValue=true
+' 		  response.write hasValue & "<br>"
 		  if (oldGroup<>thisGroup and oldID=id and oldGroup <> "---first---") then thisRow = thisRow &  "</div>"
 		  if oldGroup<>thisGroup or oldID<>id then 
 			thisRow = thisRow & "<div class='mySection' groupName='" & thisGroup & "'>"
 			if myKey.GetAttribute("disable")="1" then 
-				thisRow = thisRow & "<input type='checkbox' name='" & thisName & "-disBtn' onchange='disGroup(this);'"
+				thisRow = thisRow & "<input type='checkbox' value='" & id & "' name='" & thisGroup & "-disBtn' onclick='disGroup(this);"
+				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " calc_" & myKey.GetAttribute("group") & "(this);"
+				thisRow = thisRow & "'"
 				if hasValue then 
 					thisRow = thisRow & " checked='checked'"
 					disText=""
@@ -1828,21 +1787,32 @@ sub showKeyEdit(key)
 			
 		  select case thisType
 		  	case "option"
-		  		thisRow = thisRow &  "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "'>"
+		  		thisRow = thisRow &  "<select " & disText & " class='myInput' name='" & thisName & "'"
+		  		if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onchange='calc_" & myKey.GetAttribute("group") & "(this);' "
+		  		thisRow = thisRow & ">"
 		  		for each myOption in myKey.getElementsByTagName("option")
 		  			thisRow = thisRow & "<option value='" & myOption.text & "'"
 		  			if hasValue then 
 		  				if thisValue(0).text=myOption.text then thisRow = thisRow & " selected='selected' "
 		  			end if
+		  			if myOption.GetAttribute("price")<>"" then 
+		  				thisRow = thisRow & " price='" & myOption.GetAttribute("price") & "' "
+		  			end if
 		  			thisRow = thisRow & ">" & myOption.GetAttribute("label") & "</option>"
 			  	next
 			  	thisRow = thisRow & "</select>"
 			case "option-other"
-				thisRow = thisRow & "<select " & disText & " style='margin:0;padding:0;' name='" & thisName & "' onchange='checkOther(this);'>"
+				thisRow = thisRow & "<select " & disText & " class='myInput' name='" & thisName & "' onchange='checkOther(this);"
+				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " calc_" & myKey.GetAttribute("group") & "(this);"
+				thisRow = thisRow & "'"
+				thisRow = thisRow & ">"
 		  		for each myOption in myKey.getElementsByTagName("option")
 		  			thisRow = thisRow & "<option value='" & myOption.text & "'"
 		  			if hasValue then 
 		  				if thisValue(0).text=myOption.text then thisRow = thisRow & " selected='selected' "
+		  			end if
+		  			if myOption.GetAttribute("price")<>"" then 
+		  				thisRow = thisRow & " price='" & myOption.GetAttribute("price") & "' "
 		  			end if
 		  			thisRow = thisRow & ">" & myOption.GetAttribute("label") & "</option>"
 			  	next
@@ -1857,8 +1827,14 @@ sub showKeyEdit(key)
 				end if
 			  	thisRow = thisRow & "<input type='text' name='" & thisName & "-addValue' onblur='addOther(this);'>"
 			case "text"
-				thisRow = thisRow & "<input " & disText & " type='text' style='margin:0;padding:0;' size='" & myKey.text & "' name='" & thisName & "' "
-				if hasValue then thisRow = thisRow & "value='" & thisValue(0).text & "'"
+				thisRow = thisRow & "<input " & disText & " type='text' class='myInput' size='" & myKey.text & "' name='" & thisName & "' "
+				if myKey.GetAttribute("readonly")="yes" then thisRow =thisRow & " readonly='readonly' "
+				if hasValue then 
+					thisRow = thisRow & "value='" & thisValue(0).text & "'"
+				else
+					if myKey.GetAttribute("default")<>"" then thisRow = thisRow & "value='" & myKey.GetAttribute("default") & "'"
+				end if
+				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onblur='calc_" & myKey.GetAttribute("group") & "(this);' "
 				thisRow = thisRow & ">"
 			case "textarea"
 				thisRow = thisRow & "<textarea name='" & thisName & "' style='width:600px;' cols='" & myKey.text & "'>"
@@ -1871,12 +1847,28 @@ sub showKeyEdit(key)
 				else
 					if myKey.text="checked" then thisRow = thisRow & "checked='checked'"
 				end if
+				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onclick='calc_" & myKey.GetAttribute("group") & "(this);' "
+				if IsNumeric(myKey.GetAttribute("price")) then 
+		  				thisRow = thisRow & " price='" & myKey.GetAttribute("price") & "' "
+		  			end if
+				thisRow = thisRow & ">"
+			case "radio":
+			'response.write hasValue
+				thisRow = thisRow & "<input " & disText & " type='radio' value='" & myKey.text & "' name='" & thisName & "'" 
+				if hasValue then
+					if myKey.text = thisValue(0).text then thisRow = thisRow & " checked='checked' "
+					
+				else
+					if myKey.GetAttribute("default")="yes" then thisRow = thisRow & " checked='checked' "
+				end if
+				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " onchange='calc_" & myKey.GetAttribute("group") & "(this);' "
 				thisRow = thisRow & ">"
 		  end select
 		  if myKey.GetAttribute("force")="yes" then thisRow = thisRow &  "<span style='color:red;margin:0 0 0 2px;padding:0;'>*</span>"
 		  oldGroup=thisGroup
 		  oldLabel=thisLabel
 		  oldID=id
+		  if myKey.GetAttribute("br")="yes" then thisRow = thisRow & "<br>"
 		Next
 		thisRow = thisRow & "</div></div>"
 	next
@@ -2055,21 +2047,32 @@ function fetchKeyValues()
 			hasValue=0
 			For Each myKey In orderProp.SelectNodes("/keys/" & key & "/key")
 				thisName = myKey.GetAttribute("name")
+				thisGroup= myKey.GetAttribute("group")
 				id=0
-				for each value in request.form(thisName)
-					if value <> "" then 
-						thisRow = thisRow & "<key name=""" & thisName & """ id=""" 
-						if myKey.GetAttribute("type") = "check" then
-							thisRow = thisRow & mid(value,4)
-						else
-							thisRow = thisRow & id 
+'					response.write oldName& "<br>"
+				if thisName<>oldName then 
+					for each value in request.form(thisName)
+						if value <> "" then 
+							thisRow = thisRow & "<key name=""" & thisName & """ id=""" 
+							select case myKey.GetAttribute("type") 
+								case "check"
+									thisRow = thisRow & mid(value,4)
+								case else
+									if request.form(thisGroup & "-disBtn")<>"" then 
+										thisRow = thisRow & trim(split(request.form(thisGroup & "-disBtn"),",")(id))
+									else
+										thisRow = thisRow & id 
+									end if
+							end select
+							thisRow = thisRow & """>" & value & "</key>"
+							hasValue=hasValue +1
 						end if
-						thisRow = thisRow & """>" & value & "</key>"
-						hasValue=hasValue +1
-					end if
-					id=id+1
-				next
+						id=id+1
+					next
+				end if
+				oldName = thisName
 			Next
+			
 			if hasValue>0 then 
 				thisRow = thisRow & "</" & key & ">"
 			else
@@ -2079,6 +2082,8 @@ function fetchKeyValues()
 	Next
 	thisRow = thisRow & "</keys>"
 	fetchKeyValues = thisRow 
+	'response.write thisRow
+	'response.end
 end function
 	
 
@@ -2099,12 +2104,12 @@ end function
 	Marhale =		sqlSafe(request.form("Marhale"))
 	SalesPerson =	sqlSafe(request.form("SalesPerson"))
 '	Qtty =			sqlSafe(request.form("Qtty"))
-'	Size =			sqlSafe(request.form("Size"))
+	Size =			sqlSafe(request.form("Size"))
 '	SimplexDuplex =	sqlSafe(request.form("SimplexDuplex"))
-'	Price =			sqlSafe(request.form("Price"))
+	Price =			sqlSafe(request.form("totalPrice"))
 	Notes =			sqlSafe(request.form("Notes"))
 
-	mySql="UPDATE Quotes SET Customer='"& request.form("CustomerID") & "', order_date= N'"& OrderDate & "', order_time= N'"& OrderTime & "', return_date= N'"& ReturnDate & "', return_time= N'"& ReturnTime & "', company_name= N'"& CompanyName & "', customer_name= N'"& CustomerName & "', telephone= N'"& Telephone & "', order_title= N'"& OrderTitle & "', order_kind= N'"& orderTypeName & "', Type= '"& orderType & "', step= "& Marhale & ",  marhale= N'"& stepName & "', salesperson= N'"& SalesPerson & "' , LastUpdatedDate=N'"& shamsitoday() & "' , LastUpdatedTime=N'"& currentTime10() & "', LastUpdatedBy=N'"& session("ID")& "', Notes= N'"& Notes & "', property=N'" & myXML & "'  WHERE (ID = N'"& quote & "')"	
+	mySql="UPDATE Quotes SET Customer='"& request.form("CustomerID") & "', order_date= N'"& OrderDate & "', order_time= N'"& OrderTime & "', return_date= N'"& ReturnDate & "', return_time= N'"& ReturnTime & "', company_name= N'"& CompanyName & "', customer_name= N'"& CustomerName & "', telephone= N'"& Telephone & "', order_title= N'"& OrderTitle & "', order_kind= N'"& orderTypeName & "', Type= '"& orderType & "', step= "& Marhale & ",  marhale= N'"& stepName & "', salesperson= N'"& SalesPerson & "' , LastUpdatedDate=N'"& shamsitoday() & "' , LastUpdatedTime=N'"& currentTime10() & "', LastUpdatedBy=N'"& session("ID")& "', Notes= N'"& Notes & "', property=N'" & myXML & "', paperSize= N'"& Size & "', Price= N'"& Price & "'  WHERE (ID = N'"& quote & "')"	
 	', qtty= N'"& Qtty & "', paperSize= N'"& Size & "', SimplexDuplex= N'"& SimplexDuplex & "', Price= N'"& Price & "'
 	conn.Execute mySql
 	response.write quote &" UPDATED<br>"

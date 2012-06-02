@@ -1,0 +1,23 @@
+body {font-family: "Al Bayan","Zar","B Zar","2 Zar","H_Zar",Tahoma; font-size:small;}
+.CustTable {font-family:tahoma; width:80%; border:1 solid black; direction: RTL; background-color:black;}
+.CustTable td {padding:5;}
+.CustTable a {text-decoration:none;color:#000088}
+.CustTable a:hover {text-decoration:underline;}
+.CusTableHeader {background-color: #33AACC; text-align: center; font-weight:bold;}
+.CusTD1 {background-color: #CCCC66; text-align: left; font-weight:bold;}
+.CusTD2 {background-color: #DDDDDD; direction: LTR; text-align: right; }
+.CusTD3 {background-color: #DDDDDD; direction: LTR; text-align: center; }
+.CusTD4 {background-color: #CCCC66; direction: LTR; text-align: center; }
+a.aYellow:link {color: yellow;}
+a.aYellow:visited {color: green;}
+a.aYellow:hover {color: gray;}
+.mySection{border: 1px #F90 dashed;margin: 15px 10px 0 15px;padding: 5px 0 5px 0;}
+.myRow{border: 2px #F05 dashed;margin: 10px 0 10px 0;padding: 0 3px 5px 0;}
+.exteraArea{border: 1px #33F dotted;margin: 5px 0 0 5px;padding: 0 3px 5px 0;}
+.myLabel {margin: 0 3px 0 0;white-space: nowrap;padding: 5px 0 5px 0;}
+.myProp {font-weight: bold;color: #40F; margin: 0 3px 0 3px;padding: 5px 0 5px 0;}
+div.btn label{background-color:yellow;color: blue;padding: 3px 30px 3px 30px;cursor: pointer;}
+div.btn{margin: -5px 250px 0px 5px;}
+div.btn img{margin: 0px 20px -5px 0;cursor: pointer;}
+div.report{border: 1px #F33 dashed;margin: 15px 10px 0 15px;padding: 5px 0 5px 0;height: 50px;}
+div.price{visibility: collapse; height: 0px;}
