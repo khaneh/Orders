@@ -232,13 +232,15 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 		<TD align=right VALIGN=TOP>
 		<%
 		if venID="-1" then 
-			response.write "<hr><br><br>"
+			response.write "<hr><br><br>" 
 		else
 			totalprice=0
 			'Changed By kid 82/12/26 - Show Related Invoice Items If Exist AND Show the Invoice ID anyway.
 			'S A M
-			mySQL="SELECT DRV.*, InvoiceLines.Price - InvoiceLines.Discount - InvoiceLines.Reverse + InvoiceLines.Vat AS SalePrice FROM (SELECT PurchaseOrders.*, InvoiceOrderRelations.Invoice AS Invoice, InvoiceItems.ID AS InvoiceItem FROM InvoiceItems RIGHT OUTER JOIN InvoiceOrderRelations INNER JOIN PurchaseRequests INNER JOIN PurchaseRequestOrderRelations ON PurchaseRequests.ID = PurchaseRequestOrderRelations.Req_ID ON  InvoiceOrderRelations.[Order] = PurchaseRequests.Order_ID RIGHT OUTER JOIN PurchaseOrders ON PurchaseRequestOrderRelations.Ord_ID = PurchaseOrders.ID ON  InvoiceItems.RelatedInventoryItemID = PurchaseOrders.TypeID WHERE (PurchaseOrders.Status <> 'CANCEL') AND (PurchaseOrders.HasVoucher = 0) AND (PurchaseOrders.Vendor_ID = "& VenID& "))  DRV LEFT OUTER JOIN InvoiceLines ON DRV.Invoice = InvoiceLines.Invoice AND DRV.InvoiceItem = InvoiceLines.Item left outer JOIN INVOICES on InvoiceLines.Invoice = Invoices.id where invoices.voided is null or invoices.voided<>1 ORDER BY DRV.OrdDate,DRV.ID"
-
+			'mySQL="SELECT DRV.*, InvoiceLines.Price - InvoiceLines.Discount - InvoiceLines.Reverse + InvoiceLines.Vat AS SalePrice FROM (SELECT PurchaseOrders.*, InvoiceOrderRelations.Invoice AS Invoice, InvoiceItems.ID AS InvoiceItem FROM InvoiceItems RIGHT OUTER JOIN InvoiceOrderRelations INNER JOIN PurchaseRequests INNER JOIN PurchaseRequestOrderRelations ON PurchaseRequests.ID = PurchaseRequestOrderRelations.Req_ID ON  InvoiceOrderRelations.[Order] = PurchaseRequests.Order_ID RIGHT OUTER JOIN PurchaseOrders ON PurchaseRequestOrderRelations.Ord_ID = PurchaseOrders.ID ON  InvoiceItems.RelatedInventoryItemID = PurchaseOrders.TypeID WHERE (PurchaseOrders.Status <> 'CANCEL') AND (PurchaseOrders.HasVoucher = 0) AND (PurchaseOrders.Vendor_ID = "& VenID& "))  DRV LEFT OUTER JOIN InvoiceLines ON DRV.Invoice = InvoiceLines.Invoice AND DRV.InvoiceItem = InvoiceLines.Item left outer JOIN INVOICES on InvoiceLines.Invoice = Invoices.id where invoices.voided is null or invoices.voided<>1 ORDER BY DRV.OrdDate,DRV.ID"
+			' changed by S A M 91/3/16
+			mySQL="SELECT PurchaseOrders.*, InvoiceOrderRelations.Invoice AS Invoice,invoices.Voided,InventoryItems.Unit,drv.SalePrice,InventoryLog.Qtty as invQtty FROM InvoiceOrderRelations INNER JOIN PurchaseRequests INNER JOIN PurchaseRequestOrderRelations ON PurchaseRequests.ID = PurchaseRequestOrderRelations.Req_ID ON  InvoiceOrderRelations.[Order] = PurchaseRequests.Order_ID RIGHT OUTER JOIN PurchaseOrders ON PurchaseRequestOrderRelations.Ord_ID = PurchaseOrders.ID left outer join Invoices on InvoiceOrderRelations.Invoice=invoices.ID left outer join InventoryItems on PurchaseOrders.TypeID=InventoryItems.ID and PurchaseOrders.IsService=0 left outer join InventoryLog on InventoryLog.RelatedID = PurchaseOrders.ID and InventoryLog.IsInput=1 and InventoryItems.ID = InventoryLog.ItemID and InventoryLog.Voided=0 left outer join (select invoice,inventoryItem,sum(InvoiceLines.Price - InvoiceLines.Discount - InvoiceLines.Reverse + InvoiceLines.Vat) as SalePrice from InvoiceLines inner join InventoryInvoiceRelations on InvoiceLines.Item=InventoryInvoiceRelations.invoiceItem group by invoice,inventoryItem) drv on invoices.ID =drv.invoice and InventoryItems.ID=drv.inventoryItem WHERE (PurchaseOrders.Status <> 'CANCEL') AND (PurchaseOrders.HasVoucher = 0) AND (PurchaseOrders.Vendor_ID = " & VenID & ") ORDER BY PurchaseOrders.OrdDate,PurchaseOrders.ID"
+			
 '			response.write "<br>" & mySQL
 '			response.end
 			set RSS=Conn.Execute (mySQL)
@@ -252,9 +254,10 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 				<TD> ⁄œ«œ</TD>
 				<TD> «—ÌŒ ”›«—‘</TD>
 				<TD>ﬁÌ„  ›—Ê‘</TD>
+				<td> ⁄œ«œ Ê«—œ ‘œÂ »Â «‰»«—</td>
 			</TR>
 			<TR bgcolor="#5555BB" height="2">
-				<TD colspan=7></TD>
+				<TD colspan=8></TD>
 			</TR>
 			<%
 			tmpCounter=0
@@ -262,12 +265,14 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 			Do while not RSS.eof
 				tmpCounter = tmpCounter + 1
 
-				purchaseOrder =		RSS("id")
-				totalprice =		totalprice + cdbl(RSS("price"))
-				Invoice =			RSS("Invoice")
-				SalePrice =			RSS("SalePrice")
-
-
+				purchaseOrder =	RSS("id")
+				totalprice =	totalprice + cdbl(RSS("price"))
+				Invoice =		RSS("Invoice")
+				SalePrice =		RSS("SalePrice")
+				voided = 		RSS("voided")
+				unit =			RSS("unit")	
+				invQtty = 		RSS("invQtty")
+				if not IsNull(unit) then unit = "<small>(" & unit & ")</small>" 
 
 				if tmpCounter mod 2 = 1 then
 					tmpColor="#FFFFFF"
@@ -293,7 +298,7 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 						<INPUT TYPE="text" NAME="price"  style="border:none; background: transparent; direction:LTR;text-align:right;"  onblur="setPrice(this)" onKeyPress="return maskNumber(this);" size=8 value="<%=Separate(RSS("price"))%>">
 					</TD>
 					<TD>
-						<INPUT TYPE="text" NAME="qtty"   style="border:none; background: transparent; direction:LTR;text-align:right;"  onKeyPress="return maskNumber(this);" size=3 value="<%=RSS("qtty")%>">
+						<INPUT TYPE="text" NAME="qtty" style="border:none; background: transparent; direction:LTR;text-align:right;"  onKeyPress="return maskNumber(this);" size=3 value="<%=RSS("qtty")%>"><span><%=unit%></span>
 					</TD>
 					<TD align=left><span dir=ltr><%=RSS("OrdDate")%></span></TD>
 					<TD dir=LTR align=right>
@@ -301,21 +306,29 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 					lastPurchaseOrder = purchaseOrder
 					
 					Do
-						if trim("" & Invoice)="" then
+						if IsNull(voided) then
 							response.write "<span disabled>›«ﬂ Ê— ‰‘œÂ</span>" 
 						else
-%>							<A HREF="../AR/AccountReport.asp?act=showInvoice&invoice=<%=Invoice%>" title="›«ﬂ Ê— ‘„«—Â <%=Invoice%>" target="_blank"><%=Separate(SalePrice)%>
-<%							if trim("" & SalePrice)="" then
-								response.write "›«ﬂ Ê— œ«—œ" 
+%>							<A HREF="../AR/AccountReport.asp?act=showInvoice&invoice=<%=Invoice%>" title="›«ﬂ Ê— ‘„«—Â <%=Invoice%>" target="_blank">
+<%							if voided="False" then
+								if not IsNull(SalePrice) then
+									response.write "ﬁÌ„  ›—ÊŒ Â ‘œÂ œ— ›«ﬂ Ê— " & Separate(SalePrice)
+								else
+									response.write "¬Ì „ „—»ÊÿÂ œ— ›«ﬂ Ê— ÅÌœ« ‰‘œ!"
+								end if
+							else
+								response.write "<small style='color:red;' >(»«ÿ· ‘œÂ!)</small>"
 							end if
+
 %>							</A>
 <%						end if
 						
 						RSS.moveNext
 						if NOT RSS.eof then
-							purchaseOrder =		RSS("id")
-							Invoice =			RSS("Invoice")
-							SalePrice =			RSS("SalePrice")
+							purchaseOrder =	RSS("id")
+							Invoice =		RSS("Invoice")
+							SalePrice =		RSS("SalePrice")
+							voided = 		RSS("voided")
 						else
 							purchaseOrder =		-1
 						end if
@@ -323,20 +336,21 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 					Loop While lastPurchaseOrder = purchaseOrder AND NOT RSS.eof 
 %>
 					</TD>
+					<td><%=Separate(invQtty)%></td>
 				</TR>
 <%				
 			Loop
 %>
 			<TR bgcolor="#5555BB" height="2">
-				<TD colspan=7></TD>
+				<TD colspan=8></TD>
 			</TR>
 			<TR bgcolor="#eeeeee" height="2">
 				<TD colspan='3' align='left'>„«·Ì«  »— «—“‘ «›“ÊœÂ: </TD>
-				<TD colspan=4><INPUT TYPE="text" NAME="totalVat"  size=16 value="0" onchange='setPrice(this)'> —Ì«·</td>
+				<TD colspan=5><INPUT TYPE="text" NAME="totalVat"  size=16 value="0" onchange='setPrice(this)'> —Ì«·</td>
 			</TR>
 			<TR bgcolor="#eeeeee" height="2">
 				<TD colspan=3 align=left>Ã„⁄ ﬂ·:</TD>
-				<TD colspan=4><INPUT  style="border:none; background:transparent; direction:LTR;text-align:right;" TYPE="text" NAME="totalPrice" readonly size=16 value="<%=totalprice%>">  —Ì«·</td>
+				<TD colspan=5><INPUT  style="border:none; background:transparent; direction:LTR;text-align:right;" TYPE="text" NAME="totalPrice" readonly size=16 value="<%=totalprice%>">  —Ì«·</td>
 			</TR>
 			</TABLE><br>
 			<%
