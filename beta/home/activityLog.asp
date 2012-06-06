@@ -19,8 +19,8 @@ div.empty{clear: both;}
 span.toName{color:red;}
 span.typeName{color: blue;font-weight: bold;}
 div.user{text-align: center;font-weight: bold;padding: 3px 0 3px 0;background-color: black;color: yellow;margin: 8px 0 2px 0;display: none;}
-div.quote{display: none;clear: both;font-weight: 100;color: black;}
-div.order{display: none;clear: both;font-weight: 100;color: black;}
+div.quote{display: none;clear: both;font-weight: 100;color: black;cursor: pointer;}
+div.order{display: none;clear: both;font-weight: 100;color: black;cursor: pointer;}
 </style>
 <form method="post">
 	<input type="hidden" name="msgID" id='msgID' value="0">
@@ -103,9 +103,9 @@ function echoQuote(e){
 		if ($("div#user-" + msg.createdBy).is(":hidden"))
 			$("div#user-" + msg.createdBy).show();
 		$("div#quote-" + msg.createdBy).children("div:first").before(
-			"<div class='quote'><div class='date'>«” ⁄·«„ " +msg.kind + " œ— ”«⁄  " + msg.time + " ÃÂ  " + msg.customer +
-			"(" + msg.company + ") </div><div class='body' title='" + msg.note + "'>" +msg.title+" »Â  ⁄œ«œ " +
-			msg.qtty+ " œ— ”«Ì“ " + msg.size + " Ê ﬁÌ„  " + msg.price + "</div></div>"
+			"<div class='quote' onClick='openQuote(" + msg.id + ");'><div class='date'>«” ⁄·«„ " +msg.kind + " œ— ”«⁄  " + 
+			msg.time + " ÃÂ  " + msg.customer + "(" + msg.company + ") </div><div class='body' title='" + 
+			msg.note + "'>" +msg.title+" »Â  ⁄œ«œ " + msg.qtty+ " œ— ”«Ì“ " + msg.size + " Ê ﬁÌ„  " + msg.price + "</div></div>"
 		);
 		$("div.quote:hidden").slideDown("slow");
 		if ($("input#quoteID").val()<msg.id)
@@ -117,7 +117,7 @@ function echoOrder(e){
 		if ($("div#user-" + msg.createdBy).is(":hidden"))
 			$("div#user-" + msg.createdBy).show();
 		$("div#order-" + msg.createdBy).children("div:first").before(
-			"<div class='order'><div class='date'>”›«—‘ " +msg.kind + " œ— ”«⁄  " + msg.time + " ÃÂ  " + msg.customer +
+			"<div class='order' onClick='openOrder(" + msg.id + ");'><div class='date'>”›«—‘ " +msg.kind + " œ— ”«⁄  " + msg.time + " ÃÂ  " + msg.customer +
 			"(" + msg.company + ") </div><div class='body'>" +msg.title+" »Â  ⁄œ«œ " +msg.qtty+ " œ— ”«Ì“ " + msg.size + " Ê ﬁÌ„  " +
 			msg.price + "</div></div>"
 		);
@@ -161,6 +161,13 @@ function acceptDate(obj){
 	}
 	
 }
+function openOrder(id){
+	window.open('/beta/order/TraceOrder.asp?act=show&order=' + id, '_blank');
+}
+function openQuote(id){
+	window.open('/beta/order/Inquiry.asp?act=show&quote=' + id, '_blank');
+}
+
 </script>
 <%
 set rs=Conn.Execute("select * from users where display=1 order by realName")
