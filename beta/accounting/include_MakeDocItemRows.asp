@@ -478,7 +478,17 @@ End Sub
 				'--------------
 				if ItemType = 6 then 
 					LineDescription = "ÈåÇí İÇßÊæÑ ÎÑíÏ "& number
+					set rs = Conn.Execute("select count(id) as cnt from VoucherLines where Voucher_ID=" & rs1("link"))
+					ItemLines = 1 + CInt(rs("cnt"))
+					if Vat > 0 then ItemLines = ItemLines + 1
+				else
+					if Vat > 0 then
+						ItemLines = 3
+					else
+						ItemLines = 2
+					end if
 				end if
+				
 
 				Call WriteFirstRow()
 				'--------------
@@ -494,9 +504,23 @@ End Sub
 				end if
 				' -----------
 				if ItemType = 6 then 
-					LineDescription = "ÎÑíÏ ÇÒ "& RS1("AccountTitle") & " Øí İÇßÊæÑ ÔãÇÑå "& number
+					'LineDescription = "ÎÑíÏ ÇÒ "& RS1("AccountTitle") & " Øí İÇßÊæÑ ÔãÇÑå "& number
+					set rs=Conn.Execute("select VoucherLines.*,InventoryItems.Unit from VoucherLines left outer join PurchaseOrders on VoucherLines.RelatedPurchaseOrderID=PurchaseOrders.id left outer join InventoryItems on PurchaseOrders.TypeID=InventoryItems.ID and PurchaseOrders.IsService=0 where Voucher_ID=" & rs1("link"))
+					while not rs.eof
+						LineDescription = "ÎÑíÏ " & rs("qtty") & " "  
+						if not IsNull(rs("unit")) then LineDescription = LineDescription & rs("unit") & " "
+						LineDescription = LineDescription & RS("lineTitle") & " Øí İÇßÊæÑ ÔãÇÑå "& number
+						Credit=rs("price")
+						Debit=""
+						Call WriteRow()
+						rs.moveNext	
+					wend
+					rs.close
+					set rs=nothing
+				else
+					Call WriteRow()
 				end if
-				Call WriteRow()
+				
 				'------------ SAM
 				'Account = tmpAccount
 				if Vat > 0 then 
