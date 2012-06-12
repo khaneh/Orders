@@ -512,6 +512,7 @@ End Sub
 						LineDescription = LineDescription & RS("lineTitle") & " ÿÌ ›«ﬂ Ê— ‘„«—Â "& number
 						Credit=rs("price")
 						Debit=""
+						Amount=rs("price")
 						Call WriteRow()
 						rs.moveNext	
 					wend
