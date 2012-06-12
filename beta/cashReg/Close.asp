@@ -371,7 +371,7 @@ elseif request("act")="submitClose" then
 		GLAccountB=			"11005"		'This must be changed… (Cashier B)
 
 		mySQL="INSERT INTO AOItems (GLAccount, GL, FirstGLAccount, Account, EffectiveDate, IsCredit, Reason, Type, Link, AmountOriginal, CreatedDate, CreatedBy, RemainedAmount) VALUES ('" &_
-		GLAccountA & "', '"& OpenGL & "', '"& firstGLAccount & "', '"& cashAcceptorAccount & "', '"& closeDate & "', 0, 5, 3, '"& MemoID & "', '"& totalRemainedCashA & "', N'"& closeDate & "', '"& session("ID") & "', '"& totalRemainedCashA & "')"	
+		GLAccountA & "', '"& OpenGL & "', '"& firstGLAccount & "', '"& cashAcceptorAccount & "', '"& closeDate & "', 0, 5, 3, '"& cashMemoA & "', '"& totalRemainedCashA & "', N'"& closeDate & "', '"& session("ID") & "', '"& totalRemainedCashA & "')"	
 		conn.Execute(mySQL)
 		'***------------------------- Creating AOItem for Memo  ----------------
 
@@ -401,7 +401,7 @@ elseif request("act")="submitClose" then
 		GLAccountB=			"11005"		'This must be changed… (Cashier B)
 
 		mySQL="INSERT INTO AOItems (GLAccount, GL, FirstGLAccount, Account, EffectiveDate, IsCredit, Reason, Type, Link, AmountOriginal, CreatedDate, CreatedBy, RemainedAmount) VALUES ('" &_
-		GLAccountB & "', '"& OpenGL & "', '"& firstGLAccount & "', '"& cashAcceptorAccount & "', '"& closeDate & "', 0, 5, 3, '"& MemoID & "', '"& totalRemainedCashB & "', N'"& closeDate & "', '"& session("ID") & "', '"& totalRemainedCashB & "')"	
+		GLAccountB & "', '"& OpenGL & "', '"& firstGLAccount & "', '"& cashAcceptorAccount & "', '"& closeDate & "', 0, 5, 3, '"& cashMemoB & "', '"& totalRemainedCashB & "', N'"& closeDate & "', '"& session("ID") & "', '"& totalRemainedCashB & "')"	
 		conn.Execute(mySQL)
 		'***------------------------- Creating AOItem for Memo  ----------------
 
