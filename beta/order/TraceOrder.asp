@@ -301,7 +301,25 @@ elseif request("act")="show" then
 		</td>
 	</tr>
 	</TABLE>
-
+<%
+mySQL="select count(id) as id from OrderTraceLog where [Order]=" & order & " and actualReturn_date is not null group by actualReturn_date"
+set rs = Conn.Execute(mySQL)
+if not rs.eof then 
+	if CInt(rs("id"))>1 then 
+		mySQL="select * from OrderTraceLog where id in (select min(id) as id from OrderTraceLog where [Order]=" & order & " and actualReturn_date is not null group by actualReturn_date)"
+		set rs = Conn.Execute(mySQL)
+		response.write "<TABLE cellspacing=0 Style='width:80%;border:2 solid #330066' align=center>"
+		response.write "<tr bgcolor=white><td> «—ÌŒ</td><td>”«⁄ </td><td> «—ÌŒ ⁄„·Ì</td></tr>"
+		while not rs.eof
+			response.write "<tr><td>" & rs("InsertedDate") & "</td><td>" & rs("InsertedTime") & "</td><td>" & rs("actualReturn_date") & "</td></tr>"
+			rs.moveNext
+		wend
+		response.write "</table>"
+		rs.close
+		set rs=nothing
+	end if
+end if
+%>
 	<BR>
 	<BR>
 <div id='orderProperty' style="direction:rtl;">	
@@ -309,11 +327,13 @@ elseif request("act")="show" then
 	<TABLE class="" border="0" cellspacing="0" cellpadding="2" align="center" style="background-color:#CCCCCC; color:black; direction:RTL; width:700; border: 2 solid black;">
 	<TR bgcolor="black">
 		<TD align="left"><FONT COLOR="YELLOW">Õ”«»:</FONT></TD>
-		<TD align="right" colspan=5 height="25px">
+		<TD align="right" colspan=3 height="25px">
 			<span id="customer" style="color:yellow;"><%' after any changes in this span "./Customers.asp" must be revised%>
 				<span title="»—«Ì ‰„«Ì‘ „‘Œ’«  „‘ —Ì ﬂ·Ìﬂ ﬂ‰Ìœ"><a class="aYellow" href='../CRM/AccountInfo.asp?act=show&selectedCustomer=<%=RS1("AccID")%>'><%=RS1("AccID") & " - "& RS1("AccountTitle")%></a></span>.
 			</span>
 		</TD>
+		<td align="left"><font color="yellow">‰Ê⁄ ”›«—‘:</font></td>
+		<TD><font color="red"><b><%=RS1("order_kind")%></b></font></TD>
 	</TR>
 	
 	<TR bgcolor="black" height=30 style="color:yellow;">
@@ -327,7 +347,7 @@ elseif request("act")="show" then
 	<TR height=30>
 		<TD align="left">‰«„ ‘—ﬂ :</TD>
 		<TD><%=RS1("company_name")%></TD>
-		<TD align="left">„Ê⁄œ  ÕÊÌ·:</TD>
+		<TD align="left"> «—ÌŒ  ÕÊÌ· ﬁ—«—œ«œ:</TD>
 		<TD align="right" dir=LTR><%=RS1("return_date")%></TD>
 		<TD align="left">”«⁄   ÕÊÌ·:</TD>
 		<TD align="right" dir=LTR><%=RS1("return_time")%></TD>
@@ -335,16 +355,18 @@ elseif request("act")="show" then
 	<TR height=30>
 		<TD align="left">‰«„ „‘ —Ì:</TD>
 		<TD><%=RS1("customer_name")%></TD>
-		<TD align="left">‰Ê⁄ ”›«—‘:</TD>
-		<TD><%=RS1("order_kind")%></TD>
-		<TD align="left">”›«—‘ êÌ—‰œÂ:</TD>
-		<TD><%=RS1("salesperson")%>	</TD>
-	</TR>
-	<TR height=30>
 		<TD align="left"> ·›‰:</TD>
 		<TD><%=RS1("telephone")%></TD>
+		<TD align="left"> «—ÌŒ  ÕÊÌ· ⁄„·Ì:</TD>
+		<TD align="right" dir=LTR><%=RS1("actualReturn_date")%></TD>
+		
+	</TR>
+	<TR height=30>
+		
 		<TD align="left">⁄‰Ê«‰ ﬂ«— œ«Œ· ›«Ì·:</TD>
-		<TD colspan="4"><%=RS1("order_title")%></TD>
+		<TD colspan="3"><%=RS1("order_title")%></TD>
+		<TD align="left">”›«—‘ êÌ—‰œÂ:</TD>
+		<TD><%=RS1("salesperson")%>	</TD>
 	</TR>
 	<TR height=30>
 		<TD align="left"> ⁄œ«œ:</TD>
@@ -701,10 +723,10 @@ elseif request("act")="advancedSearch" then
 	if instr(tmpTime,":")<3 then tmpTime="0" & tmpTime
 	if len(tmpTime)<5 then tmpTime=Left(tmpTime,3) & "0" & Right(tmpTime,1)
 
-	if request.form("resultsCount")="" OR not isnumeric(request.form("resultsCount")) then
+	if request("resultsCount")="" OR not isnumeric(request("resultsCount")) then
 		resultsCount = 50
 	else
-		resultsCount = cint(request.form("resultsCount"))
+		resultsCount = cint(request("resultsCount"))
 	end if
 
 %>
@@ -740,9 +762,9 @@ elseif request("act")="advancedSearch" then
 		<TR>
 			<TD><INPUT TYPE="checkbox" NAME="check_tarikh_sefaresh" onclick="check_tarikh_sefaresh_Click()" checked></TD>
 			<TD> «—ÌŒ ”›«—‘</TD>
-			<TD><INPUT TYPE="text" NAME="az_tarikh_sefaresh" dir="LTR" value="<%=request.form("az_tarikh_sefaresh")%>" size="10" onKeyPress="return maskDate(this);" onBlur="if(acceptDate(this))document.all.ta_tarikh_sefaresh.value=this.value;" maxlength="10"></TD>
+			<TD><INPUT TYPE="text" NAME="az_tarikh_sefaresh" dir="LTR" value="<%=request("az_tarikh_sefaresh")%>" size="10" onKeyPress="return maskDate(this);" onBlur="if(acceptDate(this))document.all.ta_tarikh_sefaresh.value=this.value;" maxlength="10"></TD>
 			<TD> «</TD>
-			<TD><INPUT TYPE="text" NAME="ta_tarikh_sefaresh" dir="LTR" value="<%=request.form("ta_tarikh_sefaresh")%>" size="10" onKeyPress="return maskDate(this);" onblur="acceptDate(this)" maxlength="10"></TD>
+			<TD><INPUT TYPE="text" NAME="ta_tarikh_sefaresh" dir="LTR" value="<%=request("ta_tarikh_sefaresh")%>" size="10" onKeyPress="return maskDate(this);" onblur="acceptDate(this)" maxlength="10"></TD>
 			<TD><INPUT TYPE="checkbox" NAME="check_marhale" onclick="check_marhale_Click()" checked></TD>
 			<TD>„—Õ·Â</TD>
 			<TD><SELECT NAME="marhale_box" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px'>
@@ -794,7 +816,12 @@ elseif request("act")="advancedSearch" then
 			<td colspan="11" style="height:2px"></td>
 		</TR>
 		<TR>
-			<TD colspan="5">&nbsp;</TD>
+			<TD colspan="5">
+				<input type="checkbox" name="returnIsNull" onclick="check_returnisnull_Click()" checked>
+				<span id="check_returnisnull_label" style='color:black;'> «—ÌŒ  ÕÊÌ· ﬁ—«—œ«œ ‰œ«—œ</span>
+				<input type="checkbox" name="actualIsNull" onclick="check_actualisnull_Click()" checked>
+				<span id="check_actualisnull_label" style='color:black;'> «—ÌŒ  ÕÊÌ· ⁄„·Ì ‰œ«—œ</span>
+			</td>
 			<TD><INPUT TYPE="checkbox" NAME="check_salesperson" onclick="check_salesperson_Click()" checked></TD>
 			<TD>”›«—‘ êÌ—‰œÂ</TD>
 			<TD colspan="3">
@@ -1007,6 +1034,22 @@ elseif request("act")="advancedSearch" then
 			document.all.check_closed_label.style.color='#BBBBBB'
 		}
 	}
+	function check_returnisnull_Click(){
+		if (document.all.returnIsNull.checked) {
+			document.all.check_returnisnull_label.style.color='black'
+		}
+		else{
+			document.all.check_returnisnull_label.style.color='#BBBBBB'
+		}
+	}
+	function check_actualisnull_Click(){
+		if (document.all.actualIsNull.checked) {
+			document.all.check_actualisnull_label.style.color='black'
+		}
+		else{
+			document.all.check_actualisnull_label.style.color='#BBBBBB'
+		}
+	}
 
 
 	function Form_Load(){
@@ -1034,16 +1077,16 @@ elseif request("act")="advancedSearch" then
 
 	End If
 
-	If request.form("check_tarikh_sefaresh") = "on" Then
-		if request.form("az_tarikh_sefaresh") <> "" then
-			myCriteria = myCriteria & maybeAND & "order_date >= '" & request.form("az_tarikh_sefaresh") & "'"
+	If request("check_tarikh_sefaresh") = "on" Then
+		if request("az_tarikh_sefaresh") <> "" then
+			myCriteria = myCriteria & maybeAND & "order_date >= '" & request("az_tarikh_sefaresh") & "'"
 			maybeAND=" AND "
 		End If
-		if request.form("ta_tarikh_sefaresh") <> "" then
-			myCriteria = myCriteria & maybeAND & "order_date <= '" & request.form("ta_tarikh_sefaresh") & "'"
+		if request("ta_tarikh_sefaresh") <> "" then
+			myCriteria = myCriteria & maybeAND & "order_date <= '" & request("ta_tarikh_sefaresh") & "'"
 			maybeAND=" AND "
 		End If 
-		If (request.form("az_tarikh_sefaresh") = "") AND (request.form("ta_tarikh_sefaresh") = "") then
+		If (request("az_tarikh_sefaresh") = "") AND (request("ta_tarikh_sefaresh") = "") then
 			response.write "document.all.check_tarikh_sefaresh.checked = false;" & vbCrLf
 			response.write "document.all.az_tarikh_sefaresh.style.visibility = 'hidden';" & vbCrLf
 			response.write "document.all.ta_tarikh_sefaresh.style.visibility = 'hidden';" & vbCrLf
@@ -1154,8 +1197,22 @@ elseif request("act")="advancedSearch" then
 		response.write "document.all.check_telephone.checked = false;" & vbCrLf
 		response.write "document.all.telephone_box.style.visibility = 'hidden';" & vbCrLf
 	End If
-
-	If request.form("check_closed") = "on" then
+	
+	If (request("returnIsNull") = "on") then
+		myCriteria = myCriteria & maybeAND & "return_date is null"
+		maybeAND=" AND "
+	Else
+		response.write "document.all.returnIsNull.checked = false;" & vbCrLf
+	End If
+	
+	If (request("actualIsNull") = "on") then
+		myCriteria = myCriteria & maybeAND & "actualReturn_date is null"
+		maybeAND=" AND "
+	Else
+		response.write "document.all.actualIsNull.checked = false;" & vbCrLf
+	End If
+	
+	If request("check_closed") = "on" then
 		myCriteria = myCriteria & maybeAND & "Orders.Closed=0"
 	Else
 		If request("Submit")=" «ÌÌœ" then
@@ -1178,6 +1235,7 @@ elseif request("act")="advancedSearch" then
 	if request("Submit")=" «ÌÌœ" then
 		IF maybeAND <> " AND " THEN
 			response.write "Nothing !!!!!!!!!!"
+			response.write "<br>" & myCriteria
 		ELSE
 			mySQL="SELECT orders_trace.*, Orders.closed, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon,DRV_Invoice.price FROM Orders INNER JOIN  orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN  OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID left outer join (select InvoiceOrderRelations.[Order],SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceOrderRelations.[Order]) DRV_Invoice on Orders.ID=DRV_Invoice.[Order] WHERE ("& myCriteria & ") ORDER BY order_date DESC, radif_sefareshat DESC"	
 			set RS1=Conn.Execute (mySQL)

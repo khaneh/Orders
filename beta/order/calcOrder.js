@@ -251,7 +251,7 @@ function calc_addedPaper(e){
 		thisRow.children("div[groupname=fold]").children("[name=fold-disBtn]").is(':checked') +
 		thisRow.children("div[groupname=snap]").children("[name=snap-disBtn]").is(':checked');
 	step += $("input[name=binding-disBtn]:checked").size();
-	console.log("s: " + step+" q: "+qtty+" f: "+form);
+	//console.log("s: " + step+" q: "+qtty+" f: "+form);
 	var step5 = false;
 	var step10= false;
 	var result= 0;

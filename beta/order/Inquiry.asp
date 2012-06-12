@@ -1255,7 +1255,7 @@ elseif Request.QueryString("act")="getQuote" then
 				<TD>
 					<TABLE border="0">
 						<TR>
-							<TD dir="LTR"><INPUT TYPE="text" NAME="ReturnDate" onblur="acceptDate(this)" maxlength="10" size="10" tabIndex="5"></TD>
+							<TD dir="LTR"><INPUT TYPE="text" NAME="ReturnDate" onblur="acceptDate(this)" maxlength="10" size="10" tabIndex="5" value="<%=shamsiDate(dateAdd("d",10,date()))%>"></TD>
 							<TD dir="RTL">(?‘‰»Â)</TD>
 						</TR>
 					</TABLE>
@@ -2133,11 +2133,23 @@ elseif Request.QueryString("act")="convertToOrder" then
 		set RS1=conn.execute (mySQL)
 		If RS1.EOF then
 			response.write "<BR><BR><BR><BR><CENTER>‘„«—Â «” ⁄·«„ „⁄ »— ‰Ì” </CENTER>"
+			conn.close
 			response.end
 		End If
 		CustomerID = RS1("Customer")
 		RS1.close
-
+		set rs = Conn.Execute("select * from accounts where id=" & CustomerID)
+		if rs.eof then 
+			conn.close
+			response.write "<BR><BR><BR><BR><CENTER>Œÿ«Ì ⁄ÃÌ» ‘„«—Â „‘ —Ìù „⁄ »— ‰Ì” !</CENTER>"
+			response.end
+		end if
+		if (cdbl(rs("arBalance"))+cdbl(rs("creditLimit")) < 0) then 
+			conn.close
+			response.redirect "?errmsg=" & Server.URLEncode("»œÂÌ «Ì‰ Õ”«» «“ „Ì“«‰ «⁄ »«— ¬‰ »Ì‘ — ‘œÂ°<br> ·ÿ›« »« ”—Å—”  ›—Ê‘ Â„«Â‰ê ﬂ‰Ìœ.<br><a href='../CRM/AccountInfo.asp?act=show&selectedCustomer=" & CustomerID & "'>‰„«Ì‘ Õ”«»</a>")
+		end if
+		rs.close
+		set rs = nothing
 		CreationDate = shamsiToday()
 		OrderTime = Left(currentTime10(),5)
 
@@ -2148,8 +2160,8 @@ elseif Request.QueryString("act")="convertToOrder" then
 		RS1.close
 
 		' create orders_trace row and copy info from quote
-		mySQL=	"INSERT INTO orders_trace (radif_sefareshat, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, marhale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy, property) "&_
-				"SELECT '" & OrderID & "', N'"& CreationDate & "', N'"& OrderTime & "', return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, N'œ— Ã—Ì«‰', N'œ— ’› ‘—Ê⁄', salesperson, 1, 1, N'"& CreationDate & "',  N'"& currentTime10() & "', '"& session("ID") & "',property FROM Quotes WHERE ID='" & quote & "'; "
+		mySQL=	"INSERT INTO orders_trace (radif_sefareshat, order_date, order_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, marhale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy, property) "&_
+				"SELECT '" & OrderID & "', N'"& CreationDate & "', N'"& OrderTime & "', company_name, customer_name, telephone, order_title, order_kind, Type, N'œ— Ã—Ì«‰', N'œ— ’› ‘—Ê⁄', salesperson, 1, 1, N'"& CreationDate & "',  N'"& currentTime10() & "', '"& session("ID") & "',property FROM Quotes WHERE ID='" & quote & "'; "
 		conn.Execute(mySQL)
 
 		' relate invoices to the new order

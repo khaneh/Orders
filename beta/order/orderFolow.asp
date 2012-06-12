@@ -22,9 +22,10 @@ if not Auth(2 , 3) then NotAllowdToViewThisPage()
 	.CusTD2 {background-color: #DDDDDD; direction: LTR; text-align: right; font-size:9pt;}
 	.CusTD3 {background-color: #DDDDDD; direction: LTR; text-align: center; font-size:9pt;}
 	.CusTD4 {background-color: #CCCC66; direction: LTR; text-align: center; font-size:9pt;}
-	div.Right {float: right;width: 95px;}
+	div.Right {float: right;width: 110px;}
 	div.rightHead {float: right;padding-left: 20px;}
-	div.NewRow{clear: right;}
+	div.NewRow{clear: right;margin: 20px 10px 0 0;}
+	a.link{margin: 0 15px 0 0;}
 	td.empty {background-color: #C3DBEB !important;}
 </STYLE>
 <SCRIPT LANGUAGE='JavaScript'>
@@ -96,8 +97,10 @@ if request("act")="" then
 	rs.close
 	%>
 	</div>
-	<div>
+	<div class="NewRow">
 		<input type="submit" name="submit" value=" «ÌÌœ">
+		<a class="link" href="TraceOrder.asp?act=advancedSearch&az_tarikh_sefaresh=<%="1376/01/01"%>&ta_tarikh_sefaresh=<%=shamsiToday()%>&Submit= «ÌÌœ&resultsCount=500&check_closed=on&check_tarikh_sefaresh=on"> „«Ì‘ ·Ì” Ì «“ ”›«—‘ùÂ«Ì »«“</a>
+		<a class="link" href="TraceOrder.asp?act=advancedSearch&Submit= «ÌÌœ&resultsCount=500&check_closed=on&returnIsNull=on">‰„«Ì‘ ·Ì” Ì «“ ”›«—‘ùÂ«ÌÌ ﬂÂ  «—ÌŒ  ÕÊÌ· ﬁ—«—œ«œ ‰œ«—œ</a>
 	</div>
 </form>
 <div style="clear: both;margin:20px 0 0 0;">
@@ -186,7 +189,7 @@ wend
 				'response.write request("moreNextWeek")
 				if fromDate="" then fromDate="1389/01/01"
 				if toDate="" then toDate="9999/99/99"
-				mySQL = "select orderTraceSteps.name,isnull(drv.orderCount,0) as orderCount from orderTraceSteps left outer join (select orders_trace.step, count(orders_trace.radif_sefareshat) as orderCount from orders_trace inner join Orders on orders_trace.radif_sefareshat=orders.id and orders.Closed=0 where 1=1 and orders_trace.return_date >'1389/01/01' " & condition & " group by orders_trace.step) drv on orderTraceSteps.id=drv.step where orderTraceSteps.id=" & steps(s,i)
+				mySQL = "select orderTraceSteps.name,isnull(drv.orderCount,0) as orderCount from orderTraceSteps left outer join (select orders_trace.step, count(orders_trace.radif_sefareshat) as orderCount from orders_trace inner join Orders on orders_trace.radif_sefareshat=orders.id and orders.Closed=0 where (orders_trace.return_date >'1389/01/01' " & condition & ") or orders_trace.return_date is null group by orders_trace.step) drv on orderTraceSteps.id=drv.step where orderTraceSteps.id=" & steps(s,i)
 				set rs=Conn.Execute(mySQL)
 				'response.write mySQL
 	%>
@@ -216,11 +219,11 @@ wend
 <%
 elseif request("act")="show" then
 	myCriteria=""
-	if request("fromDate")<>"" then myCriteria = " AND orders_trace.return_date between '" & request("fromDate") & "' AND '" & request("toDate") & "'"
+	if request("fromDate")<>"" then myCriteria = " and ((orders_trace.return_date between '" & request("fromDate") & "' AND '" & request("toDate") & "') or orders_trace.return_date is null) "
 	if request("orderTypes")<>"" then myCriteria = myCriteria & " and orders_trace.type in (" & request("orderTypes") & ")"
 	myCriteria = myCriteria & " and orders_trace.step=" & request("step")
 	
-	mySQL="SELECT orders_trace.*, Orders.closed, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon,DRV_Invoice.price,orders.customer FROM Orders INNER JOIN  orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN  OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID left outer join (select InvoiceOrderRelations.[Order],SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceOrderRelations.[Order]) DRV_Invoice on Orders.ID=DRV_Invoice.[Order] WHERE (orders.Closed=0 "& myCriteria & ") ORDER BY order_date DESC, radif_sefareshat DESC"	
+	mySQL="SELECT orders_trace.*, Orders.closed, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon,DRV_Invoice.price,orders.customer FROM Orders INNER JOIN  orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN  OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID left outer join (select InvoiceOrderRelations.[Order],SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceOrderRelations.[Order]) DRV_Invoice on Orders.ID=DRV_Invoice.[Order] WHERE (orders.Closed=0 "& myCriteria & ")  ORDER BY order_date DESC, radif_sefareshat DESC"	
 	'response.write mysql
 	set RS1=Conn.Execute (mySQL)
 	if not RS1.eof then

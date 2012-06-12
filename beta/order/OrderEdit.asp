@@ -160,8 +160,8 @@ end function
 
 OrderDate =		sqlSafe(request.form("OrderDate"))
 OrderTime =		sqlSafe(request.form("OrderTime"))
-ReturnDate =	sqlSafe(request.form("ReturnDate"))
-ReturnTime =	sqlSafe(request.form("ReturnTime"))
+ReturnDate =	"null"
+ReturnTime =	"null"
 CompanyName	=	sqlSafe(request.form("CompanyName"))
 CustomerName =	sqlSafe(request.form("CustomerName"))
 Telephone =		sqlSafe(request.form("Telephone"))
@@ -173,6 +173,10 @@ Qtty =			sqlSafe(request.form("Qtty"))
 Size =			sqlSafe(request.form("paperSize"))
 SimplexDuplex =	sqlSafe(request.form("SimplexDuplex"))
 Price =			sqlSafe(request.form("totalPrice"))
+actualReturn_date="null"
+if request.form("actualReturn_date")<>"" then actualReturn_date = "'" & sqlSafe(request.form("actualReturn_date")) & "'"
+if request.form("ReturnDate")<>"" then ReturnDate = "'" & sqlSafe(request.form("ReturnDate")) & "'"
+if request.form("ReturnTime")<>"" then ReturnTime = "'" & sqlSafe(request.form("ReturnTime")) & "'"
 
 mySQL="select users.id,users.RealName,orders_trace.order_title,orders_trace.customer_name, orders_trace.company_name from orders_trace inner join orderTraceStepAnnonce on orders_trace.step=orderTraceStepAnnonce.stepID inner join Users on orderTraceStepAnnonce.userID=users.ID where orders_trace.radif_sefareshat=" & radif
 set rs=Conn.Execute(mySQL)
@@ -196,7 +200,7 @@ wend
 rs.close
 set rs=nothing
 
-	mySql="UPDATE orders_trace SET order_date= N'"& OrderDate & "', order_time= N'"& OrderTime & "', return_date= N'"& ReturnDate & "', return_time= N'"& ReturnTime & "', company_name= N'"& CompanyName & "', customer_name= N'"& CustomerName & "', telephone= N'"& Telephone & "', order_title= N'"& OrderTitle & "', order_kind= N'"& orderTypeName & "', Type= '"& orderType & "', vazyat= N'"& statusName & "', status= "& Vazyat & ", step= "& Marhale & ",  marhale= N'"& stepName & "', salesperson= N'"& SalesPerson & "', qtty= N'"& Qtty & "', paperSize= N'"& Size & "', SimplexDuplex= N'"& SimplexDuplex & "', Price= N'"& Price & "' , LastUpdatedDate=N'"& shamsitoday() & "' , LastUpdatedTime=N'"& currentTime10() & "', LastUpdatedBy=N'"& session("ID")& "', property=N'" & myXML & "' WHERE (radif_sefareshat= N'"& radif & "')"	
+	mySql="UPDATE orders_trace SET order_date= N'"& OrderDate & "', order_time= N'"& OrderTime & "', return_date= "& ReturnDate & ", return_time= "& ReturnTime & ", company_name= N'"& CompanyName & "', customer_name= N'"& CustomerName & "', telephone= N'"& Telephone & "', order_title= N'"& OrderTitle & "', order_kind= N'"& orderTypeName & "', Type= '"& orderType & "', vazyat= N'"& statusName & "', status= "& Vazyat & ", step= "& Marhale & ",  marhale= N'"& stepName & "', salesperson= N'"& SalesPerson & "', qtty= N'"& Qtty & "', paperSize= N'"& Size & "', SimplexDuplex= N'"& SimplexDuplex & "', Price= N'"& Price & "' , actualReturn_date =" & actualReturn_date & ", LastUpdatedDate=N'"& shamsitoday() & "' , LastUpdatedTime=N'"& currentTime10() & "', LastUpdatedBy=N'"& session("ID")& "', property=N'" & myXML & "' WHERE (radif_sefareshat= N'"& radif & "')"	
 	conn.Execute mySql
 	response.write radif &" UPDATED<br>"
 	response.write "<A HREF='orderEdit.asp'>Back</A>"
@@ -292,18 +296,34 @@ end if
 <TABLE border="0" cellspacing="0" cellpadding="2" dir="RTL" width="700" align="center">
 <TR bgcolor="black">
 	<TD align="left"><FONT COLOR="YELLOW">ÍÓÇÈ:</FONT></TD>
-	<TD align="right" colspan=5 height="25px">
+	<TD align="right" colspan=3 height="25px">
 		<span id="customer" style="color:yellow;"><%' after any changes in this span "./Customers.asp" must be revised%>
 			<INPUT TYPE="hidden" NAME="customerID" value="<%=customerID%>"><span><%=customerID & " - "& RS2("AccountTitle")%></span>.
 		</span>
 		<INPUT class="GenButton" TYPE="button" value="ÊÛííÑ" onClick="selectCustomer();">
 	</TD>
+	<TD align="left" ><FONT COLOR="YELLOW">äæÚ ÓİÇÑÔ:</FONT></TD>
+	<TD>
+		<SELECT NAME="OrderType" tabindex="25" style='font-family: tahoma,arial ; font-size: 9pt; font-weight: bold; width: 100px' onchange="alert('ÊæÌå ÏÇÔÊå ÈÇÔíÏ ßå ÊÛííÑ äæÚ ÓİÇÑÔ ÈÇÚË ÇÎÊáÇá ÏÑ ÌÒÆíÇÊ ÓİÇÑÔ ÎæÇåÏ ÔÏ. ÂíÇ ãÓæáíÊ ÂäÑÇ ãíĞíÑíÏ¿');">
+<%
+		thisOrderType=RS2("Type")
+		set RS_TYPE=Conn.Execute ("SELECT ID, Name FROM OrderTraceTypes WHERE (IsActive=1) ORDER BY ID")
+		Do while not RS_TYPE.eof	
+%>
+			<OPTION value="<%=RS_TYPE("ID")%>" <%if thisOrderType=RS_TYPE("ID") then response.write "selected" %> ><%=RS_TYPE("Name")%></option>
+<%
+			RS_TYPE.moveNext
+		loop
+		RS_TYPE.close
+		set RS_TYPE = nothing
+%>		
+		</SELECT></TD>
 </TR>
 <TR bgcolor="black">
 	<TD align="left"><FONT COLOR="YELLOW">ÔãÇÑå ÓİÇÑÔ:</FONT></TD>
 	<TD align="right">
 		<!-- Radif -->
-		<INPUT TYPE="text" disabled maxlength="6" size="5" tabIndex="1" dir="LTR" value="<%=RS2("radif_sefareshat")%>">
+		<INPUT TYPE="text" disabled maxlength="6" size="5" dir="LTR" value="<%=RS2("radif_sefareshat")%>">
 		<INPUT TYPE="hidden" NAME="Radif" value="<%=RS2("radif_sefareshat")%>">
 	</TD>
 	<TD align="left"><FONT COLOR="YELLOW">ÊÇÑíÎ:</FONT></TD>
@@ -318,99 +338,108 @@ end if
 		</TABLE></TD>
 	<TD align="left"><FONT COLOR="YELLOW">ÓÇÚÊ:</FONT></TD>
 	<TD align="right">
-	<INPUT disabled TYPE="text" maxlength="5" size="3" dir="LTR" value="<%=RS2("order_time")%>">
+	<INPUT disabled TYPE="text" maxlength="5" size="3" dir="LTR" value="<%=RS2("order_time")%>" tabindex="24">
 	<INPUT TYPE="hidden" NAME="OrderTime" value="<%=RS2("order_time")%>"></TD>
 </TR>
 <TR bgcolor="#CCCCCC">
 	<TD align="left">äÇã ÔÑßÊ:</TD>
 	<TD align="right">
 		<!-- CompanyName -->
-		<INPUT TYPE="text" NAME="CompanyName" maxlength="50" size="25" tabIndex="2"  value="<%=RS2("company_name")%>"></TD>
-	<TD align="left">ãæÚÏ ÊÍæíá:</TD>
-	<TD><TABLE border="0">
-		<TR>
-			<TD dir="LTR"><INPUT TYPE="text" NAME="ReturnDate"  onblur="acceptDate(this)" maxlength="10" size="8" tabIndex="5" onKeyPress="return maskDate(this);" value="<%=RS2("return_date")%>"></TD>
-			<TD dir="RTL">(?ÔäÈå)</TD>
-		</TR>
-		</TABLE></TD>
+		<INPUT TYPE="text" NAME="CompanyName" maxlength="50" size="25" tabIndex="1"  value="<%=RS2("company_name")%>"></TD>
+	<TD title="ÊæÌå İÑãÇííÏ ßå ÏÑ ÕæÑÊ Ñ ÔÏä Çíä ÊÇÑíÎ¡ ÛíÑ ŞÇÈá æíÑÇíÔ ÎæÇåÏ ÈæÏ" align="left">ÊÇÑíÎ ÊÍæíá ŞÑÇÑÏÇÏ:</TD>
+	<TD>
+		<TABLE border="0">
+			<TR>
+				<TD dir="LTR">
+					<INPUT TYPE="text" NAME="ReturnDate"  onblur="acceptDate(this)" maxlength="10" size="8" tabindex="23" onKeyPress="return maskDate(this);" value="<%=RS2("return_date")%>" <%if not isnull(RS2("return_date")) then response.write " readonly='readonly' "%>>
+				</TD>
+				<TD dir="RTL">(?ÔäÈå)</TD>
+			</TR>
+		</TABLE>
+	</TD>
 	<TD align="left">ÓÇÚÊ ÊÍæíá:</TD>
-	<TD align="right"><INPUT TYPE="text" NAME="ReturnTime" maxlength="6" size="3" tabIndex="6" dir="LTR" onKeyPress="return maskTime(this);" value="<%=RS2("return_time")%>"></TD>
+	<TD align="right">
+		<INPUT TYPE="text" NAME="ReturnTime" maxlength="6" size="3" dir="LTR" onKeyPress="return maskTime(this);" tabindex="22" value="<%=RS2("return_time")%>">
+	</TD>
 </TR>
 <TR bgcolor="#CCCCCC">
 	<TD align="left">äÇã ãÔÊÑí:</TD>
 	<TD align="right">
 		<!-- CustomerName -->
-		<INPUT TYPE="text" NAME="CustomerName" maxlength="50" size="25" tabIndex="3" value="<%=RS2("customer_name")%>"></TD>
-	<TD align="left" >äæÚ ÓİÇÑÔ:</TD>
-	<TD>
-		<SELECT NAME="OrderType" style='font-family: tahoma,arial ; font-size: 9pt; font-weight: bold; width: 100px' tabIndex="7" onchange="alert('ÊæÌå ÏÇÔÊå ÈÇÔíÏ ßå ÊÛííÑ äæÚ ÓİÇÑÔ ÈÇÚË ÇÎÊáÇá ÏÑ ÌÒÆíÇÊ ÓİÇÑÔ ÎæÇåÏ ÔÏ. ÂíÇ ãÓæáíÊ ÂäÑÇ ãíĞíÑíÏ¿');">
-<%
-		thisOrderType=RS2("Type")
-		set RS_TYPE=Conn.Execute ("SELECT ID, Name FROM OrderTraceTypes WHERE (IsActive=1) ORDER BY ID")
-		Do while not RS_TYPE.eof	
-%>
-			<OPTION value="<%=RS_TYPE("ID")%>" <%if thisOrderType=RS_TYPE("ID") then response.write "selected" %> ><%=RS_TYPE("Name")%></option>
-<%
-			RS_TYPE.moveNext
-		loop
-		RS_TYPE.close
-		set RS_TYPE = nothing
-%>		
-		</SELECT></TD>
-	<TD align="left">ÓİÇÑÔ íÑäÏå:</TD>
-	<TD><INPUT NAME="SalesPerson" Type="TEXT"value="<%=RS2("salesperson")%>" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 100px' tabIndex="88" readonly>
+		<INPUT TYPE="text" NAME="CustomerName" maxlength="50" size="25" tabIndex="2" value="<%=RS2("customer_name")%>">
 	</TD>
-</TR>
-<TR bgcolor="#CCCCCC">
 	<TD align="left">Êáİä:</TD>
 	<TD align="right">
 		<!-- Telephone -->
-		<INPUT TYPE="text" NAME="Telephone" maxlength="50" size="25" tabIndex="4" value="<%=RS2("telephone")%>"></TD>
+		<INPUT TYPE="text" NAME="Telephone" maxlength="50" size="25" tabIndex="3" value="<%=RS2("telephone")%>">
+	</TD>
+	<TD title="åÑ Çå ßå áÇÒã ÈÇÔå Çíä İíáÏ ŞÇÈá æíÑÇíÔ ÎæÇåÏ ÈæÏ" align="left">ÊÇÑíÎ ÊÍæíá Úãáí:</TD>
+	<TD align="right">
+		<INPUT TYPE="text" NAME="actualReturn_date"  onblur="acceptDate(this)" maxlength="10" size="8" tabIndex="4" onKeyPress="return maskDate(this);" value="<%=RS2("actualReturn_date")%>">
+	</TD>
+</TR>
+<TR bgcolor="#CCCCCC">
 	<TD align="left">ÚäæÇä ßÇÑ ÏÇÎá İÇíá:</TD>
-	<TD align="right" colspan="4"><INPUT TYPE="text" NAME="OrderTitle" maxlength="255" size="50" tabIndex="9" value="<%=RS2("order_title")%>"></TD>
+	<TD align="right" colspan="3">
+		<INPUT TYPE="text" NAME="OrderTitle" maxlength="255" size="50" tabIndex="5" value="<%=RS2("order_title")%>">
+	</TD>
+	<TD align="left">ÓİÇÑÔ íÑäÏå:</TD>
+	<TD>
+		<INPUT NAME="SalesPerson" Type="TEXT"value="<%=RS2("salesperson")%>" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 100px' tabIndex="888" readonly>
+	</TD>
 </TR>
 <TR bgcolor="#CCCCCC">
 	<TD align="left">ãÑÍáå:</TD>
-	<TD><SELECT NAME="Marhale" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px' tabIndex="13" >
+	<TD>
+		<SELECT NAME="Marhale" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px' tabindex="20" >
 	<%
 	set RS_STEP=Conn.Execute ("SELECT * FROM OrderTraceSteps WHERE (IsActive=1)")
 	Do while not RS_STEP.eof	
 	%>
-		<OPTION value="<%=RS_STEP("ID")%>" <%if RS2("step")=RS_STEP("ID") then response.write "selected" %> ><%=RS_STEP("name")%></option>
+			<OPTION value="<%=RS_STEP("ID")%>" <%if RS2("step")=RS_STEP("ID") then response.write "selected" %> ><%=RS_STEP("name")%></option>
 		<%
 		RS_STEP.moveNext
 	loop
 	RS_STEP.close
 	set RS_STEP = nothing
 	%>
-	</SELECT></TD>
+		</SELECT>
+	</TD>
 	<TD align="left">æÖÚíÊ:</TD>
-	<TD><SELECT NAME="Vazyat" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 100px' tabIndex="14">
+	<TD colspan="3">
+		<SELECT NAME="Vazyat" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 100px' tabindex="21" >
 	<%
 	set RS_STATUS=Conn.Execute ("SELECT * FROM OrderTraceStatus WHERE (IsActive=1)")
 	Do while not RS_STATUS.eof	
 	%>
-		<OPTION value="<%=RS_STATUS("ID")%>" <%if RS2("status")=RS_STATUS("ID") then response.write "selected" %> ><%=RS_STATUS("Name")%></option>
+			<OPTION value="<%=RS_STATUS("ID")%>" <%if RS2("status")=RS_STATUS("ID") then response.write "selected" %> ><%=RS_STATUS("Name")%></option>
 		<%
 		RS_STATUS.moveNext
 	loop
 	RS_STATUS.close
 	set RS_STATUS = nothing
 	%>
-	</SELECT></TD>
-	<td align="left">ÓÇíÒ:</td>
-	<td>
-		<input type="text" value="<%=rs2("paperSize")%>" name="paperSize" tabIndex='15'>
-	</td>
+		</SELECT>
+	</TD>
 </TR>
 <tr bgcolor="#CCCCCC">
+	<td align="left">ÓÇíÒ:</td>
+	<td>
+		<input type="text" value="<%=rs2("paperSize")%>" name="paperSize" tabIndex='6'>
+	</td>
 	<td align="left">ÊíÑÇ:</td>
 	<td>
-		<input type="text" name="qtty" value="<%=rs2("qtty")%>" tabindex="16">
+		<input type="text" name="qtty" value="<%=rs2("qtty")%>" tabindex="7">
 	</td>
+<%
+	set rs=Conn.Execute("select * from OrderTraceTypes where id="&rs2("type"))
+	if rs("property")<>"" then 
+		hasProperty=true
+	end if
+%>
 	<td align="left">ŞíãÊ ßá:</td>
-	<td colspan="3">
-		<input type="text" value="<%=rs2("price")%>" name="totalPrice" id='totalPrice' style="background-color:#FED;border-width:0;" readonly="readonly">
+	<td>
+		<input type="text" value="<%=rs2("price")%>" name="totalPrice" id='totalPrice' tabindex="8" style="background-color:#FED;border-width:0;" <%if hasProperty then response.write " readonly='readonly' "%>>
 	</td>
 </tr>
 <tr bgcolor="#CCCCCC">
@@ -419,6 +448,9 @@ end if
 		<script type="text/javascript" src="/js/jalaliCalendar.js"></script>
 		<script type="text/javascript" src="/js/jquery.dateFormat-1.0.js"></script>
 		<script type="text/javascript" src="calcOrder.js"></script>
+<%
+if hasProperty then 
+%>
 		<div>ÌÒÆíÇÊ ÓİÇÑÔ</div>
 		<div>
 			<br>ÈÑÇí ãÍÇÓÈå ÎæÏßÇÑ ŞíãÊåÇ ÈÇíÏ Ñæí ÇÑÇãÊÑåÇí åÑ ÓØÑ ÈÑæíÏ æ ÂäÑÇ ÊÛííÑ ÏåíÏ æ íÇ Âä Óáæá ÑÇ ÊÑß äãÇííÏ.
@@ -426,7 +458,7 @@ end if
 			<br>ãÍÇÓÈå ÈÑÎí ÇÒ ŞíãÊåÇ ÇÒ Ñæí ÇÑÇãÊÑåÇí ÓÇíÑ ÎØæØ ÎæÇåÏ ÈæÏ. ãËáÇ ÊíÑÇ ÏÑ ãÇÔíä¡ ÊíÑÇí ÎæÇåÏ ÈæÏ ßå ÏÑ Óáİæä æ íæ æí æ æÑäí ãÍÇÓÈå ãíÔæÏ. æ ÏÑ ÕæÑÊí ßå ÊíÑÇ ãÇÔíä Ñæ ÚæÖ ßäíã ÈÇíÏ ÓáæáåÇí ãÑÈæØ Èå Çíä ÂíÊãåÇ Ñæ ÊÑß ßäíã ÊÇ ÏæÈÇÑå ŞíãÊÔæä ãÍÇÓÈå ÈÔå
 		</div>
 <%
-	set rs=Conn.Execute("select * from OrderTraceTypes where id="&rs2("type"))
+end if
 	set typeProp = server.createobject("MSXML2.DomDocument")
 	set orderProp = server.createobject("MSXML2.DomDocument")
 	
