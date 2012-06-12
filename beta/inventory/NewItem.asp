@@ -128,6 +128,10 @@ if(document.all.aaa2.value==2)
 		</SELECT>
 	</TD>
 </TR>
+<tr>
+	<td align="left">«‰»«—</td>
+	<td align="right"></td>
+</tr>
 <TR>
 	<TD align=left>‰«„ ﬂ«·«</TD>
 	<TD align=right><INPUT TYPE="text" NAME="ItemName" size=64></TD>

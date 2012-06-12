@@ -7,15 +7,120 @@ if not Auth(5 , 3) then NotAllowdToViewThisPage()
 %>
 <!--#include file="top.asp" -->
 <!--#include File="../include_farsiDateHandling.asp"-->
-<!--#include File="../include_JS_InputMasks.asp"-->
 <!--#include File="../include_UtilFunctions.asp"-->
+<link type="text/css" href="/css/cupertino/jquery-ui-1.8.21.custom.css" rel="stylesheet" />
+<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
+<script type="text/javascript" src="/js/jalaliCalendar.js"></script>
+<script type="text/javascript" src="/js/jquery.dateFormat-1.0.js"></script>
+<script type="text/javascript" src="/js/jquery-ui-1.8.21.custom.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$.ajaxSetup({
+		cache: false
+	});
+	$("div#invSelect").dialog({ 
+		autoOpen: false,
+		title: 'Ã”  Ê ÃÊÌ ﬂ«·«Ì «‰»«—' ,
+		width: 460
+	});
+	$("input#invCode").blur(function(){
+		$.getJSON("xml_InventoryItem.asp",
+			{act:'fromCode',invCode:$("input#invCode").val()},
+			function(json){
+				$("input#itemName").val(json.itemName);
+				$("input#itemID").val(json.itemID);
+				$("input#err").val(json.err);
+				if (json.err==1){
+					$("input[name=Submit]").prop("disabled", true);
+					$("div#errMsg").html(json.errMsg);
+				}
+				else {
+					$("input[name=Submit]").prop("disabled", false);
+					$("div#errMsg").html("");
+				}
+				$.each(json.store, function(i,st){
+					$("select#store").children("[value=" + st.storeID + "]").attr("unit",st.unit);
+				});
+				$("input#unit").val($("select#store").children(":selected").attr("unit"));
+			}
+		);
+	});
+	$("input#invCode").keypress(function(event){
+		if ( event.which == 13 ) {
+			event.preventDefault();
+			if ($("input#invCode").val()==''){
+				$("div#invSelect").dialog('open');
+			} else {
+				$("select#store").focus();
+			}
+		}
+	});
+	$("select#store").change(function(){
+		$("input#unit").val($(this).children(":selected").attr("unit"));
+	});
+	$("input#mySearch").change(function(){
+		if ($(this).val()=='')
+			$("div#searchResult").html('œ‰»«· çÌ »ê—œ„° ÌÂ çÌ“Ì »‰ÊÌ”!');
+		else {
+			
+			$.getJSON("xml_InventoryItem.asp",
+				{act:'search',search:$(this).val()},
+				function(json){
+					var result='';
+					$.each(json, function(i,invItem){
+						result +="<div class='invItem' invID='" + invItem.id + 
+							"' invName='" + invItem.name + "' invCode='" + invItem.invCode + 
+							"'>(<span class='red'>" +invItem.invCode +"</span>) <b>" + invItem.name+"</b></div>";
+					});
+					if (result=='')
+						result = 'çÌ“Ì ÅÌœ« ‰ﬂ—œ„!';
+					$("div#searchResult").html(result);
+					$("div.invItem").click(function(){
+						$("input#invCode").val($(this).attr("invCode"));
+						$("input#itemName").val($(this).attr("invName"));
+						$("input#itemID").val($(this).attr("invID"));
+						$.getJSON("xml_InventoryItem.asp",
+							{act:'getStore',itemID:$(this).attr("invID")},
+							function(json){
+								$.each(json, function(i,st){
+									$("select#store").children("[value=" + st.storeID + "]").attr("unit",st.unit);
+								});
+								$("input#unit").val($("select#store").children(":selected").attr("unit"));
+							}
+						);
+						$("div#invSelect").dialog('close');
+						$("select#store").focus();
+					});
+				}
+			);
+			
+		}
+	});
+	$("input#searchBut").click(function(e){
+		e.preventDefault();
+		if ($("input#itemID").val==''){
+			$("div#errMsg").html("ﬂ«·«ÌÌ «‰ Œ«» ‰‘œÂ°ù ·ÿ›« ﬂ«·«ÌÌ «‰ Œ«» ﬂ‰Ìœ");
+			$("input[name=Submit]").prop("disabled", true);
+		} else if ($("select#store").children(":selected").attr("unit")==''){
+			
+		}
+	});
+	
+});
 
+</script>
+<style>
+	span.red{color: red;}
+	div.errMsg{color: red;}
+	div.invItem{margin: 5px 0 5px 0;cursor: pointer;}
+	div.invItem:hover{margin: 5px 0 5px 0;cursor: pointer;background-color: #F90;}
+</style>
 <BR>
 <%
 catItem1 = request("catItem")
-goodItem1 = request("item")
+itemID = request("item")
 owner = request("owner")
-if not isNumeric(goodItem1) then
+if not isNumeric(itemID) then
 	response.write "<br>" 
 	call showAlert ("Œÿ«! ﬂœ ﬂ«·« »«Ìœ ⁄œœ »«‘œ",CONST_MSG_ERROR) 
 	response.write "<br>" 
@@ -24,10 +129,10 @@ end if
 purchaseOrderID = request("purchaseOrderID")
 if catItem1="" then 
 	'catItem1="-1"
-	'goodItem1="-1"
+	'itemID="-1"
 	'purchaseOrderID="-1"
-elseif goodItem1="" then 
-	goodItem1="-1"
+elseif itemID="" then 
+	itemID="-1"
 	purchaseOrderID="-1"
 	owner = "-1"
 elseif purchaseOrderID="" then 
@@ -479,7 +584,7 @@ end if
 <TR>
 	<TD align=center colspan=2>
 	<INPUT TYPE="submit" Name="Submit" Value="Ê—Êœ ﬂ«·« »Â «‰»«—" class=inputBut style="width:120px;" tabIndex="14"<%
-	if not goodItem1<>"-1" then
+	if not itemID<>"-1" then
 		response.write " disabled "
 	end if
 	%>>
@@ -541,19 +646,33 @@ elseif request.form("Submit")="Ã” ÃÊ" then
 <INPUT TYPE="hidden" name="item" value="<%=request.form("item")%>">
 <TABLE border=0 align=center>
 <%
-				set RSW=Conn.Execute ("SELECT * FROM InventoryItems WHERE (OldItemID = "& goodItem1 & ")" )
+				storeID = request("store")
+				set RSW=Conn.Execute ("SELECT * FROM InventoryItems Left outer join inventoryItemsInStore on inventoryItemsInStore.itemID=inventoryItems.id and inventoryItemsInStore.storeID=" & storeID & "  WHERE (invCode = "& itemID & ")" )
 				if RSW.EOF then
 					call showAlert ("Œÿ«! ﬂœ ﬂ«·« „⁄ »— ‰Ì” " , CONST_MSG_ERROR )
 					response.end
 				end if 
-				goodItem1 = RSW("id")
+				if IsNull(RSW("itemID")) then 
+					
+				end if
+				itemID = RSW("id")
 				goodUnit = RSW("unit")
 				goodName = RSW("name")
 				owner = RSW("owner")
+				RSW.close
+				set RSW = nothing
+				set rs = Conn.Execute("select * from storeHouses where id=" & storeID)
+				if RS.EOF then
+					call showAlert ("Œÿ«! «‰»«— ÊÃÊœ ‰œ«—œ" , CONST_MSG_ERROR )
+					response.end
+				end if
+				storeName = rs("name")
+				rs.close
+				set rs=nothing
 %>
 <TR>
 	<TD align=right>
-	<span disabled><%=goodName%></span><BR>
+	<span disabled><%=goodName%> œ— <b><%=storeName%></b></span><BR>
 	<BR>
 	<br>
 	</TD>
@@ -563,8 +682,8 @@ elseif request.form("Submit")="Ã” ÃÊ" then
 	<TD align=right>
 			
 <%
-				set RSA=Conn.Execute ("SELECT * FROM purchaseOrders WHERE (Status = 'OUT' and TypeID="& goodItem1& ") order by OrdDate" )
-				'set RSA=Conn.Execute ("SELECT * FROM purchaseOrders WHERE (TypeID="& goodItem1& ") order by OrdDate" )
+				set RSA=Conn.Execute ("SELECT * FROM purchaseOrders WHERE (Status = 'OUT' and TypeID="& itemID& ") order by OrdDate" )
+				'set RSA=Conn.Execute ("SELECT * FROM purchaseOrders WHERE (TypeID="& itemID& ") order by OrdDate" )
 				flg = false
 				if not RSA.eof then 
 					response.write("”›«—‘ Œ—Ìœ —« «‰ Œ«» ﬂ‰Ìœ:<br>")
@@ -582,7 +701,7 @@ elseif request.form("Submit")="Ã” ÃÊ" then
 				end if
 				if Auth(5,"E") then 
 					response.write ("<input type='hidden' NAME='customerItemRequest' id='customerItemRequest'>")
-					set rs=Conn.Execute ("select InventoryItemRequests.*,Accounts.accountTitle from InventoryItemRequests inner join Orders on InventoryItemRequests.order_id=orders.id inner join Accounts on Orders.customer=Accounts.id where InventoryItemRequests.status='new' and CustomerHaveInvItem=1 and InventoryItemRequests.id not in(select RelatedId from InventoryLog where owner>0 and voided=0 and IsInput=1 and ItemID=" & goodItem1 & ") and itemID=" & goodItem1)
+					set rs=Conn.Execute ("select InventoryItemRequests.*,Accounts.accountTitle from InventoryItemRequests inner join Orders on InventoryItemRequests.order_id=orders.id inner join Accounts on Orders.customer=Accounts.id where InventoryItemRequests.status='new' and CustomerHaveInvItem=1 and InventoryItemRequests.id not in(select RelatedId from InventoryLog where owner>0 and voided=0 and IsInput=1 and ItemID=" & itemID & ") and itemID=" & itemID)
 					if not rs.eof then response.write ("<br>œ—ŒÊ«” ùÂ«Ì „‘ —Ì:<br>")
 					while not rs.eof
 						response.write("<INPUT TYPE='radio' name='purchaseOrderID' value='-8' onclick='document.all.customerItemRequest.value=" & rs("id") & "';>")
@@ -597,7 +716,7 @@ elseif request.form("Submit")="Ã” ÃÊ" then
 				'-------------------------------------------------------------------------------------------------
 				'--------------------------------------- NOT IMPLIMENTED!!!!--------------------------------------
 				'-------------------------------------------------------------------------------------------------
-				set rs=Conn.Execute("select [log].*,InventoryItems.unit from InventoryLog as [log] inner join (select top 1  logDate from InventoryLog where ItemID=" & goodItem1 & " and sumQtty=0 order by logDate desc) as date on [log].logDate>date.logDate inner join InventoryItems on [log].itemID=InventoryItems.ID where isInput = 0 and [log].ItemID=" & goodItem1)
+				set rs=Conn.Execute("select [log].*,inventoryItemsInStore.unit from InventoryLog as [log] inner join (select top 1  logDate from InventoryLog where ItemID=" & itemID & " and sumQtty=0 order by logDate desc) as date on [log].logDate>date.logDate inner join inventoryItemsInStore on [log].itemID=inventoryItemsInStore.itemID and [log].storeID=inventoryItemsInStore.storeID where isInput = 0 and [log].ItemID=" & itemID)
 				if not rs.eof then 
 				%>
 				<INPUT TYPE="radio" NAME="purchaseOrderID" value="-3"> ﬂ«·«Ì „—ÃÊ⁄Ì <select name="retID">
@@ -624,16 +743,20 @@ elseif request.form("Submit")="Ã” ÃÊ" then
 				end if
 				if Auth(5,"H") then 
 				'-------------------------------------------------------------------------------------------------
-				'--------------------------------------- NOT IMPLIMENTED!!!!--------------------------------------
+				'---------------------------------------in 91.3.17 by SAM
 				'-------------------------------------------------------------------------------------------------
-				set rs=Conn.Execute("select [log].*,InventoryItems.unit from InventoryLog as [log] inner join (select top 1  logDate from InventoryLog where ItemID=" & goodItem1 & " and sumQtty=0 order by logDate desc) as date on [log].logDate>date.logDate inner join InventoryItems on [log].itemID=InventoryItems.ID where isInput = 0 and [log].ItemID=" & goodItem1)
+				mySQL = "select storeHouses.*, isnull(drv.sumQtty,0) as sumQtty from storeHouses left outer join (select storeID,SUM(IsInput * Qtty) - SUM((1 - IsInput) * Qtty) AS sumQtty from inventoryLog where itemID=" & itemID &  " and owner=-1 and voided=0 group by storeID) drv on drv.storeID=storeHouses.id  where id<>" & storeID
+'				response.write mySQL
+				set rs=Conn.Execute(mySQL)
 				if not rs.eof then 
 				%>
-				<INPUT TYPE="radio" NAME="purchaseOrderID" value="-7"> Ê—Êœ «“  «‰»«— ‘Â—Ì«— / œ› — ⁄»«” ¬»«œ<select name="outID">
+				<INPUT TYPE="radio" NAME="purchaseOrderID" value="-7"> Ê—Êœ «“ ”«Ì— «‰»«—Â«<select name="outID">
 				<%
 					while not rs.eof
 					%>
-					<option value="<%=rs("id")%>"><%=rs("Qtty") & rs("unit") & " œ—  «—ÌŒ " & rs("logDate")%></option>
+					<option value="<%=rs("id")%>" <%if cint(rs("sumQtty"))=0 then response.write " disabled='disabled'"%>>
+						<%=rs("name") & " „ÊÃÊœÌ " & rs("sumQtty")%>
+					</option>
 					<%
 						rs.moveNext
 					wend
@@ -673,31 +796,58 @@ else
 '-------------------------------------------------------------------------------  Inventory Item Input
 '-----------------------------------------------------------------------------------------------------
 %>
+<FORM METHOD=POST ACTION="itemin.asp" id='searchForm'>
 <TABLE border=0 align=center>
 <TR>
 	<TD colspan=2 align=center><H3>Ê—Êœ ﬂ«·«</H3></TD>
 </TR>
 <TR>
-	<TD align=left>ﬂœ ﬂ«·«<br></TD>
+	<TD align=left>ﬂœ ﬂ«·«</TD>
 	<TD align=right>
-		<FORM METHOD=POST ACTION="itemin.asp">
+		
 		<input type="hidden" Name='tmpDlgArg' value=''>
 		<input type="hidden" Name='tmpDlgTxt' value=''>
-		<INPUT  dir="LTR"  TYPE="text" NAME="item" maxlength="10" size="13"  value="<%=owner%>" onKeyPress='return mask(this);' onBlur='check(this);'> &nbsp;&nbsp; <INPUT TYPE="text" NAME="accountName" size=30 readonly  value="<%=accountName%>" style="background-color:transparent">
+		<INPUT dir="LTR" TYPE="text" NAME="item" id="invCode" maxlength="10" size="13">
+		<!-- onKeyPress='return mask(this);' onBlur='check(this);'--> 
+		&nbsp;&nbsp; 
+		<INPUT TYPE="text" NAME="accountName" id="itemName" size=50 readonly='readonly' style="background-color:transparent">
 	</TD>
 </TR>
+<tr>
+	<td align="left">«‰»«—</td>
+	<td align="right">
+		<select name="store" id='store'>
+<%
+		set rs=Conn.Execute("select * from storeHouses")
+		while not rs.eof
+			response.write("<option value='" & rs("id") & "'unit=''>" & rs("name") & "</option>")
+			rs.moveNext
+		wend
+		rs.close
+		set rs=nothing
+%>				
+		</select>
+	</td>
+</tr>
 <TR>
 	<TD align=center colspan=2>
-	<INPUT TYPE="hidden" name="goodUnit" value="<%=goodUnit%>">
-	<INPUT TYPE="hidden" name="goodName" value="<%=goodName%>">
-	<INPUT TYPE="submit" Name="Submit" Value="Ã” ÃÊ" class=inputBut style="width:120px;" tabIndex="14">
+	<INPUT TYPE="hidden" name="unit" id='unit'>
+	<INPUT TYPE="hidden" name="itemID" id='itemID'>
+	<input type="hidden" name='err' id='err'>
+	<INPUT TYPE="submit" Name="Submit" id="searchBut" Value="Ã” ÃÊ" class=inputBut style="width:120px;" tabIndex="14" disabled="disabled">
 	</TD>
 </TR>
 </TABLE>
 </FORM>
 <BR><BR>
 <TABLE align=center width=50%>
-<TR>
+<div id='errMsg' class="errMsg"></div>
+<div id='invSelect' dir="rtl">
+	<span>‰«„ ﬂ«·« —« Ê«—œ ﬂ‰Ìœ: </span>
+	<input type="text" name="mySearch" id='mySearch'>
+	<div id='searchResult'></div>
+</div>
+<!--TR>
 	<TD align=center style="border:solid 1pt black">
 		<BR>
 		<FORM METHOD=POST ACTION="">
@@ -706,11 +856,10 @@ else
 		<BR>
 		</FORM>
 	</TD>
-</TR>
+</TR-->
 </TABLE><BR>
 
-<SCRIPT LANGUAGE="JavaScript">
-<!--
+<SCRIPT LANGUAGE="text/javascript">
 document.all.item.focus()
 
 var dialogActive=false;
@@ -737,6 +886,7 @@ function mask(src){
 }
 
 function check(src){ 
+	
 	if (!dialogActive){
 		badCode = false;
 		if (window.XMLHttpRequest) {
@@ -751,8 +901,6 @@ function check(src){
 		}
 }
 
-
-//-->
 </SCRIPT>
 <%
 end if 
