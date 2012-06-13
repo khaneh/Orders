@@ -33,6 +33,7 @@ if not Auth(2 , 3) then NotAllowdToViewThisPage()
 	div.btn img{margin: 0px 20px -5px 0;cursor: pointer;}
 	div.report{visibility: collapse; height: 0px;}
 	div.price{float: left;border: 1px solid #999;margin: 0 0 0 10px;color: black;background-color: yellow;padding: 1px 3px 1px 3px;}
+	.time{direction: ltr;}
 </STYLE>
 <script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
 <script type="text/javascript" src="/js/jquery.printElement.min.js"></script>
@@ -116,7 +117,7 @@ elseif request("act")="search" then
 	End If
 
 '	mySQL="SELECT orders_trace.*, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon FROM Orders INNER JOIN orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID WHERE ("& myCriteria & ") AND (Orders.Closed=0) ORDER BY order_date DESC, radif_sefareshat DESC"	
-	mySQL="SELECT orders_trace.*, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon , Invoices.ID AS InvoiceID, Invoices.Approved, Invoices.Voided, Invoices.Issued,DRV_invoice.price FROM Invoices INNER JOIN InvoiceOrderRelations ON Invoices.ID = InvoiceOrderRelations.Invoice RIGHT OUTER JOIN Orders INNER JOIN orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID ON InvoiceOrderRelations.[Order] = Orders.ID left outer join (select InvoiceOrderRelations.[Order],SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceOrderRelations.[Order]) DRV_invoice on Orders.id=DRV_invoice.[Order] WHERE ("& myCriteria & ") AND (Orders.Closed=0) ORDER BY orders_trace.order_date DESC, orders_trace.radif_sefareshat DESC"
+	mySQL="SELECT orders_trace.*, Orders.closed, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon,DRV_Invoice.price, ghar.return_date as ghDate, ghar.return_time as ghTime FROM Orders INNER JOIN  orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN  OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID left outer join (select InvoiceOrderRelations.[Order],SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceOrderRelations.[Order]) DRV_Invoice on Orders.ID=DRV_Invoice.[Order] inner join (select [order],return_date,return_time from OrderTraceLog where ID in (select min(id) from OrderTraceLog where return_date is not null group by [Order])) as ghar on orders_trace.radif_sefareshat =ghar.[order] WHERE ("& myCriteria & ") ORDER BY order_date DESC, radif_sefareshat DESC"
 
 	set RS1=Conn.Execute (mySQL)
 	if not RS1.eof then
@@ -138,7 +139,7 @@ elseif request("act")="search" then
 		</TR>
 <%		Do while not RS1.eof
 
-		if isnull(RS1("InvoiceID")) then
+		if isnull(RS1("price")) then
 			InvoiceStatus="<span style='color:red;'><b>‰œ«—œ</b></span>"
 		else
 			if RS1("Voided") then
@@ -153,16 +154,26 @@ elseif request("act")="search" then
 			InvoiceStatus="<A " & style & " HREF='../AR/AccountReport.asp?act=showInvoice&invoice=" & RS1("InvoiceID")& "' Target='_blank'>" & RS1("InvoiceID") & "</A>"
 		end if
 			
-		tmpCounter = tmpCounter + 1
 		if tmpCounter mod 2 = 1 then
-			tmpColor="#FFFFFF"
+			if IsNull(RS1("return_date")) then 
+				tmpColor="#FF0000"
+			else
+				tmpColor="#FFFFFF"
+			end if
 		Else
-			tmpColor="#EEEEEE"
+			if IsNull(RS1("return_date")) then 
+				tmpColor="#DD8888"
+			else
+				tmpColor="#DDDDDD"
+			end if
 		End If 
 %>
 		<TR valign=top bgcolor="<%=tmpColor%>">
 			<TD DIR="LTR"><A HREF="TraceOrder.asp?act=show&order=<%=RS1("radif_sefareshat")%>" target="_blank"><%=RS1("radif_sefareshat")%></A></TD>
-			<TD DIR="LTR"><%=RS1("order_date")%><br><%=RS1("return_date") & " ("& RS1("return_time") & ")"%></TD>
+			<TD DIR="LTR">
+				<div title=" «—ÌŒ  ÕÊÌ· ﬁ—«—œ«œ" style="color:#F80;"><%=RS1("ghDate") & " ("& RS1("ghTime") & ")"%></div>
+				<div title=" «—ÌŒ  ÕÊÌ· ⁄„·Ì"><%=RS1("return_date") & " ("& RS1("return_time") & ")"%></div>
+			</TD>
 			<TD><%=RS1("company_name")%><br><span style='color:gray'><%=RS1("customer_name")%></span><br> ·›‰:(<%=RS1("telephone")%>)&nbsp;</TD>
 			<TD><%=RS1("order_title")%>&nbsp;</TD>
 			<TD><%=RS1("order_kind")%></TD>
@@ -323,7 +334,7 @@ if not rs.eof then
 		response.write "<TABLE cellspacing=0 Style='width:80%;border:2 solid #330066' align=center>"
 		response.write "<tr bgcolor=white><td> «—ÌŒ</td><td>”«⁄ </td><td> «—ÌŒ  ÕÊÌ·</td><td>”«⁄   ÕÊÌ·</td></tr>"
 		while not rs.eof
-			response.write "<tr><td>" & rs("InsertedDate") & "</td><td>" & rs("InsertedTime") & "</td><td>" & rs("Return_date") & "</td><td>" & rs("return_time") & "</td></tr>"
+			response.write "<tr><td>" & rs("InsertedDate") & "</td><td>" & rs("InsertedTime") & "</td><td>" & rs("Return_date") & "</td><td class='time'>" & rs("return_time") & "</td></tr>"
 			rs.moveNext
 		wend
 		response.write "</table>"
@@ -1322,7 +1333,7 @@ elseif request("act")="advancedSearch" then
 			response.write "Nothing !!!!!!!!!!"
 			response.write "<br>" & myCriteria
 		ELSE
-			mySQL="SELECT orders_trace.*, Orders.closed, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon,DRV_Invoice.price FROM Orders INNER JOIN  orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN  OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID left outer join (select InvoiceOrderRelations.[Order],SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceOrderRelations.[Order]) DRV_Invoice on Orders.ID=DRV_Invoice.[Order] WHERE ("& myCriteria & ") ORDER BY order_date DESC, radif_sefareshat DESC"	
+			mySQL="SELECT orders_trace.*, Orders.closed, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon,DRV_Invoice.price, ghar.return_date as ghDate, ghar.return_time as ghTime FROM Orders INNER JOIN  orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN  OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID left outer join (select InvoiceOrderRelations.[Order],SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceOrderRelations.[Order]) DRV_Invoice on Orders.ID=DRV_Invoice.[Order] inner join (select [order],return_date,return_time from OrderTraceLog where ID in (select min(id) from OrderTraceLog where return_date is not null group by [Order])) as ghar on orders_trace.radif_sefareshat =ghar.[order] WHERE ("& myCriteria & ") ORDER BY order_date DESC, radif_sefareshat DESC"	
 			set RS1=Conn.Execute (mySQL)
 			if not RS1.eof then
 				tmpCounter=0
@@ -1369,7 +1380,10 @@ elseif request("act")="advancedSearch" then
 				<TR bgcolor="<%=tmpColor%>" title="<%=RS1("StatusName")%>">
 					<TD width="40" DIR="LTR"><A HREF="TraceOrder.asp?act=show&order=<%=RS1("radif_sefareshat")%>" target="_blank"><%=RS1("radif_sefareshat")%></A></TD>
 					<TD DIR="LTR"><%=RS1("order_date")%></TD>
-					<TD DIR="LTR"><%=RS1("return_date") & " ("& RS1("return_time") & ")"%></TD>
+					<TD DIR="LTR">
+						<div title=" «—ÌŒ  ÕÊÌ· ﬁ—«—œ«œ" style="color:#F80;"><%=RS1("ghDate") & " ("& RS1("ghTime") & ")"%></div>
+						<div title=" «—ÌŒ  ÕÊÌ· ⁄„·Ì"><%=RS1("return_date") & " ("& RS1("return_time") & ")"%></div>
+					</TD>
 					<TD><%=RS1("company_name") & "<br> ·›‰:("& RS1("telephone")& ")"%>&nbsp;</TD>
 					<TD><%=RS1("customer_name")%>&nbsp;</TD>
 					<TD><%=RS1("order_title")%>&nbsp;</TD>
