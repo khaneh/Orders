@@ -249,11 +249,19 @@ elseif request("act")="show" then
 <%				Do while not RS1.eof 
 		tmpCounter = tmpCounter + 1
 		if tmpCounter mod 2 = 1 then
-			tmpColor="#FFFFFF"
+			if IsNull(RS1("return_date")) then 
+				tmpColor="#FF0000"
+			else
+				tmpColor="#FFFFFF"
+			end if
 		Else
-			tmpColor="#DDDDDD"
+			if IsNull(RS1("return_date")) then 
+				tmpColor="#DD8888"
+			else
+				tmpColor="#DDDDDD"
+			end if
 		End If
-
+		
 		if RS1("Closed") then
 			tmpStyle="background-color:#FFCCCC;"
 		else

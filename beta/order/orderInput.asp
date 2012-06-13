@@ -170,8 +170,14 @@ elseif request("act")="getorder" then
 		<TD align="left">‰«„ ‘—ﬂ :</TD>
 		<TD align="right">
 			<!-- CompanyName -->
-			<INPUT TYPE="text" NAME="CompanyName" maxlength="50" size="25" tabIndex="2" value="<%=companyName%>"></TD>
-		<TD title=" ÊÃÂ ›—„«ÌÌœ ﬂÂ œ— ’Ê—  Å— ‘œ‰ «Ì‰  «—ÌŒ° €Ì— ﬁ«»· ÊÌ—«Ì‘ ŒÊ«Âœ »Êœ" align="left"> «—ÌŒ  ÕÊÌ· ﬁ—«—œ«œ:</TD>
+			<INPUT TYPE="text" NAME="CompanyName" maxlength="50" size="25" tabIndex="2" value="<%=companyName%>">
+		</TD>
+		<TD></TD>
+		<TD align="left">
+			<span>›⁄·« „⁄·Ê„ ‰Ì” !</span>
+			<input name="returnDateNull" type="checkbox">
+		</td>
+		<TD title=" ÊÃÂ ›—„«ÌÌœ ﬂÂ œ— ’Ê—  Å— ‘œ‰ «Ì‰  «—ÌŒ° »Â ⁄‰Ê«‰  «—ÌŒ  ÕÊÌ· ﬁ—«—œ«œ À»  ŒÊ«Âœ ‘œ Ê €Ì— ﬁ«»· ÊÌ—«Ì‘ ŒÊ«Âœ »Êœ!" align="left"> «—ÌŒ  ÕÊÌ· ﬁ—«—œ«œ:</TD>
 		<TD>
 			<TABLE border="0">
 				<TR>
@@ -181,10 +187,6 @@ elseif request("act")="getorder" then
 					<TD dir="RTL">(?‘‰»Â)</TD>
 				</TR>
 			</TABLE>
-		</TD>
-		<TD align="left">”«⁄   ÕÊÌ·:</TD>
-		<TD align="right">
-			<INPUT TYPE="text" NAME="ReturnTime" maxlength="5" size="3" dir="LTR" onKeyPress="return maskTime(this);" >
 		</TD>
 	</TR>
 	<TR bgcolor="#CCCCCC">
@@ -198,10 +200,10 @@ elseif request("act")="getorder" then
 			<!-- Telephone -->
 			<INPUT TYPE="text" NAME="Telephone" maxlength="50" size="25" tabIndex="4" value="<%=Tel%>">
 		</TD>
-		<TD title="Â— ê«Â ﬂÂ ·«“„ »«‘Â «Ì‰ ›Ì·œ ﬁ«»· ÊÌ—«Ì‘ ŒÊ«Âœ »Êœ" align="left"> «—ÌŒ  ÕÊÌ· ⁄„·Ì:</TD>
-		<TD>
-			<INPUT TYPE="text" NAME="actualReturn_date" onblur="acceptDate(this)" maxlength="10" size="10" tabIndex="5">
-		</td>
+		<TD align="left">”«⁄   ÕÊÌ·:</TD>
+		<TD align="right">
+			<INPUT TYPE="text" NAME="ReturnTime" maxlength="5" size="3" dir="LTR" onKeyPress="return maskTime(this);" >
+		</TD>
 	</TR>
 	<TR bgcolor="#CCCCCC">
 		<td align="left">”«Ì“:</td>
@@ -365,16 +367,16 @@ end if
 			document.all.SalesPerson.focus();
 			return false;
 		}
-		/*else if(document.all.ReturnDate.value.replace(/^\s*|\s*$/g,'') == ''){
+		else if(document.all.ReturnDate.value.replace(/^\s*|\s*$/g,'') == '' && !document.all.returnDateNull.checked){
 			alert("„Ê⁄œ  ÕÊÌ· —« Ê«—œ ﬂ‰Ìœ")
 			document.all.ReturnDate.focus();
 			return false;
 		}
-		else if(document.all.ReturnTime.value.replace(/^\s*|\s*$/g,'') == ''){
+		else if(document.all.ReturnTime.value.replace(/^\s*|\s*$/g,'') == '' && !document.all.returnDateNull.checked){
 			alert("“„«‰ (”«⁄ )  ÕÊÌ· —« Ê«—œ ﬂ‰Ìœ")
 			document.all.ReturnTime.focus();
 			return false;
-		}*/
+		}
 		else if(document.all.OrderTitle.value.replace(/^\s*|\s*$/g,'') == ''){
 			alert("⁄‰Ê«‰ ﬂ«— œ«Œ· ›«Ì· —« Ê«—œ ﬂ‰Ìœ")
 			document.all.OrderTitle.focus();
@@ -516,15 +518,15 @@ end function
 	if IsNumeric(request.form("qtty")) then 
 		qtty = CInt(request.form("qtty"))
 	end if
-	actualReturn_date = "null"
+
 	ReturnDate = "null"
 	ReturnTime = "null"
 	if request.form("actualReturn_date")<>"" then actualReturn_date = "'" & request.form("actualReturn_date") & "'"
-	if request.form("actualReturn_date")<>"" then ReturnDate = "'" & request.form("ReturnDate") & "'"
-	if request.form("actualReturn_date")<>"" then ReturnTime = "'" & request.form("ReturnTime") & "'"
+	if request.form("ReturnDate")<>"" then ReturnDate = "'" & request.form("ReturnDate") & "'"
+	if request.form("ReturnDate")<>"" then ReturnTime = "'" & request.form("ReturnTime") & "'"
 		
-	mySQL="INSERT INTO orders_trace (radif_sefareshat, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, marhale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy,property,qtty,paperSize,price, actualReturn_date) VALUES ('"&_
-	OrderID & "', N'"& sqlSafe(request.form("OrderDate")) & "', "& ReturnTime & ", "& ReturnDate & ", N'"& sqlSafe(request.form("ReturnTime")) & "', N'"& sqlSafe(request.form("CompanyName")) & "', N'"& sqlSafe(request.form("CustomerName")) & "', N'"& sqlSafe(request.form("Telephone")) & "', N'"& sqlSafe(request.form("OrderTitle")) & "', N'"& orderTypeName & "', '"& orderType & "', N'œ— Ã—Ì«‰', N'œ— ’› ‘—Ê⁄', N'"& sqlSafe(request.form("SalesPerson")) & "', 1, 1, N'"& CreationDate & "',  N'"& currentTime10() & "', "& session("ID") & " ,N'" & myXML& "'," & qtty & ",'" & request.form("paperSize") & "','" & request.form("totalPrice") & "'," & actualReturn_date & ")"	
+	mySQL="INSERT INTO orders_trace (radif_sefareshat, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, marhale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy,property,qtty,paperSize,price) VALUES ('"&_
+	OrderID & "', N'"& sqlSafe(request.form("OrderDate")) & "', "& ReturnTime & ", "& ReturnDate & ", N'"& sqlSafe(request.form("ReturnTime")) & "', N'"& sqlSafe(request.form("CompanyName")) & "', N'"& sqlSafe(request.form("CustomerName")) & "', N'"& sqlSafe(request.form("Telephone")) & "', N'"& sqlSafe(request.form("OrderTitle")) & "', N'"& orderTypeName & "', '"& orderType & "', N'œ— Ã—Ì«‰', N'œ— ’› ‘—Ê⁄', N'"& sqlSafe(request.form("SalesPerson")) & "', 1, 1, N'"& CreationDate & "',  N'"& currentTime10() & "', "& session("ID") & " ,N'" & myXML& "'," & qtty & ",'" & request.form("paperSize") & "','" & request.form("totalPrice") & "')"	
 	response.write mySQL
 	conn.Execute(mySQL)
 

@@ -173,8 +173,6 @@ Qtty =			sqlSafe(request.form("Qtty"))
 Size =			sqlSafe(request.form("paperSize"))
 SimplexDuplex =	sqlSafe(request.form("SimplexDuplex"))
 Price =			sqlSafe(request.form("totalPrice"))
-actualReturn_date="null"
-if request.form("actualReturn_date")<>"" then actualReturn_date = "'" & sqlSafe(request.form("actualReturn_date")) & "'"
 if request.form("ReturnDate")<>"" then ReturnDate = "'" & sqlSafe(request.form("ReturnDate")) & "'"
 if request.form("ReturnTime")<>"" then ReturnTime = "'" & sqlSafe(request.form("ReturnTime")) & "'"
 
@@ -200,7 +198,7 @@ wend
 rs.close
 set rs=nothing
 
-	mySql="UPDATE orders_trace SET order_date= N'"& OrderDate & "', order_time= N'"& OrderTime & "', return_date= "& ReturnDate & ", return_time= "& ReturnTime & ", company_name= N'"& CompanyName & "', customer_name= N'"& CustomerName & "', telephone= N'"& Telephone & "', order_title= N'"& OrderTitle & "', order_kind= N'"& orderTypeName & "', Type= '"& orderType & "', vazyat= N'"& statusName & "', status= "& Vazyat & ", step= "& Marhale & ",  marhale= N'"& stepName & "', salesperson= N'"& SalesPerson & "', qtty= N'"& Qtty & "', paperSize= N'"& Size & "', SimplexDuplex= N'"& SimplexDuplex & "', Price= N'"& Price & "' , actualReturn_date =" & actualReturn_date & ", LastUpdatedDate=N'"& shamsitoday() & "' , LastUpdatedTime=N'"& currentTime10() & "', LastUpdatedBy=N'"& session("ID")& "', property=N'" & myXML & "' WHERE (radif_sefareshat= N'"& radif & "')"	
+	mySql="UPDATE orders_trace SET order_date= N'"& OrderDate & "', order_time= N'"& OrderTime & "', return_date= "& ReturnDate & ", return_time= "& ReturnTime & ", company_name= N'"& CompanyName & "', customer_name= N'"& CustomerName & "', telephone= N'"& Telephone & "', order_title= N'"& OrderTitle & "', order_kind= N'"& orderTypeName & "', Type= '"& orderType & "', vazyat= N'"& statusName & "', status= "& Vazyat & ", step= "& Marhale & ",  marhale= N'"& stepName & "', salesperson= N'"& SalesPerson & "', qtty= N'"& Qtty & "', paperSize= N'"& Size & "', SimplexDuplex= N'"& SimplexDuplex & "', Price= N'"& Price & "' , LastUpdatedDate=N'"& shamsitoday() & "' , LastUpdatedTime=N'"& currentTime10() & "', LastUpdatedBy=N'"& session("ID")& "', property=N'" & myXML & "' WHERE (radif_sefareshat= N'"& radif & "')"	
 	conn.Execute mySql
 	response.write radif &" UPDATED<br>"
 	response.write "<A HREF='orderEdit.asp'>Back</A>"
@@ -346,12 +344,12 @@ end if
 	<TD align="right">
 		<!-- CompanyName -->
 		<INPUT TYPE="text" NAME="CompanyName" maxlength="50" size="25" tabIndex="1"  value="<%=RS2("company_name")%>"></TD>
-	<TD title=" ÊÃÂ ›—„«ÌÌœ ﬂÂ œ— ’Ê—  Å— ‘œ‰ «Ì‰  «—ÌŒ° €Ì— ﬁ«»· ÊÌ—«Ì‘ ŒÊ«Âœ »Êœ" align="left"> «—ÌŒ  ÕÊÌ· ﬁ—«—œ«œ:</TD>
+	<TD align="left"> «—ÌŒ  ÕÊÌ·:</TD>
 	<TD>
 		<TABLE border="0">
 			<TR>
 				<TD dir="LTR">
-					<INPUT TYPE="text" NAME="ReturnDate"  onblur="acceptDate(this)" maxlength="10" size="8" tabindex="23" onKeyPress="return maskDate(this);" value="<%=RS2("return_date")%>" <%if not isnull(RS2("return_date")) then response.write " readonly='readonly' "%>>
+					<INPUT TYPE="text" NAME="ReturnDate"  onblur="acceptDate(this)" maxlength="10" size="8" tabindex="4" onKeyPress="return maskDate(this);" value="<%=RS2("return_date")%>">
 				</TD>
 				<TD dir="RTL">(?‘‰»Â)</TD>
 			</TR>
@@ -359,7 +357,7 @@ end if
 	</TD>
 	<TD align="left">”«⁄   ÕÊÌ·:</TD>
 	<TD align="right">
-		<INPUT TYPE="text" NAME="ReturnTime" maxlength="6" size="3" dir="LTR" onKeyPress="return maskTime(this);" tabindex="22" value="<%=RS2("return_time")%>">
+		<INPUT TYPE="text" NAME="ReturnTime" maxlength="6" size="3" dir="LTR" onKeyPress="return maskTime(this);" tabindex="5" value="<%=RS2("return_time")%>">
 	</TD>
 </TR>
 <TR bgcolor="#CCCCCC">
@@ -373,15 +371,13 @@ end if
 		<!-- Telephone -->
 		<INPUT TYPE="text" NAME="Telephone" maxlength="50" size="25" tabIndex="3" value="<%=RS2("telephone")%>">
 	</TD>
-	<TD title="Â— ê«Â ﬂÂ ·«“„ »«‘Â «Ì‰ ›Ì·œ ﬁ«»· ÊÌ—«Ì‘ ŒÊ«Âœ »Êœ" align="left"> «—ÌŒ  ÕÊÌ· ⁄„·Ì:</TD>
-	<TD align="right">
-		<INPUT TYPE="text" NAME="actualReturn_date"  onblur="acceptDate(this)" maxlength="10" size="8" tabIndex="4" onKeyPress="return maskDate(this);" value="<%=RS2("actualReturn_date")%>">
-	</TD>
+	<TD></TD>
+	<TD></TD>
 </TR>
 <TR bgcolor="#CCCCCC">
 	<TD align="left">⁄‰Ê«‰ ﬂ«— œ«Œ· ›«Ì·:</TD>
 	<TD align="right" colspan="3">
-		<INPUT TYPE="text" NAME="OrderTitle" maxlength="255" size="50" tabIndex="5" value="<%=RS2("order_title")%>">
+		<INPUT TYPE="text" NAME="OrderTitle" maxlength="255" size="50" tabIndex="6" value="<%=RS2("order_title")%>">
 	</TD>
 	<TD align="left">”›«—‘ êÌ—‰œÂ:</TD>
 	<TD>
@@ -425,11 +421,11 @@ end if
 <tr bgcolor="#CCCCCC">
 	<td align="left">”«Ì“:</td>
 	<td>
-		<input type="text" value="<%=rs2("paperSize")%>" name="paperSize" tabIndex='6'>
+		<input type="text" value="<%=rs2("paperSize")%>" name="paperSize" tabIndex='7'>
 	</td>
 	<td align="left"> Ì—«é:</td>
 	<td>
-		<input type="text" name="qtty" value="<%=rs2("qtty")%>" tabindex="7">
+		<input type="text" name="qtty" value="<%=rs2("qtty")%>" tabindex="8">
 	</td>
 <%
 	set rs=Conn.Execute("select * from OrderTraceTypes where id="&rs2("type"))
