@@ -29,6 +29,7 @@ if not Auth(2 , 9) then NotAllowdToViewThisPage() '«” ⁄·«„
 	div.btn label{background-color:yellow;color: blue;padding: 3px 30px 3px 30px;cursor: pointer;}
 	div.btn{margin: -5px 250px 0px 5px;}
 	div.btn img{margin: 0px 20px -5px 0;cursor: pointer;}
+	span.price{background-color: #FED;}
 </STYLE>
 
 <%
@@ -272,63 +273,105 @@ elseif Request.QueryString("act")="show" then
 	
 	<BR>
 	<TABLE class="" cellspacing="0" cellpadding="2" align="center" style="background-color:#CCCCCC; color:black; direction:RTL; width:700; border: 2 solid #555599;">
-	<TR bgcolor="#555599">
-		<TD align="left"><FONT COLOR="YELLOW">Õ”«»:</FONT></TD>
-		<TD align="right" colspan=5 height="25px">
-			<span id="customer" style="color:yellow;"><%' after any changes in this span "./Customers.asp" must be revised%>
-				<span><%=RS1("AccID") & " - "& RS1("AccountTitle")%></span>.
-			</span>
-		</TD>
-	</TR>
+		<TR bgcolor="#555599">
+			<TD align="left"><FONT COLOR="YELLOW">Õ”«»:</FONT></TD>
+			<TD align="right" colspan=5 height="25px">
+				<span id="customer" style="color:yellow;"><%' after any changes in this span "./Customers.asp" must be revised%>
+					<span><%=RS1("AccID") & " - "& RS1("AccountTitle")%></span>.
+				</span>
+			</TD>
+		</TR>
+		
+		<TR bgcolor="#555599" height=30 style="color:yellow;">
+			<TD align="left">‘„«—Â «” ⁄·«„:</TD>
+			<TD align="right"><%=RS1("ID")%></TD>
+			<TD align="left"> «—ÌŒ:</TD>
+			<TD><span dir="LTR"><%=RS1("order_date")%></span></TD>
+			<TD align="left">”«⁄ :</TD>
+			<TD align="right"><%=RS1("order_time")%></TD>
+		</TR>
+		<TR height=30>
+			<TD align="left">‰«„ ‘—ﬂ :</TD>
+			<TD><%=RS1("company_name")%></TD>
+			<TD align="left">„Ê⁄œ «⁄ »«—:</TD>
+			<TD align="right" dir=LTR><%=RS1("return_date")%></TD>
+			<TD align="left">”«⁄  «⁄ »«—:</TD>
+			<TD align="right" dir=LTR><%=RS1("return_time")%></TD>
+		</TR>
+		<TR height=30>
+			<TD align="left">‰«„ „‘ —Ì:</TD>
+			<TD><%=RS1("customer_name")%></TD>
+			<TD align="left">‰Ê⁄ «” ⁄·«„:</TD>
+			<TD><%=RS1("order_kind")%></TD>
+			<TD align="left">«” ⁄·«„ êÌ—‰œÂ:</TD>
+			<TD><%=RS1("salesperson")%>	</TD>
+		</TR>
+		<TR height=30>
+			<TD align="left"> ·›‰:</TD>
+			<TD><%=RS1("telephone")%></TD>
+			<TD align="left">⁄‰Ê«‰ ﬂ«— œ«Œ· ›«Ì·:</TD>
+			<TD colspan="3"><%=RS1("order_title")%></TD>
+		</TR>
 	
-	<TR bgcolor="#555599" height=30 style="color:yellow;">
-		<TD align="left">‘„«—Â «” ⁄·«„:</TD>
-		<TD align="right"><%=RS1("ID")%></TD>
-		<TD align="left"> «—ÌŒ:</TD>
-		<TD><span dir="LTR"><%=RS1("order_date")%></span></TD>
-		<TD align="left">”«⁄ :</TD>
-		<TD align="right"><%=RS1("order_time")%></TD>
-	</TR>
-	<TR height=30>
-		<TD align="left">‰«„ ‘—ﬂ :</TD>
-		<TD><%=RS1("company_name")%></TD>
-		<TD align="left">„Ê⁄œ «⁄ »«—:</TD>
-		<TD align="right" dir=LTR><%=RS1("return_date")%></TD>
-		<TD align="left">”«⁄  «⁄ »«—:</TD>
-		<TD align="right" dir=LTR><%=RS1("return_time")%></TD>
-	</TR>
-	<TR height=30>
-		<TD align="left">‰«„ „‘ —Ì:</TD>
-		<TD><%=RS1("customer_name")%></TD>
-		<TD align="left">‰Ê⁄ «” ⁄·«„:</TD>
-		<TD><%=RS1("order_kind")%></TD>
-		<TD align="left">«” ⁄·«„ êÌ—‰œÂ:</TD>
-		<TD><%=RS1("salesperson")%>	</TD>
-	</TR>
-	<TR height=30>
-		<TD align="left"> ·›‰:</TD>
-		<TD><%=RS1("telephone")%></TD>
-		<TD align="left">⁄‰Ê«‰ ﬂ«— œ«Œ· ›«Ì·:</TD>
-		<TD colspan="3"><%=RS1("order_title")%></TD>
-	</TR>
-
-	<TR height=30>
-		<TD align="left">ﬁÌ„  ﬂ·:</TD>
-		<TD><%=RS1("Price")%></TD>
-		<TD align="left">”«Ì“:</TD>
-		<TD colspan="3"><%=RS1("PaperSize")%></TD>
-		<!--TD align="left">Ìﬂ—Ê/œÊ—Ê:</TD>
-		<TD><%=RS1("SimplexDuplex")%></TD-->
-	</TR>
-	<TR height=30>
-		<TD align="left">„—Õ·Â:</TD>
-		<TD colspan="5"><%=RS1("marhale")%></TD>
-	</TR>
-	<TR height=30>
-		<TD align="left" valign="top" colspan="3"> Ê÷ÌÕ«  »Ì‘ —:</TD>
-		<TD colspan="3"><%=replace(RS1("Notes"),chr(13),"<br>")%></TD>
-	</TR>
-	</TABLE><BR>
+		<TR height=30>
+			<td align="left"> ⁄œ«œ:</td>
+			<td><%=rs1("qtty")%></td>
+			<TD align="left">”«Ì“:</TD>
+			<TD><%=RS1("PaperSize")%></TD>
+			<TD align="left">“„«‰  Ê·Ìœ:</TD>
+			<TD>
+			<%if RS1("productionDuration") = 0 then 
+				response.write "<font color=red>‰«„⁄·Ê„</font>" 
+			else
+				response.write RS1("productionDuration") & " —Ê“"
+			end if %>
+			
+			</TD>
+		</TR>
+		<TR height=30>
+			<TD align="left">„—Õ·Â:</TD>
+			<TD colspan="3"><%=RS1("marhale")%></TD>
+			<TD align="left">ﬁÌ„  ﬂ·:</TD>
+			<TD><span class="price"><%=RS1("Price")%></span></TD>
+		</TR>
+		<TR height=30>
+			<TD align="left" valign="top" colspan="3"> Ê÷ÌÕ«  »Ì‘ —:</TD>
+			<TD colspan="3">
+			<%if not IsNull(RS1("Notes")) then response.write replace(RS1("Notes"),chr(13),"<br>")%>
+			</TD>
+		</TR>
+	</TABLE>
+<%
+set rs = conn.Execute("select *,users.RealName from QuoteLogs inner join Users on QuoteLogs.LastUpdatedBy=users.ID where QuoteLogs.QuoteID=" & quote & " and QuoteLogs.ID in (select min(id) from QuoteLogs group by QuoteID,productionDuration)")
+if not rs.eof then 
+%>
+	<TABLE class="" cellspacing="0" cellpadding="2" align="center" style="background-color:#CCCCCC; color:black; direction:RTL; width:700; border: 2 solid #555599;">
+	<tr bgcolor="#555599" height=30 style="color:yellow;">
+		<td> «—ÌŒ</td>
+		<td>”«⁄ </td>
+		<td>“„«‰  Ê·Ìœ</td>
+		<td> Ê”ÿ</td>
+	</tr>
+<%
+	while not rs.eof 
+		response.write "<tr><td>" & rs("LastUpdatedDate") & "</td><td>" & rs("LastUpdatedTime") & "</td><td>" 
+		if CInt(rs("productionDuration"))=0 then 
+			response.write "<font color=red>‰«„⁄·Ê„</font>"
+		else
+			response.write  rs("productionDuration") & " —Ê“"
+		end if
+		response.write  "</td><td>" & rs("RealName") & "</td></tr>"
+		rs.moveNext
+	wend
+%>	
+	<tr>
+	
+	</tr>
+	</table>
+<%
+end if
+%>
+	<BR>
 	<%
 if (not (IsNull(rs1("property")) or rs1("property")="")) then
 %>
@@ -489,10 +532,10 @@ elseif Request.QueryString("act")="advancedSearch" then
 	if instr(tmpTime,":")<3 then tmpTime="0" & tmpTime
 	if len(tmpTime)<5 then tmpTime=Left(tmpTime,3) & "0" & Right(tmpTime,1)
 
-	if request.form("resultsCount")="" OR not isnumeric(request.form("resultsCount")) then
+	if request("resultsCount")="" OR not isnumeric(request("resultsCount")) then
 		resultsCount = 50
 	else
-		resultsCount = cint(request.form("resultsCount"))
+		resultsCount = cint(request("resultsCount"))
 	end if
 
 %>
@@ -526,54 +569,80 @@ elseif Request.QueryString("act")="advancedSearch" then
 			<td colspan="11" style="height:2px"></td>
 		</TR>
 		<TR>
-			<TD><INPUT TYPE="checkbox" NAME="check_tarikh_sefaresh" onclick="check_tarikh_sefaresh_Click()" checked></TD>
+			<TD>
+				<INPUT TYPE="checkbox" NAME="check_tarikh_sefaresh" onclick="check_tarikh_sefaresh_Click()" checked>
+			</TD>
 			<TD> «—ÌŒ «” ⁄·«„</TD>
-			<TD><INPUT TYPE="text" NAME="az_tarikh_sefaresh" dir="LTR" value="<%=request.form("az_tarikh_sefaresh")%>" size="10" onKeyPress="return maskDate(this);" onBlur="if(acceptDate(this))document.all.ta_tarikh_sefaresh.value=this.value;" maxlength="10"></TD>
+			<TD>
+				<INPUT TYPE="text" NAME="az_tarikh_sefaresh" dir="LTR" value="<%=request.form("az_tarikh_sefaresh")%>" size="10" onKeyPress="return maskDate(this);" onBlur="if(acceptDate(this))document.all.ta_tarikh_sefaresh.value=this.value;" maxlength="10">
+			</TD>
 			<TD> «</TD>
-			<TD><INPUT TYPE="text" NAME="ta_tarikh_sefaresh" dir="LTR" value="<%=request.form("ta_tarikh_sefaresh")%>" size="10" onKeyPress="return maskDate(this);" onblur="acceptDate(this)" maxlength="10"></TD>
-			<TD><INPUT TYPE="checkbox" NAME="check_marhale" onclick="check_marhale_Click()" checked></TD>
+			<TD>
+				<INPUT TYPE="text" NAME="ta_tarikh_sefaresh" dir="LTR" value="<%=request.form("ta_tarikh_sefaresh")%>" size="10" onKeyPress="return maskDate(this);" onblur="acceptDate(this)" maxlength="10">
+			</TD>
+			<TD>
+				<INPUT TYPE="checkbox" NAME="check_marhale" onclick="check_marhale_Click()" checked>
+			</TD>
 			<TD>„—Õ·Â</TD>
-			<TD><SELECT NAME="marhale_box" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px'>
+			<TD>
+				<SELECT NAME="marhale_box" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px'>
 					<%
 					set RS_STEP=Conn.Execute ("SELECT * FROM QuoteSteps WHERE (IsActive=1)")
 					Do while not RS_STEP.eof	
 					%>
-						<OPTION value="<%=RS_STEP("ID")%>" <%if cint(request.form("marhale_box"))=cint(RS_STEP("ID")) then response.write "selected" %> ><%=RS_STEP("name")%></option>
+						<OPTION value="<%=RS_STEP("ID")%>" <%if cint(request("marhale_box"))=cint(RS_STEP("ID")) then response.write "selected" %> ><%=RS_STEP("name")%></option>
 						<%
 						RS_STEP.moveNext
 					loop
 					RS_STEP.close
 					%>
-			</SELECT></TD>
-			<TD><span id="marhale_not_check_label" style='font-weight:bold;color:red'>‰»«‘œ</span></TD>
-			<TD><INPUT TYPE="checkbox" NAME="marhale_not_check" onclick="marhale_not_check_Click();" checked></TD>
+				</SELECT>
+			</TD>
+			<TD>
+				<span id="marhale_not_check_label" style='font-weight:bold;color:red'>‰»«‘œ</span>
+			</TD>
+			<TD>
+				<INPUT TYPE="checkbox" NAME="marhale_not_check" onclick="marhale_not_check_Click();" checked>
+			</TD>
 		</TR>
 		<TR bgcolor="#555599">
 			<td colspan="11" style="height:2px"></td>
 		</TR>
 		<TR bgcolor="#EEEEEE">
-			<TD><INPUT TYPE="checkbox" NAME="check_tarikh_tahvil" onclick="check_tarikh_tahvil_Click()" checked></TD>
+			<TD>
+				<INPUT TYPE="checkbox" NAME="check_tarikh_tahvil" onclick="check_tarikh_tahvil_Click()" checked>
+			</TD>
 			<TD> «—ÌŒ «⁄ »«—</TD>
-			<TD><INPUT TYPE="text" NAME="az_tarikh_tahvil" dir="LTR" value="<%=request.form("az_tarikh_tahvil")%>" size="10" onblur="acceptDate(this)" maxlength="10" onKeyPress="return maskDate(this);"></TD>
+			<TD>
+				<INPUT TYPE="text" NAME="az_tarikh_tahvil" dir="LTR" value="<%=request.form("az_tarikh_tahvil")%>" size="10" onblur="acceptDate(this)" maxlength="10" onKeyPress="return maskDate(this);">
+			</TD>
 			<TD> «</TD>
-			<TD><INPUT TYPE="text" NAME="ta_tarikh_tahvil" dir="LTR" value="<%=request.form("ta_tarikh_tahvil")%>" onblur="acceptDate(this)" maxlength="10" size="10" onKeyPress="return maskDate(this);"></TD>
+			<TD>
+				<INPUT TYPE="text" NAME="ta_tarikh_tahvil" dir="LTR" value="<%=request.form("ta_tarikh_tahvil")%>" onblur="acceptDate(this)" maxlength="10" size="10" onKeyPress="return maskDate(this);">
+			</TD>
 			<td colspan="5"></td>
 			
 		</TR>
 		<TR bgcolor="#EEEEEE">
 			<TD colspan="5">&nbsp;</TD>
-			<TD><INPUT TYPE="checkbox" NAME="check_closed" onclick="check_closed_Click()" checked></TD>
-			<TD colspan="4"><span id="check_closed_label" style='color:black;'>›ﬁÿ «” ⁄·«„ Â«Ì »«“</span></TD>
+			<TD>
+				<INPUT TYPE="checkbox" NAME="check_closed" onclick="check_closed_Click()" checked>
+			</TD>
+			<TD colspan="4">
+				<span id="check_closed_label" style='color:black;'>›ﬁÿ «” ⁄·«„ Â«Ì »«“</span>
+			</TD>
 		</TR>
 		<TR bgcolor="#555599">
 			<td colspan="11" style="height:2px"></td>
 		</TR>
 		<TR>
 			<TD colspan="5">&nbsp;</TD>
-			<TD><INPUT TYPE="checkbox" NAME="check_salesperson" onclick="check_salesperson_Click()" checked></TD>
+			<TD>
+				<INPUT TYPE="checkbox" NAME="check_salesperson" onclick="check_salesperson_Click()" checked>
+			</TD>
 			<TD>«” ⁄·«„ êÌ—‰œÂ</TD>
 			<TD colspan="3">
-			<SELECT NAME="salesperson_box" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px'>
+				<SELECT NAME="salesperson_box" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px'>
 <%				set RSV=Conn.Execute ("SELECT RealName FROM Users WHERE Display=1 ORDER BY RealName") 
 				Do while not RSV.eof
 %>
@@ -583,29 +652,46 @@ elseif Request.QueryString("act")="advancedSearch" then
 				Loop
 				RSV.close
 %>
-			</SELECT></TD>
+				</SELECT>
+			</TD>
 		</TR>
 		<TR bgcolor="#555599">
 			<td colspan="11" style="height:2px"></td>
 		</TR>
 		<TR bgcolor="#EEEEEE">
-			<TD><INPUT TYPE="checkbox" NAME="check_company_name" onclick="check_company_name_Click()" checked></TD>
+			<TD>
+				<INPUT TYPE="checkbox" NAME="check_company_name" onclick="check_company_name_Click()" checked>
+			</TD>
 			<TD>‰«„ ‘—ﬂ </TD>
-			<TD colspan="3"><INPUT TYPE="text" NAME="company_name_box" value="<%=request.form("company_name_box")%>"></TD>
-			<TD><INPUT TYPE="checkbox" NAME="check_telephone" onclick="check_telephone_Click()" checked></TD>
+			<TD colspan="3">
+				<INPUT TYPE="text" NAME="company_name_box" value="<%=request.form("company_name_box")%>">
+			</TD>
+			<TD>
+				<INPUT TYPE="checkbox" NAME="check_telephone" onclick="check_telephone_Click()" checked>
+			</TD>
 			<TD> ·›‰</TD>
-			<TD colspan="3"><INPUT TYPE="text" NAME="telephone_box" value="<%=request.form("telephone_box")%>"></TD>
+			<TD colspan="3">
+				<INPUT TYPE="text" NAME="telephone_box" value="<%=request.form("telephone_box")%>">
+			</TD>
 		</TR>
 		<TR bgcolor="#555599">
 			<td colspan="11" style="height:2px"></td>
 		</TR>
 		<TR>
-			<TD><INPUT TYPE="checkbox" NAME="check_customer_name" onclick="check_customer_name_Click()" checked></TD>
+			<TD>
+				<INPUT TYPE="checkbox" NAME="check_customer_name" onclick="check_customer_name_Click()" checked>
+			</TD>
 			<TD>‰«„ „‘ —Ì</TD>
-			<TD colspan="3"><INPUT TYPE="text" NAME="customer_name_box" value="<%=request.form("customer_name_box")%>"></TD>
-			<TD><INPUT TYPE="checkbox" NAME="check_order_title" onclick="check_order_title_Click()" checked></TD>
+			<TD colspan="3">
+				<INPUT TYPE="text" NAME="customer_name_box" value="<%=request.form("customer_name_box")%>">
+			</TD>
+			<TD>
+				<INPUT TYPE="checkbox" NAME="check_order_title" onclick="check_order_title_Click()" checked>
+			</TD>
 			<TD>⁄‰Ê«‰ «” ⁄·«„</TD>
-			<TD colspan="3"><INPUT TYPE="text" NAME="order_title_box" value="<%=request.form("order_title_box")%>"></TD>
+			<TD colspan="3">
+				<INPUT TYPE="text" NAME="order_title_box" value="<%=request.form("order_title_box")%>">
+			</TD>
 		</TR>
 		<TR bgcolor="#555599">
 			<td colspan="11" style="height:2px"></td>
@@ -708,20 +794,6 @@ elseif Request.QueryString("act")="advancedSearch" then
 			document.all.marhale_box.style.visibility = "hidden";
 			document.all.marhale_not_check.style.visibility = "hidden";
 			document.all.marhale_not_check_label.style.color='#BBBBBB'
-		}
-	}
-
-	function check_vazyat_Click(){
-		if (document.all.check_vazyat.checked) {
-			document.all.vazyat_box.style.visibility = "visible";
-			document.all.vazyat_box.focus();
-			document.all.vazyat_not_check.style.visibility = "visible";
-			vazyat_not_check_Click();
-		}
-		else{
-			document.all.vazyat_box.style.visibility = "hidden";
-			document.all.vazyat_not_check.style.visibility = "hidden";
-			document.all.vazyat_not_check_label.style.color='#BBBBBB'
 		}
 	}
 
@@ -874,11 +946,11 @@ elseif Request.QueryString("act")="advancedSearch" then
 		response.write "document.all.order_kind_box.style.visibility = 'hidden';" & vbCrLf
 	End If
 
-	If request.form("check_marhale") = "on" then
-		If request.form("marhale_not_check") = "on" then
-			myCriteria = myCriteria & maybeAND & "NOT(step = " & request.form("marhale_box") & ")"
+	If request("check_marhale") = "on" then
+		If request("marhale_not_check") = "on" then
+			myCriteria = myCriteria & maybeAND & "NOT(step = " & request("marhale_box") & ")"
 		Else
-			myCriteria = myCriteria & maybeAND & "step = " & request.form("marhale_box") 
+			myCriteria = myCriteria & maybeAND & "step = " & request("marhale_box") 
 			response.write "document.all.marhale_not_check.checked = false;" & vbCrLf
 			response.write "document.all.marhale_not_check_label.style.color='#BBBBBB';"& vbCrLf
 		End If
@@ -888,22 +960,6 @@ elseif Request.QueryString("act")="advancedSearch" then
 		response.write "document.all.marhale_box.style.visibility = 'hidden';" & vbCrLf
 		response.write "document.all.marhale_not_check.style.visibility = 'hidden';" & vbCrLf
 		response.write "document.all.marhale_not_check_label.style.color='#BBBBBB';"& vbCrLf
-	End If
-
-	If request.form("check_vazyat") = "on" then
-		If request.form("vazyat_not_check") = "on" then
-			myCriteria = myCriteria & maybeAND & "NOT(status = " & request.form("vazyat_box") & ")"
-		Else
-			myCriteria = myCriteria & maybeAND & "status = " & request.form("vazyat_box") 
-			response.write "document.all.vazyat_not_check.checked = false;" & vbCrLf
-			response.write "document.all.vazyat_not_check_label.style.color='#BBBBBB';"& vbCrLf
-		End If
-		maybeAND=" AND "
-	Else
-		response.write "document.all.check_vazyat.checked = false;" & vbCrLf
-		response.write "document.all.vazyat_box.style.visibility = 'hidden';" & vbCrLf
-		response.write "document.all.vazyat_not_check.style.visibility = 'hidden';" & vbCrLf
-		response.write "document.all.vazyat_not_check_label.style.color='#BBBBBB';"& vbCrLf
 	End If
 
 	If request.form("check_salesperson") = "on" then
@@ -930,7 +986,7 @@ elseif Request.QueryString("act")="advancedSearch" then
 		response.write "document.all.telephone_box.style.visibility = 'hidden';" & vbCrLf
 	End If
 
-	If request.form("check_closed") = "on" then
+	If request("check_closed") = "on" then
 		myCriteria = myCriteria & maybeAND & "Quotes.Closed=0"
 	Else
 		If request("Submit")=" «ÌÌœ" then
@@ -1267,9 +1323,12 @@ elseif Request.QueryString("act")="getQuote" then
 				<TD align="left">‰«„ „‘ —Ì:</TD>
 				<TD align="right">
 					<!-- CustomerName -->
-					<INPUT TYPE="text" NAME="CustomerName" maxlength="50" size="25" tabIndex="3" value="<%=customerName%>"></TD>
-				<TD align="left"></TD>
+					<INPUT TYPE="text" NAME="CustomerName" maxlength="50" size="25" tabIndex="3" value="<%=customerName%>">
+				</TD>
+				<TD align="left">“„«‰  Ê·Ìœ:</TD>
 				<TD>
+					<input type="text" name="productionDuration" value="0" size="2">
+					<span>—Ê“</span>
 				</TD>
 				<TD align="left">«” ⁄·«„ êÌ—‰œÂ:</TD>
 				<TD><INPUT Type="Text" readonly NAME="SalesPerson" value="<%=CSRName%>" style='font-family: tahoma,arial ; font-size: 9pt; font-weight: bold; width: 100px' tabIndex="888">
@@ -1298,7 +1357,7 @@ elseif Request.QueryString("act")="getQuote" then
 				</td>
 				<td align="left">ﬁÌ„  ﬂ·:</td>
 				<td colspan="3">
-					<input type="text" name="totalPrice" id='totalPrice' style="background-color:#FED;border-width:0;" readonly="readonly">
+					<input type="text" name="totalPrice" id='totalPrice' style="background-color:#FED;border-width:0;" <%if hasProperty then response.write "readonly='readonly'"%>>
 				</td>
 			</TR>
 			
@@ -1515,10 +1574,10 @@ end function
 	defaultMarhale = "À»  ‘œÂ" ' 1
 	
 
-	mySQL="INSERT INTO Quotes (CreatedDate, CreatedBy, Customer, Closed, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, marhale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy, Notes,property) VALUES ('"&_
-	CreationDate & "', '"& session("ID") & "', '"& CustomerID & "', '0', N'"& sqlSafe(request.form("OrderDate")) & "', N'"& sqlSafe(request.form("OrderTime")) & "', N'"& sqlSafe(request.form("ReturnDate")) & "', N'"& sqlSafe(request.form("ReturnTime")) & "', N'"& sqlSafe(request.form("CompanyName")) & "', N'"& sqlSafe(request.form("CustomerName")) & "', N'"& sqlSafe(request.form("Telephone")) & "', N'"& sqlSafe(request.form("OrderTitle")) & "', N'"& orderTypeName & "', '"& orderType & "', N'" & defaultVaziat & "', N'" & defaultMarhale & "', N'"& sqlSafe(request.form("SalesPerson")) & "', 1, 1, N'"& CreationDate & "',  N'"& currentTime10() & "', '"& session("ID") & "', N'"& sqlSafe(request.form("Notes")) & "',N'" & myXML & "'); SELECT @@Identity AS NewQuote"
+	mySQL="SET NOCOUNT ON;INSERT INTO Quotes (CreatedDate, CreatedBy, Customer, Closed, order_date, order_time, return_date, return_time, company_name, customer_name, telephone, order_title, order_kind, Type, vazyat, marhale, salesperson, status, step, LastUpdatedDate, LastUpdatedTime, LastUpdatedBy, Notes,property,productionDuration, Qtty, price, PaperSize) VALUES ('"&_
+	CreationDate & "', '"& session("ID") & "', '"& CustomerID & "', '0', N'"& sqlSafe(request.form("OrderDate")) & "', N'"& sqlSafe(request.form("OrderTime")) & "', N'"& sqlSafe(request.form("ReturnDate")) & "', N'"& sqlSafe(request.form("ReturnTime")) & "', N'"& sqlSafe(request.form("CompanyName")) & "', N'"& sqlSafe(request.form("CustomerName")) & "', N'"& sqlSafe(request.form("Telephone")) & "', N'"& sqlSafe(request.form("OrderTitle")) & "', N'"& orderTypeName & "', '"& orderType & "', N'" & defaultVaziat & "', N'" & defaultMarhale & "', N'"& sqlSafe(request.form("SalesPerson")) & "', 1, 1, N'"& CreationDate & "',  N'"& currentTime10() & "', '"& session("ID") & "', N'"& sqlSafe(request.form("Notes")) & "',N'" & myXML & "', " & sqlSafe(request.form("productionDuration")) & "," & sqlSafe(request.form("qtty")) & ",'" & sqlSafe(request.form("totalPrice")) & "', N'" & sqlSafe(request.form("PaperSize")) & "'); SELECT SCOPE_IDENTITY() AS NewQuote;SET NOCOUNT OFF"
 
-	set RS1 = Conn.execute(mySQL).NextRecordSet
+	set RS1 = Conn.execute(mySQL)'.NextRecordSet
 	QuoteID = RS1 ("NewQuote")
 	RS1.close
 
@@ -1690,12 +1749,30 @@ elseif Request.QueryString("act")="editQuote" then
 		<td>
 			<input type="text" name="qtty" value="<%=rs2("qtty")%>" tabindex="9">
 		</td>
-		<TD align="left"> Ê÷ÌÕ«  »Ì‘ —:</TD>
-		<TD align="right" colspan="3"><TEXTAREA NAME="Notes" tabIndex="10" style="width:100%"><%=RS2("Notes")%></TEXTAREA></TD>
+		<td align="left">”«Ì“:</td>
+		<td>
+			<input type="text" value="<%=rs2("paperSize")%>" name="paperSize" tabIndex="14">
+		</td>
+		<td align="left">ﬁÌ„  ﬂ·:</td>
+		<td >
+			<input type="text" value="<%=rs2("price")%>" name="totalPrice" id='totalPrice' style="background-color:#FED;border-width:0;" <%if rs2("property")<>"" then response.write " readonly='readonly'"%>>
+		</td>
 	</TR>
 	<TR bgcolor="#CCCCCC">
+		<td> Œ„Ì‰ “„«‰  Ê·Ìœ:</td>
+		<td>
+			<input name="productionDuration" type="text" size="2" value="<%=RS2("productionDuration")%>">
+			<span>—Ê“</span><br>
+			<small>(’›— »Â „⁄‰Ì „⁄·Ê„ ‰»Êœ‰ “„«‰ «” )</small>
+		</td>
+		<TD align="left"> Ê÷ÌÕ«  »Ì‘ —:</TD>
+		<TD align="right" colspan="3"><TEXTAREA NAME="Notes" tabIndex="10" style="width:100%"><%=RS2("Notes")%></TEXTAREA></TD>
+		
+	</TR>
+	<tr bgcolor="#CCCCCC">
 		<TD align="left">„—Õ·Â:</TD>
-		<TD ><SELECT NAME="Marhale" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px' tabIndex="13" >
+		<TD>
+			<SELECT NAME="Marhale" style='font-family: tahoma,arial ; font-size: 8pt; font-weight: bold; width: 140px' tabIndex="13" >
 		<%
 		set RS_STEP=Conn.Execute ("SELECT * FROM QuoteSteps WHERE (IsActive=1)")
 		Do while not RS_STEP.eof	
@@ -1707,16 +1784,10 @@ elseif Request.QueryString("act")="editQuote" then
 		RS_STEP.close
 		set RS_STEP = nothing
 		%>
-		</SELECT></TD>
-		<td align="left">”«Ì“:</td>
-		<td>
-			<input type="text" value="<%=rs2("paperSize")%>" name="paperSize" tabIndex="14">
-		</td>
-		<td align="left">ﬁÌ„  ﬂ·:</td>
-		<td >
-			<input type="text" value="<%=rs2("price")%>" name="totalPrice" id='totalPrice' style="background-color:#FED;border-width:0;" readonly="readonly">
-		</td>
-	</TR>
+			</SELECT>
+		</TD>
+		<td colspan="4"></td>
+	</tr>
 	<tr bgcolor="#CCCCCC">
 		<td colspan="6">
 	<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
@@ -2108,8 +2179,9 @@ end function
 '	SimplexDuplex =	sqlSafe(request.form("SimplexDuplex"))
 	Price =			sqlSafe(request.form("totalPrice"))
 	Notes =			sqlSafe(request.form("Notes"))
+	productionDuration = sqlSafe(request.form("productionDuration"))
 
-	mySql="UPDATE Quotes SET Customer='"& request.form("CustomerID") & "', order_date= N'"& OrderDate & "', order_time= N'"& OrderTime & "', return_date= N'"& ReturnDate & "', return_time= N'"& ReturnTime & "', company_name= N'"& CompanyName & "', customer_name= N'"& CustomerName & "', telephone= N'"& Telephone & "', order_title= N'"& OrderTitle & "', order_kind= N'"& orderTypeName & "', Type= '"& orderType & "', step= "& Marhale & ",  marhale= N'"& stepName & "', salesperson= N'"& SalesPerson & "' , LastUpdatedDate=N'"& shamsitoday() & "' , LastUpdatedTime=N'"& currentTime10() & "', LastUpdatedBy=N'"& session("ID")& "', Notes= N'"& Notes & "', property=N'" & myXML & "', paperSize= N'"& Size & "', Price= N'"& Price & "'  WHERE (ID = N'"& quote & "')"	
+	mySql="UPDATE Quotes SET Customer='"& request.form("CustomerID") & "', order_date= N'"& OrderDate & "', order_time= N'"& OrderTime & "', return_date= N'"& ReturnDate & "', return_time= N'"& ReturnTime & "', company_name= N'"& CompanyName & "', customer_name= N'"& CustomerName & "', telephone= N'"& Telephone & "', order_title= N'"& OrderTitle & "', order_kind= N'"& orderTypeName & "', Type= '"& orderType & "', step= "& Marhale & ",  marhale= N'"& stepName & "', salesperson= N'"& SalesPerson & "' , LastUpdatedDate=N'"& shamsitoday() & "' , LastUpdatedTime=N'"& currentTime10() & "', LastUpdatedBy=N'"& session("ID")& "', Notes= N'"& Notes & "', property=N'" & myXML & "', paperSize= N'"& Size & "', Price= N'"& Price & "', productionDuration = " & productionDuration & "  WHERE (ID = N'"& quote & "')"	
 	', qtty= N'"& Qtty & "', paperSize= N'"& Size & "', SimplexDuplex= N'"& SimplexDuplex & "', Price= N'"& Price & "'
 	conn.Execute mySql
 	response.write quote &" UPDATED<br>"
