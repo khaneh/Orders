@@ -22,9 +22,10 @@ if not Auth(2 , 3) then NotAllowdToViewThisPage()
 	.CusTD2 {background-color: #DDDDDD; direction: LTR; text-align: right; font-size:9pt;}
 	.CusTD3 {background-color: #DDDDDD; direction: LTR; text-align: center; font-size:9pt;}
 	.CusTD4 {background-color: #CCCC66; direction: LTR; text-align: center; font-size:9pt;}
-	div.Right {float: right;width: 95px;}
+	div.Right {float: right;width: 110px;}
 	div.rightHead {float: right;padding-left: 20px;}
-	div.NewRow{clear: right;}
+	div.NewRow{clear: right;margin: 20px 10px 0 0;}
+	a.link{margin: 0 15px 0 0;}
 	td.empty {background-color: #C3DBEB !important;}
 </STYLE>
 <SCRIPT LANGUAGE='JavaScript'>
@@ -96,8 +97,10 @@ if request("act")="" then
 	rs.close
 	%>
 	</div>
-	<div>
+	<div class="NewRow">
 		<input type="submit" name="submit" value=" «ÌÌœ">
+		<a class="link" href="Inquiry.asp?act=advancedSearch&Submit= «ÌÌœ&check_marhale=on&marhale_not_check=on&marhale_box=4&check_closed=on">—œ Ê ”›«—‘ ‰‘œÂùÂ«</a>
+		
 	</div>
 </form>
 <div style="clear: both;margin:20px 0 0 0;">
