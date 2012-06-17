@@ -133,7 +133,7 @@ set rs=Conn.Execute("select * from QuoteSteps where IsActive=1")
 while not rs.eof
 
 	fromDate=""
-	toDate=shamsiToday()
+	toDate="9999/99/99" 'shamsiToday()
 	orderTypes=""
 	condition="" 
 	if request("submit")="ÊÇííÏ" then 
