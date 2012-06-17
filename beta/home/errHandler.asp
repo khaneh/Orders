@@ -3,7 +3,7 @@
 <HEAD>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1256">
 <meta http-equiv="Content-Language" content="fa">
-<TITLE>خظا!</TITLE>
+<TITLE>خطا!</TITLE>
 </head>
 <BODY>
 <CENTER><H3>ظاهرا اشكالي پيش آمده است</H3>
@@ -144,7 +144,7 @@ errSQL = "SELECT id FROM errLog where errDate='" & rdate & "' and errTime='" & r
 
 set errRS = errConn.Execute (errSQL)
 	if not errRS.EOF then
-		response.write "<CENTER>براي پيگيري بعدي اين شماره و نحوه رسيدن به اين اشكال را يادداشت كنيد:  " & 		"<BR><div dir=ltr style='font:17pt'> " & errRS("id") & "</div></CENTER><BR>"
+		response.write "<CENTER style='direction:rtl;'>لطفا شماره زير را به صميمي ايميل كنيد، ممنون از همكاري شما:  " & 		"<BR><div dir=ltr style='font:17pt'> " & errRS("id") & "</div></CENTER><BR>"
 		
 	end if
 'Show All Server Variables
