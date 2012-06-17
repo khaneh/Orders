@@ -1,4 +1,11 @@
 <%@LANGUAGE="VBSCRIPT" CODEPAGE="1256"%><BR><BR>
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1256">
+<meta http-equiv="Content-Language" content="fa">
+<TITLE>خظا!</TITLE>
+</head>
+<BODY>
 <CENTER><H3>ظاهرا اشكالي پيش آمده است</H3>
 <!--ممكن است اين اشكال ناشي از   ورودي غلط توسط شما باشد.<BR><BR>
 لطفا <A HREF="javascript:history.go(-1)">دوباره سعي كنيد، </A>يا در صورت باقي ماندن اشكال مدير سيستم را مطلع نماييد.
@@ -146,3 +153,4 @@ set errRS = errConn.Execute (errSQL)
 'next 
  %>
 </div>
+</BODY>
