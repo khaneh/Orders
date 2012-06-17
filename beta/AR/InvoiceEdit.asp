@@ -865,15 +865,16 @@ elseif request("act")="approveInvoice" then
 			'-------------------------------------------------------------------------
 			mySQL="select distinct sales.item, sales.description, sales.appQtty,pik.itemID,pik.itemName,pik.qtty from (select invoiceLines.item,max(invoiceLines.description) as description,sum(invoiceLines.appQtty) as appQtty, InventoryInvoiceRelations.inventoryItem from InvoiceLines inner join Invoices on invoices.ID=invoiceLines.Invoice inner join InventoryInvoiceRelations on InventoryInvoiceRelations.invoiceItem=invoiceLines.Item WHERE Invoices.id=" & InvoiceID & " group by invoiceLines.item, InventoryInvoiceRelations.inventoryItem) as sales full outer join (SELECT InventoryPickuplistItems.itemID, max(InventoryPickuplistItems.ItemName) AS ItemName, sum(InventoryPickuplistItems.Qtty) AS Qtty, InventoryInvoiceRelations.invoiceItem FROM InventoryPickuplistItems INNER JOIN InventoryPickuplists ON InventoryPickuplistItems.pickupListID = InventoryPickuplists.id INNER JOIN InvoiceOrderRelations ON InventoryPickuplistItems.Order_ID = InvoiceOrderRelations.[Order] inner join invoices on InvoiceOrderRelations.invoice=invoices.id inner join InventoryInvoiceRelations on InventoryInvoiceRelations.inventoryItem=InventoryPickuplistItems.itemID WHERE NOT InventoryPickuplists.Status = N'del' and InventoryPickuplistItems.CustomerHaveInvItem=0 and Invoices.id=" & InvoiceID & " group by InventoryPickuplistItems.itemID, InventoryInvoiceRelations.invoiceItem  ) as pik on pik.itemID=sales.inventoryItem or pik.invoiceItem=sales.item"
 			set rs=Conn.Execute (mySQL)
+			errmsg=""
 			msg=""
 			while not rs.eof
 				if IsNull(rs("appQtty")) then 
-					msg = msg & "»—«Ì ÕÊ«·ÂùÌ "  & rs("itemName") & " ‘„« ÂÌç ¬Ì „Ì œ— ›«ﬂ Ê— À»  ‰ﬂ—œÌœ<br>"
+					errmsg = errmsg & "»—«Ì ÕÊ«·ÂùÌ "  & rs("itemName") & " ‘„« ÂÌç ¬Ì „Ì œ— ›«ﬂ Ê— À»  ‰ﬂ—œÌœ<br>"
 				else
 					if IsNull(rs("qtty")) then 
-						msg = msg & "»—«Ì " & rs("description") & " ‘„« ÂÌç ÕÊ«·Âù«Ì ’«œ— ‰ﬂ—œÂù«Ìœ<br>"
+						errmsg = errmsg & "»—«Ì " & rs("description") & " ‘„« ÂÌç ÕÊ«·Âù«Ì ’«œ— ‰ﬂ—œÂù«Ìœ<br>"
 					else
-						if CDbl(rs("qtty")) <> CDbl(rs("appQtty")) then msg = msg & " ⁄œ«œ ÕÊ«·Â <b>" & rs("itemName") & "</b> »«  ⁄œ«œ <b>" & rs("description") & "</b> „€«Ì— «” .<br>" 
+						if CDbl(rs("qtty")) <> CDbl(rs("appQtty")) then errmsg = errmsg & " ⁄œ«œ ÕÊ«·Â <b>" & rs("itemName") & "</b> »«  ⁄œ«œ <b>" & rs("description") & "</b> „€«Ì— «” .<br>" 
 					end if
 				end if
 				
@@ -888,10 +889,10 @@ elseif request("act")="approveInvoice" then
 			set rs=Conn.Execute (mySQL)
 			while not rs.eof
 				if IsNull(rs("appQtty")) then 
-					msg = msg & "»—«Ì Œœ„«  "  & rs("typeName") & " ‘„« ÂÌç ¬Ì „Ì œ— ›«ﬂ Ê— À»  ‰ﬂ—œÌœ<br>"
+					errmsg = errmsg & "»—«Ì Œœ„«  "  & rs("typeName") & " ‘„« ÂÌç ¬Ì „Ì œ— ›«ﬂ Ê— À»  ‰ﬂ—œÌœ<br>"
 				else
 					if IsNull(rs("qtty")) then 
-						msg = msg & "»—«Ì " & rs("description") & " ‘„« ÂÌç œ—ŒÊ«”  Œœ„« Ì À»  ‰ﬂ—œÂù«Ìœ<br>"
+						errmsg = errmsg & "»—«Ì " & rs("description") & " ‘„« ÂÌç œ—ŒÊ«”  Œœ„« Ì À»  ‰ﬂ—œÂù«Ìœ<br>"
 					else
 						if CDbl(rs("qtty")) <> CDbl(rs("appQtty")) then msg = msg & " ⁄œ«œ  <b>" & rs("typeName") & "</b> »«  ⁄œ«œ <b>" & rs("description") & "</b> „€«Ì— «” .<br>" 
 					end if
@@ -900,9 +901,9 @@ elseif request("act")="approveInvoice" then
 				rs.moveNext
 			wend
 			set rs=nothing
-			if (msg<>"") then
+			if (errmsg<>"") then
 				Conn.close
-				response.redirect "?errMsg=" & Server.URLEncode(msg)
+				response.redirect "?errMsg=" & Server.URLEncode(errmsg)
 			end if 
 			'-------------------------------------------------------------------------
 			'---------------------------------------------
@@ -937,7 +938,7 @@ elseif request("act")="approveInvoice" then
 	mySQL="UPDATE Invoices SET Approved=1, ApprovedDate=N'"& shamsiToday() & "', ApprovedBy='"& session("ID") & "' WHERE (ID='"& InvoiceID & "')"
 	conn.Execute(mySQL)
 
-	response.redirect "AccountReport.asp?act=showInvoice&invoice="& InvoiceID 
+	response.redirect "AccountReport.asp?act=showInvoice&invoice="& InvoiceID & "&msg=" & Server.URLEncode(msg)
 '-------------------------------------------------------------------------------------------------------
 elseif request("act")="IssueInvoice" then
 
@@ -1005,15 +1006,15 @@ elseif request("act")="IssueInvoice" then
 	'---- CHECK pickup list
 	mySQL="select distinct sales.item, sales.description, sales.appQtty,pik.itemID,pik.itemName,pik.qtty from (select invoiceLines.item,max(invoiceLines.description) as description,sum(invoiceLines.appQtty) as appQtty, InventoryInvoiceRelations.inventoryItem from InvoiceLines inner join Invoices on invoices.ID=invoiceLines.Invoice inner join InventoryInvoiceRelations on InventoryInvoiceRelations.invoiceItem=invoiceLines.Item WHERE Invoices.id=" & InvoiceID & " group by invoiceLines.item, InventoryInvoiceRelations.inventoryItem) as sales full outer join (SELECT InventoryPickuplistItems.itemID, max(InventoryPickuplistItems.ItemName) AS ItemName, sum(InventoryPickuplistItems.Qtty) AS Qtty, InventoryInvoiceRelations.invoiceItem FROM InventoryPickuplistItems INNER JOIN InventoryPickuplists ON InventoryPickuplistItems.pickupListID = InventoryPickuplists.id INNER JOIN InvoiceOrderRelations ON InventoryPickuplistItems.Order_ID = InvoiceOrderRelations.[Order] inner join invoices on InvoiceOrderRelations.invoice=invoices.id inner join InventoryInvoiceRelations on InventoryInvoiceRelations.inventoryItem=InventoryPickuplistItems.itemID WHERE NOT InventoryPickuplists.Status = N'del' and InventoryPickuplistItems.CustomerHaveInvItem=0 and Invoices.id=" & InvoiceID & " group by InventoryPickuplistItems.itemID, InventoryInvoiceRelations.invoiceItem  ) as pik on pik.itemID=sales.inventoryItem or pik.invoiceItem=sales.item"
 	set rs=Conn.Execute (mySQL)
-	msg=""
+	errMsg=""
 	while not rs.eof
 		if IsNull(rs("appQtty")) then 
-			msg = msg & "»—«Ì ÕÊ«·ÂùÌ "  & rs("itemName") & " ‘„« ÂÌç ¬Ì „Ì œ— ›«ﬂ Ê— À»  ‰ﬂ—œÌœ<br>"
+			errMsg = errMsg & "»—«Ì ÕÊ«·ÂùÌ "  & rs("itemName") & " ‘„« ÂÌç ¬Ì „Ì œ— ›«ﬂ Ê— À»  ‰ﬂ—œÌœ<br>"
 		else
 			if IsNull(rs("qtty")) then 
-				msg = msg & "»—«Ì " & rs("description") & " ‘„« ÂÌç ÕÊ«·Âù«Ì ’«œ— ‰ﬂ—œÂù«Ìœ<br>"
+				errMsg = errMsg & "»—«Ì " & rs("description") & " ‘„« ÂÌç ÕÊ«·Âù«Ì ’«œ— ‰ﬂ—œÂù«Ìœ<br>"
 			else
-				if CDbl(rs("qtty")) <> CDbl(rs("appQtty")) then msg = msg & " ⁄œ«œ ÕÊ«·Â <b>" & rs("itemName") & "</b> »«  ⁄œ«œ <b>" & rs("description") & "</b> „€«Ì— «” .<br>" 
+				if CDbl(rs("qtty")) <> CDbl(rs("appQtty")) then errMsg = errMsg & " ⁄œ«œ ÕÊ«·Â <b>" & rs("itemName") & "</b> »«  ⁄œ«œ <b>" & rs("description") & "</b> „€«Ì— «” .<br>" 
 			end if
 		end if
 		
@@ -1027,10 +1028,10 @@ elseif request("act")="IssueInvoice" then
 	set rs=Conn.Execute (mySQL)
 	while not rs.eof
 		if IsNull(rs("appQtty")) then 
-			msg = msg & "»—«Ì Œœ„«  "  & rs("typeName") & " ‘„« ÂÌç ¬Ì „Ì œ— ›«ﬂ Ê— À»  ‰ﬂ—œÌœ<br>"
+			errMsg = errMsg & "»—«Ì Œœ„«  "  & rs("typeName") & " ‘„« ÂÌç ¬Ì „Ì œ— ›«ﬂ Ê— À»  ‰ﬂ—œÌœ<br>"
 		else
 			if IsNull(rs("qtty")) then 
-				msg = msg & "»—«Ì " & rs("description") & " ‘„« ÂÌç œ—ŒÊ«”  Œœ„« Ì À»  ‰ﬂ—œÂù«Ìœ<br>"
+				errMsg = errMsg & "»—«Ì " & rs("description") & " ‘„« ÂÌç œ—ŒÊ«”  Œœ„« Ì À»  ‰ﬂ—œÂù«Ìœ<br>"
 			else
 				if CDbl(rs("qtty")) <> CDbl(rs("appQtty")) then msg = msg & " ⁄œ«œ  <b>" & rs("typeName") & "</b> »«  ⁄œ«œ <b>" & rs("description") & "</b> „€«Ì— «” .<br>" 
 			end if
@@ -1039,9 +1040,9 @@ elseif request("act")="IssueInvoice" then
 		rs.moveNext
 	wend
 	set rs=nothing
-	if (msg<>"") then
+	if (errMsg<>"") then
 		Conn.close
-		response.redirect "?errMsg=" & Server.URLEncode(msg)
+		response.redirect "?errMsg=" & Server.URLEncode(errMsg)
 	end if 
 	'---------------------------------------------
 	
@@ -1116,7 +1117,7 @@ elseif request("act")="IssueInvoice" then
 	end if
 	conn.Execute(mySQL)
 	conn.close
-	response.redirect "AccountReport.asp?act=showInvoice&invoice="& InvoiceID 
+	response.redirect "AccountReport.asp?act=showInvoice&invoice="& InvoiceID & "&msg=" & Server.URLEncode(msg)
 '---------------------------------------------------------------------------------------------------------
 elseif request("act")="voidInvoice" then
 	if not Auth(6 , "F") then		
