@@ -102,7 +102,7 @@ if request("od")<>"" then
 		<center><h2>Ã“ÌÌ«  ”›«—‘ Œ—Ìœ </h2>
 		‘„«—Â ”›«—‘: <%=ordID%>
 		</center>
-		<TABLE dir=rtl align=center width=600>
+		<TABLE dir=rtl align=center width=680>
 		<TR bgcolor="#CCCCCC">
 			<TD width=50%>
 				<li>‰Ê⁄ ﬂ«—: <%=otypeName%><br>
@@ -188,11 +188,16 @@ if request("od")<>"" then
 		<TR>
 			<TD>
 				<%
-				set RSOD=Conn.Execute ("SELECT * FROM purchaseOrderStatus WHERE Ord_ID = "& ordID )	
+				set RSOD=Conn.Execute ("SELECT purchaseOrderStatus.*,users.realName FROM purchaseOrderStatus left outer join users on purchaseOrderStatus.user_id=users.id WHERE Ord_ID = "& ordID )	
 				'response.write "SELECT * FROM purchaseOrderStatus WHERE Ord_ID = "& ordID 
 				Do while not RSOD.eof
 					%>
-					- <span dir=ltr><%=RSOD("StatusDate")%></span> <span dir=ltr>(<%=RSOD("StatusTime")%>)</span> : <%=RSOD("StatusDetail")%><br>
+					<span dir=ltr><%=RSOD("StatusDate")%></span> 
+					<span dir=ltr>(<%=RSOD("StatusTime")%>)</span> : <%=RSOD("StatusDetail")%>
+					<%if not IsNull(RSOD("realName")) then %>
+					<small style="color:#44F;">(<%=RSOD("realName")%>)</small>
+					<%end if%>
+					<br>
 					<%
 				RSOD.moveNext
 				Loop
@@ -341,7 +346,7 @@ if request.form("Submit")="À»  Ê÷⁄Ì " then
 		orderStatus = "NOT CHANGED"
 	end if
 
-	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusTime, statusDate, statusCode, StatusDetail) VALUES ("& OrdID & ", '"& currentTime10() & "', '"& stDate & "', "& stid & ", N'"& stdetl & "' )")
+	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusTime, statusDate, statusCode, StatusDetail,user_id) VALUES ("& OrdID & ", '"& currentTime10() & "', '"& stDate & "', "& stid & ", N'"& stdetl & "' ," & session("ID") & ")")
 
 	if NOT orderStatus = "NOT CHANGED" then 
 		Conn.Execute ("update purchaseOrders SET status = '"& orderStatus & "' where id = "& OrdID )	

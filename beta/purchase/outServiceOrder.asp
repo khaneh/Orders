@@ -330,14 +330,14 @@ if request.form("Submit")="À»  ”›«—‘" then
 		response.write Percent & " % <br>"
 	next
 
-	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusTime, statusDate, statusCode, StatusDetail) VALUES ("& OrdID & ", '"& currentTime10() & "', N'"& ordDate & "', "& 0 & ", N' «—ÌŒ «ÌÃ«œ' )")
+	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusTime, statusDate, statusCode, StatusDetail, user_id) VALUES ("& OrdID & ", '"& currentTime10() & "', N'"& ordDate & "', "& 0 & ", N' «—ÌŒ «ÌÃ«œ' ," & session("ID") & ")")
 '	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusTime, statusDate, statusCode, StatusDetail) VALUES ("& OrdID & ", N'"& Date1 & "', "& 1 & ", N'œ— «Ì‰  «—ÌŒ »«Ìœ «—”«· ‘Êœ' )")
 '	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusTime, statusDate, statusCode, StatusDetail) VALUES ("& OrdID & ", N'"& Date2 & "', "& 2 & ", N'œ— «Ì‰  «—ÌŒ »«Ìœ œ—Ì«›  ‘Êœ' )")
 '	
 '	Changed By Kid 821224 Because There was An Error : Number of VALUES does not match the number of Fields.
 '
-	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusDate, statusCode, StatusDetail) VALUES ("& OrdID & ", N'"& Date1 & "', "& 1 & ", N'œ— «Ì‰  «—ÌŒ »«Ìœ «—”«· ‘Êœ' )")
-	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusDate, statusCode, StatusDetail) VALUES ("& OrdID & ", N'"& Date2 & "', "& 2 & ", N'œ— «Ì‰  «—ÌŒ »«Ìœ œ—Ì«›  ‘Êœ' )")
+	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusDate, statusCode, StatusDetail,user_id) VALUES ("& OrdID & ", N'"& Date1 & "', "& 1 & ", N'œ— «Ì‰  «—ÌŒ »«Ìœ «—”«· ‘Êœ' ," & session("id") & ")")
+	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusDate, statusCode, StatusDetail,user_id) VALUES ("& OrdID & ", N'"& Date2 & "', "& 2 & ", N'œ— «Ì‰  «—ÌŒ »«Ìœ œ—Ì«›  ‘Êœ' ," & session("id") & ")")
 	
 
 	response.redirect "outServiceTrace.asp?od=" & ordID
@@ -389,9 +389,9 @@ if request.form("Submit")="À»  ”›«—‘ ﬂ«·«" then
 		response.write Percent & " % <br>"
 	next
 
-	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusDate, statusCode, StatusDetail) VALUES ("& OrdID & ", '"& ordDate & "', "& 0 & ", N' «—ÌŒ «ÌÃ«œ' )")
-	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusDate, statusCode, StatusDetail) VALUES ("& OrdID & ", '"& Date1 & "', "& 1 & ", N'œ— «Ì‰  «—ÌŒ »«Ìœ «—”«· ‘Êœ' )")
-	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusDate, statusCode, StatusDetail) VALUES ("& OrdID & ", '"& Date2 & "', "& 2 & ", N'œ— «Ì‰  «—ÌŒ »«Ìœ œ—Ì«›  ‘Êœ' )")
+	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusDate, statusCode, StatusDetail,user_id,statusTime) VALUES ("& OrdID & ", '"& ordDate & "', "& 0 & ", N' «—ÌŒ «ÌÃ«œ' ," & session("id") & ", '"& currentTime10() & "')")
+	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusDate, statusCode, StatusDetail,user_id) VALUES ("& OrdID & ", '"& Date1 & "', "& 1 & ", N'œ— «Ì‰  «—ÌŒ »«Ìœ «—”«· ‘Êœ' ," & session("id") & ")")
+	conn.Execute ("INSERT INTO purchaseOrderStatus (Ord_ID, statusDate, statusCode, StatusDetail,user_id) VALUES ("& OrdID & ", '"& Date2 & "', "& 2 & ", N'œ— «Ì‰  «—ÌŒ »«Ìœ œ—Ì«›  ‘Êœ' ," & session("id") & ")")
 	
 
 	response.redirect "outServiceTrace.asp?od=" & ordID
