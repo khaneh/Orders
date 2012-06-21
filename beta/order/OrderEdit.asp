@@ -488,8 +488,9 @@ sub showKeyEdit(key)
 		  thisLabel= myKey.GetAttribute("label")
 		  thisGroup= myKey.GetAttribute("group")
 		  hasValue=false
-		  	set thisValue= orderProp.SelectNodes(key & "[@id='" & id & "' and @name='" & thisName & "']")
-		  	if thisValue.length>0 then hasValue=true
+	  	set thisValue= orderProp.SelectNodes(key & "[@id='" & id & "' and @name='" & thisName & "']")
+	  	if thisValue.length>0 then hasValue=true
+	  		
 ' 		  response.write hasValue & "<br>"
 		  if (oldGroup<>thisGroup and oldID=id and oldGroup <> "---first---") then thisRow = thisRow &  "</div>"
 		  if oldGroup<>thisGroup or oldID<>id then 
@@ -498,11 +499,25 @@ sub showKeyEdit(key)
 				thisRow = thisRow & "<input type='checkbox' value='" & id & "' name='" & thisGroup & "-disBtn' onclick='disGroup(this);"
 				if myKey.GetAttribute("blur")="yes" then thisRow = thisRow & " calc_" & myKey.GetAttribute("group") & "(this);"
 				thisRow = thisRow & "'"
+				
 				if hasValue then 
 					thisRow = thisRow & " checked='checked'"
 					disText=""
 				else
-					disText=" disabled='disabled' "
+					hasGroupValue = false
+					for each grpItem in typeProp.SelectNodes(key & "[@group='" & thisGroup & "']")
+						set grpValue = orderProp.SelectNodes(key & "[@id='" & id & "' and @name='" & grpItem.GetAttribute("name") & "']")
+						response.write thisGroup & id & "," & grpItem.GetAttribute("name") & ":" & grpValue.length & "<br>"
+						if grpValue.length > 0 then hasGroupValue = true
+					next
+					
+					set grpValue = nothing
+					if hasGroupValue then 
+						thisRow = thisRow & " checked='checked'"
+						disText=""
+					else
+						disText=" disabled='disabled' "
+					end if
 				end if	
 				thisRow = thisRow & ">"
 			else
