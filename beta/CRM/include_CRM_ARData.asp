@@ -24,6 +24,7 @@
 	  <Tr>
 		<Td colspan="2" valign="center" align="center">
 			<BR>
+			<% if Auth(2 , 9) then %><input class="GenButton" type="Button" value="ÑİÊä ÇÓÊÚáÇã"onclick="window.open('../order/Inquiry.asp?act=getType&selectedCustomer=<%=cusID%>');" <% if AccountIsDisabled then %> disabled <% end if %>> <% end if %>
 			<% if Auth(2 , 1) then %><input class="GenButton" type="Button" value="ÑİÊä ÓİÇÑÔ"onclick="window.open('../order/OrderInput.asp?act=getType&selectedCustomer=<%=cusID%>');" <% if AccountIsDisabled then %> disabled <% end if %>> <% end if %> 
 			<% if Auth(6 , 1) then %><input class="GenButton" type="button" value="æÑæÏ İÇßÊæÑ" onclick="window.open('../AR/InvoiceInput.asp?act=selectOrder&selectedCustomer=<%=cusID%>');" <% if AccountIsDisabled then %> disabled <% end if %>> <% end if %> 
 			<% if Auth(6 , 2) then %><input class="GenButton" type="button" value="æÑæÏ ÇÚáÇãíå" onclick="window.open('../AR/MemoInput.asp?act=getMemo&selectedCustomer=<%=cusID%>');" <% if AccountIsDisabled then %> disabled <% end if %>> <% end if %> 
