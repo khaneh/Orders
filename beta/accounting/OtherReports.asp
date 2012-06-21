@@ -428,6 +428,9 @@ elseif request("act")="cash" then
 	fmonth(9)="œÌ"
 	fmonth(10)="»Â„‰"
 	fmonth(11)="«”›‰œ"
+	
+	'----------------------------------------------------------------------------------------
+	
 	function echoTD(num,sys)
 		result="<td style=""direction: ltr;text-align: right;color:"
 		if num<0 then 
@@ -479,6 +482,12 @@ elseif request("act")="cash" then
 			else
 				result = result & "<a target=î_blankî href=""AccountInfo.asp?act=account&id=11000&fromDate=" & Server.URLEncode(ref2&"01") & "&DateTo=" & Server.URLEncode(ref2&"31") & """>"
 			end if
+		case "bnk"
+			if myMonth<>"" then 
+				result = result & "<a target=î_blankî href=""AccountInfo.asp?act=account&id=12000&fromDate=" & Server.URLEncode(ref2) & "&DateTo=" & Server.URLEncode(ref2) & """>"
+			else
+				result = result & "<a target=î_blankî href=""AccountInfo.asp?act=account&id=12000&fromDate=" & Server.URLEncode(ref2&"01") & "&DateTo=" & Server.URLEncode(ref2&"31") & """>"
+			end if
 		case else
 			if mid(sys,1,4)="bank" then 
 				if myMonth<>"" then 
@@ -491,20 +500,20 @@ elseif request("act")="cash" then
 			end if
 		end select
 		result = result & Separate(num) 
-		if sys="ar" or sys="ar-full" or sys="ap" or sys="ap-full" or sys="cash" then result = result & "</a>"
+		if sys="ar" or sys="ar-full" or sys="ap" or sys="ap-full" or sys="cash" or sys="bnk" then result = result & "</a>"
 		result = result & "</td>"
 		echoTD = result
 	end function
 	if myMonth<>"" then 
-		mySQL="select * from (select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17003 group by Ref2,glAccount union select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17004 group by Ref2,glAccount union select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42001 group by Ref2,glAccount union select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42004 group by Ref2,glAccount union select sum(Amount) as Amount, GLDocDate collate SQL_Latin1_General_CP1_CI_AS as ref2,11000 as glGroup from EffectiveGLRows where gl=" & OpenGL & " and SUBSTRING(GLDocDate,1,8)='" & myMonth & "' and isCredit=0 and glAccount in (11004,11005,11006,11007) group by GLDocDate) dev order by Ref2,GLAccount"
+		mySQL="select * from (select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17003 group by Ref2,glAccount union select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17004 group by Ref2,glAccount union select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17016 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17016 group by Ref2,glAccount union select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42001 group by Ref2,glAccount union select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42004 group by Ref2,glAccount union select sum(amount) as amount,ref2,glAccount from (select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42011 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42011 group by Ref2,glAccount union select sum(Amount) as Amount, GLDocDate collate SQL_Latin1_General_CP1_CI_AS as ref2,11000 as GLAccount from EffectiveGLRows where gl=" & OpenGL & " and SUBSTRING(GLDocDate,1,8)='" & myMonth & "' and isCredit=0 and glAccount in (11004,11005,11006,11007) group by GLDocDate union select sum(2*(.5-cast(isCredit as int))*amount) as amount, d.ref2 collate SQL_Latin1_General_CP1_CI_AS as ref2,12000 as GLAccount from EffectiveGLRows inner join (select GLDocDate as ref2 from EffectiveGLRows where GL=" & OpenGL & " and glAccount between 12000 and 12999 and  SUBSTRING(GLDocDate,1,8)='" & myMonth & "' group by GLDocDate) d on GLDocDate<=d.ref2 where GL=" & OpenGL & " and glAccount between 12000 and 12999 group by d.ref2) dev order by Ref2,GLAccount"
 		
 		'"select * from (select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) union select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) union select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) union select Amount,Ref2,ref1,GLAccount,max(description) as description from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' and SUBSTRING(Ref2,1,8)='" & myMonth & "' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) dev order by Ref2,GLAccount"
 	else
-		mySQL="select * from (select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17003 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17004 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42001 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42004 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(GLDocDate,1,8) collate SQL_Latin1_General_CP1_CI_AS as ref2,11000 as glGroup from EffectiveGLRows where gl=" & OpenGL & " and isCredit=0 and glAccount in (11004,11005,11006,11007) group by SUBSTRING(GLDocDate,1,8)) drv order by Ref2,GLAccount"
+		mySQL="select * from (select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17003 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17003 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17004 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17004 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=17016 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv17016 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42001 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42001 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42004 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42004 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(Ref2,1,8) as Ref2,GLAccount from ( select Amount,Ref2,GLAccount from EffectiveGLRows where GL=" & OpenGL & " and GLAccount=42011 and Ref1<>'' group by GLAccount, Tafsil, Amount, Ref1, Ref2, GL HAVING (COUNT(Ref1) % 2 = 1) ) drv42011 group by SUBSTRING(Ref2,1,8),GLAccount union select sum(Amount) as Amount, SUBSTRING(GLDocDate,1,8) collate SQL_Latin1_General_CP1_CI_AS as ref2,11000 as GLAccount from EffectiveGLRows where gl=" & OpenGL & " and isCredit=0 and glAccount in (11004,11005,11006,11007) group by SUBSTRING(GLDocDate,1,8) union select sum(2*(.5-cast(isCredit as int))*amount) as amount, d.ref2,12000 as GLAccount from EffectiveGLRows inner join (select SUBSTRING(GLDocDate,1,8) collate SQL_Latin1_General_CP1_CI_AS as ref2 from EffectiveGLRows where GL=" & OpenGL & " and glAccount between 12000 and 12999 group by SUBSTRING(GLDocDate,1,8)) d on GLDocDate<d.ref2+'32' where GL=" & OpenGL & " and glAccount between 12000 and 12999 group by d.ref2) drv order by Ref2,GLAccount"
 	end if
 	'response.write mySQL
 	set rs=Conn.Execute(mySQL)
-	
+	amount12000=0
 		'Conn.Close
 		'response.redirect "?errMsg=" & Server.URLEncode("Œÿ«Ì ⁄ÃÌ»! çÌ“Ì ÅÌœ« ‰‘œ")
 	
@@ -514,12 +523,18 @@ elseif request("act")="cash" then
 				amount17003 = CDbl(rs("Amount"))
 			case "17004":
 				amount17004 = CDbl(rs("Amount"))
+			case "17016":
+				amount17016 = CDbl(rs("Amount"))
 			case "42001":
 				amount42001 = CDbl(rs("Amount"))
 			case "42004":
-				amount42004 = CDbl(rs("Amount"))	
+				amount42004 = CDbl(rs("Amount"))
+			case "42011":
+				amount42011 = CDbl(rs("Amount"))	
 			case "11000":
-				amount11000 = CDbl(rs("Amount"))		
+				amount11000 = CDbl(rs("Amount"))
+			case "12000":
+				amount12000 = CDbl(rs("Amount"))		
 		end select
 		
 		rs.MoveNext
@@ -535,60 +550,70 @@ elseif request("act")="cash" then
 	<table>
 		<tr class="RepTableHeader">
 			<td rowspan="2" colspan="2">&nbsp;</td>
-			<td colspan="2">œ— Ã—Ì«‰ Ê’Ê·</td>
+			<td colspan="3">œ— Ã—Ì«‰ Ê’Ê·</td>
 			<td rowspan="2">Ã„⁄ œ— Ã—Ì«‰</td>
-			<td rowspan="2">’‰œÊﬁ</td>
-			<td colspan="2">«”‰«œ Å—œ«Œ ‰Ì</td>
+			<td colspan="3">«”‰«œ Å—œ«Œ ‰Ì</td>
 			<td rowspan="2">Ã„⁄ «”‰«œ Å—œ«Œ ‰Ì</td>
-			<td rowspan="2">ﬂ”—Ì</td>
+			<td rowspan="2"> —«“ çﬂ</td>
+			<td rowspan="2">’‰œÊﬁ</td>
+			<td rowspan="2">»«‰ﬂ —Ê“</td>
+			<td rowspan="2">»«‰ﬂ ÅÌ‘ù»Ì‰Ì</td>
 		</tr>
 		<tr class="RepTableHeader">
 			<td>17003</td>
 			<td>17004</td>
+			<td>17016</td>
 			<td>42001</td>
 			<td>42004</td>
+			<td>42011</td>
 		</tr>
 		<%
 		rowColor="RepTR0"
 		do while not rs.eof
-		ref2=rs("Ref2")
-		if rowColor="RepTR0" then 
-			rowColor="RepTR1"
-		else
-			rowColor="RepTR0"
-		end if
+			ref2=rs("Ref2")
+			if rowColor="RepTR0" then 
+				rowColor="RepTR1"
+			else
+				rowColor="RepTR0"
+			end if
 		%>
 		<tr class="<%=rowColor%>">
 			<%
-			yyyy=mid(ref2,1,4)
-			if myMonth<>"" then 
-				mm=ref2
-			else
-				mm=fmonth(cint(mid(ref2,6,2))-1)
-			end if
-			amount17003=0
-			amount17004=0
-			amount42001=0
-			amount42004=0
-			amount11000=0
-			
-			call setValue()
+				yyyy=mid(ref2,1,4)
+				if myMonth<>"" then 
+					mm=ref2
+				else
+					mm=fmonth(cint(mid(ref2,6,2))-1)
+				end if
+				amount17003=0
+				amount17004=0
+				amount17016=0
+				amount42001=0
+				amount42004=0
+				amount42011=0
+				amount11000=0
+				
+				call setValue()
 			%>
 			<td title="<%=ref2%>"><%=yyyy%></td>
-			<%if myMonth<>"" then%>
+				<%if myMonth<>"" then%>
 			<td><%=mm%></td>
-			<%else%>
+				<%else%>
 			<td title='»—«Ì „‘«ÂœÂ Ã“∆Ì«  ﬂ·Ìﬂ ﬂ‰Ìœ'><a href="otherReports.asp?act=cash&month=<%=replace(mid(ref2,1,8),"/","-")%>"><%=mm%></a></td>
 			<%
-			end if
-			response.write echoTD(amount17003,"bank17003")
-			response.write echoTD(amount17004,"bank17004")
-			response.write echoTD(amount17003+amount17004,"")
-			response.write echoTD(amount11000,"cash")
-			response.write echoTD(amount42001,"bank42001")
-			response.write echoTD(amount42004,"bank42004")
-			response.write echoTD(amount42001+amount42004,"")
-			response.write echoTD(amount17003+amount17004-(amount42001+amount42004),"")
+				end if
+				response.write echoTD(amount17003,"bank17003")
+				response.write echoTD(amount17004,"bank17004")
+				response.write echoTD(amount17016,"bank17016")
+				response.write echoTD(amount17003+amount17004+amount17016,"")
+				response.write echoTD(amount42001,"bank42001")
+				response.write echoTD(amount42004,"bank42004")
+				response.write echoTD(amount42011,"bank42011")
+				response.write echoTD(amount42001+amount42004+amount17016,"")
+				response.write echoTD(amount17003+amount17004-(amount42001+amount42004),"")
+				response.write echoTD(amount11000,"cash")
+				response.write echoTD(amount12000,"bnk")
+				response.write echoTD(amount12000+amount17003+amount17004-(amount42001+amount42004),"")
 			%>
 			
 		</tr>
