@@ -98,7 +98,7 @@ end if
 	<TH colspan=3 height=25 align=center bgcolor=#CCCCCC>Ã” ÃÊ</TD>
 </TR>
 <TR>
-	<TD><INPUT <%if checkDate then response.write "checked"%> TYPE="checkbox" NAME="checkDate"> «—ÌŒ</TD>
+	<TD title=" «—ÌŒ «ÌÃ«œ ›«ﬂ Ê—"><INPUT <%if checkDate then response.write "checked"%> TYPE="checkbox" NAME="checkDate"> «—ÌŒ</TD>
 	<TD>«“  <INPUT class="GenInput" TYPE="text" NAME="FromDate" dir="LTR" value="<%=FromDate%>" size="10" onKeyPress="return maskDate(this);" onBlur="acceptDate(this);" maxlength="10"></TD>
 	<TD> ‹« <INPUT class="GenInput" TYPE="text" NAME="ToDate" dir="LTR" value="<%=ToDate%>" size="10" onKeyPress="return maskDate(this);" onBlur="acceptDate(this);" maxlength="10"></TD>
 </TR>
@@ -312,15 +312,15 @@ end if
 					<td colspan="9" class="CusTableHeader" style="text-align:right;">›«ﬂ Ê— Â«</td>
 				</tr>
 				<%
-				mySQL="SELECT     Invoices.*, Users.RealName AS Creator, InvoiceOrderRelations.[Order], orders_trace.vazyat, " &_
-					"                      orders_trace.marhale, CONVERT(int, Invoices.Approved) + CONVERT(int, Invoices.Issued) * 2 AS InvStatus " &_
-					"FROM         orders_trace RIGHT OUTER JOIN " &_
-					"                      InvoiceOrderRelations ON orders_trace.radif_sefareshat = InvoiceOrderRelations.[Order] RIGHT OUTER JOIN " &_
-					"                      Invoices INNER JOIN " &_
-					"                      Users ON Invoices.CreatedBy = Users.ID ON InvoiceOrderRelations.Invoice = Invoices.ID " &_
-					"WHERE     " & criteria &_
+				mySQL="SELECT Invoices.*, Users.RealName AS Creator, InvoiceOrderRelations.[Order], orders_trace.vazyat, " &_
+					"orders_trace.marhale, CONVERT(int, Invoices.Approved) + CONVERT(int, Invoices.Issued) * 2 AS InvStatus " &_
+					"FROM orders_trace RIGHT OUTER JOIN " &_
+					" InvoiceOrderRelations ON orders_trace.radif_sefareshat = InvoiceOrderRelations.[Order] RIGHT OUTER JOIN " &_
+					" Invoices INNER JOIN " &_
+					" Users ON Invoices.CreatedBy = Users.ID ON InvoiceOrderRelations.Invoice = Invoices.ID " &_
+					"WHERE " & criteria &_
 					"ORDER BY " & order
-
+'response.write mySQL
 				if ord<0 then
 					style="background-color: #33CC99;"
 					arrow="<br><span style='font-family:webdings'>6 6 6</span>"
