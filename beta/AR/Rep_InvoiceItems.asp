@@ -195,7 +195,7 @@ if request("act")="show" then
 	</FORM>
 <br>
 <%
-
+'response.write mySQL_Sum
 	Set RS1=Conn.Execute(mySQL_Sum)
 	if NOT RS1.eof then
 

@@ -516,7 +516,7 @@ end function
 	'----------------------------------------------------------------------------
 	qtty = 0
 	if IsNumeric(request.form("qtty")) then 
-		qtty = CInt(request.form("qtty"))
+		qtty = cdbl(request.form("qtty"))
 	end if
 
 	ReturnDate = "null"
