@@ -58,7 +58,7 @@ menuItem=1
 			<%end if %>
 			<%end if %>
 			
-			<%if Auth(1 , 6) then %>
+			<%if Auth(1 , 8) then %>
 			<%if SubmenuItem="7" then %> 
 				<TD width=10><img src='/images/RTB.gif'></td>
 				<TD align=center background="/images/MTB.gif" class='alak2'><A HREF='rfmModel.asp'>œ‘»Ê—œ „‘ —Ì«‰</A></TD>
