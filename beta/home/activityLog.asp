@@ -9,18 +9,19 @@ if not Auth(0 , 9) then NotAllowdToViewThisPage()
 <!--#include File="../include_farsiDateHandling.asp"-->
 <!--#include File="../include_JS_InputMasks.asp"-->
 <style>
-div.allMessage{border: 3px solid #3AC;background-color: #3AC !important;}
-div.allQuote{border: 3px solid #77F;background-color: #77F !important;}
-div.allOrder{border: 3px solid #FB4;background-color: #FB4 !important;}
-div.msg{display: none;clear: both;font-weight: 100;color: black; }
-div.date{float: right;background-color: #CCC;padding: 5px 10px 5px 10px;text-align: center;}
-div.body{float: right;background-color: #8AA;padding: 5px 10px 5px 10px;color: yellow;}
+div.allMessage{color: #3AC;}
+div.allQuote{color: #77F;}
+div.allOrder{color: #aa0;}
+div.msg{display: none;clear: both;font-weight: 100;cursor: pointer; }
+div.date{float: right;padding: 5px 10px 5px 10px;text-align: center;border-bottom: 2px solid #CCC;white-space: nowrap;overflow: scroll;max-width: 150px;}
+div.body{float: right;padding: 5px 10px 5px 10px;border-bottom: 2px solid #CCC;color: black;overflow: scroll;max-width: 570px;white-space: nowrap;}
 div.empty{clear: both;}
 span.toName{color:red;}
 span.typeName{color: blue;font-weight: bold;}
-div.user{text-align: center;font-weight: bold;padding: 3px 0 3px 0;background-color: black;color: yellow;margin: 8px 0 2px 0;display: none;}
-div.quote{display: none;clear: both;font-weight: 100;color: black;cursor: pointer;}
-div.order{display: none;clear: both;font-weight: 100;color: black;cursor: pointer;}
+div.user{text-align: center;font-weight: bold;padding: 3px 0 3px 0;color: yellow;margin: 8px 0 2px 0;display: none;}
+div.userName{background-color: black;}
+div.quote{display: none;clear: both;font-weight: 100;cursor: pointer;}
+div.order{display: none;clear: both;font-weight: 100;cursor: pointer;}
 </style>
 <form method="post">
 	<input type="hidden" name="msgID" id='msgID' value="0">
@@ -88,9 +89,8 @@ function echoMsg(e){
 		if ($("div#user-" + msg.from).is(":hidden"))
 			$("div#user-" + msg.from).show();
 		$("div#message-" + msg.from).children("div:first").before(
-			"<div class='msg'>" +
-			"<div class='date'><span class='typeName'>" + msg.typeName + "</span> »Â <span class='toName'>"+ msg.toName + 
-			"</span>”«⁄  " + msg.time.substring(0,5) +
+			"<div class='msg' onClick='openMsg(" + msg.id + ");' title='»Â " + msg.toName + "'>" +
+			"<div class='date'><span class='typeName'>" + msg.typeName + "</span> ”«⁄  " + msg.time.substring(0,5) +
 			"</div><div class='body'>" + msg.body + "</div></div>"
 		);
 		$("div.msg:hidden").slideDown("slow");
@@ -103,8 +103,8 @@ function echoQuote(e){
 		if ($("div#user-" + msg.createdBy).is(":hidden"))
 			$("div#user-" + msg.createdBy).show();
 		$("div#quote-" + msg.createdBy).children("div:first").before(
-			"<div class='quote' onClick='openQuote(" + msg.id + ");'><div class='date'>«” ⁄·«„ " +msg.kind + " œ— ”«⁄  " + 
-			msg.time + " ÃÂ  " + msg.customer + "(" + msg.company + ") </div><div class='body' title='" + 
+			"<div class='quote' onClick='openQuote(" + msg.id + ");' title='ÃÂ  " + msg.customer + "(" + msg.company + 
+			")'><div class='date'><span class='typeName'>«” ⁄·«„ " +msg.kind + "</span> œ— ”«⁄  " + msg.time + "</div><div class='body' title='" + 
 			msg.note + "'>" +msg.title+" »Â  ⁄œ«œ " + msg.qtty+ " œ— ”«Ì“ " + msg.size + " Ê ﬁÌ„  " + msg.price + "</div></div>"
 		);
 		$("div.quote:hidden").slideDown("slow");
@@ -117,9 +117,9 @@ function echoOrder(e){
 		if ($("div#user-" + msg.createdBy).is(":hidden"))
 			$("div#user-" + msg.createdBy).show();
 		$("div#order-" + msg.createdBy).children("div:first").before(
-			"<div class='order' onClick='openOrder(" + msg.id + ");'><div class='date'>”›«—‘ " +msg.kind + " œ— ”«⁄  " + msg.time + " ÃÂ  " + msg.customer +
-			"(" + msg.company + ") </div><div class='body'>" +msg.title+" »Â  ⁄œ«œ " +msg.qtty+ " œ— ”«Ì“ " + msg.size + " Ê ﬁÌ„  " +
-			msg.price + "</div></div>"
+			"<div class='order' onClick='openOrder(" + msg.id + ");' title='ÃÂ  " + msg.customer + "(" + msg.company + 
+			")'><div class='date'><span class='typeName'>”›«—‘ " +msg.kind + "</span> œ— ”«⁄  " + msg.time + "</div><div class='body'>" +msg.title+" »Â  ⁄œ«œ " +
+			msg.qtty+ " œ— ”«Ì“ " + msg.size + " Ê ﬁÌ„  " + msg.price + "</div></div>"
 		);
 		$("div.order:hidden").slideDown("slow");
 		if ($("input#orderID").val()<msg.id)
@@ -167,6 +167,9 @@ function openOrder(id){
 function openQuote(id){
 	window.open('/beta/order/Inquiry.asp?act=show&quote=' + id, '_blank');
 }
+function openMsg(id){
+	window.open('message.asp?act=show&id=' + id, '_blank');
+}
 
 </script>
 <%
@@ -174,7 +177,7 @@ set rs=Conn.Execute("select * from users where display=1 order by realName")
 while not rs.eof 
 %>
 	<div id='user-<%=rs("id")%>' class='user'>
-		<div><%=rs("realName")%></div>
+		<div class="userName"><%=rs("realName")%></div>
 		<div id='message-<%=rs("id")%>' class='allMessage'><div class="empty"></div></div>
 		<div id='quote-<%=rs("id")%>' class='allQuote'><div class="empty"></div></div>
 		<div id='order-<%=rs("id")%>' class='allOrder'><div class="empty"></div></div>

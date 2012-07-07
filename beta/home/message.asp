@@ -17,6 +17,41 @@ function sqlSafe (s)
   st=replace(St,chr(34),"`")
   sqlsafe=st
 end function
+if request("act")="show" then 
+	if IsNumeric(request("id")) then 
+		set rs=Conn.execute ("select Messages.*,userTo.realName as toName, userFrom.realName as fromName,message_types.name as typeName from Messages inner join users as userTo on Messages.msgTo=userTo.id inner join users as userFrom on Messages.msgFrom=userFrom.id inner join message_types on Messages.type=message_types.id where Messages.id=" & request("id"))
+		if rs.eof then 
+			ErrorMsg	= "ÎØÇí ãÍÇá!"
+			response.redirect returnURL & "errMsg=" & Server.URLEncode(ErrorMsg)
+		end if
+		select case Trim(rs("relatedTable"))
+			case "accounts":
+				response.redirect "../CRM/AccountInfo.asp?act=show&selectedCustomer="&rs("relatedID")
+			case "invoices":
+				response.redirect "../AR/AccountReport.asp?act=showInvoice&invoice="&rs("relatedID")
+			case "orders":
+				response.redirect "../order/TraceOrder.asp?act=show&order="&rs("relatedID")
+			case "quotes" :
+				response.redirect "../order/Inquiry.asp?act=show&quote="&rs("relatedID")
+			case else 
+%>
+<br><br><br>
+
+<div align="right">
+	<LI>ÊÇÑíÎ ÇÑÓÇá: <span dir=ltr><%=RS("MsgDate")%></span>
+	<LI>ÓÇÚÊ: <%=RS("MsgTime")%>
+	<li>ÇÒ: <%=rs("fromName")%></li>
+	<li>Èå: <%=rs("toName")%></li>
+	<li><%=rs("typeName")%></li>
+	<LI>íÇã: <%=RS("MsgBody")%>
+</div>
+<%					
+		end select
+	else
+		ErrorMsg	= "ÎØÇ ÏÑ æÑæÏí."
+		response.redirect returnURL & "errMsg=" & Server.URLEncode(ErrorMsg)
+	end if
+end if
 
 '-----------------------------------------------------------------------------------------------------
 '------------------------------------------------------------------------------------ Send New Message
@@ -180,136 +215,141 @@ end if
 '-----------------------------------------------------------------------------------------------------
 '------------------------------------------------------------------------------------ New Message Form
 '-----------------------------------------------------------------------------------------------------
-if request("act")<>"reply" and request("act")<>"forward" then 
-	RelatedID=request("RelatedID")
-	RelatedTable=LCase(request("RelatedTable"))
+if request("act")<>"show" then
+
+	if request("act")<>"reply" and request("act")<>"forward"  then 
+		RelatedID=request("RelatedID")
+		RelatedTable=LCase(request("RelatedTable"))
+	end if
+	Select Case RelatedTable
+	Case "orders":
+		RelatedTableName = "ÓİÇÑÔ ÔãÇÑå"
+	Case "accounts":
+		RelatedTableName = "ÔãÇÑå ÍÓÇÈ"
+	Case "invoices":
+		RelatedTableName = "İÇßÊæÑ ÔãÇÑå"
+	Case "quotes":
+		RelatedTableName = "ÇÓÊÚáÇã ÔãÇÑå"
+	Case else:
+		RelatedTableName = RelatedTable
+	End Select
+	if request("sendTo") <> ""  then sendTo = request("sendTo")
+	'response.write sendTo
+	'response.write RelatedTable
+	%>
+	<TD  valign=top>
+	<FORM METHOD=POST ACTION="message.asp">
+	<INPUT TYPE="hidden" name="replyTo" value="<%=replyTo%>">
+	<INPUT TYPE="hidden" name="IsReply" value="<%=IsReply%>">
+	<TABLE>
+	<TR>
+		<TD align=left>íÑäÏå:</TD>
+		<TD align=right>
+			<INPUT TYPE="hidden" NAME="retURL" value="<%=request("retURL")%>">
+			<% if not (request("act") = "reply") then %>
+			<select name="MsgTo" class=inputBut >
+			<% set RSV=Conn.Execute ("SELECT * FROM Users WHERE Display=1 ORDER BY RealName") 
+			Do while not RSV.eof
+			%>
+				<option value="<%=RSV("ID")%>" <%
+					if cint(RSV("ID"))=cint(sendTo) then
+						response.write " selected "
+					end if
+					%>><%=RSV("RealName")%></option>
+			<%
+			RSV.moveNext
+			Loop
+			RSV.close
+			%>
+	<%		if Auth(0 , 7) then
+				' Has the Priviledge to SEND MESSAGE TO EVERYONE
+	%>			<option disabled value="0">----------------------</option>
+				<option value="-100">* åãå *</option>
+	<%		end if%>
+			</select> 
+			<% else 
+	
+			if request("sendTo")<>"" then
+			sendTo = request("sendTo")
+			end if
+	
+			set RSV=Conn.Execute ("SELECT RealName FROM Users where ID = " & sendTo) 
+			if RSV.EOF then
+				response.redirect "message.asp"
+			end if %>
+			<INPUT TYPE="hidden"  NAME="MsgTo" value="<%=sendTo%>"><INPUT readonly TYPE="text" NAME="MsgTo21" value="<%=RSV("RealName")%>">
+			<% end if %>
+			<span dir=ltr><%=shamsiToday()%></span><BR>
+		</TD>
+	</TR>
+	<TR>
+		<TD align=left><!--ÚäæÇä--></TD>
+		<TD align=right>
+			<INPUT TYPE="hidden" NAME="msgTitle"  class=inputBut size=31 value="<%=MsgTitle%>">
+		</TD>
+	</TR>
+	<TR>
+		<TD align=left>íÇã</TD>
+		<TD align=right>
+			<TEXTAREA NAME="msgBody" ROWS="7"  class=inputBut COLS="32" maxlength=1999><%=msgBody%></TEXTAREA>
+		</TD>
+	</TR>
+	<TR>
+		<TD align=left>ãÑÈæØ ÇÓÊ Èå </TD>
+		<TD align=right>
+			<% if RelatedID = "" then %>
+			<SELECT NAME="RelatedTable"  onchange="hideIT()" >
+				<option <% if RelatedTable="NaN" then %> selected <% end if %>value="NaN">åíí</option>
+				<option <% if RelatedTable="orders" then %> selected <% end if %>value="orders">ÓİÇÑÔ ÔãÇÑå </option>
+				<option <% if RelatedTable="accounts" then %> selected <% end if %>value="accounts">ÔãÇÑå ÍÓÇÈ </option>
+				<option <% if RelatedTable="invoices" then %> selected <% end if %>value="invoices">İÇßÊæÑ ÔãÇÑå </option>
+	
+				</SELECT><span name="relatedIDSpan"  id="relatedIDSpan">
+				<INPUT TYPE="text" NAME="relatedID" size=9 value="<%=RelatedID%>"  onKeyPress="return maskNumber(this);" ></span>
+			<% else %>
+				<INPUT TYPE="hidden" NAME="RelatedTable" value="<%=RelatedTable%>"><INPUT TYPE="text" NAME="alak" value="<%=RelatedTableName%>"size=17 readonly> <INPUT TYPE="text" NAME="relatedID" size=9 value="<%=RelatedID%>"  readonly>
+			<% end if %>
+		</TD>
+	</TR>
+	<TR>
+		<TD align=left>ÇæáæíÊ:</TD>
+		<TD align=right>
+			<span style="background-color:white"><INPUT TYPE="radio" NAME="urgent" value="0" checked>ÚÇÏí &nbsp;
+			<span style="background-color:#FFDDDD"><INPUT TYPE="radio" NAME="urgent" value="1">æíå &nbsp;
+			<span style="background-color:yellow"><INPUT TYPE="radio" NAME="urgent" value="2">Îíáí İæÑí &nbsp;
+		</TD>
+	</TR>
+	<tr>
+		<td align="left">äæÚ:</td>
+		<td align="right">
+			<select name="msgType">
+			<%
+			set rs= Conn.Execute("select * from message_types")
+			if request("typeID")<>"" then typeID=request("typeID")
+			while not rs.eof
+			%>
+				<option value="<%=rs("id")%>" <%if cint(typeID)=cint(rs("id")) then response.write(" selected ") %>><%=rs("name")%></option>
+			<%	
+				rs.moveNext
+			wend
+			%>
+			</select>
+		</td>
+	</tr>
+	<TR>
+		<TD align=left></TD>
+		<TD align=center><br><INPUT TYPE="submit" name="submit" value="ÇÑÓÇá íÇã"></TD>
+	</TR>
+	<TR>
+		<TD align=left></TD>
+		<TD align=right>
+		</TD>
+	</TR>
+	</TABLE>
+	</FORM>
+<%
 end if
-Select Case RelatedTable
-Case "orders":
-	RelatedTableName = "ÓİÇÑÔ ÔãÇÑå"
-Case "accounts":
-	RelatedTableName = "ÔãÇÑå ÍÓÇÈ"
-Case "invoices":
-	RelatedTableName = "İÇßÊæÑ ÔãÇÑå"
-Case "quotes":
-	RelatedTableName = "ÇÓÊÚáÇã ÔãÇÑå"
-Case else:
-	RelatedTableName = RelatedTable
-End Select
-if request("sendTo") <> "" then sendTo = request("sendTo")
-'response.write sendTo
-'response.write RelatedTable
 %>
-<TD  valign=top>
-<FORM METHOD=POST ACTION="message.asp">
-<INPUT TYPE="hidden" name="replyTo" value="<%=replyTo%>">
-<INPUT TYPE="hidden" name="IsReply" value="<%=IsReply%>">
-<TABLE>
-<TR>
-	<TD align=left>íÑäÏå:</TD>
-	<TD align=right>
-		<INPUT TYPE="hidden" NAME="retURL" value="<%=request("retURL")%>">
-		<% if not (request("act") = "reply") then %>
-		<select name="MsgTo" class=inputBut >
-		<% set RSV=Conn.Execute ("SELECT * FROM Users WHERE Display=1 ORDER BY RealName") 
-		Do while not RSV.eof
-		%>
-			<option value="<%=RSV("ID")%>" <%
-				if cint(RSV("ID"))=cint(sendTo) then
-					response.write " selected "
-				end if
-				%>><%=RSV("RealName")%></option>
-		<%
-		RSV.moveNext
-		Loop
-		RSV.close
-		%>
-<%		if Auth(0 , 7) then
-			' Has the Priviledge to SEND MESSAGE TO EVERYONE
-%>			<option disabled value="0">----------------------</option>
-			<option value="-100">* åãå *</option>
-<%		end if%>
-		</select> 
-		<% else 
-
-		if request("sendTo")<>"" then
-		sendTo = request("sendTo")
-		end if
-
-		set RSV=Conn.Execute ("SELECT RealName FROM Users where ID = " & sendTo) 
-		if RSV.EOF then
-			response.redirect "message.asp"
-		end if %>
-		<INPUT TYPE="hidden"  NAME="MsgTo" value="<%=sendTo%>"><INPUT readonly TYPE="text" NAME="MsgTo21" value="<%=RSV("RealName")%>">
-		<% end if %>
-		<span dir=ltr><%=shamsiToday()%></span><BR>
-	</TD>
-</TR>
-<TR>
-	<TD align=left><!--ÚäæÇä--></TD>
-	<TD align=right>
-		<INPUT TYPE="hidden" NAME="msgTitle"  class=inputBut size=31 value="<%=MsgTitle%>">
-	</TD>
-</TR>
-<TR>
-	<TD align=left>íÇã</TD>
-	<TD align=right>
-		<TEXTAREA NAME="msgBody" ROWS="7"  class=inputBut COLS="32" maxlength=1999><%=msgBody%></TEXTAREA>
-	</TD>
-</TR>
-<TR>
-	<TD align=left>ãÑÈæØ ÇÓÊ Èå </TD>
-	<TD align=right>
-		<% if RelatedID = "" then %>
-		<SELECT NAME="RelatedTable"  onchange="hideIT()" >
-			<option <% if RelatedTable="NaN" then %> selected <% end if %>value="NaN">åíí</option>
-			<option <% if RelatedTable="orders" then %> selected <% end if %>value="orders">ÓİÇÑÔ ÔãÇÑå </option>
-			<option <% if RelatedTable="accounts" then %> selected <% end if %>value="accounts">ÔãÇÑå ÍÓÇÈ </option>
-			<option <% if RelatedTable="invoices" then %> selected <% end if %>value="invoices">İÇßÊæÑ ÔãÇÑå </option>
-
-			</SELECT><span name="relatedIDSpan"  id="relatedIDSpan">
-			<INPUT TYPE="text" NAME="relatedID" size=9 value="<%=RelatedID%>"  onKeyPress="return maskNumber(this);" ></span>
-		<% else %>
-			<INPUT TYPE="hidden" NAME="RelatedTable" value="<%=RelatedTable%>"><INPUT TYPE="text" NAME="alak" value="<%=RelatedTableName%>"size=17 readonly> <INPUT TYPE="text" NAME="relatedID" size=9 value="<%=RelatedID%>"  readonly>
-		<% end if %>
-	</TD>
-</TR>
-<TR>
-	<TD align=left>ÇæáæíÊ:</TD>
-	<TD align=right>
-		<span style="background-color:white"><INPUT TYPE="radio" NAME="urgent" value="0" checked>ÚÇÏí &nbsp;
-		<span style="background-color:#FFDDDD"><INPUT TYPE="radio" NAME="urgent" value="1">æíå &nbsp;
-		<span style="background-color:yellow"><INPUT TYPE="radio" NAME="urgent" value="2">Îíáí İæÑí &nbsp;
-	</TD>
-</TR>
-<tr>
-	<td align="left">äæÚ:</td>
-	<td align="right">
-		<select name="msgType">
-		<%
-		set rs= Conn.Execute("select * from message_types")
-		if request("typeID")<>"" then typeID=request("typeID")
-		while not rs.eof
-		%>
-			<option value="<%=rs("id")%>" <%if cint(typeID)=cint(rs("id")) then response.write(" selected ") %>><%=rs("name")%></option>
-		<%	
-			rs.moveNext
-		wend
-		%>
-		</select>
-	</td>
-</tr>
-<TR>
-	<TD align=left></TD>
-	<TD align=center><br><INPUT TYPE="submit" name="submit" value="ÇÑÓÇá íÇã"></TD>
-</TR>
-<TR>
-	<TD align=left></TD>
-	<TD align=right>
-	</TD>
-</TR>
-</TABLE>
-</FORM>
 <SCRIPT LANGUAGE="JavaScript">
 <!--
 function hideIT()
