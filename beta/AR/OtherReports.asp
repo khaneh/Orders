@@ -291,18 +291,14 @@ StartOfTheYear = left(shamsiToday(),4) & "/01/01"
 		<!---------------------------------------------------------------------------------->
 		<TD style="border:1pt solid white;width:130pt" align=center>
 		<% if Auth("C" , 9) then %>
-			<FORM METHOD=POST ACTION="Rep_CustomerNoCredit.asp?act=show">
 			<table class="RepTable2" id="col8">
 			<tr>
-				<th colspan="2">Р“«—‘ г‘ —н«дн яе «Џ »«— ¬де« ’Ё— дн” </td>
+				<td colspan="2"><a href="Rep_CustomerNoCredit.asp?act=show">Р“«—‘ г‘ —н«дн яе «Џ »«— ¬де« ’Ё— дн” </a></td>
 			</tr>
 			<tr>
-				<td colspan="2">&nbsp;</td>
+				<td colspan="2"><a href="arReport.asp">Ќ”«»Эе«н »ѕея«—</a></td>
 			</tr>
-				
 			</table>
-			<INPUT Class="GenButton" style="border:1 solid black;" TYPE="submit" value=" дг«н‘ ">&nbsp;
-			</FORM>
 		<% end if %>
 		&nbsp;
 		</TD>
