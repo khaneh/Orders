@@ -21,6 +21,7 @@ if not Auth(6 , 9) then
 	selectedCustomer = session("id")
 else
 %>
+<a href="?act=showRemain">הדַםװ ֽ׃ַָוַם ָ׃Êַהßַׁ</a>
 <FORM METHOD=POST ACTION="?act=show">
 <CENTER>ד׃ֶזב םםׁם: <select name="selectedCustomer" class=inputBut ></CENTER>
 		<option value="1000">ודו (־בַױו)</option>
@@ -44,7 +45,32 @@ RSV.close
 </form>
 <%
 end if 
-
+if request("act")="showRemain" then 
+%>
+<table>
+	<tr>
+		<td>הַד</td>
+		<td>דָבÛ דַהֿו</td>
+		<td>דַהֿו Ýׁזװ</td>
+		<td></td>
+	</tr>
+<%
+	set rs=Conn.execute("select * from accounts where apBalance<0")
+	while not rs.eof 
+%>
+	<tr>
+		<td><a href="../CRM/AccountInfo.asp?act=show&selectedCustomer=<%=rs("id")%>"><%=rs("accountTitle")%></a></td>
+		<td><%=Separate(abs(CDbl(rs("apBalance"))))%></td>
+		<td><%=Separate(abs(CDbl(rs("arBalance"))))%></td>
+		<td><%if CDbl(rs("arBalance"))<0 then response.write " ָֿ" else if CDbl(rs("arBalance")) >0 then response.write " ָ׃"%></td>
+	</tr>
+<%		
+		rs.moveNext
+	wend
+%>
+</table>
+<%
+end if
 '-----------------------------------------------------------------------------------------------------
 '------------------------------------------------------------------------------------ Send New Message
 '-----------------------------------------------------------------------------------------------------

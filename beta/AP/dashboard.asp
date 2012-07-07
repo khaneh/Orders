@@ -11,6 +11,10 @@ if not Auth(7 , "B") then NotAllowdToViewThisPage()
 <script type="text/javascript" src="/js/jquery-ui-1.8.16.custom.min.js"></script>
 <script type="text/javascript">
 	$(document).ready(function () {
+		$.ajaxSetup({
+			cache: false
+		});
+		
 		$("#unFactBT").click(function() {
 			if ($("#unFact").is(":hidden")) {
 				$("#unFact").slideDown("slow");
@@ -33,17 +37,45 @@ if not Auth(7 , "B") then NotAllowdToViewThisPage()
 			}
 		});
 	});
+	function go(url){
+		window.open(url,'ap-dashboard');
+	}
+	function show(myAct){
+		var loadUrl="dashboard_ajax.asp";
+		$.getJSON(loadUrl,
+			{act:myAct},
+			function(json){
+				out="";
+				$("#list").html("<div></div>");
+				$.each(json,function(i,msg){
+					out+="<div "
+					if (msg.link!='') 
+						out+="class='pointer' onclick=\"go('"+ msg.link +"');\"";
+					if (msg.title!='')
+						out+=" title=\"" + msg.title + "\"";
+					out+=">"+msg.div+"</div>";
+				});
+				$("#list").children("div:first").after(out);
+			}
+		);
+	}
 </script>
 <!--#include File="../include_farsiDateHandling.asp"-->
 <!--#include File="../include_JS_InputMasks.asp"-->
 <style >
 	.indent {margin-right: 30px;display: none;}
-	.BT {cursor: pointer;}
+	.pointer {cursor: pointer;}
+	div.step{float: right;width: 120px;text-align: center;cursor: pointer;}
+	div.inStep{}
+	div.folder{width: 35px;height: 35px;background-image: url('/beta/images/folder1.gif');margin: 0 42px 0 0;}
+	div.folder-close{background-image: url('/beta/images/folder0.gif');}
+	div.float-close{clear: both;float: none;}
+	#list{margin: 20px 10px 0 0;}
 </style>
 <BR>
 <form method="post" action="">
-	<input name="fromDate" type="text" size="10" onblur="acceptDate(this);" value="<%=shamsiDate(dateadd("d",-180,date()))%>">
-	<input type="submit" value="ÊÇííÏ">
+	<!--input name="fromDate" type="text" size="10" onblur="acceptDate(this);" value="<%=shamsiDate(dateadd("d",-180,date()))%>">
+	<input type="submit" value="ÊÇííÏ"-->
 </form>
 <%
 if request("fromDate")="" then 
@@ -51,21 +83,103 @@ if request("fromDate")="" then
 else
 	fromDate=request("fromDate")
 end if
+function getCount(mySQL)
+	out=0
+	set rs=Conn.Execute(mySQL)
+	if not rs.eof then out=rs("count")
+	rs.close
+	set rs=nothing
+	getCount = out
+end function
+startDate="1389/01/01"
+c1=getCount("select count(id) as [count] from InventoryItems inner join (select ItemID,sum(qtty) as sumQtty from InventoryPickuplistItems inner join InventoryPickuplists on InventoryPickuplistItems.pickupListID=InventoryPickuplists.id and InventoryPickuplists.Status='new' group by ItemID) as pick on InventoryItems.ID=pick.itemID where enabled=1 and owner=-1 and qtty-sumQtty<=minim and qtty>minim")
+c2=getCount("select count(id) as [count] from InventoryItems where enabled=1 and owner=-1 and qtty<=minim")
+c3=getCount("select count(id) as [count] from InventoryItemRequests where status='new'")
+c4=getCount("SELECT count(id) as [count] FROM purchaseRequests WHERE (Status = 'new' AND TypeID <> 0 AND IsService=1)")
+c5=getCount("SELECT count(id) as [count] FROM purchaseRequests WHERE (Status = 'new' AND IsService=0)")
+c60=getCount("select count(id) as [count] from PurchaseOrders where status='NEW'") 
+c61=getCount("select count(id) as [count] from PurchaseOrders where status='OUT'") 
+c62=getCount("select count(id) as [count] from PurchaseOrders where ordDate>'"&startDate&"' and IsService=0 and status<>'CANCEL' and id not in (select distinct relatedID from InventoryLog where RelatedID>0 and isInput=1 and owner=-1 and type=1)")
+c7=getCount("select count(id) as [count] from PurchaseOrders where ordDate>'"&startDate&"' and IsService=0 and status<>'CANCEL' and id not in (select VoucherLines.RelatedPurchaseOrderID from Vouchers inner join VoucherLines on VoucherLines.Voucher_ID=Vouchers.id where Vouchers.Voided=0)")
+c8=getCount("select count(id) as [count] from PurchaseOrders where ordDate>'"&startDate&"' and IsService=1 and status<>'CANCEL' and id not in (select VoucherLines.RelatedPurchaseOrderID from Vouchers inner join VoucherLines on VoucherLines.Voucher_ID=Vouchers.id where Vouchers.Voided=0)")
+c9=getCount("select count(VoucherLines.RelatedPurchaseOrderID) as [count] from Vouchers inner join VoucherLines on VoucherLines.Voucher_ID=Vouchers.id where Vouchers.Voided=0 and Vouchers.paid=0 and Vouchers.Verified=0")
+c10=getCount("select count(Vouchers.id) as [count] from Vouchers inner join APItems on Vouchers.id=apItems.Link and apItems.Type=6 where APItems.Voided=0 and Vouchers.Voided=0 and Vouchers.paid=0 and APItems.FullyApplied=0 and apItems.effectiveDate>'" & startDate & "'")
 %>
-<a href="../inventory/">ÏÑÎæÇÓÊåÇí ßÇáÇ ÇÒ ÇäÈÇÑ ßå åäæÒ ÍæÇáå ÈÑÇí ÂäåÇ ÕÇÏÑ äÔÏå: </a>
+
+<div title="áíÓÊ ßÇáÇí ãæÑÏ äíÇÒ ßå ÏÑÎæÇÓÊ ßÇáÇ äÏÇÑÏ" class="step">
+	<div onclick="show('ifPickLow');">	
+		<div class="folder <%if c1=0 then response.write "folder-close"%>"></div>
+		<div><%=c1%></div>
+		<span>ÏÑ ÕæÑÊ ÇäÌÇã ÓİÇÑÔ ÒíÑ ÍÏÇŞá ÎæÇåÏ ÔÏ</span>		
+	</div>
+	<div onclick="show('invLow');">
+		<div class="folder <%if c2=0 then response.write "folder-close"%>"></div>
+		<div><%=c2%></div>
+		<span>ÒíÑ ÍÏÇŞá ãæÌæÏí</span>
+	</div>
+</div>
+<div class="step">
+	<div title="ÏÑÎæÇÓÊåÇíí ßå åäæÒ ÓİÇÑÔ äÏÇÑäÏ" onclick="go('../inventory/');">	
+		<div class="folder <%if c3=0 then response.write "folder-close"%>"></div>
+		<div><%=c3%></div>
+		<span>ÏÑÎæÇÓÊ ßÇáÇí ÇäÈÇÑ</span>
+	</div>
+	<div title="ÏÑÎæÇÓÊåÇíí ßå åäæÒ ÓİÇÑÔ äÏÇÑäÏ" onclick="go('../purchase/outServiceOrder.asp');">
+		<div class="folder <%if c4=0 then response.write "folder-close"%>"></div>
+		<div><%=c4%></div>	
+		<span>ÏÑ ÎæÇÓÊ ÎÑíÏ ÎÏãÇÊ</span>
+	</div>
+	<div title="ÏÑÎæÇÓÊåÇíí ßå åäæÒ ÓİÇÑÔ äÏÇÑäÏ" onclick="go('../purchase/outServiceOrder.asp');">
+		<div class="folder <%if c5=0 then response.write "folder-close"%>"></div>
+		<div><%=c5%></div>
+		<span>ÏÑ ÎæÇÓÊ ÎÑíÏ ßÇáÇí ÇäÈÇÑ</span>
+	</div>
+</div>
+<div class="step">
+	<div title="ÓİÇÑÔåÇíí ßå æÖÚíÊ ÂäåÇ ÌÏíÏ ÇÓÊ" onclick="go('../purchase/outServiceTrace.asp?lstOrd=NEW');">
+		<div class="folder <%if c60=0 then response.write "folder-close"%>"></div>
+		<div><%=c60%></div>
+		<span>ÓİÇÑÔ ÎÑíÏ ÌÏíÏ</span>
+	</div>
+	<div title="ÓİÇÑÔåÇíí ßå ÏÑ ÎÇÑÌ ÇÒ ÔÑßÊ åÓÊäÏ" onclick="go('../purchase/outServiceTrace.asp?lstOrd=OUT');">
+		<div class="folder <%if c61=0 then response.write "folder-close"%>"></div>
+		<div><%=c61%></div>
+		<span>ÓİÇÑÔ ÎÑíÏ ÎÇÑÌ ÇÒ ÔÑßÊ</span>
+	</div>
+	<div title="ÓİÇÑÔåÇíí ßå æÑæÏ Èå ÇäÈÇÑ äÔÏåÇäÏ" onclick="show('noInvRelation');">
+		<div class="folder <%if c62=0 then response.write "folder-close"%>"></div>
+		<div><%=c62%></div>
+		<span>ÓİÇÑÔ Èå ÇäÈÇÑ æÇÑÏ äÔÏå</span>
+	</div>
+</div>
+<div class="step">
+	<div title="ßå åäæÒ İÇßÊæÑ ÊÇãíä ßääÏå äíÇãÏå" onclick="show('invNOvo');">
+		<div class="folder <%if c7=0 then response.write "folder-close"%>"></div>
+		<div><%=c7%></div>
+		<span>æÑæÏ Èå ÇäÈÇÑ</span>
+	</div>
+	<div title="ßå åäæÒ İÇßÊæÑ ÊÇãíä ßääÏå äíÇãÏå" onclick="show('serviceNoVo');">
+		<div class="folder <%if c8=0 then response.write "folder-close"%>"></div>
+		<div><%=c8%></div>
+		<span>ÊÇííÏ ÇäÌÇã ÎÏãÇÊ</span>
+	</div>
+</div>
+<div title="ßå åäæÒ ÊÇííÏ äÔÏå" class="step" onclick="go('../AP/verify.asp');">
+	<div class="folder <%if c9=0 then response.write "folder-close"%>"></div>
+	<div><%=c9%></div>
+	<span>İÇßÊæÑ ÊÇãíä ßääÏå</span>
+</div>
+<div title="İÇßÊæÑåÇíí ßå ÊÇííÏ ÔÏå æ åäæÒ ß ÏÇÏå äÔÏå" class="step" onclick="show('unPaid');">
+	<div class="folder <%if c10=0 then response.write "folder-close"%>"></div>
+	<div><%=c10%></div>
+	<span>ÑÏÇÎÊ ß</span>
+</div>
+<div class="float-close"></div>
+<div id="list"><div></div></div>
+
+
 <%
-mySQL="select count(id) as [count] from InventoryItemRequests where status='new' and reqDate>=N'" & fromDate & "'"
-set rs=Conn.Execute(mySQL)
-if not rs.eof then response.write  rs("count")&"<BR>"
-%>
-<a href="../purchase/outServiceOrder.asp">ÏÑÎæÇÓÊåÇí ÓİÇÑÔ ÎÑíÏ ÌÏíÏ: </a>
-<%
-mySQL="select count(id) as [count] from PurchaseRequests where status='new' and reqDate>=N'" & fromDate & "'"
-set rs=Conn.Execute(mySQL)
-if not rs.eof then response.write rs("count")&"<BR>"
-%>
-<a href="../purchase/outServiceTrace.asp?lstOrd=NEW">ÓİÇÑÔåÇí ÎÑíÏ ÌÏíÏ: </a>
-<%
+response.end
 mySQL="select count(id) as [count] from PurchaseOrders where status='NEW' and ordDate>=N'" & fromDate & "'"
 set rs=Conn.Execute(mySQL)
 if not rs.eof then response.write rs("count")&"<BR>"
@@ -77,11 +191,7 @@ set rs=Conn.Execute(mySQL)
 if not rs.eof then response.write rs("count")&"<BR>"
 %>
 <label id='unFactBT' title="ÈÑÇí ãÔÇåÏå ÌÒÆíÇÊ ßáíß ßäíÏ" class="BT">ßá ÎÑíÏåÇí İÇßÊæÑ äÔÏå: </label>
-<%
-mySQL="select count(id) as [count] from PurchaseOrders where HasVoucher=0 and Status<>'CANCEL' and ordDate>=N'" & fromDate & "'"
-set rs=Conn.Execute(mySQL)
-if not rs.eof then response.write rs("count")&"<BR>"
-%>
+
 <div class="indent" id='unFact'>
 <%
 mySQL="select vendor_id,accounts.AccountTitle,count(PurchaseOrders.id) as [count] from PurchaseOrders inner join Accounts on PurchaseOrders.Vendor_ID=accounts.ID where HasVoucher=0 and PurchaseOrders.Status<>'CANCEL' and PurchaseOrders.ordDate>=N'" & fromDate & "' group by Vendor_ID,AccountTitle"
