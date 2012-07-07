@@ -161,7 +161,7 @@ elseif request("act")="editInvoice" then
 						<tr>
 							<td align="left"> «—ÌŒ ’œÊ—:</td>
 							<td dir="LTR">
-								<INPUT class="InvGenInput" NAME="issueDate" TYPE="text" maxlength="10" size="10" value="<%=IssuedDate%>"  onblur="acceptDate(this)"></td>
+								<INPUT <%'if not Auth(6,"N") then response.write " readonly='readonly' "%> class="InvGenInput" NAME="issueDate" TYPE="text" maxlength="10" size="10" value="<%=IssuedDate%>"  onblur="acceptDate(this)"></td>
 							<td dir="RTL"><%="ø‘‰»Â"%></td>
 						</tr>
 						</table></TD>
