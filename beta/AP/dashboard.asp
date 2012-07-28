@@ -6,6 +6,7 @@ if not Auth(7 , "B") then NotAllowdToViewThisPage()
 %>
 <!--#include file="top.asp" -->
 <link type="text/css" href="/css/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+<link type="text/css" href="/css/jame.css" rel="stylesheet" />
 
 <script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
 <script type="text/javascript" src="/js/jquery-ui-1.8.16.custom.min.js"></script>
@@ -48,9 +49,11 @@ if not Auth(7 , "B") then NotAllowdToViewThisPage()
 				out="";
 				$("#list").html("<div></div>");
 				$.each(json,function(i,msg){
-					out+="<div "
+					out+="<div class='row "
 					if (msg.link!='') 
-						out+="class='pointer' onclick=\"go('"+ msg.link +"');\"";
+						out+="pointer' onclick=\"go('"+ msg.link +"');\"";
+					else
+						out+="'"	
 					if (msg.title!='')
 						out+=" title=\"" + msg.title + "\"";
 					out+=">"+msg.div+"</div>";
@@ -64,7 +67,12 @@ if not Auth(7 , "B") then NotAllowdToViewThisPage()
 <!--#include File="../include_JS_InputMasks.asp"-->
 <style >
 	.indent {margin-right: 30px;display: none;}
+	.row{margin-left: 20px;padding-top: 5px;padding-bottom: 5px;}
+	.rspan1{width: 70px;}
+	.rspan3{width: 260px;}
 	.pointer {cursor: pointer;}
+	#list div:nth-child(even) {background-color: #FFF;}
+	#list div:nth-child(odd) {background-color: #DDD;}
 	div.step{float: right;width: 120px;text-align: center;cursor: pointer;}
 	div.inStep{}
 	div.folder{width: 35px;height: 35px;background-image: url('/beta/images/folder1.gif');margin: 0 42px 0 0;}
@@ -93,7 +101,7 @@ function getCount(mySQL)
 end function
 startDate="1389/01/01"
 c1=getCount("select count(id) as [count] from InventoryItems inner join (select ItemID,sum(qtty) as sumQtty from InventoryPickuplistItems inner join InventoryPickuplists on InventoryPickuplistItems.pickupListID=InventoryPickuplists.id and InventoryPickuplists.Status='new' group by ItemID) as pick on InventoryItems.ID=pick.itemID where enabled=1 and owner=-1 and qtty-sumQtty<=minim and qtty>minim")
-c2=getCount("select count(id) as [count] from InventoryItems where enabled=1 and owner=-1 and qtty<=minim")
+c2=getCount("select count(id) as [count] from InventoryItems where enabled=1 and owner=-1 and qtty<minim")
 c3=getCount("select count(id) as [count] from InventoryItemRequests where status='new'")
 c4=getCount("SELECT count(id) as [count] FROM purchaseRequests WHERE (Status = 'new' AND TypeID <> 0 AND IsService=1)")
 c5=getCount("SELECT count(id) as [count] FROM purchaseRequests WHERE (Status = 'new' AND IsService=0)")
@@ -146,19 +154,19 @@ c10=getCount("select count(Vouchers.id) as [count] from Vouchers inner join APIt
 		<div><%=c61%></div>
 		<span>”›«—‘ Œ—Ìœ Œ«—Ã «“ ‘—ﬂ </span>
 	</div>
-	<div title="”›«—‘ùÂ«ÌÌ ﬂÂ Ê—Êœ »Â «‰»«— ‰‘œÂù«‰œ" onclick="show('noInvRelation');">
+	<div title="”›«—‘ùÂ«ÌÌ ﬂÂ Ê—Êœ »Â «‰»«— ‰‘œÂù«‰œ(«“ «» œ«Ì ”«· 89)" onclick="show('noInvRelation');">
 		<div class="folder <%if c62=0 then response.write "folder-close"%>"></div>
 		<div><%=c62%></div>
 		<span>”›«—‘ »Â «‰»«— Ê«—œ ‰‘œÂ</span>
 	</div>
 </div>
 <div class="step">
-	<div title="ﬂÂ Â‰Ê“ ›«ﬂ Ê—  «„Ì‰ ﬂ‰‰œÂ ‰Ì«„œÂ" onclick="show('invNOvo');">
+	<div title="ﬂÂ Â‰Ê“ ›«ﬂ Ê—  «„Ì‰ ﬂ‰‰œÂ ‰Ì«„œÂ(«“ «» œ«Ì ”«· 89)" onclick="show('invNOvo');">
 		<div class="folder <%if c7=0 then response.write "folder-close"%>"></div>
 		<div><%=c7%></div>
 		<span>Ê—Êœ »Â «‰»«—</span>
 	</div>
-	<div title="ﬂÂ Â‰Ê“ ›«ﬂ Ê—  «„Ì‰ ﬂ‰‰œÂ ‰Ì«„œÂ" onclick="show('serviceNoVo');">
+	<div title="ﬂÂ Â‰Ê“ ›«ﬂ Ê—  «„Ì‰ ﬂ‰‰œÂ ‰Ì«„œÂ(«“ «» œ«Ì ”«· 89)" onclick="show('serviceNoVo');">
 		<div class="folder <%if c8=0 then response.write "folder-close"%>"></div>
 		<div><%=c8%></div>
 		<span> «ÌÌœ «‰Ã«„ Œœ„« </span>
@@ -169,7 +177,7 @@ c10=getCount("select count(Vouchers.id) as [count] from Vouchers inner join APIt
 	<div><%=c9%></div>
 	<span>›«ﬂ Ê—  «„Ì‰ ﬂ‰‰œÂ</span>
 </div>
-<div title="›«ﬂ Ê—Â«ÌÌ ﬂÂ  «ÌÌœ ‘œÂ Ê Â‰Ê“ çﬂ œ«œÂ ‰‘œÂ" class="step" onclick="show('unPaid');">
+<div title="›«ﬂ Ê—Â«ÌÌ ﬂÂ  «ÌÌœ ‘œÂ Ê Â‰Ê“  ”ÊÌÂ ‰‘œÂ(«“ «» œ«Ì ”«· 89)" class="step" onclick="show('unPaid');">
 	<div class="folder <%if c10=0 then response.write "folder-close"%>"></div>
 	<div><%=c10%></div>
 	<span>Å—œ«Œ  çﬂ</span>
