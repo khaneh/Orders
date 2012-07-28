@@ -478,7 +478,9 @@ end if %>
 			if (not isNull(RS3("pickupListID"))) then 
 				response.write "</a>"
 			end if
+			if RS3("status") = "del" then response.write ("<font color=red>Õ–› ‘œÂ</font>")
 		%>
+			
 			</td>
 			<td align=left width=5%>
 			<%
@@ -593,7 +595,10 @@ end if %>
 			<td align=left width=5%><%
 			if RS3("status") = "new" then
 			%><a href="manageOrder.asp?d=y&i=<%=RS3("id")%>&r=<%=request("radif")%>&relatedApprovedInvoiceID=<%=relatedApprovedInvoiceID%>&relatedApprovedInvoiceBy=<%=relatedApprovedInvoiceBy%>"><b>Õ–›</b></a><%
-			end if %></td>
+			end if 
+			if RS3("status") = "del" then response.write ("<font color=red>Õ–› ‘œÂ</font>")
+			%>
+			</td>
 		</tr>
 		<% 
 		RS3.moveNext
