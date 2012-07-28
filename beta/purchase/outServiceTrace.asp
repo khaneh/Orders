@@ -66,6 +66,67 @@ function xmlsend(myFile,myID,myValue) {
 //-->
 </SCRIPT>
 <%
+if request("act")="search" then 
+%>
+<br>
+<FORM METHOD=POST ACTION="?act=select" onsubmit="if (document.all.search.value=='') return false;">
+<div dir='rtl'><B>ê«„ «Ê· : Ã” ÃÊ »—«Ì ‰«„ Õ”«»</B>
+	<INPUT TYPE="text" NAME="search">&nbsp;
+	<INPUT TYPE="submit" value="Ã” ÃÊ"><br>
+	<input type="hidden" name="id" value="<%=request("id")%>"
+</div>
+</FORM>
+<SCRIPT type="text/javascript">
+	document.all.search.focus();
+</SCRIPT>
+<%
+	response.end
+elseif request("act")="select" then
+	if request("search") <> "" then
+		SA_TitleOrName=request("search")
+		SA_Action="return true;"
+		'SA_Action="return selectOperations();"
+		SA_SearchAgainURL="voucherInput.asp"
+		SA_StepText="" '"ê«„ œÊ„ : «‰ Œ«» Õ”«»"
+		SA_ActName			= "select"	
+		SA_SearchBox	="search"		
+		SA_IsVendor = 1
+%>
+		<FORM METHOD=POST ACTION="?act=check">
+			<input type="hidden" name="id" value="<%=request("id")%>">
+		<!--#include File="../AR/include_SelectAccount.asp"-->
+		</FORM>
+<%
+	response.end
+	end if
+elseif request("act")="check" then
+	PurchaseOrderID=request("id")
+	vendorID=request("selectedCustomer")
+	set rs = Conn.Execute("select * from PurchaseOrders where id=" & PurchaseOrderID)
+	oldVendorID = rs("vendor_ID")
+	PurchaseOrder = rs("typeName") & "(" & rs("comment") & ")"
+	set rs= Conn.Execute("select * from accounts where id=" & oldVendorID)
+	oldAccountTitle = rs("accountTitle") & "(" & rs("id") & ")"
+	set rs= Conn.Execute("select * from accounts where id=" & vendorID)
+	newAccountTitle = rs("accountTitle") & "(" & rs("id") & ")"
+%>
+<br>
+<span>¬Ì« „ÿ„∆‰ Â” Ìœ ﬂÂ »—«Ì </span><b><%=PurchaseOrder%></b><br>
+<span>»Ã«Ì ›—Ê‘‰œÂ: </span><%=oldAccountTitle%><br>
+<span>«“ ›—Ê‘‰œÂ: </span><B><%=newAccountTitle%></B>
+<span>«” ›«œÂ ŒÊ«ÂÌœ ﬂ—œø</span><br><br>
+<form method=post action="?act=change">
+	<input type="hidden" name="PurchaseOrderID" value="<%=PurchaseOrderID%>">
+	<input type="hidden" name="vendorID" value="<%=vendorID%>">
+	<input type="submit" name="ok" value="»·Â">
+	<input type="button" value="ŒÌ—" onclick="window.location='?od=<%=PurchaseOrderID%>';"/>
+</form>
+<%
+	response.end
+elseif request("act")="change" then
+	Conn.Execute ("update PurchaseOrders set vendor_ID=" & request("vendorID") & " where id=" & request("PurchaseOrderID"))
+	response.redirect "?od=" & request("PurchaseOrderID")
+end if
 '-----------------------------------------------------------------------------------------------------
 '-------------------------------------------------------------------- Remove Relation to Inventory Log
 '---------------------------------------------------------------------------------------84-10-18-Alix-
@@ -127,14 +188,14 @@ if request("od")<>"" then
 					' show voucher, if exists
 					'===================================================
 					set RSV=Conn.Execute ("SELECT Vouchers.verified, Vouchers.id, Vouchers.paid FROM Vouchers INNER JOIN VoucherLines ON Vouchers.id = VoucherLines.Voucher_ID WHERE (VoucherLines.RelatedPurchaseOrderID = "& ordID & ") AND voided=0")
-
+					
 					if not RSV.eof then
 						response.write "<hR>"
 						'linkto = "verify"
 						'if not RSV("verified")=0 and RSV("paid")=0 then
 						'	linkto = "payment"
 						'end if 
-						
+
 						response.write "»—«Ì «Ì‰ ”›«—‘ Ìﬂ "
 						response.write "<A target='_blank' HREF='../AP/AccountReport.asp?act=showVoucher&voucher="& RSV("ID") & "'> ›«ﬂ Ê— »Â ‘„«—Â " & RSV("ID") & " </A>"
 						response.write "’«œ— ‘œÂ ﬂÂ  «ÌÌœ"
@@ -169,9 +230,19 @@ if request("od")<>"" then
 			<TD width=50%>
 				<%
 				set RSOD=Conn.Execute ("SELECT * FROM Accounts WHERE ID = "& VendorID )	
-				if not RSOD.eof then
+				if not RSOD.eof then ' 4,8
 					%>
-					<li><%=RSOD("accounttitle")%> (<%=VendorID%>)<br>
+					<li><%=RSOD("accounttitle")%> <a href="CRM/AccountInfo.asp?act=show&selectedCustomer=<%=VendorID%>">(<%=VendorID%>)</a> 
+					<%
+					if not HasVoucher then 
+						if auth(4,8) then 
+					%>
+					<a href="?act=search&id=<%=ordID%>">[ €ÌÌ—]</a>
+					<%
+						end if
+					end if 
+					%>
+					<br>
 					<li>‰«„ ›—Ê‘‰œÂ: <%=RSOD("firstName1")%> <%=RSOD("lastName1")%><br>
 					<li>‰«„ ‘—ﬂ : <%=RSOD("companyName")%><br>
 					<li>‰‘«‰Ì: <%=RSOD("city1")%> - <%=RSOD("Address1")%> -<BR> Tel: <%=RSOD("tel1")%> - Fax: <%=RSOD("fax1")%> - Email: <%=RSOD("email1")%><br><br>
