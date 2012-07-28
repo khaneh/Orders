@@ -60,7 +60,7 @@ $(document).ready(function(){
 					result += (diff.m>0)? diff.m + "ÏÞíÞå ":"";
 					if (obj.attr('id')!="order") 
 						$("#result").html(result);
-					console.log(obj.attr('id'));
+					//console.log(obj.attr('id'));
 					if ($("#order_found").val()=="0"){
 						ret = false;
 					} else {
@@ -169,7 +169,8 @@ $(document).ready(function(){
 					if (json.lastCounter>0) {
 						$("#result").html("ÂÎÑíä ßäÊæÑ íÏÇ ÔÏ");
 						$("#startCounter").val(json.lastCounter+1);
-						$("#endCounter").focus();
+						//$("#endCounter").focus();
+						$("#startCounter").focus();
 					} else{
 						$("#result").html("ÓÇÈÞåÇí ÇÒ ÂÎÑíä ßäÊæÑ íÏÇ äÔÏ");
 						$("#startCounter").val(json.lastCounter);
@@ -197,7 +198,7 @@ $(document).ready(function(){
 						$("#endDate").val($.format.date(today,"yyyy/MM/dd"));
 						$("#end_time").val($.jalaliCalendar.jalaliToGregorianStr($("#endDate").val()));
 						$("#startDate").focus();
-						console.log('today');
+						//console.log('today');
 					} else{
 						if (json.isNewDay=='1'){
 							$("#result").html("Èå äÙÑ ãíÇÏ ßå ÔãÇ ÑæÒ ÌÏíÏí Ñæ ÂÛÇÒ ßÑÏíÏ¡ ÑæÒ ÎæÈí ÏÇÔÊå ÈÇÔíÏ.");	
@@ -218,7 +219,8 @@ $(document).ready(function(){
 					}
 				}
 			);
-			$("#endCounter").focus();
+			//$("#endCounter").focus();
+			$("#startCounter").focus();
 		});
 	}
 	var loadUrl="cost_ajax_check.asp";
@@ -226,7 +228,9 @@ $(document).ready(function(){
 	$("#startCounter").blur(function(){
 		//$("#result").html(ajax_load).load(loadUrl,"act=counter");
 		if ($.isNumeric($("#startCounter").val()) && parseFloat($("#startCounter").val())>0){
-			$("#endCounter").focus();
+			//$("#endCounter").focus();
+			//console.log("endCounter");
+			;
 		} else {
 			$("#startCounter").val("");
 			$("#startCounter").focus();
