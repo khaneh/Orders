@@ -1036,7 +1036,31 @@ elseif request("act")="IssueInvoice" then
 			if IsNull(rs("qtty")) then 
 				errMsg = errMsg & "ÈÑÇí " & rs("description") & " ÔãÇ åí ÍæÇáåÇí ÕÇÏÑ äßÑÏåÇíÏ<br>"
 			else
-				if CDbl(rs("qtty")) <> CDbl(rs("appQtty")) then errMsg = errMsg & "ÊÚÏÇÏ ÍæÇáå <b>" & rs("itemName") & "</b> ÈÇ ÊÚÏÇÏ <b>" & rs("description") & "</b> ãÛÇíÑ ÇÓÊ.<br>" 
+				if CDbl(rs("qtty")) <> CDbl(rs("appQtty")) then 
+				'errMsg = errMsg & "ÊÚÏÇÏ ÍæÇáå <b>" & rs("itemName") & "</b> ÈÇ ÊÚÏÇÏ <b>" & rs("description") & "</b> ãÛÇíÑ ÇÓÊ.<br>" 
+					item=rs("item")
+					appQtty=CDbl(rs("appQtty"))
+					desc=rs("description")
+					itemName=""
+					sumQtty=0
+					do
+						skeepNext=0
+						if item<>rs("item") then exit do
+						sumQtty=sumQtty+cdbl(rs("qtty"))
+						if itemName="" then 
+							itemName = rs("itemName")
+						else
+							itemName=itemName & ", " & rs("itemName")
+						end if
+						rs.moveNext
+						skeepNext=1
+						if rs.eof then exit do
+					loop while item=rs("item") 
+					'rs.MovePrevious
+					
+					if appQtty<>sumQtty then errmsg = errmsg & "ÊÚÏÇÏ ÍæÇáå <b>" & itemName & "</b> ÈÇ ÊÚÏÇÏ <b>" & desc & "</b> ãÛÇíÑ ÇÓÊ.<br>" 
+
+				end if
 			end if
 		end if
 		
