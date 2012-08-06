@@ -298,6 +298,9 @@ StartOfTheYear = left(shamsiToday(),4) & "/01/01"
 			<tr>
 				<td colspan="2"><a href="arReport.asp">ÍÓÇÈåÇí ÈÏåßÇÑ</a></td>
 			</tr>
+			<tr>
+				<td colspan="2"><a href="memoReport.asp">ÒÇÑÔ ÇÚáÇãíååÇ</a></td>
+			</tr>
 			</table>
 		<% end if %>
 		&nbsp;
