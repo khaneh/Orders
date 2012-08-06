@@ -239,7 +239,7 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 			'S A M
 			'mySQL="SELECT DRV.*, InvoiceLines.Price - InvoiceLines.Discount - InvoiceLines.Reverse + InvoiceLines.Vat AS SalePrice FROM (SELECT PurchaseOrders.*, InvoiceOrderRelations.Invoice AS Invoice, InvoiceItems.ID AS InvoiceItem FROM InvoiceItems RIGHT OUTER JOIN InvoiceOrderRelations INNER JOIN PurchaseRequests INNER JOIN PurchaseRequestOrderRelations ON PurchaseRequests.ID = PurchaseRequestOrderRelations.Req_ID ON  InvoiceOrderRelations.[Order] = PurchaseRequests.Order_ID RIGHT OUTER JOIN PurchaseOrders ON PurchaseRequestOrderRelations.Ord_ID = PurchaseOrders.ID ON  InvoiceItems.RelatedInventoryItemID = PurchaseOrders.TypeID WHERE (PurchaseOrders.Status <> 'CANCEL') AND (PurchaseOrders.HasVoucher = 0) AND (PurchaseOrders.Vendor_ID = "& VenID& "))  DRV LEFT OUTER JOIN InvoiceLines ON DRV.Invoice = InvoiceLines.Invoice AND DRV.InvoiceItem = InvoiceLines.Item left outer JOIN INVOICES on InvoiceLines.Invoice = Invoices.id where invoices.voided is null or invoices.voided<>1 ORDER BY DRV.OrdDate,DRV.ID"
 			' changed by S A M 91/3/16
-			mySQL="SELECT PurchaseOrders.*, InvoiceOrderRelations.Invoice AS Invoice,invoices.Voided,InventoryItems.Unit,drv.SalePrice,InventoryLog.Qtty as invQtty FROM InvoiceOrderRelations INNER JOIN PurchaseRequests INNER JOIN PurchaseRequestOrderRelations ON PurchaseRequests.ID = PurchaseRequestOrderRelations.Req_ID ON  InvoiceOrderRelations.[Order] = PurchaseRequests.Order_ID RIGHT OUTER JOIN PurchaseOrders ON PurchaseRequestOrderRelations.Ord_ID = PurchaseOrders.ID left outer join Invoices on InvoiceOrderRelations.Invoice=invoices.ID left outer join InventoryItems on PurchaseOrders.TypeID=InventoryItems.ID and PurchaseOrders.IsService=0 left outer join InventoryLog on InventoryLog.RelatedID = PurchaseOrders.ID and InventoryLog.IsInput=1 and InventoryItems.ID = InventoryLog.ItemID and InventoryLog.Voided=0 left outer join (select invoice,inventoryItem,sum(InvoiceLines.Price - InvoiceLines.Discount - InvoiceLines.Reverse + InvoiceLines.Vat) as SalePrice from InvoiceLines inner join InventoryInvoiceRelations on InvoiceLines.Item=InventoryInvoiceRelations.invoiceItem group by invoice,inventoryItem) drv on invoices.ID =drv.invoice and InventoryItems.ID=drv.inventoryItem WHERE (PurchaseOrders.Status <> 'CANCEL') AND (PurchaseOrders.HasVoucher = 0) AND (PurchaseOrders.Vendor_ID = " & VenID & ") ORDER BY PurchaseOrders.OrdDate,PurchaseOrders.ID"
+			mySQL="SELECT PurchaseOrders.*, InvoiceOrderRelations.Invoice AS Invoice,invoices.Voided,InventoryItems.Unit,drv.SalePrice,InventoryLog.Qtty as invQtty,InventoryLog.price as invPrice FROM InvoiceOrderRelations INNER JOIN PurchaseRequests INNER JOIN PurchaseRequestOrderRelations ON PurchaseRequests.ID = PurchaseRequestOrderRelations.Req_ID ON  InvoiceOrderRelations.[Order] = PurchaseRequests.Order_ID RIGHT OUTER JOIN PurchaseOrders ON PurchaseRequestOrderRelations.Ord_ID = PurchaseOrders.ID left outer join Invoices on InvoiceOrderRelations.Invoice=invoices.ID left outer join InventoryItems on PurchaseOrders.TypeID=InventoryItems.ID and PurchaseOrders.IsService=0 left outer join InventoryLog on InventoryLog.RelatedID = PurchaseOrders.ID and InventoryLog.IsInput=1 and InventoryItems.ID = InventoryLog.ItemID and InventoryLog.Voided=0 left outer join (select invoice,inventoryItem,sum(InvoiceLines.Price - InvoiceLines.Discount - InvoiceLines.Reverse + InvoiceLines.Vat) as SalePrice from InvoiceLines inner join InventoryInvoiceRelations on InvoiceLines.Item=InventoryInvoiceRelations.invoiceItem group by invoice,inventoryItem) drv on invoices.ID =drv.invoice and InventoryItems.ID=drv.inventoryItem WHERE (PurchaseOrders.Status <> 'CANCEL') AND (PurchaseOrders.HasVoucher = 0) AND (PurchaseOrders.Vendor_ID = " & VenID & ") ORDER BY PurchaseOrders.OrdDate,PurchaseOrders.ID"
 			
 '			response.write "<br>" & mySQL
 '			response.end
@@ -255,9 +255,10 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 				<TD> «—ÌŒ ”›«—‘</TD>
 				<TD>ﬁÌ„  ›—Ê‘</TD>
 				<td> ⁄œ«œ Ê«—œ ‘œÂ »Â «‰»«—</td>
+				<td>—Ì«· Ê—Êœ »Â «‰»«—</td>
 			</TR>
 			<TR bgcolor="#5555BB" height="2">
-				<TD colspan=8></TD>
+				<TD colspan=9></TD>
 			</TR>
 			<%
 			tmpCounter=0
@@ -272,8 +273,13 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 				voided = 		RSS("voided")
 				unit =			RSS("unit")	
 				invQtty = 		RSS("invQtty")
+				invPrice = 		RSS("invPrice")
+				qtty =			RSS("qtty")
 				if not IsNull(unit) then unit = "<small>(" & unit & ")</small>" 
-
+				dis = false
+				if not IsNull(invQtty) then 
+					if cdbl(invQtty) <> cdbl(qtty) then dis=true
+				end if
 				if tmpCounter mod 2 = 1 then
 					tmpColor="#FFFFFF"
 					tmpColor2="#FFFFBB"
@@ -285,7 +291,7 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 				<TR bgcolor="<%=tmpColor%>" >
 					<TD><INPUT TYPE="hidden" name=color1 value="<%=tmpColor%>">
 						<INPUT TYPE="hidden" name=color2 value="<%=tmpColor2%>">
-						<INPUT TYPE="checkbox" onclick="setPrice(this)"  name="pcheck" id="<%=tmpCounter-1%>" value="<%=RSS("id")%>">
+						<INPUT TYPE="checkbox" onclick="setPrice(this)"  name="pcheck" id="<%=tmpCounter-1%>" value="<%=RSS("id")%>" <%if dis then response.write "disabled='disabled'"%>>
 					</TD>
 					<TD dir=LTR align=right>
 						<INPUT TYPE="hidden" name="purchaseOrderID" value="0">
@@ -298,7 +304,7 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 						<INPUT TYPE="text" NAME="price"  style="border:none; background: transparent; direction:LTR;text-align:right;"  onblur="setPrice(this)" onKeyPress="return maskNumber(this);" size=8 value="<%=Separate(RSS("price"))%>">
 					</TD>
 					<TD>
-						<INPUT TYPE="text" NAME="qtty" style="border:none; background: transparent; direction:LTR;text-align:right;"  onKeyPress="return maskNumber(this);" size=3 value="<%=RSS("qtty")%>"><span><%=unit%></span>
+						<INPUT TYPE="text" NAME="qtty" style="border:none; background: transparent; direction:LTR;text-align:right;"  onKeyPress="return maskNumber(this);" size=3 value="<%=qtty%>"><span><%=unit%></span>
 					</TD>
 					<TD align=left><span dir=ltr><%=RSS("OrdDate")%></span></TD>
 					<TD dir=LTR align=right>
@@ -337,20 +343,21 @@ elseif request("act")="show" AND request("selectedCustomer") <> "" then
 %>
 					</TD>
 					<td><%=Separate(invQtty)%></td>
+					<td><%=Separate(invPrice)%></td>
 				</TR>
 <%				
 			Loop
 %>
 			<TR bgcolor="#5555BB" height="2">
-				<TD colspan=8></TD>
+				<TD colspan=9></TD>
 			</TR>
 			<TR bgcolor="#eeeeee" height="2">
 				<TD colspan='3' align='left'>„«·Ì«  »— «—“‘ «›“ÊœÂ: </TD>
-				<TD colspan=5><INPUT TYPE="text" NAME="totalVat"  size=16 value="0" onchange='setPrice(this)'> —Ì«·</td>
+				<TD colspan=6><INPUT TYPE="text" NAME="totalVat"  size=16 value="0" onchange='setPrice(this)'> —Ì«·</td>
 			</TR>
 			<TR bgcolor="#eeeeee" height="2">
 				<TD colspan=3 align=left>Ã„⁄ ﬂ·:</TD>
-				<TD colspan=5><INPUT  style="border:none; background:transparent; direction:LTR;text-align:right;" TYPE="text" NAME="totalPrice" readonly size=16 value="<%=totalprice%>">  —Ì«·</td>
+				<TD colspan=6><INPUT  style="border:none; background:transparent; direction:LTR;text-align:right;" TYPE="text" NAME="totalPrice" readonly size=16 value="<%=totalprice%>">  —Ì«·</td>
 			</TR>
 			</TABLE><br>
 			<%
