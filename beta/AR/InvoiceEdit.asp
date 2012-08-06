@@ -116,8 +116,13 @@ elseif request("act")="editInvoice" then
 		if Auth(6 , "A") then
 			' Has the Priviledge to change the Invoice
 			response.write "<BR>"
-			if Auth(6,"N") then 
-				call showAlert ("«Ì‰ ›«ﬂ Ê— ’«œ— ‘œÂ «” .<br>Â—ç‰œ ﬂÂ ‘„« «Ã«“Â œ«—Ìœ «Ì‰ ›«ﬂ Ê— —« œç«—  €ÌÌ—«  ﬂ·Ì ﬂ‰Ìœ<br>„”Ê·Ì  „‘ﬂ·«  «Õ „«·Ì —« „Ì Å–Ì—Ìœø",CONST_MSG_INFORM)
+			if Auth(6,"N") then  
+				set rs=Conn.Execute("select * from effectiveGlrows where sys='AR' and link in (select id from arItems where type=1 and reason=1 and link=" & invoiceID & ")")
+				if rs.eof then 
+					call showAlert ("«Ì‰ ›«ﬂ Ê— ’«œ— ‘œÂ «” .<br>Â—ç‰œ ﬂÂ ‘„« «Ã«“Â œ«—Ìœ «Ì‰ ›«ﬂ Ê— —« œç«—  €ÌÌ—«  ﬂ·Ì ﬂ‰Ìœ<br>„”Ê·Ì  „‘ﬂ·«  «Õ „«·Ì —« „Ì Å–Ì—Ìœø",CONST_MSG_INFORM)
+				else
+					response.redirect "AccountReport.asp?act=showInvoice&invoice="& InvoiceID & "&errmsg=" & Server.URLEncode("«Ì‰ ›«ﬂ Ê— ”‰œ Õ”«»œ«—Ì œ«—œ° <br>‘„« ﬂÂ „ÌùŒÊ«ÂÌœ  €ÌÌ—«  ﬂ·Ì »œÌœ° «» œ« »«Ìœ ¬‰—« »«ÿ· ﬂ‰Ìœ.")
+				end if
 			else 
 				call showAlert ("«Ì‰ ›«ﬂ Ê— ’«œ— ‘œÂ «” .<br>Â—ç‰œ ﬂÂ ‘„« «Ã«“Â œ«—Ìœ ﬂÂ «Ì‰ ›«ﬂ Ê— —«  €ÌÌ— »œÂÌœ<br>„”Ê·Ì  „‘ﬂ·«  «Õ „«·Ì —« „Ì Å–Ì—Ìœø",CONST_MSG_INFORM) 
 			end if
@@ -192,7 +197,10 @@ elseif request("act")="editInvoice" then
 						<td dir="LTR">
 							<INPUT class="InvGenInput" NAME="InvoiceNo" value="<%=InvoiceNo%>" style="border:1px solid black;" TYPE="text" maxlength="10" size="10"></td>
 						<td dir="RTL">
-							<INPUT TYPE="checkbox" NAME="IsA" onClick='checkIsA();' <% if IsA then response.write " checked " %>> «·› &nbsp;</td>
+							<INPUT TYPE="checkbox" NAME="IsA" onClick='checkIsA();' 
+							<% if IsA then response.write " checked " 
+							if Issued and not Auth(6,"N") then response.write " disabled='disabled' "%>> «·› &nbsp;
+						</td>
 					</tr>
 					</table></TD>
 			</tr>
@@ -380,14 +388,23 @@ elseif request("act")="submitEdit" then
 		CustomerID=		clng(request.form("CustomerID"))
 
 		issueDate=	request.form("issueDate")
+		
 
 		if request.form("IsA") = "on" then 
 			IsA=1 
 			InvoiceNo=request.form("InvoiceNo")
 			if InvoiceNo <> "" then InvoiceNo = clng(InvoiceNo)
 		else 
+			set rs = Conn.Execute("select * from invoices where id=" & invoiceID)
 			IsA=0
 			InvoiceNo=""
+			if rs("issued") then 
+				if rs("isA") then 
+					IsA=1 
+					InvoiceNo=request.form("InvoiceNo")
+					if InvoiceNo <> "" then InvoiceNo = clng(InvoiceNo)
+				end if
+			end if
 		end if
 			
 		for i=1 to request.form("selectedOrders").count
@@ -422,6 +439,7 @@ elseif request("act")="submitEdit" then
 			approved=	rs("Approved")
 			isReverse=	rs("IsReverse")
 			ApprovedBy=	rs("ApprovedBy")
+			if issued then isA=rs("isA")
 		else
 			errorFound=True
 		end if
