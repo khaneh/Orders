@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>HTML5 File Drag and Drop Upload with jQuery and PHP | Tutorialzine Demo</title>
+        
+    </head>
+    
+    <body>
+		<style >
+#dropbox{
+/* 	background:url('../img/background_tile_3.jpg'); */
+	border: 1px dashed red;
+	border-radius:3px;
+	position: relative;
+	margin:80px auto 90px;
+	min-height: 290px;
+	overflow: hidden;
+	padding-bottom: 40px;
+    width: 990px;
+	
+	box-shadow:0 0 4px rgba(0,0,0,0.3) inset,0 -3px 2px rgba(0,0,0,0.1);
+}
+
+
+#dropbox .message{
+	font-size: 11px;
+    text-align: center;
+    padding-top:160px;
+    display: block;
+}
+
+#dropbox .message i{
+	color:#ccc;
+	font-size:10px;
+}
+
+#dropbox:before{
+	border-radius:3px 3px 0 0;
+}
+
+
+
+/*-------------------------
+	Image Previews
+--------------------------*/
+
+
+
+#dropbox .preview{
+	width:245px;
+	height: 215px;
+	float:left;
+	margin: 55px 0 0 60px;
+	position: relative;
+	text-align: center;
+}
+
+#dropbox .preview img{
+	max-width: 240px;
+	max-height:180px;
+	border:3px solid #fff;
+	display: block;
+	
+	box-shadow:0 0 2px #000;
+}
+
+#dropbox .imageHolder{
+	display: inline-block;
+	position:relative;
+}
+
+#dropbox .uploaded{
+	position: absolute;
+	top:0;
+	left:0;
+	height:100%;
+	width:100%;
+	background: url('/images/done.png') no-repeat center center rgba(255,255,255,0.5);
+	display: none;
+}
+
+#dropbox .preview.done .uploaded{
+	display: block;
+}
+
+
+
+/*-------------------------
+	Progress Bars
+--------------------------*/
+
+
+
+#dropbox .progressHolder{
+	position: absolute;
+	background-color:#252f38;
+	height:12px;
+	width:100%;
+	left:0;
+	bottom: 0;
+	
+	box-shadow:0 0 2px #000;
+}
+
+#dropbox .progress{
+	background-color:#2586d0;
+	position: absolute;
+	height:100%;
+	left:0;
+	width:0;
+	
+	box-shadow: 0 0 1px rgba(255, 255, 255, 0.4) inset;
+	
+	-moz-transition:0.25s;
+	-webkit-transition:0.25s;
+	-o-transition:0.25s;
+	transition:0.25s;
+}
+
+#dropbox .preview.done .progress{
+	width:100% !important;
+}
+div.fileName {
+	font-size: small;
+}
+span.fileSize{
+	font-size: smaller;
+	margin-left: 10px;
+}
+div.progress{
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+		</style>
+		
+		
+		<div id="dropbox">
+			<div class="progress">0</div>
+			<span class="message">لطفا فایلهای سفارش را در این محل بیاندازید</span>
+		</div>
+		
+        
+        <!-- Including The jQuery Library -->
+		<script src="/js/jquery-1.7.min.js"></script>
+		
+		<!-- Including the HTML5 Uploader plugin -->
+<!-- 		<script src="/js/jquery.filedrop.js"></script> -->
+		<script src="/js/jquery.upchunk.js"></script>
+		
+		<!-- The main script file -->
+<script type="text/javascript">
+function getReadableFileSizeString(fileSizeInBytes) {
+
+    var i = -1;
+    var byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB'];
+    do {
+        fileSizeInBytes = fileSizeInBytes / 1024;
+        i++;
+    } while (fileSizeInBytes > 1024);
+
+    return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i];
+};
+
+$(document).ready(function(){
+	$.ajaxSetup({
+		cache: false
+	});
+	$.getJSON("/service/json_getFile.asp",
+		{act:"list"},
+		function (js){
+			$.each(js, function(i,s){
+				$('<div title='+s.itemName+' class="fileName"><a href="'+s.itemPath+'">'+s.itemPath+'</a><span class="fileSize">'+getReadableFileSizeString(s.itemSize)+' </span></div>').appendTo('#dropbox');
+			});
+		});
+});
+
+$(function(){
+	
+	var dropbox = $('#dropbox'),
+		message = $('.message', dropbox);
+	dropbox.upchunk({
+		url: 'post_file.asp',
+		chunk: false,                                     // whether or not files will be sent to the server in chunks
+		chunk_size: 1024,                                 // the size of each chunk
+		fallback_id: '',                                  // an identifier of a standard file input field to optionally interface with the plugin
+		file_param: 'pic',                               // the name of the parameter the file will have when sent to the server
+		name_param: 'file_name',                          // the name of the parameter the file name will have when sent to the server
+		max_file_size: 0,                                 // the maximum size of each uploaded file, 0 for infinite
+		queue_size: 2,                                    // the maximum amount of files to upload to the server at once
+		processNextImmediately: false,                    // whether to start processing the next file immediately once progress reaches 100% instead of waiting for the server's response
+		data: {orderID: 1222},
+		progressUpdated: function(file, hash, progress){
+			$('.prograss').html(progress);
+			console.log(progress)
+		}
+	});
+	
+/*
+	dropbox.filedrop({
+		// The name of the $_FILES entry:
+		paramname:'pic',
+		data: {orderID: 11112},
+		maxfiles: 5,
+    	maxfilesize: 10000,
+		//url: 'http://192.168.10.12/post_file.php',
+		url: 'post_file.asp',
+		uploadFinished:function(i,file,response){
+			$.data(file).addClass('done');
+			// response is the JSON object that post_file.php returns
+		},
+		allowedfiletypes: ['image/jpg','image/png','image/gif','application/pdf'],
+    	error: function(err, file) {
+			switch(err) {
+				case 'BrowserNotSupported':
+					showMessage('Your browser does not support HTML5 file uploads!');
+					break;
+				case 'TooManyFiles':
+					alert('Too many files! Please select 5 at most! (configurable)');
+					break;
+				case 'FileTooLarge':
+					alert(file.name+' is too large! Please upload files up to 2mb (configurable).');
+					break;
+				default:
+					break;
+			}
+		},
+
+		uploadStarted:function(i, file, len){
+			createImage(file);
+		},
+
+		progressUpdated: function(i, file, progress) {
+			$.data(file).find('.progress').width(progress);
+		}
+    	 
+	});
+*/
+	
+	var template = '<div class="preview">'+
+						'<span class="imageHolder">'+
+							'<img />'+
+							'<span class="uploaded"></span>'+
+						'</span>'+
+						'<div class="progressHolder">'+
+							'<div class="progress"></div>'+
+						'</div>'+
+					'</div>'; 
+	
+	
+	function createImage(file){
+
+		var preview = $(template), 
+			image = $('img', preview);
+			
+		var reader = new FileReader();
+		
+		image.width = 100;
+		image.height = 100;
+		
+		reader.onload = function(e){
+			
+			// e.target.result holds the DataURL which
+			// can be used as a source of the image:
+			
+			image.attr('src',e.target.result);
+		};
+		
+		// Reading the file as a DataURL. When finished,
+		// this will trigger the onload function above:
+		reader.readAsDataURL(file);
+		
+		message.hide();
+		preview.appendTo(dropbox);
+		
+		// Associating a preview container
+		// with the file, using jQuery's $.data():
+		
+		$.data(file,preview);
+	}
+
+	function showMessage(msg){
+		message.html(msg);
+	}
+
+});
+        </script>
+    
+    </body>
+</html>
+
