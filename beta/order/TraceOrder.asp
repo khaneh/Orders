@@ -118,7 +118,7 @@ elseif request("act")="search" then
 
 '	mySQL="SELECT orders_trace.*, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon FROM Orders INNER JOIN orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID WHERE ("& myCriteria & ") AND (Orders.Closed=0) ORDER BY order_date DESC, radif_sefareshat DESC"	
 	'mySQL="SELECT orders_trace.*, Orders.closed, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon,DRV_Invoice.price, ghar.return_date as ghDate, ghar.return_time as ghTime FROM Orders INNER JOIN  orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN  OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID left outer join (select InvoiceOrderRelations.[Order],SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceOrderRelations.[Order]) DRV_Invoice on Orders.ID=DRV_Invoice.[Order] inner join (select [order],return_date,return_time from OrderTraceLog where ID in (select min(id) from OrderTraceLog where return_date is not null group by [Order])) as ghar on orders_trace.radif_sefareshat =ghar.[order] WHERE ("& myCriteria & ") ORDER BY order_date DESC, radif_sefareshat DESC"
-	mySQL="SELECT orders_trace.*, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon , Invoices.ID AS InvoiceID, Invoices.Approved, Invoices.Voided, Invoices.Issued,DRV_invoice.price, ghar.return_date as ghDate, ghar.return_time as ghTime FROM Invoices INNER JOIN InvoiceOrderRelations ON Invoices.ID = InvoiceOrderRelations.Invoice RIGHT OUTER JOIN Orders INNER JOIN orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID ON InvoiceOrderRelations.[Order] = Orders.ID left outer join (select InvoiceOrderRelations.[Order],SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceOrderRelations.[Order]) DRV_invoice on Orders.id=DRV_invoice.[Order] inner join (select [order],return_date,return_time from OrderTraceLog where ID in (select min(id) from OrderTraceLog where return_date is not null group by [Order])) as ghar on orders_trace.radif_sefareshat =ghar.[order] WHERE ("& myCriteria & ") AND (Orders.Closed=0) ORDER BY orders_trace.order_date DESC, orders_trace.radif_sefareshat DESC"
+	mySQL="SELECT orders_trace.*, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon , Invoices.ID AS InvoiceID, Invoices.Approved, Invoices.Voided, Invoices.Issued,DRV_invoice.price, ghar.return_date as ghDate, ghar.return_time as ghTime FROM Invoices INNER JOIN InvoiceOrderRelations ON Invoices.ID = InvoiceOrderRelations.Invoice RIGHT OUTER JOIN Orders INNER JOIN orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID ON InvoiceOrderRelations.[Order] = Orders.ID left outer join (select InvoiceOrderRelations.[Order],SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceOrderRelations.[Order]) DRV_invoice on Orders.id=DRV_invoice.[Order] left outer join (select [order],return_date,return_time from OrderTraceLog where ID in (select min(id) from OrderTraceLog where return_date is not null group by [Order])) as ghar on orders_trace.radif_sefareshat =ghar.[order] WHERE ("& myCriteria & ") AND (Orders.Closed=0) ORDER BY orders_trace.order_date DESC, orders_trace.radif_sefareshat DESC"
 
 
 	set RS1=Conn.Execute (mySQL)
@@ -592,7 +592,7 @@ end if
 		%>
 		<a href="<%=orderFolder & order%>">‰„«Ì‘ ÅÊ‘Â ”›«—‘</a>
 		
-	<div style='direction:ltr;float:left;'>
+	<div style='direction:ltr;float:left;'><!--b>»« ⁄—÷ ÅÊ“‘ «” Ê—ÌÃ ﬁ«»· œ” —” ‰Ì” </b-->
 	<% ListFolderContents(orderFolder & order) %>
 	<div>
 	<TABLE border="0" cellspacing="0" cellpadding="2" align="center" style=" color:black; direction:RTL; width:700; ">
@@ -727,7 +727,22 @@ end if
 		<td>À»  ﬂ‰‰œÂ</td>
 	</tr>
 	<%
-
+function floor(x)
+	dim temp	
+	temp = Round(x)
+	if temp > x then
+	    temp = temp - 1
+	end if
+	floor = temp
+end function
+function ceil(x)
+	dim temp	
+	temp = Round(x)
+	if temp < x then
+	    temp = temp + 1
+	end if
+	ceil = temp
+end function
 	mySQL="select costs.description,isnull(DATEDIFF(mi,costs.start_time,costs.end_time),0) as theTime,end_counter - start_counter as theCount, cost_operation_type.name as operationName, cost_drivers.name as driverName, cost_centers.name as centerName, users.RealName from costs inner join cost_operation_type on costs.operation_type=cost_operation_type.id inner join cost_drivers on cost_operation_type.driver_id=cost_drivers.id inner join cost_centers on cost_drivers.cost_center_id=cost_centers.id inner join Users on costs.user_id=users.ID where [order]=" & order
 	set rs=Conn.Execute(mySQL)
 	while not rs.eof
@@ -737,7 +752,7 @@ end if
 		<td><%=rs("driverName")%></td>
 		<td><%=rs("operationName")%></td>
 		<td><%=rs("theCount")%></td>
-		<td><%=cint(rs("theTime"))/60 & ":" & cint(rs("theTime")) mod 60%></td>
+		<td><%=floor(cint(rs("theTime"))/60) & ":" & cint(rs("theTime")) mod 60%></td>
 		<td><%=rs("description")%></td>
 		<td><%=rs("realName")%></td>
 	</tr>
@@ -1186,11 +1201,11 @@ elseif request("act")="advancedSearch" then
 	If request.form("check_tarikh_tahvil") = "on" Then
 		if request.form("az_tarikh_tahvil") <> "" then
 
-			myCriteria = myCriteria & maybeAND & "return_date >= '" & request.form("az_tarikh_tahvil") & "'"
+			myCriteria = myCriteria & maybeAND & "orders_trace.return_date >= '" & request.form("az_tarikh_tahvil") & "'"
 			maybeAND=" AND "
 		End If
 		if request.form("ta_tarikh_tahvil") <> "" then
-			myCriteria = myCriteria & maybeAND & "return_date <= '" & request.form("ta_tarikh_tahvil") & "'"
+			myCriteria = myCriteria & maybeAND & "orders_trace.return_date <= '" & request.form("ta_tarikh_tahvil") & "'"
 			maybeAND=" AND "
 		End If
 		If (request.form("az_tarikh_tahvil") = "") AND (request.form("ta_tarikh_tahvil") = "") then
@@ -1338,6 +1353,7 @@ elseif request("act")="advancedSearch" then
 			response.write "<br>" & myCriteria
 		ELSE
 			mySQL="SELECT orders_trace.*, Orders.closed, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon,DRV_Invoice.price, ghar.return_date as ghDate, ghar.return_time as ghTime FROM Orders INNER JOIN  orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN  OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID left outer join (select InvoiceOrderRelations.[Order],SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceOrderRelations.[Order]) DRV_Invoice on Orders.ID=DRV_Invoice.[Order] left outer join (select [order],return_date,return_time from OrderTraceLog where ID in (select min(id) from OrderTraceLog where return_date is not null group by [Order])) as ghar on orders_trace.radif_sefareshat =ghar.[order] WHERE ("& myCriteria & ") ORDER BY order_date DESC, radif_sefareshat DESC"	
+			'response.write "<br>"&mySQL&"<br>"
 			set RS1=Conn.Execute (mySQL)
 			if not RS1.eof then
 				tmpCounter=0

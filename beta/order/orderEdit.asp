@@ -507,7 +507,6 @@ sub showKeyEdit(key)
 					hasGroupValue = false
 					for each grpItem in typeProp.SelectNodes(key & "[@group='" & thisGroup & "']")
 						set grpValue = orderProp.SelectNodes(key & "[@id='" & id & "' and @name='" & grpItem.GetAttribute("name") & "']")
-						response.write thisGroup & id & "," & grpItem.GetAttribute("name") & ":" & grpValue.length & "<br>"
 						if grpValue.length > 0 then hasGroupValue = true
 					next
 					

@@ -761,21 +761,25 @@ function addRow(rowNo){
 }
 
 function setPrice(src){
+/* 	echoNum(src); */
 	myRow=src.parentNode.parentNode.rowIndex
 
-	if (src.name=="Amounts" && document.getElementsByName("ChequeNos")[myRow].value==''){
-		src.value=0;
+	if ($(src).attr("name")=="Amounts" && $("ChequeNos")[myRow].val()==''){
+		$(src).val(0);
 	}
 	else{
-		src.value=val2txt(txt2val(src.value));
+		if (isNaN($(src).val()))
+			$(src).val(0);
+		else
+			$(src).val(echoNum(getNum($(src).val())));
 	}
-	cashAmount=parseInt(txt2val(document.getElementsByName("CashAmount")[0].value));
+	cashAmount=getNum($("input[name=CashAmount]:first").val());
 	totalAmount = cashAmount;
-
-	for (rowNo=0; rowNo < document.getElementsByName("Amounts").length; rowNo++){
-		totalAmount += parseInt(txt2val(document.getElementsByName("Amounts")[rowNo].value));
-	}
-	document.all.TotalAmount.value = val2txt(totalAmount);
+	$("input[name=Amounts]").each(function(i,amount){
+		if (!isNaN($(amount).val()) && $(amount).val()!='')
+			totalAmount += getNum($(amount).val());
+	});
+	$("input[name=TotalAmount]:first").val(echoNum(totalAmount));
 }
 
 //-->

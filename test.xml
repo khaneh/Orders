@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- created with XMLSpear -->
+<keys>
+    <printing>
+        <key id="0" name="description">مبلغ اعلام شده : 3300000 ريال</key>
+        <key id="0" name="proof_iso">on-0</key>
+        <key id="0" name="plate-type">2</key>
+        <key id="0" name="plate-qtty">4</key>
+        <key id="0" name="paper-weight">6</key>
+        <key id="0" name="paper-type">1</key>
+        <key id="0" name="paper-size">2</key>
+        <key id="0" name="paper-qtty">150</key>
+        <key id="0" name="after-cut_size">30*45</key>
+        <key id="0" name="after-cut_qtty">1200</key>
+        <key id="0" name="machin">2</key>
+        <key id="0" name="machin-form">1</key>
+        <key id="0" name="machin-qtty">1100</key>
+        <key id="0" name="machin-d-type">4</key>
+        <key id="0" name="machin-control">2</key>
+        <key id="0" name="fold-count">2</key>
+        <key id="0" name="cutting-description">دور بري</key>
+    </printing>
+    <service>
+        <key id="0" name="service-item">ساخت قالب</key>
+        <key id="0" name="service-description">ساخت و تيغ زني دارد </key>
+    </service>
+</keys>

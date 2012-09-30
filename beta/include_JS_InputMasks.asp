@@ -145,7 +145,8 @@ objCtl.value = soutput
 objCtl.focus(); 
 }
 function maskNumber(objCtl){ 
-	var theKey=event.keyCode;
+	var theKey=event.which;
+//	console.log(event);
 	if (theKey==13){
 		return true;
 	}
@@ -204,6 +205,22 @@ function txt2val(inp){
 	if(''+result=="NaN")
 		result=0;
 	return result;
+}
+function getNum(n){
+	var out="0";
+	//if (!isNaN(n))
+		out = parseInt(n.replace(/,/gi,''));
+	return out;
+}
+function echoNum(str){
+	var regex = /(-?[0-9]+)([0-9]{3})/;
+	str = Math.floor(str);
+    str += '';
+    while (regex.test(str)) {
+        str = str.replace(regex, '$1,$2');
+    }
+    //str += ' kr';
+    return str;
 }
 
 //-->

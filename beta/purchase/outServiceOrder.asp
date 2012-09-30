@@ -82,8 +82,8 @@ if request.form("Submit")="«ÌÃ«œ ”›«—‘ Œ—Ìœ" then
 			%>
 			<TR bgcolor="<%=tmpColor%>" title="<%=Comment%>">
 				<TD><%=RSX("typeName")%></TD>
-				<TD><span dir=ltr><%=RSX("ReqDate")%></span></TD>
-				<TD><span dir=ltr><%=RSX("DueDate")%></span></TD>
+				<TD><span dir=ltr><%=shamsidate(RSX("ReqDate"))%></span></TD>
+				<TD><span dir=ltr><%=shamsidate(RSX("DueDate"))%></span></TD>
 				<TD><%=RSX("price")%>
 				<%
 				if RSX("price") <> 0 then
@@ -95,8 +95,8 @@ if request.form("Submit")="«ÌÃ«œ ”›«—‘ Œ—Ìœ" then
 				<% if clng(RSX("IsService"))=0 or clng(RSX("Qtty"))<>0 then %>
 				( ⁄œ«œ: <%=RSX("qtty")%>)
 				<% end if %>
-				<% if clng(RSX("order_ID"))<>-1 then %>
-				<%=RSX("order_ID")%>
+				<% if clng(RSX("orderID"))<>-1 then %>
+				<%=RSX("orderID")%>
 				<% end if %>
 				</TD>
 				<TD><%=RST("RealName")%></TD>
@@ -220,7 +220,7 @@ if request.form("Submit")="«ÌÃ«œ ”›«—‘ Œ—Ìœ" then
 		<TR >
 			<TD colspan=1 align=left>œ— «Ì‰  «—ÌŒ »«Ìœ œ—Ì«›  ‘Êœ</TD>
 			<TD colspan=6 align=right>
-				<INPUT dir=ltr TYPE="text" NAME="date2"  class=inputBut size=51 value="<%=DueDate%>" onKeyPress="return maskDate(this);" onblur="acceptDate(this)">
+				<INPUT dir=ltr TYPE="text" NAME="date2"  class=inputBut size=51 value="<%=shamsiDate(DueDate)%>" onKeyPress="return maskDate(this);" onblur="acceptDate(this)">
 			</TD>
 		</TR>
 		<TR >
@@ -487,10 +487,10 @@ function checkValidation(){
 			<TR bgcolor="<%=tmpColor%>" title="<%=Comment%>">
 				<TD><INPUT TYPE="Hidden" Name="TypeID_IsService" Value="<%=RSS("TypeID")&"_"&RSS("IsService")%>"><INPUT TYPE="checkbox" NAME="outReq" VALUE="<%=RSS("id")%>"></TD>
 				<TD><%=RSS("typeName")%></TD>
-				<TD><span dir=ltr><%=RSS("ReqDate")%></span></TD>
+				<TD><span dir=ltr><%=shamsidate(RSS("ReqDate"))%></span></TD>
 				<TD><%=RSS("price")%></TD>
 				<TD><%=RST("RealName")%></TD>
-				<TD><a href="../shopfloor/manageOrder.asp?radif=<%=RSS("order_ID")%>"><%=RSS("order_ID")%></a></small></TD>
+				<TD><a href="../order/order.asp?act=show&id=<%=RSS("orderID")%>"><%=RSS("orderID")%></a></small></TD>
 			</TR>
 <% 
 		RSS.moveNext
@@ -598,9 +598,9 @@ function checkValidation(){
 				tmpColor="#DDDDDD"
 				tmpColor2="#EEEEBB"
 			End if 
-			orderIDpos = clng(RSS("Order_ID"))
+			orderIDpos = clng(RSS("OrderID"))
 			if orderIDpos<>-1 then 
-				orderLink="<small><a href='../shopfloor/manageOrder.asp?radif=" & orderIDpos & "'>" & orderIDpos & "</a></small>"
+				orderLink="<small><a href='../order/order.asp?act=show&id=" & orderIDpos & "'>" & orderIDpos & "</a></small>"
 			else
 				orderLink="&nbsp;"
 			end if
@@ -618,7 +618,7 @@ function checkValidation(){
 			<TR bgcolor="<%=tmpColor%>" title="<%=Comment%>">
 				<TD><INPUT TYPE="Hidden" Name="TypeID_IsService" Value="<%=RSS("TypeID")&"_"&RSS("IsService")%>"><INPUT TYPE="checkbox" NAME="outReq" VALUE="<%=RSS("id")%>"></TD>
 				<TD><%=RSS("typeName")%></TD>
-				<TD><span dir=ltr><%=RSS("ReqDate")%></span></TD>
+				<TD><span dir=ltr><%=shamsidate(RSS("ReqDate"))%></span></TD>
 				<TD><%=RSS("price")%></TD>
 				<TD><%=RST("RealName")%></TD>
 				<TD><%=orderLink%> <%=orderQtty%> </TD>

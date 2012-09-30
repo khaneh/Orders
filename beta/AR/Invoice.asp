@@ -1,6 +1,6 @@
 <%@LANGUAGE="VBSCRIPT" CODEPAGE="1256"%><%
 'AR (6)
-PageTitle="Ê—Êœ ›«ﬂ Ê—"
+PageTitle="‰„«Ì‘ ›«ﬂ Ê—"
 SubmenuItem=1
 %>
 <!--#include file="top.asp" -->
@@ -103,7 +103,8 @@ elseif request("act")="showInvoices" then
 		<!--#include file="include_CustomerInvoices.asp" -->
 <%
 	end if
-else%>
+else
+%>
 	<br>
 	<br>
 	<FORM METHOD=POST ACTION="?act=submitsearch">
@@ -114,31 +115,7 @@ else%>
 	</div>
 	</FORM>
 <!-- Ã” ÃÊ »—«Ì ‰«„ Õ”«» »« ‘„«—Â ”›«—‘-->
-	<%if Auth(6 , 1) then %>
-	<br>
 	<hr width="90%" align="center">
-	<br>
-	<FORM METHOD=POST ACTION="InvoiceInput.asp?act=submitsearch">
-	<div dir='rtl'><B><FONT SIZE="" COLOR="red"> &nbsp;›«ﬂ Ê— ÃœÌœ: </FONT><BR>Ã” ÃÊ »—«Ì ‰«„ Õ”«» Ì« ‘„«—Â ”›«—‘</B>
-		<INPUT TYPE="text" NAME="query">&nbsp;
-		<INPUT class="GenButton" TYPE="submit" value="Ã” ÃÊ"><br>
-	</div>
-	</FORM>
-	<%end if %>
-<!-- Ã” ÃÊ »—«Ì ›«ﬂ Ê— -->
-	<%if Auth(6 , 3) then %>
-	<br>
-	<hr width="90%" align="center">
-	<br>
-	<br>
-	<FORM METHOD=POST ACTION="InvoiceEdit.asp?act=search">
-	<div dir='rtl'>&nbsp;<B><FONT SIZE="" COLOR="red">«’·«Õ ›«ﬂ Ê—:</FONT><BR> ‘„«—Â ”›«—‘ —« Ê«—œ ﬂ‰Ìœ</B>
-		<INPUT style="font-family:Tahoma;" TYPE="text" NAME="order" onfocus="document.getElementsByName('invoice')[1].value='';">&nbsp;
-		<INPUT class="GenButton" TYPE="submit" value="«œ«„Â...">&nbsp;&nbsp;&nbsp;‘„«—Â ›«ﬂ Ê—:
-		<INPUT style="font-family:Tahoma;width:100px;" TYPE="text" NAME="invoice">&nbsp;
-	</div>
-	</FORM>
-	<%end if %>
 
 	<SCRIPT LANGUAGE="JavaScript">
 	<!--

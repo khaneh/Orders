@@ -233,5 +233,31 @@ Function currentTime10()
 	if (len(curSecond) = 1) then curSecond = "0" & curSecond 
 	currentTime10= curHour & ":" & curMinute & ":" & curSecond
 End Function 
-
+function weekdaynameFA(name)
+	select case name
+		case "Saturday":
+			weekdaynameFA="ÔäÈå"
+		case "Sunday":
+			weekdaynameFA="íßÔäÈå"
+		case "Monday":
+			weekdaynameFA="ÏæÔäÈå"
+		case "Tuesday":
+			weekdaynameFA="ÓåÔäÈå"
+		case "Wednesday":
+			weekdaynameFA="åÇÑÔäÈå"
+		case "Thursday":
+			weekdaynameFA="äÌÔäÈå"
+		case "Friday":
+			weekdaynameFA="ÌãÚå"
+		case else
+			 weekdaynameFA=name
+	end select
+end function
+function splitDate(myDate)
+	dim out(3)
+	out(0)=mid(myDate,1,4)
+	out(1)=mid(myDate,6,2)
+	out(2)=mid(myDate,9,2)
+	splitDate=out
+end function
 %>

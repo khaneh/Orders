@@ -5,11 +5,7 @@ SubmenuItem=8
 if not Auth(7 , "B") then NotAllowdToViewThisPage()
 %>
 <!--#include file="top.asp" -->
-<link type="text/css" href="/css/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
-<link type="text/css" href="/css/jame.css" rel="stylesheet" />
 
-<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
-<script type="text/javascript" src="/js/jquery-ui-1.8.16.custom.min.js"></script>
 <script type="text/javascript">
 	$(document).ready(function () {
 		$.ajaxSetup({

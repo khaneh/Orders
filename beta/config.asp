@@ -1,3 +1,4 @@
+<!--#include file="version.asp" -->
 <%
 ' Remember to Check "Enable Parent Paths" in:
 '		IIS > Home Directory > Configuration > Options
@@ -432,6 +433,7 @@ sub ListFolderContents(path)
  Response.Write("</ul>" & vbCrLf)
 
 end sub   
+
 '------------------------------------------------------------ END
 
 

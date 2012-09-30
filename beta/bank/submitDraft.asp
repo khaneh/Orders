@@ -199,7 +199,7 @@ elseif request("act")="" then
 		г»бџ Ќж«бе :
 	</TD>
 	<TD>
-		<INPUT TYPE="text" NAME="amount" class='GenInput' style='width:170px;direction:LTR;text-align:left;' onKeyPress="return maskNumber(this);" onBlur="this.value=val2txt(txt2val(this.value))"> —н«б 
+		<INPUT TYPE="text" NAME="amount" class='GenInput' style='width:170px;direction:LTR;text-align:left;' onKeyPress="return maskNumber(this);" onBlur="$(this).val(echoNum($(this).val()));"> —н«б 
 	</TD>
 </TR>
 <TR>

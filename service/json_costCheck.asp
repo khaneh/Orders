@@ -1,6 +1,6 @@
 <%@LANGUAGE="VBSCRIPT" CODEPAGE="1256"%>
-<!--#include file="../config.asp" -->
-<!--#include File="../JSON_2.0.4.asp"-->
+<!--#include virtual="/beta/config.asp" -->
+<!--#include virtual="/beta/JSON_2.0.4.asp"-->
 <%
 'dim result
 set result = jsObject()
@@ -8,13 +8,13 @@ select case request("act")
 	case "order":
 		result("order") = -1
 		if IsNumeric(request("orderID")) then 
-			set rs=Conn.Execute("select * from orders_trace where radif_sefareshat=" & request("orderID"))
+			set rs=Conn.Execute("select orders.*, orderTypes.name as typeName, Accounts.AccountTitle, orderSteps.name as stepName from orders inner join orderTypes on orders.type=orderTypes.id inner join Accounts on orders.customer=Accounts.id inner join orderSteps on orders.step = orderSteps.id where orders.id=" & request("orderID"))
 			if not rs.eof then 
-				result("order") = rs("radif_sefareshat")
-				result("orderTitle") = rs("order_title")
-				result("orderKind") = rs("order_kind")
-				result("customerName") = rs("customer_name")
-				result("orderStep") = rs("marhale")
+				result("order") = rs("id")
+				result("orderTitle") = rs("orderTitle")
+				result("orderKind") = rs("typeName")
+				result("customerName") = rs("AccountTitle")
+				result("orderStep") = rs("stepName")
 			end if
 			rs.close
 		end if

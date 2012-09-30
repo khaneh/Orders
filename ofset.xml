@@ -1,0 +1,208 @@
+<?xml version="1.0"?>
+<keys>
+<row name="printing" label="چاپ" id="0">
+	<group name="desc" isPrice="no">
+		<key name="description" label="شرح عمليات" type="textarea"  force="yes" blur="yes">3</key>
+		<key name="pages" label="تعداد صفحه" type="text" force="yes" blur="yes" ltr="yes">3</key>
+	</group>
+	<group name="proof" label="پروف" item="100" blur="yes" isPrice="yes">
+		<key name="proof-dammy" label="دامي با پلات HP" type="check" price="20" blur="yes">checked</key>
+		<key name="proof_bw" label="سياه و سفيد" type="check"/>
+		<key name="proof_digital" label="ديجيتال" type="check" price="32000" blur="yes"/>
+		<key name="proof_iso" label="ISO-12647" type="check" price="40" blur="yes"/>
+		<key name="proof-date" label="مهلت" type="text" blur="yes" force="yes">15</key>
+	</group>
+	<group name="plate" item="101" label="پليت" blur="yes" isPrice="yes">
+		<key name="plate-type" label="پليت" type="option" blur="yes">
+			<option label="GTO" price="80000">1</option>
+			<option label="SM 52 یك ورقي" price="100000">2</option>
+			<option label="دو ورقي" price="170000">3</option>
+			<option label="4.5 ورقي" price="280000">5</option>
+			<option label="ارسالي مشتري" price="0">4</option>
+		</key>
+		<key name="plate-color-count" label="تعداد رنگ" default="4" type="text" force="yes" blur="yes" ltr="yes">1</key>
+		<key name="plate-qtty" label="فرم" type="text" blur="yes" force="yes" ltr="yes">3</key>
+		<key name="plate-desc" label="شرح" type="text">20</key>
+		<key name="plate-customer" label="ارسالي" type="check" blur="yes"/>
+		<key name="plate-archive" label="آرشيو شود" type="check"/>
+	</group>
+	<group name="print" item="102" label="چاپ" blur="yes" isPrice="yes">
+		<key name="machin" label="ماشين" type="option" blur="yes">
+			<option label="GTO يك ورقي" price="80">1</option>
+			<option label="SM 52 يك ورقي" price="80">2</option>
+			<option label="4.5 ورقي KBA" price="300">3</option>
+			<option label="دو ورقي" price="150">4</option>
+		</key>
+		<key name="machin-form" label="فرم" type="text" force="yes" blur="yes" ltr="yes">2</key>	
+		<key name="machin-qtty" label="تيراژ" type="text" force="yes" blur="yes" ltr="yes">4</key>
+		<key name="machin-sp-color" default="0" type="text" label="تعداد رنگ خاص" blur="yes" force="yes" br="yes" ltr="yes">1</key>
+		<key name="machin-d-type" label="نوع" type="option" blur="yes">
+			<option label="يك رو">1</option>
+			<option label="دو سري">2</option>
+			<option label="سكه">3</option>
+			<option label="نشان">4</option>
+		</key>
+		<key name="machin-control" label="كنترل" type="option" >
+			<option label="نمونه">1</option>
+			<option label="استاندارد">2</option>
+			<option label="ناظر">3</option>
+		</key>
+		<key name="machin-desc" label="شرح" type="text" >20</key>
+	</group>
+	<group name="verni" disable="yes" item="103" label="ورني" blur="yes" isPrice="yes">
+		<key name="verni-wat" label="ورني" type="option" blur="yes">
+			<option label="پايه آب">1</option>
+			<option label="سرد">2</option>
+		</key>
+		<key name="verni-mat" label="ورني" type="option" blur="yes">
+			<option label="مات" price="150,120">1</option>
+			<option label="براق" price="250,200">2</option>
+		</key>
+		<key name="verni-form" label="فرم" type="text" force="yes" blur="yes" ltr="yes">2</key>
+		<key name="verni-desc" label="شرح" type="text">20</key>
+	</group>
+	<group name="selefon" disable="yes" item="104" label="سلفون" blur="yes" isPrice="yes">
+		<key name="selefon-face" label="سلفون" type="option" blur="yes">
+			<option label="يك رو">1</option>
+			<option label="دو رو">2</option>
+		</key>
+		<key name="selefon-mat" label="سلفون" type="option" blur="yes">
+			<option label="مات">1</option>
+			<option label="براق">2</option>
+		</key>
+		<key name="selefon-hot" label="سلفون" type="option" blur="yes">
+			<option label="حرارتي" price=".5,.5">1</option>
+			<option label="سرد" price=".4,.4">2</option>
+		</key>
+		<key name="selefon-size" label="ایعاد سلفون" type="option" br="yes" blur="yes">
+			<option label="100X70">1</option>
+			<option label="60X90">2</option>
+			<option label="50X70">3</option>
+			<option label="45X60">4</option>
+			<option label="33X70">5</option>
+			<option label="35X50">6</option>
+			<option label="30X45">7</option>
+		</key>
+		<key name="selefon-desc" label="شرح" type="text">20</key>
+	</group>
+	<group name="uv" disable="yes" item="105" label="UV" blur="yes" isPrice="yes">
+		<key name="uv-spot" label="UV" type="option" blur="yes">
+			<option label="موضعي-معمولی">1</option>
+			<option label="موضعی-برجسته">2</option>
+			<option label="موضعی-افكت">3</option>
+			<option label="كامل (سيلندري)">4</option>
+		</key>
+		<key name="uv-mat" label="UV" type="option" blur="yes">
+			<option label="مات">1</option>
+			<option label="براق">2</option>
+		</key>
+		<key name="uv-form" label="فرم" type="text" blur="yes" force="yes" ltr="yes">2</key>
+		<key name="uv-size" label="اندازه" type="option" blur="yes" br="yes">
+			<option label="100X70" price="3600|3300,0|0,4680|4320,3480|2160">1</option>
+			<option label="60X90" price="3600|3300,0|0,4320|3960,3000|1800">2</option>
+			<option label="50X70" price="1920|1200,0|2340,2304|1440,1380|696">3</option>
+			<option label="45X60" price="1800|1020,0|1920,2160|1224,1380|696">4</option>
+			<option label="33X70" price="1800|936,0|1800,2160|1123,1200|540">5</option>
+			<option label="35X50" price="1260|864,0|1560,1512|1037,1020|444">6</option>
+			<option label="30X45" price="1020|780,0|1380,1223|936,1020|444">7</option>
+		</key>
+		<key name="uv-desc" label="شرح" type="text">20</key>
+	</group>
+	<group name="fold" disable="yes" label="تا"  item="106" blur="yes" isPrice="dy">
+		<key name="fold-count" label="تعداد تا" type="text"  blur="yes" force="yes" ltr="yes">2</key>
+		<key name="fold-description" label="شرح" type="text" force="yes">30</key>
+	</group>
+	<group name="cutting" disable="yes" label="برش" item="107" blur="yes" isPrice="dy">
+		<key name="cutting-count" label="تعداد برش" type="text" force="yes" ltr="yes">2</key>
+		<key name="cutting-description" label="شرح" type="text">30</key>
+	</group>
+	<group name="snap" label="فالب زني" disable="yes" item="108" blur="yes" isPrice="dy">
+		<key name="snap-size" label="اندازه قالب زني" type="text" blur="yes" force="yes" ltr="yes">6</key>
+		<key name="snap-desc" label="شرح" type="text">30</key>
+	</group>
+	<group name="paper" item="109" label="كاغذ" blur="yes" isPrice="yes">
+		<key name="paper-weight" label="گرماژ" type="option-other" force="yes">
+			<option label="70">13</option>
+			<option label="80">1</option>
+			<option label="90">2</option>
+			<option label="100">3</option>
+			<option label="120">4</option>
+			<option label="135">5</option>
+			<option label="150">6</option>
+			<option label="170">7</option>
+			<option label="200">8</option>
+			<option label="250">9</option>
+			<option label="300">10</option>
+			<option label="350">11</option>
+			<option label="400">12</option>
+		</key>
+		<key name="paper-type" label="نوع كاغذ" type="option">
+			<option label="گلاسه مات" price="20000">1</option>
+			<option label="گلاسه براق" price="20000">7</option>
+			<option label="تحرير" price="20000">2</option>
+			<option label="پشت طوسي" price="20000">3</option>
+			<option label="فانتزي" price="20000">4</option>
+			<option label="پشت چسب‌دار" price="20000">6</option>
+			<option label="متفرقه" price="20000">5</option>
+		</key>
+		<key name="paper-size" label="اندازه كاغذ" type="option-other" blur="yes">
+			<option label="70X100">1</option>
+			<option label="60X90">2</option>
+			<option label="51X70">3</option>
+		</key>
+		<key name="paper-in-form" label="نسبت برش" type="text" force="yes" default="1" blur="yes" br="yes">1</key>
+		<key name="paper-qtty" label="تعداد كاغذ" type="text" readonly="yes" force="yes" >4</key>
+		<key name="after-cut_size" label="اندازه بعد از برش" type="text" force="yes" default="70X100" blur="yes" ltr="yes">6</key>
+		<key name="after-cut_qtty" label="تعداد بعد از برش" type="text" readonly="yes" force="yes">5</key>
+		<key name="wastepaper" label="باطله" type="text" readonly="yes" force="yes" br="yes">4</key>
+		<key name="paper-customer" label="ارسالي" type="check" blur="yes"/>
+		<key name="paper-desc" label="شرح" type="text">30</key>
+	</group>
+</row>
+<row name="binding" label="عمليات صحافي" id="0">
+	<group name="binding" disable="yes" item="110" label="صحافي" blur="yes" isPrice="yes">
+		<key name="binding-type" label="نوع صحافي" type="option-other" blur="yes">
+			<option label="چسب گرم">1</option>
+			<option label="مفتول">2</option>
+			<option label="ته دوخت">3</option>
+			<option label="دوخت و چسب">4</option>
+		</key>
+		<key name="binding-form" label="تعداد فرم (برپايه50*70)" type="text" blur="yes" force="yes" ltr="yes">2</key>
+		<key name="binding-qtty" label="تيراژ" type="text" blur="yes" br="yes" force="yes" ltr="yes">4</key>
+		<key name="binding-size" label="اندازه" type="option" blur="yes" >
+			<option label="رقعي" price="120,100,0,0">1</option>
+			<option label="وزيري" price="140,120,0,0">2</option>
+			<option label="رحلي" price="160,140,0,0">3</option>
+			<option label="پالتويي" price="160,140,0,0">4</option>
+			<option label="سلطاني" price="200,160,0,0">5</option>
+			<option label="جيبي" price="200,160,0,0">6</option>
+		</key>
+		<key name="binding-orient" type="radio" blur="yes">
+			<option label="هيچ" default="yes">1</option>
+			<option label="بياضي">2</option>
+			<option label="خشتي">3</option>
+		</key>
+		<key name="binding-description" label="شرح" type="text">30</key>
+	</group>
+</row>
+<row name="service" label="ساير خدمات" id="0">
+	<group name="service" label="خدمات بيروني" disable="yes" item="111" blur="yes" isPrice="dy">
+		<key name="service-item" label="نوع سرويس" type="option-fromTable" table="OutServices"/>
+		<key name="service-description" label="شرح" type="text" br="yes">30</key>
+	</group>
+</row>
+<row name="delivery" label="تحويل" id="0">
+	<group name="packing" item="112" label="بسته بندي" blur="yes" isPrice="dy">
+		<key name="packing-type" label="نوع بسته بندي" force="yes" blur="yes" type="text">10</key>
+		<key name="packing-qtty" label="تعداد بسته بندي" force="yes" blur="yes" type="text" ltr="yes">4</key>
+	</group>
+	<group name="delivery" item="113" label="ارسال" blur="yes" isPrice="dy">
+		<key name="delivery-point" label="محل ارسال" force="yes" type="option" br="yes" blur="yes">
+			<option label="محل شرکت(آزادي)" addr="خيابان آزادي شماره 545">1</option>
+			<option label="شهريار " addr="شهريار، ميدان نماز، به سمت تهران، كوچه باغستان، پلاك 20">2</option>
+			<option label="آدرس" addr="">3</option>
+		</key>
+		<key name="delivery-address" label="نحوه و آدرس ارسال" force="yes" type="textarea" default="خيابان آزادي شماره 545" blur="yes">4</key>
+	</group>
+</row>
+</keys>

@@ -312,10 +312,11 @@ end if
 					<td colspan="9" class="CusTableHeader" style="text-align:right;">›«ﬂ Ê— Â«</td>
 				</tr>
 				<%
-				mySQL="SELECT Invoices.*, Users.RealName AS Creator, InvoiceOrderRelations.[Order], orders_trace.vazyat, " &_
-					"orders_trace.marhale, CONVERT(int, Invoices.Approved) + CONVERT(int, Invoices.Issued) * 2 AS InvStatus " &_
-					"FROM orders_trace RIGHT OUTER JOIN " &_
-					" InvoiceOrderRelations ON orders_trace.radif_sefareshat = InvoiceOrderRelations.[Order] RIGHT OUTER JOIN " &_
+				mySQL="SELECT Invoices.*, Users.RealName AS Creator, InvoiceOrderRelations.[Order], orderStatus.name as vazyat, " &_
+					"orderSteps.name as marhale, CONVERT(int, Invoices.Approved) + CONVERT(int, Invoices.Issued) * 2 AS InvStatus " &_
+					"FROM orders inner join orderStatus on orders.status = orderStatus.id "&_
+					"inner join orderSteps on orders.step = orderSteps.id RIGHT OUTER JOIN " &_
+					" InvoiceOrderRelations ON orders.id = InvoiceOrderRelations.[Order] RIGHT OUTER JOIN " &_
 					" Invoices INNER JOIN " &_
 					" Users ON Invoices.CreatedBy = Users.ID ON InvoiceOrderRelations.Invoice = Invoices.ID " &_
 					"WHERE " & criteria &_

@@ -321,7 +321,7 @@ if request("ed")<>"" then
 				<TD><%=RSW("RealName")%></TD>
 				<TD>
 				<% if RSW("order_ID")<>-1 then %>
-				<a href="../shopfloor/manageOrder.asp?radif=<%=RSW("order_ID")%>">
+				<a href="../order/order.asp?act=show&id=<%=RSW("order_ID")%>">
 				<%=RSW("order_ID")%></a>
 				<% end if %>
 				</TD>
@@ -523,7 +523,7 @@ if request("Submit")="’œÊ— ÕÊ«·Â Œ—ÊÃ" or request("Submit")="sodoor" then
 		totalQtty=0
 		for i=1 to request("itemReq").count
 			myRequestID=request("itemReq")(i)
-			set RSX=Conn.Execute ("SELECT dbo.InventoryItems.OldItemID AS OldItemID, dbo.InventoryItemRequests.*, dbo.Users.RealName AS RealName FROM dbo.InventoryItems INNER JOIN dbo.InventoryItemRequests ON dbo.InventoryItems.ID = dbo.InventoryItemRequests.ItemID INNER JOIN dbo.Users ON dbo.InventoryItemRequests.CreatedBy = dbo.Users.ID WHERE InventoryItemRequests.ID = "& myRequestID )	
+			set RSX=Conn.Execute ("SELECT dbo.InventoryItems.OldItemID AS OldItemID, InventoryItems.name, dbo.InventoryItemRequests.*, dbo.Users.RealName AS RealName FROM dbo.InventoryItems INNER JOIN dbo.InventoryItemRequests ON dbo.InventoryItems.ID = dbo.InventoryItemRequests.ItemID INNER JOIN dbo.Users ON dbo.InventoryItemRequests.CreatedBy = dbo.Users.ID WHERE InventoryItemRequests.ID = "& myRequestID )	
 			totalQtty = totalQtty + RSX("qtty")
 			tmpCounter = tmpCounter + 1
 			if tmpCounter mod 2 = 1 then
@@ -543,20 +543,32 @@ if request("Submit")="’œÊ— ÕÊ«·Â Œ—ÊÃ" or request("Submit")="sodoor" then
 					response.write " Ê÷ÌÕ ‰œ«—œ"
 				end if
 			%>">
-				<TD ><INPUT TYPE="hidden" name=RequestID  value="<%=RSX("id")%>"><INPUT TYPE="hidden" name=itemID  value="<%=RSX("ItemID")%>"><INPUT TYPE="text" readonly NAME="itemName" value="<%=RSX("ItemName")%>" style="width:160; border:0"><%=myRequestID%></TD>
-				<TD align=center><span dir=ltr><%=RSX("ReqDate")%></span></TD>
-				<TD><INPUT TYPE="text" NAME="qtty" value="<%=RSX("qtty")%>"  size=7 style="width:45; border:0">  <%=RSX("unit")%><INPUT TYPE="hidden" name=unit  value="<%=RSX("unit")%>"></TD>
+				<TD >
+					<INPUT TYPE="hidden" name=RequestID  value="<%=RSX("id")%>">
+					<INPUT TYPE="hidden" name=itemID  value="<%=RSX("ItemID")%>">
+					<INPUT TYPE="text" readonly NAME="itemName" value="<%=RSX("Name")%>" style="width:160; border:0">
+					<br>
+					<small>œ— ŒÊ«”  ‘œÂ: <%=RSX("ItemName")%></small>
+				</TD>
+				<TD align=center>
+					<span dir=ltr><%=shamsidate(RSX("ReqDate"))%></span>
+					<span dir=ltr><%=DatePart("h",RSX("ReqDate")) &":"& DatePart("n",RSX("ReqDate"))%></span>
+				</TD>
+				<TD>
+					<INPUT TYPE="text" NAME="qtty" value="<%=RSX("qtty")%>"  size=7 style="width:45; border:0">  <%=RSX("unit")%>
+					<INPUT TYPE="hidden" name=unit  value="<%=RSX("unit")%>">
+				</TD>
 				<TD><%=RSX("RealName")%></TD>
-				<TD><INPUT TYPE="hidden" name="Related_order_ID"  value="<%=RSX("order_ID")%>">
-				<% if RSX("order_ID")<>-1 then %>
-				<a href="../shopfloor/manageOrder.asp?radif=<%=RSX("order_ID")%>">
-				<%=RSX("order_ID")%></a>
+				<TD><INPUT TYPE="hidden" name="Related_order_ID"  value="<%=RSX("orderID")%>">
+				<% if RSX("orderID")<>-1 then %>
+				<a href="../order/order.asp?act=show&id=<%=RSX("orderID")%>">
+				<%=RSX("orderID")%></a>
 				<% end if %>
 				</TD>
 				<TD>
 					<% 
 
-					set RST=Conn.Execute ("SELECT SUM((CONVERT(tinyint, dbo.InventoryLog.IsInput) - .5) * 2 * dbo.InventoryLog.Qtty) AS sumQtty, dbo.Accounts.AccountTitle FROM dbo.Orders INNER JOIN dbo.InventoryLog ON dbo.Orders.Customer = dbo.InventoryLog.owner INNER JOIN dbo.Accounts ON dbo.Orders.Customer = dbo.Accounts.ID WHERE (dbo.InventoryLog.ItemID = " & RSX("ItemID")  & " and dbo.InventoryLog.voided=0) GROUP BY dbo.Orders.ID, dbo.Accounts.AccountTitle HAVING (dbo.Orders.ID = " & RSX("order_ID")  & ")" )
+					set RST=Conn.Execute ("SELECT SUM((CONVERT(tinyint, dbo.InventoryLog.IsInput) - .5) * 2 * dbo.InventoryLog.Qtty) AS sumQtty, dbo.Accounts.AccountTitle FROM dbo.Orders INNER JOIN dbo.InventoryLog ON dbo.Orders.Customer = dbo.InventoryLog.owner INNER JOIN dbo.Accounts ON dbo.Orders.Customer = dbo.Accounts.ID WHERE (dbo.InventoryLog.ItemID = " & RSX("ItemID")  & " and dbo.InventoryLog.voided=0) GROUP BY dbo.Orders.ID, dbo.Accounts.AccountTitle HAVING (dbo.Orders.ID = " & RSX("orderID")  & ")" )
 					if not RST.EOF then
 						
 						if clng(RST("sumQtty")) < 0 then 
@@ -622,6 +634,58 @@ end if
 '--------------------------------------------------------------------- LIST Inventory Item Pickuplists
 '-----------------------------------------------------------------------------------------------------
 %>
+<style>
+	.changeItem{cursor: pointer;}
+</style>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$.ajaxSetup({
+			cache: false
+		});
+		$('.changeItem').prop('title','ÃÂ   €ÌÌ—/ ⁄ÌÌ‰ ¬Ì „ ﬂ·Ìﬂ ﬂ‰Ìœ');
+		$('.changeItem').click(function(){
+			var myRow = $(this).closest("tr");
+			var itemReq = myRow.find('input[name=itemReq]').val();
+			var theInvoiceitem = myRow.find('input[name=itemReq]').attr('invoiceitem');
+			$("#itemReq").val(itemReq);
+			
+			$.ajax({
+				type:"POST",
+				url:"/service/json_getInventory.asp",
+				data:{act:"itemListFromInvoiceItem",invoiceItem:theInvoiceitem},
+				dataType:"json"
+			}).done(function (data){
+				$("#itemID").children("option").remove();
+				$.each(data,function(i,e){
+					$("#itemID").append("<option value='" + e.inventoryItem + "' unit='" + e.unit + "'>" + e.name + "(" + e.unit + ")" + "</option>")
+				});
+			});
+			$('#changeItemDlg').dialog("open");
+		});
+		$("#changeItemDlg").dialog({ 
+			autoOpen: false,
+			buttons: {" «ÌÌœ":function(){
+				var invID=$("input[name=InvoiceID]").val();
+				$.ajax({
+					type:"POST",
+					url:"/service/json_getInventory.asp",
+					data:{act:"updateItemRequest",id:$("#itemReq").val(),unit:$("#itemID option:selected").attr("unit"),itemID:$("#itemID option:selected").val()},
+					dataType:"json"
+				}).done(function (data){
+					if (data.status=="ok")
+						$("[name=itemReq][value=" + $("#itemReq").val() + "]").prop("disabled",false);
+					//location.reload();
+				});
+				$(this).dialog("close");
+			}},
+			title: "«‰ Œ«» ¬Ì „"
+		});
+	});
+</script>
+<div id='changeItemDlg'>
+	<input type="hidden" id="itemReq"/>
+	<select id='itemID'></select>
+</div>
 <BR><BR>
 <br>
 <FORM METHOD=POST ACTION="default.asp">
@@ -629,7 +693,7 @@ end if
 
 sortBy=request("s")
 if sortBy="5" then 
-	sB="order_ID"
+	sB="orderID"
 elseif sortBy="2" then 
 	sB="ReqDate"
 elseif sortBy="3" then 
@@ -641,7 +705,7 @@ else
 end if
 
 if Auth(5 , 9) then
-	set RSS=Conn.Execute ("SELECT dbo.InventoryItemRequests.*, dbo.Users.RealName AS RealName FROM dbo.InventoryItemRequests INNER JOIN dbo.Users ON dbo.InventoryItemRequests.CreatedBy = dbo.Users.ID WHERE (dbo.InventoryItemRequests.Status = 'new') AND (dbo.InventoryItemRequests.Order_ID <> - 1) order by " & sB)
+	set RSS=Conn.Execute ("SELECT dbo.InventoryItemRequests.*, dbo.Users.RealName AS RealName FROM dbo.InventoryItemRequests INNER JOIN dbo.Users ON dbo.InventoryItemRequests.CreatedBy = dbo.Users.ID WHERE (dbo.InventoryItemRequests.Status = 'new') AND (dbo.InventoryItemRequests.OrderID <> - 1) order by " & sB)
 
 	if not RSS.eof then
 		%>
@@ -673,12 +737,12 @@ if Auth(5 , 9) then
 
 		%>
 		<TR bgcolor="<%=tmpColor%>" >
-			<TD><INPUT TYPE="hidden" name=color1 value="<%=tmpColor%>"><INPUT TYPE="hidden" name=color2 value="<%=tmpColor2%>"><INPUT TYPE="checkbox"  onclick="setPrice(this)"   NAME="itemReq" VALUE="<%=RSS("id")%>"></TD>
-			<TD><%=RSS("ItemName")%></TD>
-			<TD><%=RSS("ReqDate")%></small></TD>
-			<TD><%=RSS("Qtty")%> <%=RSS("unit")%></TD>
+			<TD><INPUT TYPE="hidden" name=color1 value="<%=tmpColor%>"><INPUT TYPE="hidden" name=color2 value="<%=tmpColor2%>"><INPUT TYPE="checkbox"  onclick="setPrice(this)" <%if IsNull(rss("itemID")) then response.write "disabled='disabled'"%> invoiceItem="<%=rss("invoiceItem")%>" NAME="itemReq" VALUE="<%=RSS("id")%>"></TD>
+			<TD <%if not IsNull(rss("invoiceItem")) then Response.write " class='changeItem'"%>><%=RSS("ItemName")%></TD>
+			<TD><%=shamsidate(RSS("ReqDate"))%></small></TD>
+			<TD><%=RSS("Qtty")%> <%=rss("unit")%></TD>
 			<TD><%=RSS("RealName")%></TD>
-			<TD><a href="../shopfloor/manageOrder.asp?radif=<%=RSS("order_ID")%>"><%=RSS("order_ID")%></a>
+			<TD><a href="../order/order.asp?act=show&id=<%=RSS("orderID")%>"><%=RSS("orderID")%></a>
 			<% if RSS("CustomerHaveInvItem") then	
 				response.write " <b>  («—”«·Ì) </b>" 
 			end if
@@ -706,7 +770,7 @@ if Auth(5 , 9) then
 end if 
 
 if Auth(5 , 1) then
-	set RSS=Conn.Execute ("SELECT dbo.InventoryItemRequests.*, dbo.Users.RealName AS RealName FROM dbo.InventoryItemRequests INNER JOIN dbo.Users ON dbo.InventoryItemRequests.CreatedBy = dbo.Users.ID WHERE (dbo.InventoryItemRequests.Status = 'new') AND (dbo.InventoryItemRequests.Order_ID = - 1) order by " & sB)
+	set RSS=Conn.Execute ("SELECT dbo.InventoryItemRequests.*, dbo.Users.RealName AS RealName FROM dbo.InventoryItemRequests INNER JOIN dbo.Users ON dbo.InventoryItemRequests.CreatedBy = dbo.Users.ID WHERE (dbo.InventoryItemRequests.Status = 'new') AND (dbo.InventoryItemRequests.OrderID = - 1) order by " & sB)
 
 	if not RSS.eof then
 		%>
@@ -720,7 +784,6 @@ if Auth(5 , 1) then
 			<TD><A HREF="default.asp?s=2"><SMALL> «—ÌŒ œ—ŒÊ«” </SMALL></A></TD>
 			<TD><A HREF="default.asp?s=3"><SMALL> ⁄œ«œ</SMALL></A></TD>
 			<TD><A HREF="default.asp?s=4"><SMALL>œ—ŒÊ«”  ﬂ‰‰œÂ</SMALL></A></TD>
-			<TD><A HREF="default.asp?s=5"><SMALL>‘„«—Â ”›«—‘</SMALL></A></TD>
 		</TR>
 		<%
 		tmpCounter = tmpCounter + 1
@@ -740,10 +803,9 @@ if Auth(5 , 1) then
 		<TR bgcolor="<%=tmpColor%>" >
 			<TD><INPUT TYPE="hidden" name=color1 value="<%=tmpColor%>"><INPUT TYPE="hidden" name=color2 value="<%=tmpColor2%>"><INPUT TYPE="checkbox"  onclick="setPrice(this)"  NAME="itemReq" VALUE="<%=RSS("id")%>"></TD>
 			<TD><%=RSS("ItemName")%></TD>
-			<TD><%=RSS("ReqDate")%></small></TD>
-			<TD><%=RSS("Qtty")%> <%=RSS("unit")%></TD>
+			<TD><%=shamsidate(RSS("ReqDate"))%></small></TD>
+			<TD><%=RSS("Qtty")%> <%=rss("unit")%></TD>
 			<TD><%=RSS("RealName")%></TD>
-			<TD><!a href="../shopfloor/manageOrder.asp?radif=<%=RSS("order_ID")%>"><!--<%=RSS("order_ID")%>--></a></small></TD>
 		</TR>
 		<!--TR bgcolor="<%=tmpColor%>" >
 			<TD></TD>
@@ -777,7 +839,6 @@ end if
 %>
 
 <SCRIPT LANGUAGE="JavaScript">
-<!--
 
 function setPrice(obj)
 {
@@ -794,7 +855,7 @@ else
 	theTR.setAttribute("bgColor",document.getElementsByName('color1')[ii].value)
 	}
 }
-//-->
+
 </SCRIPT>
 
 

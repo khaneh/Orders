@@ -1,6 +1,6 @@
 <!--#include file="config.asp" -->
 <%
-AppBgColor = "#BBBBBB"	'Other:"#99AACC"
+AppBgColor = "#555"	'Other:"#99AACC" change 2 bbb
 AppFgColor =  "#C3DBEB" '"#DEEBD9"
 SelectedMenuColor = "#0E5499"
 UnSelectedMenuColor = "#309261"
@@ -69,6 +69,15 @@ End Function
 	.alak2 a { color: black; text-decoration: none;  font-size: 10pt; }
 	.GenButton { font-family:tahoma; font-size: 9pt; border: 1px solid black; height:20px; }
 </style>
+<link type="text/css" href="/css/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+<link rel="StyleSheet" href="/css/jame.css" type="text/css">
+<link rel="StyleSheet" href="/css/font.css" type="text/css">
+<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
+<script type="text/javascript" src="/js/jquery.dateFormat-1.0.js"></script>
+<script type="text/javascript" src="/js/jalaliCalendar.js"></script>
+<script type="text/javascript" src="/js/xslTransform.js"></script>
+<script type="text/javascript" src="/js/jame.js"></script>
+<script type="text/javascript" src="/js/jquery-ui-1.8.16.custom.min.js"></script>
 </HEAD>
 <BODY bgcolor=<%=AppBgColor%> topmargin=0 leftmargin=0><!<% if onunload<>"" then %> onunload="<%=onunload%>"<% end if %> >
 <TABLE topmargin=0 leftmargin=0 align=center width=760 border=0>
@@ -126,7 +135,7 @@ CSRName = session("CSRName")
 	<%if menuItem="2" then %> 
 		<TD class=tt2 width="<%=TabWidth%>" align=center background='<%=ImgTabSelected%>'>ÓÝÇÑÔÇÊ</TD>
 	<%else %>  
-		<TD class=tt2 width="<%=TabWidth%>" align=center background='<%=ImgTabNotSelected%>' ><A style='font-size:8pt;' HREF='<%=rootLink%>order/orderInput.asp'>ÓÝÇÑÔÇÊ</A></TD>
+		<TD class=tt2 width="<%=TabWidth%>" align=center background='<%=ImgTabNotSelected%>' ><A style='font-size:8pt;' HREF='<%=rootLink%>order/order.asp?act=makeNewQoute'>ÓÝÇÑÔÇÊ</A></TD>
 	<%end if %>
 	<%end if %>
 

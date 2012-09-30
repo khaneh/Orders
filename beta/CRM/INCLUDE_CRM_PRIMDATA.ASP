@@ -187,37 +187,24 @@
 		</tr>
 		</table>
 	  </Td></Tr>
-	  <Tr><Td colspan="2" align=center><BR><BR>
-			<table class="CustTable" cellspacing='1'>
-				<tr>
-					<td colspan="3" class="CusTableHeader"><span style="width:350;text-align:center;">Ì«œœ«‘  Â«</span><span style="width:80;text-align:left;background-color:red;"><input class="GenButton" type="button" value="‰Ê‘ ‰ Ì«œœ«‘ "onclick="window.location = '../home/message.asp?sendTo=<%=RS1("CSR")%>&RelatedTable=accounts&RelatedID=<%=cusID%>&retURL=<%=Server.URLEncode("../CRM/AccountInfo.asp?act=show&selectedCustomer="&RS1("ID"))%>';"></span></td>
-				</tr>
-				<%
-				mySQL="SELECT Messages.*, users.realName as fromName,userTo.realName as toName, message_types.name as messageTypeName FROM Messages INNER JOIN Users ON Messages.MsgFrom = Users.ID inner join Users as userTo on Messages.MsgTo=userTo.id inner join message_types on message_types.id= messages.type WHERE (Messages.RelatedTable = 'accounts') AND (Messages.RelatedID = "& cusID & ") ORDER BY Messages.ID DESC"
-				Set RS1 = conn.execute(mySQL)
-				if RS1.eof then
-				%>
-					<tr>
-						<td colspan="3" class="CusTD3" > «ﬂ‰Ê‰ Ì«œœ«‘ Ì »—«Ì «Ì‰ Õ”«» ‰Ê‘ Â ‰‘œÂ</td>
-					</tr>
-				<%
-				end if
-				tmpCounter=0
-				while not RS1.eof 
-					tmpCounter=tmpCounter+1
-				%>
-					<tr class="<%if (tmpCounter MOD 2) = 1 then response.write "CusTD3" else response.write "CusTD4" %>">
-						<td><%=rs1("messageTypeName")%></td>
-						<td>«“ <span class="from"><%=RS1("fromName")%></span><br>»Â <span class="to"><%=rs1("toName")%></span><br>
-							<%=RS1("MsgDate")%> <BR> <%=RS1("MsgTime")%>
-						</td>
-						<td dir='RTL'><%=replace(RS1("MsgBody"),chr(13),"<br>")%></td>
-					</tr>
-				<%
-					RS1.moveNext
-				wend
-				%>
-				</table><BR><BR>
+	  <Tr>
+	  	<Td colspan="2"><BR><BR>
+			<div id="orderMessages"></div>
+			<input id="customerID" type="hidden" value="<%=RS1("ID")%>"/>
+			<script type="text/javascript">
+				$(document).ready(function(){
+					TransformXmlURL("/service/xml_getMessage.asp?act=related&table=accounts&id=" + $("#customerID").val(),"/xsl/showRelatedMessage.xsl", function(result){
+						$("#orderMessages").html(result);
+						$("td.msgBody").each(function(i){
+							$(this).html($(this).html().replace(/\n/gi,"<br/>"));
+							});
+							$("input[name=addNewMessage]").click(function(){
+								document.location="../home/message.asp?RelatedTable=accounts&RelatedID=" + $("#customerID").val() + "&retURL=" + escape("../CRM/AccountInfo.asp?act=show&selectedCustomer=" + $("#customerID").val());
+						});
+					});
+				});
+			</script>	  	
+<BR><BR>
 			<%
 			mySQL="SELECT AccountsEditLog.EditOn, AccountsEditLog.AutoKey, Users.RealName FROM AccountsEditLog INNER JOIN Users ON AccountsEditLog.EditBy = Users.ID where AccountsEditLog.id=" & cusID & " ORDER BY AccountsEditLog.AutoKey"
 			Set RS1 = conn.execute(mySQL)

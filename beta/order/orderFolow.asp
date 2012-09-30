@@ -80,7 +80,7 @@ if request("act")="" then
 	<div class="NewRow">
 		<div class="RightHead">äæÚ ÓİÇÑÔ</div>
 	<%
-	set rs=Conn.Execute("select * from OrderTraceTypes where isActive=1")
+	set rs=Conn.Execute("select * from OrderTypes where isActive=1")
 	while not rs.eof
 	%>
 		<div class="Right">
@@ -98,23 +98,38 @@ if request("act")="" then
 	%>
 	</div>
 	<div class="NewRow">
-		<input type="submit" name="submit" value="ÊÇííÏ">
-		<a class="link" href="TraceOrder.asp?act=advancedSearch&az_tarikh_sefaresh=<%="1376/01/01"%>&ta_tarikh_sefaresh=<%=shamsiToday()%>&Submit=ÊÇííÏ&resultsCount=500&check_closed=on&check_tarikh_sefaresh=on">ÊãÇíÔ áíÓÊí ÇÒ ÓİÇÑÔåÇí ÈÇÒ</a>
-		<a class="link" href="TraceOrder.asp?act=advancedSearch&Submit=ÊÇííÏ&resultsCount=500&check_closed=on&returnIsNull=on">äãÇíÔ áíÓÊí ÇÒ ÓİÇÑÔåÇíí ßå ÊÇÑíÎ ÊÍæíá ŞÑÇÑÏÇÏ äÏÇÑÏ</a>
+		<input type="submit" name="submit" value="ÊÇííÏ" class="btn">
+		<a class="btn btn-info" onclick="$('#openOrder').submit();">ÊãÇíÔ áíÓÊí ÇÒ ÓİÇÑÔåÇí ÈÇÒ</a>
+		<a class="btn btn-info" onclick="$('#orderHasNoRetDate').submit();">äãÇíÔ áíÓÊí ÇÒ ÓİÇÑÔåÇíí ßå ÊÇÑíÎ ÊÍæíá ŞÑÇÑÏÇÏ äÏÇÑÏ</a>
 	</div>
+</form>
+<form action="order.asp?act=advancedSearch" method="post" id="openOrder">
+	<input name="checkClosed" value="on" type="hidden"/>
+	<input name="checkIsOrder" value="on" type="hidden"/>
+	<input name="isOrder" value="1" type="hidden"/>
+	<input name="resultCount" value="500" type="hidden"/>
+	<input type="hidden" name="submitBtn" value="ÌÓÊÌæ"/>
+</form>
+<form action="order.asp?act=advancedSearch" method="post" id="orderHasNoRetDate">
+	<input name="checkClosed" value="on" type="hidden"/>
+	<input name="checkRetIsNull" value="on" type="hidden"/>
+	<input name="checkIsOrder" value="on" type="hidden"/>
+	<input name="isOrder" value="1" type="hidden"/>
+	<input name="resultCount" value="500" type="hidden"/>
+	<input type="hidden" name="submitBtn" value="ÌÓÊÌæ"/>
 </form>
 <div style="clear: both;margin:20px 0 0 0;">
 <center>
 <%
-set rs=Conn.Execute("select count(step) as stepCountLevel from orderTraceSteps where IsActive=1 and step is not null group by step order by count(step) desc")
+set rs=Conn.Execute("select count(step) as stepCountLevel from orderSteps where IsActive=1 and step is not null group by step order by count(step) desc")
 stepCountLevel = CInt(rs("stepCountLevel"))
 rs.close
-set rs=Conn.Execute("select max(step) as stepCount from orderTraceSteps where IsActive=1 and step is not null")
+set rs=Conn.Execute("select max(step) as stepCount from orderSteps where IsActive=1 and step is not null")
 stepCount = CInt(rs("stepCount"))
 rs.close
 dim steps(10,10)
 dim orderType(10)
-set rs=Conn.Execute("select * from OrderTraceTypes where isActive=1")
+set rs=Conn.Execute("select * from OrderTypes where isActive=1")
 i=0
 while not rs.eof
 	orderType(i)="orderType-"&rs("id")
@@ -123,7 +138,7 @@ while not rs.eof
 wend
 orderTypeCount=i-1
 oldStep=-1
-set rs=Conn.Execute("select id,step from orderTraceSteps where IsActive=1 and step is not null order by step,ord")
+set rs=Conn.Execute("select id,step from orderSteps where IsActive=1 and step is not null order by step,ord")
 while not rs.eof
 	if oldStep=CInt(rs("step")) then 
 		i=i+1
@@ -153,45 +168,46 @@ wend
 					next
 					if len(orderTypes)>0 then 
 						orderTypes = mid(orderTypes,1,len(orderTypes)-1)
-						condition=" and orders_trace.type in (" & orderTypes & ")"
+						condition=" and orders.type in (" & orderTypes & ")"
 					end if
 					if request("isDelay")="on" or request("today")="on" or request("tomorrow")="on" or request("nextWeek")="on" or request("moreNextWeek")="on" then
 					 	condition = condition & " and ( 0=1"
 					 	if request("isDelay")="on" then 
-					 		condition = condition & " or orders_trace.return_date between '1389/01/01' and '" & shamsiDate(dateadd("d",-1,date())) & "'"
-					 		fromDate = "1389/01/01"
+					 		condition = condition & " or orders.returnDate between '2010-03-21' and '" & dateadd("d",-1,date()) & "'"
+					 		fromDate = "2010-03-21"
 					 		toDate = shamsiDate(dateadd("d",-1,date()))
 					 	end if
 						if request("today")="on" then 
-							condition = condition & " or orders_trace.return_date = '" & shamsiToday() & "'"
+							condition = condition & " or orders.returnDate = '" & Date() & "'"
 							if fromDate = "" then fromDate = shamsiToday()
 							toDate = shamsiToday()
 						end if
 						if request("tomorrow")="on" then 
-							condition = condition & " or orders_trace.return_date = '" & shamsiDate(dateadd("d",1,date())) & "'"
-							if fromDate = "" then fromDate = shamsiDate(dateadd("d",1,date()))
-							toDate = shamsiDate(dateadd("d",1,date()))
+							condition = condition & " or orders.returnDate = '" & dateadd("d",1,date()) & "'"
+							if fromDate = "" then fromDate = dateadd("d",1,date())
+							toDate = dateadd("d",1,date())
 						end if
 						if request("nextWeek")="on" then 
-							condition = condition & " or orders_trace.return_date between '" & shamsiDate(dateadd("d",2,date())) & "' and '" & shamsiDate(dateadd("d",7,date())) & "'"
-							if fromDate = "" then fromDate = shamsiDate(dateadd("d",2,date()))
-							toDate = shamsiDate(dateadd("d",7,date()))
+							condition = condition & " or orders.returnDate between '" & dateadd("d",2,date()) & "' and '" & dateadd("d",7,date()) & "'"
+							if fromDate = "" then fromDate = dateadd("d",2,date())
+							toDate = dateadd("d",7,date())
 						end if
 						if request("moreNextWeek")="on" then 
-							condition = condition & " or orders_trace.return_date > '" & shamsiDate(dateadd("d",7,date())) & "'"
-							if fromDate = "" then fromDate = shamsiDate(dateadd("d",8,date()))
-							toDate = "9999/99/99"
+							condition = condition & " or orders.returnDate > '" & dateadd("d",7,date()) & "'"
+							if fromDate = "" then fromDate = dateadd("d",8,date())
+							toDate = "2100-12-30"
 							'response.write toDate
 						end if
 						condition = condition & ")"
 					end if
 				end if
 				'response.write request("moreNextWeek")
-				if fromDate="" then fromDate="1389/01/01"
-				if toDate="" then toDate="9999/99/99"
-				mySQL = "select orderTraceSteps.name,isnull(drv.orderCount,0) as orderCount from orderTraceSteps left outer join (select orders_trace.step, count(orders_trace.radif_sefareshat) as orderCount from orders_trace inner join Orders on orders_trace.radif_sefareshat=orders.id and orders.Closed=0 where (orders_trace.return_date >'1389/01/01' " & condition & ") or orders_trace.return_date is null group by orders_trace.step) drv on orderTraceSteps.id=drv.step where orderTraceSteps.id=" & steps(s,i)
-				set rs=Conn.Execute(mySQL)
+				if fromDate="" then fromDate="2010-03-21"
+				if toDate="" then toDate="2100-12-30"
+				mySQL = "select orderSteps.name,isnull(drv.orderCount,0) as orderCount from orderSteps left outer join (select step, count(id) as orderCount from orders where isClosed=0 and isOrder=1 and ((returnDate >'2010-03-21' " & condition & ") or returnDate is null) group by step) drv on orderSteps.id=drv.step where orderSteps.id=" & steps(s,i)
+				
 				'response.write mySQL
+				set rs=Conn.Execute(mySQL)
 	%>
 			<td title="ÈÑÇí ãÔÇåÏå ÌÒÆíÇÊ ßáíß ßäíÏ">
 			<center>
@@ -218,97 +234,42 @@ wend
 </div>
 <%
 elseif request("act")="show" then
-	myCriteria=""
-	if request("fromDate")<>"" then myCriteria = " and ((orders_trace.return_date between '" & request("fromDate") & "' AND '" & request("toDate") & "') or orders_trace.return_date is null) "
-	if request("orderTypes")<>"" then myCriteria = myCriteria & " and orders_trace.type in (" & request("orderTypes") & ")"
-	myCriteria = myCriteria & " and orders_trace.step=" & request("step")
-	
-	mySQL="SELECT orders_trace.*, Orders.closed, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon,DRV_Invoice.price,orders.customer FROM Orders INNER JOIN  orders_trace ON Orders.ID = orders_trace.radif_sefareshat INNER JOIN  OrderTraceStatus ON orders_trace.status = OrderTraceStatus.ID left outer join (select InvoiceOrderRelations.[Order],SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceOrderRelations.[Order]) DRV_Invoice on Orders.ID=DRV_Invoice.[Order] WHERE (orders.Closed=0 "& myCriteria & ")  ORDER BY order_date DESC, radif_sefareshat DESC"	
-	'response.write mysql
-	set RS1=Conn.Execute (mySQL)
-	if not RS1.eof then
-		tmpCounter=0
-		totalSum=0
-'response.write mySQL
 %>
-	<div align="center" dir="LTR">
-	<TABLE border="1" cellspacing="0" cellpadding="1" dir="RTL" borderColor="#555588">
-		<TR bgcolor="#CCCCFF">
-			<TD width="44"># ÓİÇÑÔ</TD>
-			<TD width="46">ÊÇÑíÎ ÓİÇÑÔ</TD>
-			<TD width="64">ÊÇÑíÎ ÊÍæíá</TD>
-			<TD width="122">äÇã ÔÑßÊ</TD>
-			<TD width="122">äÇã ãÔÊÑí</TD>
-			<TD width="84">ÚäæÇä ßÇÑ</TD>
-			<TD width="40">äæÚ</TD>
-			<TD width="53">ãÑÍáå</TD>
-			<TD width="36">ÓİÇÑÔ íÑäÏå</TD>
-			<TD width="18">æÖÚ</TD>
-			<td width="50">ãÈáÛ ßá</td>
-		</TR>
-<%				Do while not RS1.eof 
-		tmpCounter = tmpCounter + 1
-		if tmpCounter mod 2 = 1 then
-			if IsNull(RS1("return_date")) then 
-				tmpColor="#FF0000"
-			else
-				tmpColor="#FFFFFF"
-			end if
-		Else
-			if IsNull(RS1("return_date")) then 
-				tmpColor="#DD8888"
-			else
-				tmpColor="#DDDDDD"
-			end if
-		End If
-		
-		if RS1("Closed") then
-			tmpStyle="background-color:#FFCCCC;"
-		else
-			tmpStyle=""
-		End If
-		
-%>
-		<TR bgcolor="<%=tmpColor%>" title="<%=RS1("StatusName")%>">
-			<TD width="40" DIR="LTR"><A HREF="TraceOrder.asp?act=show&order=<%=RS1("radif_sefareshat")%>" target="_blank"><%=RS1("radif_sefareshat")%></A></TD>
-			<TD DIR="LTR"><%=RS1("order_date")%></TD>
-			<TD DIR="LTR"><%=RS1("return_date") & " ("& RS1("return_time") & ")"%></TD>
-			<TD><%=RS1("company_name") & "<br>Êáİä:("& RS1("telephone")& ")"%>&nbsp;</TD>
-			<TD><a href='../CRM/AccountInfo.asp?act=show&selectedCustomer=<%=RS1("customer")%>'><%=RS1("customer_name")%></a>&nbsp;</TD>
-			<TD><%=RS1("order_title")%>&nbsp;</TD>
-			<TD><%=RS1("order_kind")%></TD>
-			<TD style="<%=tmpStyle%>"><%=RS1("marhale")%></TD>
-			<TD><%=RS1("salesperson")%>&nbsp;</TD>
-			<TD title="ÈÑÇí ÊÛííÑ ãÑÍáå ßáíß ßäíÏ">
-				<A HREF="../shopfloor/default.asp?orderNum=<%=rs1("radif_sefareshat")%>&marhale_box=<%=RS1("step")%>">
-					<IMG SRC="<%=RS1("Icon")%>" WIDTH="20" HEIGHT="20" BORDER="0">
-				</a>
-			</TD>
-			<td><%if isnull(RS1("price")) then response.write "----" else response.write Separate(RS1("price")) end if %></td>
-		</TR>
-		<TR bgcolor="#FFFFFF">
-			<TD colspan="11" style="height:10px"></TD>
-		</TR>
-<%			
-		if not IsNull(rs1("price")) then totalSum = totalSum + CDbl(RS1("price"))
-			RS1.moveNext
-		Loop
-
-%>					<TR bgcolor="#ccccFF">
-				<TD colspan="9">ÊÚÏÇÏ äÊÇíÌ ÌÓÊÌæ: <%=tmpCounter%></TD>
-				<td colspan="2" align="center"><%=Separate(totalSum)%></td>
-			</TR>
-	</TABLE>
-	</div>
-	<BR>
-<%			else
-%>			<TABLE border="1" cellspacing="0" cellpadding="0" dir="RTL" align="center" width="600">
-		<TR bgcolor="#FFFFDD">
-			<TD align="center" style="height:40px;font-size:12pt;font-weight:bold;color:red">åí ÌæÇÈí äÏÇÑíã Èå ÔãÇ ÈÏåíã.</TD>
-		</TR>
-	</TABLE>
-	<hr>
-<%			End If
+<div id='traceResult'></div>
+<SCRIPT type="text/javascript">
+	$(document).ready(function(){
+		TransformXmlURL('/service/xml_getOrderTrace.asp?act=getFolow&isOrder=1&fromDate=<%=request("fromDate")%>&toDate=<%=request("toDate")%>&orderTypes=<%=request("orderTypes")%>&step=<%=request("step")%>',"/xsl/orderShowList.xsl", function(result){
+			$("#traceResult").html(result);
+			$("#traceResult td.orderDates").each(function(i){
+				var createdDate = $(this).find(".createdDate");
+				var createdTime = $(this).find(".createdTime");
+				var returnTime = $(this).find(".returnTime");
+				var returnDate = $(this).find(".returnDate");
+				if (returnDate.html()=="0"){
+					returnDate.html("İÚáÇ ãÚáæã äíÓÊ!");
+					returnTime.html("");
+				} else {
+					returnDate.html($.jalaliCalendar.gregorianToJalaliStr(returnDate.html()));
+					var myTime = new Date(returnTime.html().replace(RegExp('-','g'),'/'));
+					if (myTime.getHours()==0 && myTime.getMinutes()==0)
+						returnTime.html("");
+					else
+					returnTime.html("("+((myTime.getHours()<10)?('0'+myTime.getHours()):myTime.getHours())+':'+((myTime.getMinutes() < 10)?('0'+myTime.getMinutes()):(myTime.getMinutes()))+")");
+				}
+				
+				createdDate.html($.jalaliCalendar.gregorianToJalaliStr(createdDate.html()));
+				
+				var myTime = new Date(createdTime.html().replace(RegExp('-','g'),'/'));
+				if (myTime.getHours()==0 && myTime.getMinutes()==0)
+					createdTime.html("");
+				else
+				createdTime.html("("+((myTime.getHours()<10)?('0'+myTime.getHours()):myTime.getHours())+':'+((myTime.getMinutes() < 10)?('0'+myTime.getMinutes()):(myTime.getMinutes()))+")");
+				
+			});
+		});
+	});
+</script>
+<%
 
 end if
 

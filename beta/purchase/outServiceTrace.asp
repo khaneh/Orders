@@ -367,7 +367,7 @@ if request("od")<>"" then
 					<TD><%=RSX("typeName")%></TD>
 					<TD><span dir=ltr><%=RSX("ReqDate")%></span></TD>
 					<TD><%=RSX("price")%></TD>
-					<TD><% if RSX("order_ID")=-1 then%>‰œ«—œ<% else %><span id="orderID_span"><a href="../shopfloor/manageOrder.asp?radif=<%=RSX("order_ID")%>"><%=RSX("order_ID")%></a></span><% if Auth(4 , 6) then %><span id="dokme_sabt"> &nbsp;<A HREF="javascript:edit_order_id(<%=RSX("id")%>)">[ €ÌÌ—]</A></span><% end if %><% end if %></TD>
+					<TD><% if RSX("orderID")=-1 then%>‰œ«—œ<% else %><span id="orderID_span"><a href="../order/order.asp?act=show&id=<%=RSX("orderID")%>"><%=RSX("orderID")%></a></span><% if Auth(4 , 6) then %><span id="dokme_sabt"> &nbsp;<A HREF="javascript:edit_order_id(<%=RSX("id")%>)">[ €ÌÌ—]</A></span><% end if %><% end if %></TD>
 					<TD width=8%><%=RSOD("PercentOfAll")%></TD>
 					</tr>
 					<%	
@@ -592,7 +592,7 @@ end if
 
 if request("lstOrd") <> "" then			
 	lstOrd = request("lstOrd")
-	set RSS=Conn.Execute ("SELECT top 100 dbo.PurchaseOrders.*, dbo.PurchaseRequests.Order_ID AS Order_ID, ISNULL(DERIVEDTBL.Approved2, 0) AS Approved, ISNULL(DERIVEDTBL.Issued2, 0) AS Issued, DERIVEDTBL.id AS invoice_ID FROM dbo.PurchaseRequests FULL OUTER JOIN (SELECT Invoices.id, isnull(Invoices.Approved, 0) AS Approved2, isnull(Invoices.Issued, 0) AS Issued2 FROM dbo.Invoices WHERE isnull(Invoices.voided, 0) = 0 and (isnull(Invoices.Approved, 0) = 1 OR isnull(Invoices.Issued, 0) = 1)) DERIVEDTBL INNER JOIN dbo.InvoiceOrderRelations ON DERIVEDTBL.id = dbo.InvoiceOrderRelations.Invoice ON dbo.PurchaseRequests.Order_ID = dbo.InvoiceOrderRelations.[Order] FULL OUTER JOIN dbo.PurchaseOrders LEFT OUTER JOIN dbo.PurchaseRequestOrderRelations ON dbo.PurchaseOrders.ID = dbo.PurchaseRequestOrderRelations.Ord_ID ON dbo.PurchaseRequests.ID = dbo.PurchaseRequestOrderRelations.Req_ID WHERE (dbo.PurchaseOrders.Status = '"& lstOrd & "') order by " & sB)
+	set RSS=Conn.Execute ("SELECT top 100 dbo.PurchaseOrders.*, dbo.PurchaseRequests.OrderID, ISNULL(DERIVEDTBL.Approved2, 0) AS Approved, ISNULL(DERIVEDTBL.Issued2, 0) AS Issued, DERIVEDTBL.id AS invoice_ID FROM dbo.PurchaseRequests FULL OUTER JOIN (SELECT Invoices.id, isnull(Invoices.Approved, 0) AS Approved2, isnull(Invoices.Issued, 0) AS Issued2 FROM dbo.Invoices WHERE isnull(Invoices.voided, 0) = 0 and (isnull(Invoices.Approved, 0) = 1 OR isnull(Invoices.Issued, 0) = 1)) DERIVEDTBL INNER JOIN dbo.InvoiceOrderRelations ON DERIVEDTBL.id = dbo.InvoiceOrderRelations.Invoice ON dbo.PurchaseRequests.OrderID = dbo.InvoiceOrderRelations.[Order] FULL OUTER JOIN dbo.PurchaseOrders LEFT OUTER JOIN dbo.PurchaseRequestOrderRelations ON dbo.PurchaseOrders.ID = dbo.PurchaseRequestOrderRelations.Ord_ID ON dbo.PurchaseRequests.ID = dbo.PurchaseRequestOrderRelations.Req_ID WHERE (dbo.PurchaseOrders.Status = '"& lstOrd & "') order by " & sB)
 	%><br>
 	<TABLE dir=rtl align=center width=600>
 	<TR bgcolor="eeeeee" >
@@ -633,10 +633,10 @@ if request("lstOrd") <> "" then
 		<TD><A HREF="?od=<%=RSS("id")%>"><%=RSS("TypeName")%></A></TD>
 		<TD><span dir=ltr><%=RSS("OrdDate")%></span></TD>
 		<TD align=center><%
-		if RSS("order_ID") = "-1" then
+		if RSS("orderID") = "-1" then
 			response.write "-"
 		else
-			response.write "<A target='_blank' HREF='../shopfloor/manageOrder.asp?radif=" & RSS("order_ID") & "'>" & RSS("order_ID") & "</a>"
+			response.write "<A target='_blank' HREF='../shopfloor/manageOrder.asp?radif=" & RSS("orderID") & "'>" & RSS("orderID") & "</a>"
 
 			if RSS("Approved") then
 				response.write "<br>" & "›«ﬂ Ê—  «ÌÌœ ‘œÂ"

@@ -100,7 +100,7 @@ end if
 
 
 
-	set RS3=Conn.Execute ("SELECT InventoryItemRequests.*, InventoryItemRequests.ID AS Expr2, InventoryPickuplists.Status AS Expr1 FROM InventoryPickuplists FULL OUTER JOIN InventoryPickuplistItems ON InventoryPickuplists.id = InventoryPickuplistItems.pickupListID FULL OUTER JOIN InventoryItemRequests ON InventoryPickuplistItems.RequestID = InventoryItemRequests.ID WHERE (InventoryItemRequests.Order_ID = - 1) AND (InventoryItemRequests.CreatedBy =  "& session("id") & ") AND (NOT (InventoryItemRequests.Status = 'del' or InventoryItemRequests.Status = 'pick')) AND (NOT InventoryPickuplists.Status = N'done' OR InventoryPickuplists.Status IS NULL)")
+	set RS3=Conn.Execute ("SELECT InventoryItemRequests.*, InventoryItemRequests.ID AS Expr2, InventoryPickuplists.Status AS Expr1 FROM InventoryPickuplists FULL OUTER JOIN InventoryPickuplistItems ON InventoryPickuplists.id = InventoryPickuplistItems.pickupListID FULL OUTER JOIN InventoryItemRequests ON InventoryPickuplistItems.RequestID = InventoryItemRequests.ID WHERE (InventoryItemRequests.OrderID = - 1) AND (InventoryItemRequests.CreatedBy =  "& session("id") & ") AND (NOT (InventoryItemRequests.Status = 'del' or InventoryItemRequests.Status = 'pick')) AND (NOT InventoryPickuplists.Status = N'done' OR InventoryPickuplists.Status IS NULL)")
 	%>
 		<%
 		Do while not RS3.eof

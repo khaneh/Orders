@@ -23,7 +23,7 @@ if not Auth(3 , 8) then NotAllowdToViewThisPage()
 		<th>ãæÌæÏí</th>
 	</tr>
 	<%
-	set rs=Conn.Execute("select * from InventoryItems inner join InventoryItemCategoryRelations on InventoryItemCategoryRelations.Item_ID=InventoryItems.id where Cat_ID=1 and enabled=1 and qtty>0 and owner=-1")
+	set rs=Conn.Execute("select * from InventoryItems inner join InventoryItemCategoryRelations on InventoryItemCategoryRelations.Item_ID=InventoryItems.id where Cat_ID=1 and enabled=1 and qtty>0 and owner=-1 order by InventoryItems.name ")
 	cls="w"
 	while not rs.eof 
 		if cls="w" then

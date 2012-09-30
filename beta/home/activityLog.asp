@@ -13,8 +13,8 @@ div.allMessage{color: #3AC;}
 div.allQuote{color: #77F;}
 div.allOrder{color: #aa0;}
 div.msg{display: none;clear: both;font-weight: 100;cursor: pointer; }
-div.date{float: right;padding: 5px 10px 5px 10px;text-align: center;border-bottom: 2px solid #CCC;white-space: nowrap;overflow: scroll;max-width: 150px;}
-div.body{float: right;padding: 5px 10px 5px 10px;border-bottom: 2px solid #CCC;color: black;overflow: scroll;max-width: 570px;white-space: nowrap;}
+div.date{float: right;padding: 5px 10px 5px 10px;text-align: center;border-bottom: 2px solid #CCC;white-space: nowrap;overflow: hidden;max-width: 150px;}
+div.body{float: right;padding: 5px 10px 5px 10px;border-bottom: 2px solid #CCC;color: black;overflow: hidden;text-overflow: ellipsis;max-width: 550px;white-space: nowrap;}
 div.empty{clear: both;}
 span.toName{color:red;}
 span.typeName{color: blue;font-weight: bold;}
@@ -22,6 +22,7 @@ div.user{text-align: center;font-weight: bold;padding: 3px 0 3px 0;color: yellow
 div.userName{background-color: black;}
 div.quote{display: none;clear: both;font-weight: 100;cursor: pointer;}
 div.order{display: none;clear: both;font-weight: 100;cursor: pointer;}
+
 </style>
 <form method="post">
 	<input type="hidden" name="msgID" id='msgID' value="0">
@@ -32,9 +33,6 @@ div.order{display: none;clear: both;font-weight: 100;cursor: pointer;}
 	<input type="submit" name="submit" value="‰„«Ì‘">
 	<div id='result'></div>
 </form>
-<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
-<script type="text/javascript" src="/js/jalaliCalendar.js"></script>
-<script type="text/javascript" src="/js/jquery.dateFormat-1.0.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
 	$.ajaxSetup({
@@ -43,7 +41,7 @@ $(document).ready(function(){
 	$("input#date").blur(function(){
 		acceptDate($(this));
 	});
-	var loadUrl="activityLog_ajax.asp";
+	var loadUrl="/service/json_activityLog.asp";
 	$.getJSON(loadUrl,
 		{act:'message',id:$("input#msgID").val(),date:$("#date").val()},
 		function(json){
@@ -89,9 +87,9 @@ function echoMsg(e){
 		if ($("div#user-" + msg.from).is(":hidden"))
 			$("div#user-" + msg.from).show();
 		$("div#message-" + msg.from).children("div:first").before(
-			"<div class='msg' onClick='openMsg(" + msg.id + ");' title='»Â " + msg.toName + "'>" +
-			"<div class='date'><span class='typeName'>" + msg.typeName + "</span> ”«⁄  " + msg.time.substring(0,5) +
-			"</div><div class='body'>" + msg.body + "</div></div>"
+			"<div class='msg' onClick='openMsg(" + msg.id + ");'>" +
+			"<div class='date' title='»Â " + msg.toName + "'><span class='typeName'>" + msg.typeName + "</span> ”«⁄  " + msg.time.substring(0,5) +
+			"</div><div class='body' title='" + msg.body + "'>" + msg.body + "</div></div>"
 		);
 		$("div.msg:hidden").slideDown("slow");
 		if ($("input#msgID").val()<msg.id)
@@ -103,8 +101,9 @@ function echoQuote(e){
 		if ($("div#user-" + msg.createdBy).is(":hidden"))
 			$("div#user-" + msg.createdBy).show();
 		$("div#quote-" + msg.createdBy).children("div:first").before(
-			"<div class='quote' onClick='openQuote(" + msg.id + ");' title='ÃÂ  " + msg.customer + "(" + msg.company + 
-			")'><div class='date'><span class='typeName'>«” ⁄·«„ " +msg.kind + "</span> œ— ”«⁄  " + msg.time + "</div><div class='body' title='" + 
+			"<div class='quote' onClick='openQuote(" + msg.id + ");'><div class='date' title='ÃÂ  " + msg.accountTitle + 
+			"'><span class='typeName'>«” ⁄·«„ " +msg.kind + "</span> œ— ”«⁄  " + msg.time + 
+			"</div><div class='body' title='" + 
 			msg.note + "'>" +msg.title+" »Â  ⁄œ«œ " + msg.qtty+ " œ— ”«Ì“ " + msg.size + " Ê ﬁÌ„  " + msg.price + "</div></div>"
 		);
 		$("div.quote:hidden").slideDown("slow");
@@ -117,8 +116,8 @@ function echoOrder(e){
 		if ($("div#user-" + msg.createdBy).is(":hidden"))
 			$("div#user-" + msg.createdBy).show();
 		$("div#order-" + msg.createdBy).children("div:first").before(
-			"<div class='order' onClick='openOrder(" + msg.id + ");' title='ÃÂ  " + msg.customer + "(" + msg.company + 
-			")'><div class='date'><span class='typeName'>”›«—‘ " +msg.kind + "</span> œ— ”«⁄  " + msg.time + "</div><div class='body'>" +msg.title+" »Â  ⁄œ«œ " +
+			"<div class='order' onClick='openOrder(" + msg.id + ");'><div class='date'  title='ÃÂ  " + msg.accountTitle +  
+			"'><span class='typeName'>”›«—‘ " +msg.kind + "</span> œ— ”«⁄  " + msg.time + "</div><div class='body' title='" + msg.title + "'>" +msg.title+" »Â  ⁄œ«œ " +
 			msg.qtty+ " œ— ”«Ì“ " + msg.size + " Ê ﬁÌ„  " + msg.price + "</div></div>"
 		);
 		$("div.order:hidden").slideDown("slow");
@@ -162,10 +161,10 @@ function acceptDate(obj){
 	
 }
 function openOrder(id){
-	window.open('/beta/order/TraceOrder.asp?act=show&order=' + id, '_blank');
+	window.open('/beta/order/order.asp?act=show&id=' + id, '_blank');
 }
 function openQuote(id){
-	window.open('/beta/order/Inquiry.asp?act=show&quote=' + id, '_blank');
+	window.open('/beta/order/order.asp?act=show&id=' + id, '_blank');
 }
 function openMsg(id){
 	window.open('message.asp?act=show&id=' + id, '_blank');

@@ -25,13 +25,22 @@
 <style>
 	.InvTable { font-size: 9pt;}
 	.InvRowInput { font-family:tahoma; font-size: 9pt; border: none; background-color: #F0F0F0; text-align:right;}
-	.InvHeadInput { font-family:tahoma; font-size: 9pt; border: none; background-color: #CCCC88; text-align:center;}
+	input.InvHeadInput { font-family:tahoma; font-size: 9pt; border: none; background-color: #CCCC88; text-align:center;}
+	td.InvHeadInput { font-family:tahoma; font-size: 9pt; background-color: #CCCC88; text-align:center;}
 	.InvRowInput2 { font-family:tahoma; font-size: 9pt; border: none; background-color: #F0FFF0; text-align:right;}
 	.InvRowInput4 { font-family:tahoma; font-size: 9pt; border: none; background-color: #FFD3A8; direction:LTR; text-align:right;}
-	.InvHeadInput2 { font-family:tahoma; font-size: 9pt; border: none; background-color: #AACC77; text-align:center;}
-	.InvHeadInput3 { font-family:tahoma; font-size: 9pt; border: none; background-color: #F0F0F0; text-align:right; direction: RTL;}
-	.InvHeadInput4 { font-family:tahoma; font-size: 9pt; border: none; background-color: #FF9900; text-align:center;}
-	.InvGenInput { font-family:tahoma; font-size: 9pt; border: none; }
+	input.InvHeadInput2 { font-family:tahoma; font-size: 9pt; border: none; background-color: #AACC77; text-align:center;}
+	td.InvHeadInput2 { font-family:tahoma; font-size: 9pt; background-color: #AACC77; text-align:center;}
+	input.InvHeadInput3 { font-family:tahoma; font-size: 9pt; border: none; background-color: #F0F0F0; text-align:right; direction: RTL;}
+	td.InvHeadInput3 { font-family:tahoma; font-size: 9pt; background-color: #F0F0F0; text-align:right; direction: RTL;}
+	input.InvHeadInput4 { font-family:tahoma; font-size: 9pt; border: none; background-color: #FF9900; text-align:center;}
+	td.InvHeadInput4 { font-family:tahoma; font-size: 9pt; background-color: #FF9900; text-align:center;}
+	input.InvGenInput { font-family:tahoma; font-size: 9pt; border: none; }
+	span.chgDescBtn{float: left;opacity: .6;display: none;cursor: pointer;position: absolute;top:2px;left: 0;}
+	span.chgNoBtn{float: left;opacity: .6;display: none;cursor: pointer;position: absolute;top:3px;left: 0;}
+	span.chgIsaBtn{float: left;opacity: .6;display: none;cursor: pointer;position: absolute;top:3px;left: 0;}
+	td.chgDesc,td.chgNo,td.chgIsA {position: relative;}
+	span.isA{font-weight: bold;}
 </style>
 <style>
 	.RcpTable { font-family:tahoma; font-size: 9pt; border:0; padding:0; }
@@ -60,11 +69,11 @@
 </style>
 <%
 function Link2Trace(OrderNo)
-	Link2Trace="<A HREF='../order/TraceOrder.asp?act=show&order="& OrderNo & "' target='_balnk'>"& OrderNo & "</A>"
+	Link2Trace="<A HREF='../order/order.asp?act=show&id="& OrderNo & "' target='_balnk'>"& OrderNo & "</A>"
 end function
 
 function Link2TraceQuote(QuoteNo)
-	Link2TraceQuote = "<A HREF='../order/Inquiry.asp?act=show&quote="& QuoteNo & "' target='_balnk'>"& QuoteNo & "</A>"
+	Link2TraceQuote = "<A HREF='../order/order.asp?act=show&id="& QuoteNo & "' target='_balnk'>"& QuoteNo & "</A>"
 end function
 
 %>
@@ -861,7 +870,7 @@ elseif request("act")="showDebit" AND isnumeric(request("selectedCustomer")) the
 <%
 			else
 				TotalDebit = TotalDebit + Debit
-%>			<TR class='<%if tempCounter MOD 2 = 0 then response.write "RepTR1" else response.write "RepTR2"%>'>
+%>			<TR class="<% if tempCounter MOD 2 = 0 then response.write "RepTR1" else response.write "RepTR2" %>">
 				<td><%=tempCounter %></td>
 				<td dir='LTR' align='right'><%=RS1("EffectiveDate")%></td>
 				<td><%=sourceLink%></td>
@@ -1092,8 +1101,9 @@ elseif request("act")="showPayment" AND request("payment") <> "" then
 			<td colspan="4" align='center'>
 <%	if Auth(9 , 7) AND NOT voided then			' Has the Priviledge to VOID the RECEIPT/PAYMENT %>
 				<INPUT class="GenButton" TYPE="button" Value=" «»ÿ«· " onclick="VoidPayment();">
-<%	end if '--------------------------------------------------EDIT BY SAM---------------------------------------------------%>
-			<% '	ReportLogRow = PrepareReport ("InvoicePrintForm.rpt", "Payment", Payment, "/beta/dialog_printManager.asp?act=Fin") %>
+<%	end if '--------------------------------------------------EDIT BY SAM--------------------------------------------------- 
+ '	ReportLogRow = PrepareReport ("InvoicePrintForm.rpt", "Payment", Payment, "/beta/dialog_printManager.asp?act=Fin") 
+%>
 			<input class='GenButton' type='button' value='ç«Å çﬂ' onclick="changeURL('checkPrint','/beta/bank/chequePrint.asp?payment=<%=payment%>');">
 			<!--input class='GenButton' type='button' value='ç«Å »—êÂ çﬂ' onclick='printThisReport(this,<%=ReportLogRow%>);'-->
 		</tr>
@@ -1365,6 +1375,40 @@ elseif request("act")="showVoucher" then
 '-----------------------------------------------------------------------------------------------------
 '-----------------------------------------------------------------------------------------------------
 elseif request("act")="showInvoice" AND request("invoice") <> "" then
+%>
+<script type="text/javascript" src="../AO/include_AccountReport_showInvoice.js" charset="Windows-1256"></script>
+<script type="text/javascript">
+	TransformXmlURL("/service/xml_getMessage.asp?act=related&table=invoices&id=<%=request("invoice")%>","/xsl/showRelatedMessage.xsl?v=<%=version%>", function(result){
+		$("#invoiceMessages").html(result);
+		$("td.msgBody").each(function(i){
+			$(this).html($(this).html().replace(/\n/gi,"<br/>"));
+		});
+		$("input[name=addNewMessage]").click(function(){
+			document.location="../home/message.asp?RelatedTable=invoices&RelatedID=" + $("[name= InvoiceID]:first").val() + "&retURL=" + escape("../AR/AccountReport.asp?act=showInvoice&invoice=" + $("[name= InvoiceID]:first").val());
+		});
+	});
+</script>
+<div id="descDialog">
+	<input name="newDesc" type="text" size="50">
+	<input name="id" type="hidden">
+</div>
+<div id="isaDialog">
+	<span>«·›</span>
+	<input name="newIsA" type="radio" value="1">
+	<span>»</span>
+	<input name="newIsA" type="radio" value="0">
+	<span>«·› »œÊ‰ „«·Ì« </span>
+	<input name="newIsA" type="radio" value="-1">
+</div>
+<div id="noDialog">
+	<input name="newNo" type="text" size="6">
+</div>
+<div id="removeIssuedDialog">
+	<div>·ÿ›« œ·Ì· ŒÊœ —« »—«Ì Œ—ÊÃ «Ì‰ ›«ﬂ Ê— «“ ’œÊ— ‘—Õ œÂÌœ</div>
+	<input name="comment" type="text" size="50">
+</div>
+<%
+
 	InvoiceID=request("invoice")
 	if not(isnumeric(InvoiceID)) then
 		response.write "<br>" 
@@ -1436,7 +1480,8 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 	end if
 
 %>
-	<input type="hidden" Name='tmpDlgArg' value=''>
+
+	<input type="hidden" Name="tmpDlgArg" value="">
 	<input type="hidden" Name='tmpDlgTxt' value=''>
 
 	<table width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -1474,19 +1519,26 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 					</table></TD>
 			</TR>
 			<TR>
-				<TD align="left" width="100px">„—»Êÿ »Â ”›«—‘:</TD>
-				<TD align="right">
-					<span id="orders">
 <%
 					tempWriteAnd=""
 
-					mySQL="SELECT InvoiceOrderRelations.[Order], orders_trace.order_kind, orders_trace.order_title FROM InvoiceOrderRelations LEFT OUTER JOIN orders_trace ON InvoiceOrderRelations.[Order] = orders_trace.radif_sefareshat WHERE (InvoiceOrderRelations.Invoice = '"& InvoiceID & "')"
-
+					mySQL="SELECT InvoiceOrderRelations.[Order], orderTypes.name , orders.orderTitle, orders.isOrder FROM InvoiceOrderRelations LEFT OUTER JOIN orders ON InvoiceOrderRelations.[Order] = orders.id inner join orderTypes on orders.type=orderTypes.id WHERE (InvoiceOrderRelations.Invoice = '"& InvoiceID & "')"
 					Set RS1 = conn.Execute(mySQL)
+%>
+				<TD align="left" width="100px">
+					<%if not rs1.eof then %>
+					<span>„—»Êÿ »Â </span>
+					<%if (CBool(rs1("isOrder"))) then response.write " ”›«—‘ " else response.write " «” ⁄·«„ " %>:
+					<%end if %>
+				</TD>
+				<TD align="right">
+					<span id="orders">
+<%
+					
 					while not(RS1.eof) 
 						response.write "<input type='hidden' name='selectedOrders' value='"& RS1("Order") & "'>"
 						response.write tempWriteAnd & Link2Trace(RS1("Order"))
-						response.write " [ " & RS1("Order_Title") & " (" & RS1("Order_Kind") & ") ]"
+						response.write " [ " & RS1("OrderTitle") & " (" & RS1("name") & ") ]"
 						tempWriteAnd=" Ê "
 						RS1.moveNext
 					Wend
@@ -1494,50 +1546,37 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 					Set RS1 = Nothing 
 %>					</span>&nbsp;
 				</TD>
-<%				if IsA then %>	
-					<TD align="left">‘„«—Â:</td>
-					<TD><TABLE border="0">
+				<TD align="left">‘„«—Â:</td>
+				<TD>
+					<TABLE border="0">
 						<TR>
-							<TD dir="LTR">
-								<INPUT readonly class="InvGenInput" NAME="InvoiceNo" value="<%=InvoiceNo%>" style="border:1px solid black;" TYPE="text" maxlength="10" size="10"></td>
+							<TD dir="LTR" class="chgNo">
+								<INPUT readonly class="InvGenInput" NAME="InvoiceNo" value="<%=InvoiceNo%>" style="border:1px solid black;" TYPE="text" maxlength="10" size="10">
+<%
+	if auth(6,"A") or auth(6,"N") or (not Issued and auth(6,"M")) then
+%>								
+								<span class="chgNoBtn label"> €ÌÌ—</span>
+<%
+	end if
+%>								
+							</td>
 							</TD>
-							<td dir="RTL">
-									<B>«·›</B> &nbsp;
+							<td dir="RTL" class="chgIsA">
+								<span class="isA"><%if isA then response.write "«·›" else response.write "»"%></span>
+<%
+	if auth(6,"N") or (not Issued and auth(6,"M")) then
+%>								
+								
+								<span class="chgIsaBtn label"> €ÌÌ—</span>
+<%
+	end if
+%>								
 							</td>
 						</TR>
-						</TABLE></TD>
-<%				else%>
-					<TD Colspan="2">&nbsp;</TD>
-<%				end if%>
+					</TABLE>
+				</TD>
 			</TR>
-<%
-			tempWriteAnd=""
-			relatedQuotesText=""
-			hasRelatedQuotes = false
-			mySQL="SELECT InvoiceQuoteRelations.[Quote], Quotes.[order_kind], Quotes.[order_title] FROM InvoiceQuoteRelations INNER JOIN Quotes ON InvoiceQuoteRelations.[Quote] = Quotes.[ID] WHERE (InvoiceQuoteRelations.[Invoice] = '"& InvoiceID & "')"
 
-			Set RS1 = conn.Execute(mySQL)
-			While Not(RS1.eof) 
-				'response.write "<input type='hidden' name='selectedQuotes' value='"& RS1("Quote") & "'>"
-				relatedQuotesText = relatedQuotesText & tempWriteAnd & Link2TraceQuote(RS1("Quote"))
-				relatedQuotesText = relatedQuotesText & " [ " & RS1("Order_Title") & " (" & RS1("Order_Kind") & ") ]"
-				tempWriteAnd=" Ê "
-				hasRelatedQuotes = true
-				RS1.moveNext
-			Wend
-			RS1.close
-			Set RS1 = Nothing 
-
-			If hasRelatedQuotes Then 
-%>
-				<TR bgcolor='#AAAAEE' height="30">
-					<TD align="left" width="100px">„—»Êÿ »Â «” ⁄·«„ :</TD>
-					<TD align="right" colspan="3">
-						&nbsp; 
-						<span id="quotes"><%=relatedQuotesText%></span>&nbsp;
-					</TD>
-				</TR>
-<%			End If %>
 			</TABLE></TD>
 		</tr>
 		<tr bgcolor="#AAAA55" >
@@ -1566,22 +1605,21 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 		<tr bgcolor='#F0F0F0'>
 		<TD colspan="1"><div>
 		<TABLE Border="0" Cellspacing="1" Cellpadding="0" Dir="RTL" bgcolor="#558855" align="center" class="InvTable">
-		<TR bgcolor='#CCCC88'>
+		<TR bgcolor='#CCCC88' style="height: 20px;">
 			<td align='center' width="25px"> # </td>
-			<td><INPUT readonly class="InvHeadInput" TYPE="text" value="¬Ì „" size="4" ></td>
-			<td><INPUT readonly class="InvHeadInput2" TYPE="text" value=" Ê÷ÌÕ« " size="30"></td>
-			<td><INPUT readonly class="InvHeadInput2" TYPE="text" Value="ÿÊ·" size="2"></td>
-			<td><INPUT readonly class="InvHeadInput2" TYPE="text" Value="⁄—÷" size="2"></td>
-			<td><INPUT readonly class="InvHeadInput2" TYPE="text" Value=" ⁄œ«œ" size="3"></td>
-			<td><INPUT readonly class="InvHeadInput2" TYPE="text" Value="›—„" size="2"></td>
-			<td><INPUT readonly class="InvHeadInput" TYPE="text" Value=" ⁄œ«œ „ÊÀ—" size="6"></td>
-			<td><INPUT readonly class="InvHeadInput" TYPE="text" Value="›Ì" size="7"></td>
-			<td><INPUT readonly class="InvHeadInput" TYPE="text" Value="ﬁÌ„ " size="9"></td>
-			<td><INPUT readonly class="InvHeadInput" TYPE="text" Value=" Œ›Ì›"size="7"></td>
-			<td><INPUT readonly class="InvHeadInput" TYPE="text" Value="»—ê‘ " size="5"></td>
-			<!-------------------------------SAM----------------------------------------->
-			<td><INPUT readonly class="InvHeadInput4" TYPE="text" Value="„«·Ì« " size="6"></td>
-			<td><INPUT readonly class="InvHeadInput2" TYPE="text" Value="ﬁ«»· Å—œ«Œ " size="9"></td>
+			<td class="InvHeadInput" width="40px">¬Ì „</td>
+			<td class="InvHeadInput2" width="170px"> Ê÷ÌÕ« </td>
+			<td class="InvHeadInput2" width="30px">ÿÊ·</td>
+			<td class="InvHeadInput2" width="30px">⁄—÷</td>
+			<td class="InvHeadInput2" width="30px"> ⁄œ«œ</td>
+			<td class="InvHeadInput2" width="30px">›—„</td>
+			<td class="InvHeadInput" width="50px"> ⁄œ«œ „ÊÀ—</td>
+			<td class="InvHeadInput" width="55px">›Ì</td>
+			<td class="InvHeadInput" width="65px">ﬁÌ„ </td>
+			<td class="InvHeadInput" width="55px"> Œ›Ì›</td>
+			<td class="InvHeadInput" width="45px">»—ê‘ </td>
+			<td class="InvHeadInput4" width="50px">„«·Ì« </td>
+			<td class="InvHeadInput2" width="65px">ﬁ«»· Å—œ«Œ </td>
 		</TR>
 <%		
 		i=0
@@ -1597,10 +1635,18 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 			Vat =		cdbl(RS1("Vat"))
 
 %>
-			<TR bgcolor='#F0F0F0' height="20px">
+			<TR bgcolor='#F0F0F0' height="20px" class="invoiceItem" lineID="<%=rs1("id")%>">
 				<td align='center' width="25px"><%=i%></td>
 				<td class="InvRowInput" dir="LTR"><%=RS1("Item")%></td>
-				<td class="InvRowInput2" dir="RTL" width="170px"><%=RS1("Description")%></td>
+				<td class="InvRowInput2 chgDesc" dir="RTL" width="170px"><span class="desc"><%=RS1("Description")%></span>
+<%
+	if (not Issued) or auth(6,"A") then 
+%>				
+					<span class="chgDescBtn label"> €ÌÌ—</span>
+<%
+	end if
+%>					
+				</td>
 				<td class="InvRowInput2" dir="LTR"><%=Separate(cdbl(RS1("Length")))%></td>
 				<td class="InvRowInput2" dir="LTR"><%=Separate(cdbl(RS1("Width")))%></td>
 				<td class="InvRowInput2" dir="LTR"><%=Separate(cdbl(RS1("Qtty")))%></td>
@@ -1619,7 +1665,7 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 		RS1.close
 %>
 		<TR>
-			<td colspan="13" height="2px" bgcolor="#CCCC88"></td>
+			<td colspan="14" height="2px" bgcolor="#CCCC88"></td>
 		</TR>
 		<TR bgcolor='#CCCC88' height="20px">
 			<td colspan="9"> &nbsp; </td>
@@ -1633,103 +1679,52 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 			<td colspan="10"> &nbsp; </td>
 			<td align='right' dir="LTR" bgcolor="#F0F0F0"><%=Pourcent(TotalDiscount,TotalPrice) & "% Œ›Ì›"%></td>
 			<td align='right' dir="LTR" bgcolor="#F0F0F0"><%=Pourcent(TotalReverse,TotalPrice) & "%»—ê‘ "%></td>
-			<td>&nbsp;</td>
+			<td colspan=2>&nbsp;</td>
 		</TR>
 		<TR bgcolor='<%=HeaderColor%>' height="20px">
-			<td align=center colspan='13' style="padding:2;">
-<%			if voided then
-				'This is checked in order to prevent additional checks later.
-				'Because when an invoice is voided, definitely it is has been issued before.
-			elseif Issued then 
-				if Auth(6 , "A") then
-					' Has the Priviledge to CHANGE the Invoice / Rev. Invoice after it has been issued
-%>						<input class="GenButton" type="button" value=" «’·«Õ«  Ã“ÌÌ " onclick="window.location='../AR/InvoiceEdit.asp?act=editInvoice&invoice=<%=InvoiceID%>';"> 
-<%
-				end if
-				if Auth(6 , "F") then
-					' Has the Priviledge to VOID the Invoice / Rev. Invoice
-%>						<input class="GenButton" style="border:1 solid red;" title="”‰œ Õ”«»œ«—Ì œ«—œ" type="button" value=" «»ÿ«· " onclick="VoidInvoice();"> 
-<%
+			<td align=center colspan='14' style="padding:2;">
+<%			
+		set rs = Conn.Execute("select * from Orders where id in (select [order] from InvoiceOrderRelations where Invoice=" & invoiceID & ")") 
+		if not rs.eof then 
+			if rs("isOrder") and rs("isApproved") then 
+				if voided then
+					'This is checked in order to prevent additional checks later.
+					'Because when an invoice is voided, definitely it is has been issued before.
+				elseif Issued then 
+					if auth(6,"F") then Response.write "<INPUT class='btn btn-danger' TYPE='button' value=' Œ—ÊÃ «“ ’œÊ— ' id='removeIssue'>"
 				else
-					if Auth(6 , "M") then
-						set myRS=conn.Execute("SELECT * FROM ARItems WHERE (Type = '"& itemType & "') AND (Link='"& InvoiceID & "') AND GL_Update=1")
-						if not myRS.eof then 					
-								' Has the Priviledge to VOID the Invoice not has gl_update / Rev. Invoice
-			%>						<input class="GenButton" style="border:1 solid red;" title="”‰œ Õ”«»œ«—Ì ‰œ«—œ" type="button" value=" «»ÿ«· " onclick="VoidInvoiceOnly();"> 
-			<%
+					' Is not Issued
+					if Approved then
+						if Auth(6 , "D") then					' Has the Priviledge to ISSUE the Invoice / Rev. Invoice
+							if Auth(6 , "I") then				
+								' can ISSUE the Invoice / Rev. Invoice on another Date
+								Response.write "<INPUT class='InvGenInput' style='text-align:left;direction:LTR;' TYPE='text' maxlength='10' size='10' TYPE='Text' value='"&shamsiToday()&"' NAME='IssueDate' OnBlur='return acceptDate(this);'>"
+								Response.write "<INPUT class='btn btn-success' TYPE='button' value=' ’œÊ— ›«ﬂ Ê— ' id='IssueInvoiceInDate'>"		
+							else
+								Response.write "<INPUT class='btn btn-success' TYPE='button' value=' ’œÊ— ›«ﬂ Ê— ' id='IssueInvoice'>"
+							end if
+						end if
+						if auth(6,"G") then
+							Response.write "<INPUT class='btn btn-warning' TYPE='button' value=' Œ—ÊÃ «“  «ÌÌœ ' id='removeApprove'>"
+						end if
+					elseif Not(hasRelatedQuotes) then
+						'Is not approved
+						if Auth(6 , "C") then					' Has the Priviledge to APPROVE the Invoice / Rev. Invoice
+							Response.write "<INPUT class='btn btn-inverse' TYPE='button' value='  «ÌÌœ ›«ﬂ Ê— ' id='ApproveInvoice'>"
 						end if
 					end if
 				end if
-			else
-				' Is not Issued
-				if Approved then
-					if Auth(6 , "D") then					' Has the Priviledge to ISSUE the Invoice / Rev. Invoice
-						if Auth(6 , "I") then				
-							' can ISSUE the Invoice / Rev. Invoice on another Date
-%>							<INPUT class="InvGenInput" style="text-align:left;direction:LTR;" TYPE="text" maxlength="10" size="10" TYPE="Text" value="<%=shamsiToday()%>" NAME="IssueDate" OnBlur="return acceptDate(this);">
-							<INPUT class="GenButton" TYPE="button" value=" ’œÊ— ›«ﬂ Ê— " onclick="IssueInvoice();">
-<%						else
-%>							<INPUT class="GenButton" TYPE="button" value=" ’œÊ— ›«ﬂ Ê— " onclick="IssueInvoice();">
-<%						end if
-					end if
-				elseif Not(hasRelatedQuotes) then
-					'Is not approved
-					if Auth(6 , "C") then					' Has the Priviledge to APPROVE the Invoice / Rev. Invoice
-%>						<INPUT class="GenButton" TYPE="button" value="  «ÌÌœ ›«ﬂ Ê— " onclick="ApproveInvoice();">
-<%					end if
-					
+			end if
+		end if
+				if Auth(6 , "E") then					' Has the Priviledge to PRINT the Invoice / Rev. Invoice
+					ReportLogRow = PrepareReport ("InvoicePre.rpt", "Invoice_ID", InvoiceID, "/beta/dialog_printManager.asp?act=Fin") 
+					Response.write "<INPUT Class='btn btn-info' TYPE='button' value=' ç«Å ÅÌ‘ù‰ÊÌ” ' onclick=""window.location='../AR/InvoicePrint.asp?r=" & ReportLogRow & "';"">"	
+				 	ReportLogRow = PrepareReport ("InvoiceNew.rpt", "Invoice_ID", InvoiceID, "/beta/dialog_printManager.asp?act=Fin") 
+				 	Response.write "<INPUT Class='btn btn-info' TYPE='button' value=' ç«Å ' onclick=""window.location='../AR/InvoicePrint.asp?r=" & ReportLogRow & "';"">"
 				end if
-
-				if IsReverse AND Auth(6 , 5) then	' Has the Priviledge to EDIT the Rev. Invoice
-%>					<input class="GenButton" type="button" value=" ÊÌ—«Ì‘ " onclick="window.location='../AR/InvoiceEdit.asp?act=editInvoice&invoice=<%=InvoiceID%>';"> 
-<%				elseif Auth(6 , 3)then				' Has the Priviledge to EDIT the Invoice
-%>					<input class="GenButton" type="button" value=" ÊÌ—«Ì‘ " onclick="window.location='../AR/InvoiceEdit.asp?act=editInvoice&invoice=<%=InvoiceID%>';"> 
-<%				end if
-
-				if Auth(6 , "G") then
-					' Has the Priviledge to REMOVE the Pre-Invoice / Pre-Rev. Invoice
-%>						<input class="GenButton" style="border:1 solid red;" type="button" value=" Õ–› ÅÌ‘ ‰ÊÌ” " onclick="RemovePreInvoice();"> 
-					<%
-				end if
-			end if
-
-'---------- Remarked by kid 840924 , mr. vazehi wanted so
-'
-'			if IsReverse AND Auth(6 , 4) then	' Has the Priviledge to INPUT a Rev. Invoice
-'% >				<input class="GenButton" type="button" value="ﬂÅÌ ÅÌ‘ ‰ÊÌ”" onclick="window.location='../AR/InvoiceInput.asp?act=copyInvoice&invoice=< %=InvoiceID% >';"> 
-'< %			elseif Auth(6 , 1)then				' Has the Priviledge to INPUT an Invoice
-'% >				<input class="GenButton" type="button" value="ﬂÅÌ ÅÌ‘ ‰ÊÌ”" onclick="window.location='../AR/InvoiceInput.asp?act=copyInvoice&invoice=< %=InvoiceID% >';"> 
-'< %			end if
-'
-'--------- End of Remark
-
-'---------- Added by kid 850816, they requested to have the copy option but with priviledges
-'
-			if Auth(6 , "L") then	' Has the Priviledge to COPY an Invoice / Rev. Invoice
-				if IsReverse AND Auth(6 , 4) then	' Has the Priviledge to INPUT a Rev. Invoice
-%>					<input class="GenButton" type="button" value="ﬂÅÌ ÅÌ‘ ‰ÊÌ”" onclick="window.location='../AR/InvoiceInput.asp?act=copyInvoice&invoice=<%=InvoiceID%>';"> 
-<%				elseif Auth(6 , 1)then				' Has the Priviledge to INPUT an Invoice
-%>					<input class="GenButton" type="button" value="ﬂÅÌ ÅÌ‘ ‰ÊÌ”" onclick="window.location='../AR/InvoiceInput.asp?act=copyInvoice&invoice=<%=InvoiceID%>';"> 
-<%				end if
-			end if
-'---------- End of 850816 additions
-
-
-			if Auth(6 , "E") then					' Has the Priviledge to PRINT the Invoice / Rev. Invoice
-%>				
-				<% 	ReportLogRow = PrepareReport ("InvoicePre.rpt", "Invoice_ID", InvoiceID, "/beta/dialog_printManager.asp?act=Fin") %>
-				<INPUT Class="GenButton" style="border:1 solid blue;" TYPE="button" value=" ç«Å ÅÌ‘ù‰ÊÌ” " 
-				onclick="window.location='../AR/InvoicePrint.asp?r=<%=ReportLogRow%>';">
-				<% 	ReportLogRow = PrepareReport ("InvoiceNew.rpt", "Invoice_ID", InvoiceID, "/beta/dialog_printManager.asp?act=Fin") %>
-				<INPUT Class="GenButton" style="border:1 solid blue;" TYPE="button" value=" ç«Å " 
-				onclick="window.location='../AR/InvoicePrint.asp?r=<%=ReportLogRow%>';">
-<!--				onclick="printThisReport(this,<%=ReportLogRow%>);"-->
-<%			'----------------------------------------------SAM-----------------------------------------------------
-			if Issued then %>
-				<INPUT class='GenButton' style='border:1 solid blue;' type='button' value=' Ê·Ìœ ﬂœ Å—œ«Œ  «Ì‰ —‰ Ì' onclick="window.location='../AR/ePayment.asp?Invoice=<%=InvoiceID%>';">
-<%			end if
-			'------------------------------------------------------------------------------------------------------
-			end if
+			
+		
+		rs.close
 %>
 			</td>
 		</TR>
@@ -1740,7 +1735,7 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 	<br>
 	<table align=center><tr>
 <%
-	mySQL="SELECT PurchaseRequests.TypeName as requestTypeName,PurchaseRequests.Price as requestPrice, PurchaseRequests.Qtty as requestQtty, InvoiceOrderRelations.*, PurchaseOrders.ID AS PurchaseOrdersID, PurchaseOrders.Status AS PurchaseOrdersStatus, PurchaseOrders.TypeName AS TypeName, PurchaseOrders.price, PurchaseOrders.qtty FROM PurchaseOrders FULL OUTER JOIN PurchaseRequestOrderRelations RIGHT OUTER JOIN PurchaseRequests INNER JOIN InvoiceOrderRelations ON PurchaseRequests.Order_ID = InvoiceOrderRelations.[Order] ON PurchaseRequestOrderRelations.Req_ID = PurchaseRequests.ID ON PurchaseOrders.ID = PurchaseRequestOrderRelations.Ord_ID WHERE (InvoiceOrderRelations.Invoice ='"& InvoiceID & "') and PurchaseRequests.Status<> 'del'"
+	mySQL="SELECT PurchaseRequests.TypeName as requestTypeName,PurchaseRequests.Price as requestPrice, PurchaseRequests.Qtty as requestQtty, InvoiceOrderRelations.*, PurchaseOrders.ID AS PurchaseOrdersID, PurchaseOrders.Status AS PurchaseOrdersStatus, PurchaseOrders.TypeName AS TypeName, PurchaseOrders.price, PurchaseOrders.qtty FROM PurchaseOrders FULL OUTER JOIN PurchaseRequestOrderRelations RIGHT OUTER JOIN PurchaseRequests INNER JOIN InvoiceOrderRelations ON PurchaseRequests.OrderID = InvoiceOrderRelations.[Order] ON PurchaseRequestOrderRelations.Req_ID = PurchaseRequests.ID ON PurchaseOrders.ID = PurchaseRequestOrderRelations.Ord_ID WHERE (InvoiceOrderRelations.Invoice ='"& InvoiceID & "') and PurchaseRequests.Status<> 'del'"
 	Set RS1 = conn.Execute(mySQL)
 	tempWriteAnd = "Œ—Ìœ Œœ„«  „—»Êÿ »Â «Ì‰ ›«ﬂ Ê—: <hr>"
 	if not(RS1.eof) then
@@ -1805,41 +1800,11 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 %>	
 	</tr></table>
 	<br>
-	<table class="CustTable" cellspacing='1' align=center>
-		<tr>
-			<td colspan="2" class="CusTableHeader"><span style="width:450;text-align:center;">Ì«œœ«‘  Â«</span><span style="width:100;text-align:left;background-color:red;"><input class="GenButton" type="button" value="‰Ê‘ ‰ Ì«œœ«‘ " onclick="window.location = '../home/message.asp?RelatedTable=invoices&RelatedID=<%=InvoiceID%>&retURL=<%=Server.URLEncode("../AR/AccountReport.asp?act=showInvoice&invoice="&InvoiceID)%>';"></span></td>
-		</tr>
+	<div id='invoiceMessages'></div>
 <%
-	mySQL="SELECT * FROM Messages INNER JOIN Users ON Messages.MsgFrom = Users.ID WHERE (Messages.RelatedTable = 'invoices') AND (Messages.RelatedID = "& InvoiceID & ") ORDER BY Messages.ID DESC"
-	Set RS1 = conn.execute(mySQL)
-	if NOT RS1.eof then
-%>
-<%
-		tmpCounter=0
-		Do While NOT RS1.eof 
-			tmpCounter=tmpCounter+1
-%>
-			<tr class="<%if (tmpCounter MOD 2) = 1 then response.write "CusTD3" else response.write "CusTD4" %>">
-				<td>«“ <%=RS1("RealName")%><br>
-					<%=RS1("MsgDate")%> <BR> <%=RS1("MsgTime")%>
-				</td>
-				<td dir='RTL'><%=replace(RS1("MsgBody"),chr(13),"<br>")%></td>
-			</tr>
-<%
-			RS1.moveNext
-		Loop
-	else
-%>
-		<tr class="CusTD3">
-			<td colspan="2">ÂÌç</td>
-		</tr>
-<%
-	end if
-	RS1.close
-
 	set rs1=Conn.Execute("select * from effectiveGlrows where sys='AR' and link in (select id from arItems where type=1 and reason=1 and link=" & invoiceID & ")")
 %>
-	</table><BR><BR>
+<BR><BR>
 	<br><!--CENTER>ÅÌ‘ ‰„«Ì‘ ç«Å:</CENTER-->
 	<center>
 		<%
@@ -1851,49 +1816,6 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 		%>
 	</center>
 	<BR>
-	<script language="JavaScript">
-	<!--
-	function ApproveInvoice(){
-		if (confirm("¬Ì« „ÿ„∆‰ Â” Ìœ ﬂÂ „Ì ŒÊ«ÂÌœ «Ì‰ ›«ﬂ Ê— —« ' «ÌÌœ' ﬂ‰Ìœø\n\n"))
-			window.location="../AR/invoiceEdit.asp?act=approveInvoice&invoice=<%=InvoiceID%>";
-	}
-	function IssueInvoice(){
-	<% if Auth(6 , "I") then%>
-		if (confirm("¬Ì« „ÿ„∆‰ Â” Ìœ ﬂÂ „Ì ŒÊ«ÂÌœ «Ì‰ ›«ﬂ Ê— —« '’«œ—' ﬂ‰Ìœø\n\n"))
-			window.location="../AR/invoiceEdit.asp?act=IssueInvoice&invoice=<%=InvoiceID%>&issueDate="+document.all.IssueDate.value;
-	<% else %>
-		if (confirm("¬Ì« „ÿ„∆‰ Â” Ìœ ﬂÂ „Ì ŒÊ«ÂÌœ «Ì‰ ›«ﬂ Ê— —« '’«œ—' ﬂ‰Ìœø\n\n"))
-			window.location="../AR/invoiceEdit.asp?act=IssueInvoice&invoice=<%=InvoiceID%>";
-	<% end if%>
-	}
-	function VoidInvoice(){
-		if (confirm("¬Ì« „ÿ„∆‰ Â” Ìœ ﬂÂ „Ì ŒÊ«ÂÌœ «Ì‰ ›«ﬂ Ê— —« '»«ÿ·' ﬂ‰Ìœø\n")){
-
-			dialogActive=true
-			document.all.tmpDlgArg.value="#"
-			document.all.tmpDlgTxt.value=" Ê÷ÌÕÌ œ— »«—Â œ·Ì· «»ÿ«· ›«ﬂ Ê—:"
-			window.showModalDialog('../dialog_GenInput.asp',document.all.tmpDlgTxt,'dialogHeight:200px; dialogWidth:440px; dialogTop:; dialogLeft:; edge:None; center:Yes; help:No; resizable:No; status:No;');
-			dialogActive=false
-			window.location="../AR/invoiceEdit.asp?act=voidInvoice&invoice=<%=InvoiceID%>&comment="+escape(document.all.tmpDlgTxt.value);
-		}
-	}
-	function VoidInvoiceOnly(){
-		if (confirm("¬Ì« „ÿ„∆‰ Â” Ìœ ﬂÂ „Ì ŒÊ«ÂÌœ «Ì‰ ›«ﬂ Ê— —« '»«ÿ·' ﬂ‰Ìœø\n")){
-
-			dialogActive=true
-			document.all.tmpDlgArg.value="#"
-			document.all.tmpDlgTxt.value=" Ê÷ÌÕÌ œ— »«—Â œ·Ì· «»ÿ«· ›«ﬂ Ê—:"
-			window.showModalDialog('../dialog_GenInput.asp',document.all.tmpDlgTxt,'dialogHeight:200px; dialogWidth:440px; dialogTop:; dialogLeft:; edge:None; center:Yes; help:No; resizable:No; status:No;');
-			dialogActive=false
-			window.location="../AR/invoiceEdit.asp?act=voidInvoiceOnly&invoice=<%=InvoiceID%>&comment="+escape(document.all.tmpDlgTxt.value);
-		}
-	}
-	function RemovePreInvoice(){
-		if (confirm("¬Ì« „ÿ„∆‰ Â” Ìœ ﬂÂ „Ì ŒÊ«ÂÌœ «Ì‰ ÅÌ‘ ‰ÊÌ” —« Õ–› ﬂ‰Ìœø\n"))
-			window.location='../AR/InvoiceEdit.asp?act=removePreInvoice&invoice=<%=InvoiceID%>';
-	}
-	//-->
-	</script>
 <%
 '-----------------------------------------------------------------------------------------------------
 '-----------------------------------------------------------------------------------------------------

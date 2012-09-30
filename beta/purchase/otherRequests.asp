@@ -97,7 +97,7 @@ if request.form("Submit")="À»  œ—ŒÊ«”   Œ—Ìœ ﬂ«·«" then
 		orderID = "-1"
 	end if
 
-	mySql="INSERT INTO purchaseRequests (order_ID, typeName, typeID, comment, ReqDate, price,priceComment, CreatedBy, qtty, DueDate, IsService) VALUES ( "& orderID & " , N'"& otypeName & "', 0 , N'"& comment & "',N'"& shamsiToday() & "', "& price & ",N'"& priceComment & "', "& CreatedBy & ", "& qtty & " , N'"& DueDate & "', 1)"	
+	mySql="INSERT INTO purchaseRequests (orderID, typeName, typeID, comment, price,priceComment, CreatedBy, qtty, DueDate, IsService) VALUES ( "& orderID & " , N'"& otypeName & "', 0 , N'"& comment & "', "& price & ",N'"& priceComment & "', "& CreatedBy & ", "& qtty & " , dbo.udf_date_solarToDate(" & mid(DueDate,1,4) & "," & mid(DueDate,6,2) & "," & mid(DueDate,9,2) & "), 1)"	
 	conn.Execute mySql
 	'RS1.close
 

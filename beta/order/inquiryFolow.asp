@@ -35,14 +35,14 @@ if request("act")="" then
 %>
 <form action="" method="post">
 	<div class="NewRow">
-		<div class="RightHead">ãåáÊ ÊÍæíá</div>
+		<div class="RightHead">ÇÚÊÈÇÑ</div>
 		<div class="Right">
 			<input type="checkbox" <%if request("submit")="ÊÇííÏ" then
 				if request("isDelay")="on" then response.write " checked='checked' "
 			else 
 				response.write " checked='checked' "
 			end if%> name="isDelay" >
-			<label>ÊÇÎíÑ ÏÇÑÏ</label>
+			<label>ãäŞÖí ÔÏå</label>
 		</div>
 		<div class="Right">
 			<input type="checkbox"<%if request("submit")="ÊÇííÏ" then 
@@ -78,9 +78,9 @@ if request("act")="" then
 		</div>
 	</div>
 	<div class="NewRow">
-		<div class="RightHead">äæÚ ÓİÇÑÔ</div>
+		<div class="RightHead">äæÚ ÇÓÊÚáÇã</div>
 	<%
-	set rs=Conn.Execute("select * from OrderTraceTypes where isActive=1")
+	set rs=Conn.Execute("select * from OrderTypes where isActive=1")
 	while not rs.eof
 	%>
 		<div class="Right">
@@ -106,15 +106,8 @@ if request("act")="" then
 <div style="clear: both;margin:20px 0 0 0;">
 <center>
 <%
-'set rs=Conn.Execute("select count(step) as stepCountLevel from QuoteSteps where IsActive=1 and step is not null group by step order by count(step) desc")
-stepCountLevel = 1 'CInt(rs("stepCountLevel"))
-'rs.close
-set rs=Conn.Execute("select max(id) as stepCount from QuoteSteps where IsActive=1")
-stepCount = CInt(rs("stepCount"))
-rs.close
-dim steps(1,10)
 dim orderType(10)
-set rs=Conn.Execute("select * from OrderTraceTypes where isActive=1")
+set rs=Conn.Execute("select * from OrderTypes where isActive=1")
 i=0
 while not rs.eof
 	orderType(i)="orderType-"&rs("id")
@@ -122,18 +115,13 @@ while not rs.eof
 	i=i+1
 wend
 orderTypeCount=i-1
-oldStep=-1
-
 rs.close
 %>
 	<table class="CustTable">
 		<tr>
 	<%
-set rs=Conn.Execute("select * from QuoteSteps where IsActive=1")
-while not rs.eof
-
 	fromDate=""
-	toDate="9999/99/99" 'shamsiToday()
+	toDate="2100-12-30" 'shamsiToday()
 	orderTypes=""
 	condition="" 
 	if request("submit")="ÊÇííÏ" then 
@@ -147,49 +135,55 @@ while not rs.eof
 		if request("isDelay")="on" or request("today")="on" or request("tomorrow")="on" or request("nextWeek")="on" or request("moreNextWeek")="on" then
 		 	condition = condition & " and ( 0=1"
 		 	if request("isDelay")="on" then 
-		 		condition = condition & " or Quotes.return_date between '1389/01/01' and '" & shamsiDate(dateadd("d",-1,date())) & "'"
-		 		fromDate = "1389/01/01"
+		 		condition = condition & " or orders.returnDate between '2010-03-21' and '" & dateadd("d",-1,date()) & "'"
+		 		fromDate = "2010-03-21"
 		 		toDate = shamsiDate(dateadd("d",-1,date()))
 		 	end if
 			if request("today")="on" then 
-				condition = condition & " or Quotes.return_date = '" & shamsiToday() & "'"
+				condition = condition & " or orders.returnDate = '" & date() & "'"
 				if fromDate = "" then fromDate = shamsiToday()
 				toDate = shamsiToday()
 			end if
 			if request("tomorrow")="on" then 
-				condition = condition & " or Quotes.return_date = '" & shamsiDate(dateadd("d",1,date())) & "'"
-				if fromDate = "" then fromDate = shamsiDate(dateadd("d",1,date()))
-				toDate = shamsiDate(dateadd("d",1,date()))
+				condition = condition & " or orders.returnDate = '" & dateadd("d",1,date()) & "'"
+				if fromDate = "" then fromDate = dateadd("d",1,date())
+				toDate = dateadd("d",1,date())
 			end if
 			if request("nextWeek")="on" then 
-				condition = condition & " or Quotes.return_date between '" & shamsiDate(dateadd("d",2,date())) & "' and '" & shamsiDate(dateadd("d",7,date())) & "'"
-				if fromDate = "" then fromDate = shamsiDate(dateadd("d",2,date()))
-				toDate = shamsiDate(dateadd("d",7,date()))
+				condition = condition & " or orders.returnDate between '" & dateadd("d",2,date()) & "' and '" & dateadd("d",7,date()) & "'"
+				if fromDate = "" then fromDate = dateadd("d",2,date())
+				toDate = dateadd("d",7,date())
 			end if
 			if request("moreNextWeek")="on" then 
-				condition = condition & " or Quotes.return_date > '" & shamsiDate(dateadd("d",7,date())) & "'"
-				if fromDate = "" then fromDate = shamsiDate(dateadd("d",8,date()))
-				toDate = "9999/99/99"
+				condition = condition & " or orders.returnDate > '" & dateadd("d",7,date()) & "'"
+				if fromDate = "" then fromDate = dateadd("d",8,date())
+				toDate = "2100-12-30"
 			end if
 			condition = condition & ")"
 		end if
 	end if
-	if fromDate="" then fromDate="1389/01/01"
-	mySQL = "select isnull(count(id),0) as quotesCount from Quotes where step=" & rs("id") & condition
-	set rs1=Conn.Execute(mySQL)
+	if fromDate="" then fromDate="2010-03-21"
+	mySQL = "select isnull(count(id),0) as quotesNew from orders where isClosed=0 and isOrder=0" & condition
+	set rs=Conn.Execute(mySQL)
 	%>
 			<td title="ÈÑÇí ãÔÇåÏå ÌÒÆíÇÊ ßáíß ßäíÏ">
 			<center>
 				<img src="../images/folder1.gif" align="top">
 				<br>
-				<a href="inquiryFolow.asp?act=show&fromDate=<%=Server.URLEncode(fromDate)%>&toDate=<%=Server.URLEncode(toDate)%>&orderTypes=<%=Server.URLEncode(orderTypes)%>&step=<%=rs("id")%>"><%=rs("name") & " (" & rs1("quotesCount") & ")"%></a>
+				<a href="inquiryFolow.asp?act=show&fromDate=<%=Server.URLEncode(fromDate)%>&toDate=<%=Server.URLEncode(toDate)%>&orderTypes=<%=Server.URLEncode(orderTypes)%>&isClose=0">ËÈÊ ÔÏå<%=" (" & rs("quotesNew") & ")"%></a>
 			</center>
 			</td>
 	<%
-	rs1.close
-	rs.moveNext
-wend
-		%>
+	mySQL = "select isnull(count(id),0) as quotesClose from orders where isClosed=1 and isOrder=0" & condition
+	set rs=Conn.Execute(mySQL)
+	%>
+			<td title="ÈÑÇí ãÔÇåÏå ÌÒÆíÇÊ ßáíß ßäíÏ">
+			<center>
+				<img src="../images/folder1.gif" align="top">
+				<br>
+				<a href="inquiryFolow.asp?act=show&fromDate=<%=Server.URLEncode(fromDate)%>&toDate=<%=Server.URLEncode(toDate)%>&orderTypes=<%=Server.URLEncode(orderTypes)%>&isClose=1">ÑÏ ÔÏå<%=" (" & rs("quotesClose") & ")"%></a>
+			</center>
+			</td>
 		</tr>
 	</table>
 </center>
@@ -197,79 +191,42 @@ wend
 <%
 rs.close
 elseif request("act")="show" then
-	myCriteria=""
-	if request("fromDate")<>"" then myCriteria = " AND Quotes.return_date between '" & request("fromDate") & "' AND '" & request("toDate") & "'"
-	if request("orderTypes")<>"" then myCriteria = myCriteria & " and Quotes.type in (" & request("orderTypes") & ")"
-	myCriteria = myCriteria & " and Quotes.step=" & request("step")
-	
-	mySQL="SELECT Quotes.*, OrderTraceStatus.Name AS StatusName, OrderTraceStatus.Icon,DRV_Invoice.price,Quotes.customer FROM Quotes INNER JOIN  OrderTraceStatus ON Quotes.status = OrderTraceStatus.ID left outer join (select InvoiceQuoteRelations.quote,SUM(InvoiceLines.Price + InvoiceLines.Vat - InvoiceLines.Discount -InvoiceLines.Reverse) as price from InvoiceQuoteRelations inner join Invoices on InvoiceQuoteRelations.Invoice=Invoices.ID inner join InvoiceLines on Invoices.ID=InvoiceLines.Invoice where Invoices.Voided=0 group by InvoiceQuoteRelations.quote) DRV_Invoice on Quotes.ID=DRV_Invoice.quote WHERE (1=1 "& myCriteria & ") ORDER BY order_date DESC, Quotes.id DESC"	
-	'response.write mysql
-	set RS1=Conn.Execute (mySQL)
-	if not RS1.eof then
-		tmpCounter=0
-'response.write mySQL
 %>
-	<div align="center" dir="LTR">
-	<TABLE border="1" cellspacing="0" cellpadding="1" dir="RTL" borderColor="#555588">
-		<TR bgcolor="#CCCCFF">
-			<TD width="44"># ÇÓÊÚáÇã</TD>
-			<TD width="46">ÊÇÑíÎ ÇÓÊÚáÇã</TD>
-			<TD width="64">ÊÇÑíÎ ÊÍæíá</TD>
-			<TD width="122">äÇã ÔÑßÊ</TD>
-			<TD width="122">äÇã ãÔÊÑí</TD>
-			<TD width="84">ÚäæÇä ßÇÑ</TD>
-			<TD width="40">äæÚ</TD>
-			<TD width="36">ÇÓÊÚáÇã íÑäÏå</TD>
-			<TD width="18">æÖÚ</TD>
-			<td width="50">ãÈáÛ ßá</td>
-		</TR>
-<%				Do while not RS1.eof 
-		tmpCounter = tmpCounter + 1
-		if tmpCounter mod 2 = 1 then
-			tmpColor="#FFFFFF"
-		Else
-			tmpColor="#DDDDDD"
-		End If
-
-		if RS1("Closed") then
-			tmpStyle="background-color:#FFCCCC;"
-		else
-			tmpStyle=""
-		End If
-		
-%>
-		<TR bgcolor="<%=tmpColor%>" title="<%=RS1("StatusName")%>">
-			<TD width="40" DIR="LTR"><A HREF="Inquiry.asp?act=show&quote=<%=RS1("id")%>" target="_blank"><%=RS1("id")%></A></TD>
-			<TD DIR="LTR"><%=RS1("order_date")%></TD>
-			<TD DIR="LTR"><%=RS1("return_date") & " ("& RS1("return_time") & ")"%></TD>
-			<TD><%=RS1("company_name") & "<br>Êáİä:("& RS1("telephone")& ")"%>&nbsp;</TD>
-			<TD><a href='../CRM/AccountInfo.asp?act=show&selectedCustomer=<%=RS1("customer")%>'><%=RS1("customer_name")%></a>&nbsp;</TD>
-			<TD><%=RS1("order_title")%>&nbsp;</TD>
-			<TD><%=RS1("order_kind")%></TD>
-			<TD style="<%=tmpStyle%>"><%=RS1("marhale")%></TD>
-			<TD><%=RS1("salesperson")%>&nbsp;</TD>
-			<td><%if isnull(RS1("price")) then response.write "----" else response.write Separate(RS1("price")) end if %></td>
-		</TR>
-		<TR bgcolor="#FFFFFF">
-			<TD colspan="10" style="height:10px"></TD>
-		</TR>
-<%					RS1.moveNext
-		Loop
-
-%>					<TR bgcolor="#ccccFF">
-				<TD colspan="10">ÊÚÏÇÏ äÊÇíÌ ÌÓÊÌæ: <%=tmpCounter%></TD>
-			</TR>
-	</TABLE>
-	</div>
-	<BR>
-<%			else
-%>			<TABLE border="1" cellspacing="0" cellpadding="0" dir="RTL" align="center" width="600">
-		<TR bgcolor="#FFFFDD">
-			<TD align="center" style="height:40px;font-size:12pt;font-weight:bold;color:red">åí ÌæÇÈí äÏÇÑíã Èå ÔãÇ ÈÏåíã.</TD>
-		</TR>
-	</TABLE>
-	<hr>
-<%			End If
+<div id='traceResult'></div>
+<SCRIPT type="text/javascript">
+	$(document).ready(function(){
+		TransformXmlURL('/service/xml_getOrderTrace.asp?act=getQuoteFolow&isClose=<%=request("isClose")%>&fromDate=<%=request("fromDate")%>&toDate=<%=request("toDate")%>&orderTypes=<%=request("orderTypes")%>',"/xsl/orderShowList.xsl", function(result){
+			$("#traceResult").html(result);
+			$("#traceResult td.orderDates").each(function(i){
+				var createdDate = $(this).find(".createdDate");
+				var createdTime = $(this).find(".createdTime");
+				var returnTime = $(this).find(".returnTime");
+				var returnDate = $(this).find(".returnDate");
+				if (returnDate.html()=="0"){
+					returnDate.html("İÚáÇ ãÚáæã äíÓÊ!");
+					returnTime.html("");
+				} else {
+					returnDate.html($.jalaliCalendar.gregorianToJalaliStr(returnDate.html()));
+					var myTime = new Date(returnTime.html().replace(RegExp('-','g'),'/'));
+					if (myTime.getHours()==0 && myTime.getMinutes()==0)
+						returnTime.html("");
+					else
+					returnTime.html("("+((myTime.getHours()<10)?('0'+myTime.getHours()):myTime.getHours())+':'+((myTime.getMinutes() < 10)?('0'+myTime.getMinutes()):(myTime.getMinutes()))+")");
+				}
+				
+				createdDate.html($.jalaliCalendar.gregorianToJalaliStr(createdDate.html()));
+				
+				var myTime = new Date(createdTime.html().replace(RegExp('-','g'),'/'));
+				if (myTime.getHours()==0 && myTime.getMinutes()==0)
+					createdTime.html("");
+				else
+				createdTime.html("("+((myTime.getHours()<10)?('0'+myTime.getHours()):myTime.getHours())+':'+((myTime.getMinutes() < 10)?('0'+myTime.getMinutes()):(myTime.getMinutes()))+")");
+				
+			});
+		});
+	});
+</script>
+<%
 
 end if
 

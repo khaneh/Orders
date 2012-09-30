@@ -25,15 +25,52 @@ end function
 %>
 <style>
 	Table { font-size: 9pt;}
+	div.InvHead {background-color: #CC8;text-align: center;padding: 5px 0;}
+	div.InvHead2 {background-color: #AC7;text-align: center;padding: 5px 0;}
+	div.InvHead3 {background-color: #F0F0F0;text-align: center;padding: 5px 0;}
+	div.InvHead4 {background-color: #F90;text-align: center;padding: 5px 0;}
+	div.InvLine {background-color: #F0F0F0;text-align: right;}
+	div.InvLine2 {background-color: #F0FFF0;text-align: right;}
+	div.InvLine4 {background-color: #FFD3A8;text-align: right;}
+	
 	.InvRowInput { font-family:tahoma; font-size: 9pt; border: none; background-color: #F0F0F0; text-align:right;}
 	.InvHeadInput { font-family:tahoma; font-size: 9pt; border: none; background-color: #CCCC88; text-align:center;}
-	.InvRowInput2 { font-family:tahoma; font-size: 9pt; border: none; background-color: #F0FFF0; text-align:right;}
+	.InvRowInput2 { font-family:tahoma; font-size: 9pt; border: none; background-color: #F0FFF0; text-align:right; height: 22px; margin: 0;padding: 0;}
 	.InvRowInput4 { font-family:tahoma; font-size: 9pt; border: none; background-color: #FFD3A8; direction:LTR; text-align:right;}
 	.InvHeadInput2 { font-family:tahoma; font-size: 9pt; border: none; background-color: #AACC77; text-align:center;}
 	.InvHeadInput3 { font-family:tahoma; font-size: 9pt; border: none; background-color: #F0F0F0; text-align:right;}
 	.InvHeadInput4 { font-family:tahoma; font-size: 9pt; border: none; background-color: #FF9900; text-align:center;}
 	.InvGenInput  { font-family:tahoma; font-size: 9pt; border: none; }
 	.InvGenButton { font-family:tahoma; font-size: 9pt; border: 1px solid black; }
+	.order {background-color: #C3C300;font-weight: bold;padding: 6px 10px 6px 10px;}
+	.quote {background-color: #AAAAEE;font-weight: bold;padding: 6px 10px 6px 10px;}
+	#header {width: 100%;border-left: 1px solid #585;border-right: 1px solid #585;}
+	#header div {padding: 5px 2px;float: right;border-left: 1px solid #585; text-align: center;}
+	div.invRow {clear: both;float: none;width: 100%;}
+	div.invRow div {padding: 5px 2px 0 2px;float: right;border-bottom: 1px solid #585;border-left: 1px solid #585;text-align: right;height: 22px;}
+	table.invTable {border-collapse:collapse; width:100%;}
+	#tbody{height:60px;overflow-y:auto;width:100%;background:yellow;border-top: 1px solid #585;}
+	td[class*="td"] {padding: 1px 2px;border-left: 1px solid red;border-bottom: 1px solid red;}
+	div.td15{width: 15px;}
+	td.td15{width: 15px;}
+	div.td40{width: 40px;}
+	td.td40{width: 40px;}
+	div.td170{width: 170px;}
+	td.td170{width: 170px;}
+	div.td60{width: 60px;}
+	td.td60{width: 60px;}
+	div.td80{width: 80px;}
+	td.td80{width: 80px;}
+	div.td35{width: 35px;}
+	td.td35{width: 35px;}
+	div.td25{width: 25px;}
+	td.td25{width: 25px;}
+	div.td55{width: 55px;}
+	td.td55{width: 55px;}
+	div.td50{width: 50px;}
+	td.td50{width: 50px;}
+	div.td75{width: 75px;}
+	td.td75{width: 75px;}
 </style>
 <SCRIPT LANGUAGE="JavaScript">
 <!--
@@ -159,7 +196,7 @@ elseif request("act")="editInvoice" then
 								<span id="customer"><%' after any changes in this span "./Customers.asp" must be revised%>
 									<INPUT TYPE="hidden" NAME="customerID" value="<%=customerID%>"><span><%=CustomerName%></span>.
 								</span></td>
-							<td><INPUT class="InvGenButton" TYPE="button" value=" €ÌÌ—" onClick="selectCustomer();"></td>
+							<td></td>
 						</tr>
 						</table></TD>
 					<TD align="left"><table>
@@ -175,21 +212,27 @@ elseif request("act")="editInvoice" then
 			</tr>
 			<tr bgcolor='<%=HeaderColor%>'>
 				<TD align="right" width="50%">
-					„—»Êÿ »Â ”›«—‘(Â«Ì):
-					<span id="orders">
+					„—»Êÿ »Â ”›«—‘/«” ⁄·«„(Â«Ì):
+					<%
+					mySQL="SELECT * FROM InvoiceOrderRelations inner join Orders on InvoiceOrderRelations.[order]=orders.id WHERE (Invoice='"& InvoiceID & "')"
+					Set RS1 = conn.Execute(mySQL)
+					if not rs1.eof then 
+						if rs1("isOrder")="True" then 
+							isOrder="order"
+						else
+							isOrder="quote"
+						end if
+					end if
+					%>
+					<span id="orders" class="<%=isOrder%>">
 <%
 					tempWriteAnd=""
-
-					mySQL="SELECT * FROM InvoiceOrderRelations WHERE (Invoice='"& InvoiceID & "')"
-					Set RS1 = conn.Execute(mySQL)
 					while not(RS1.eof) 
-						response.write "<input type='hidden' name='selectedOrders' value='"& RS1("Order") & "'>"
 						response.write tempWriteAnd & Link2Trace(RS1("Order"))
 						tempWriteAnd=" Ê "
 						RS1.moveNext
 					wend
 %>					</span>&nbsp;
-					<INPUT class="InvGenButton" TYPE="button" value=" €ÌÌ—" onClick="selectOrder();">
 				</TD>
 				<TD align="left"><table>
 					<tr>
@@ -197,93 +240,32 @@ elseif request("act")="editInvoice" then
 						<td dir="LTR">
 							<INPUT class="InvGenInput" NAME="InvoiceNo" value="<%=InvoiceNo%>" style="border:1px solid black;" TYPE="text" maxlength="10" size="10"></td>
 						<td dir="RTL">
-							<INPUT TYPE="checkbox" NAME="IsA" onClick='checkIsA();' 
-							<% if IsA then response.write " checked " 
+							<INPUT TYPE="checkbox" value="on" NAME="IsA" onClick='checkIsA();' 
+							<% if IsA then response.write " checked='checked' " 
 							if Issued and not Auth(6,"N") then response.write " disabled='disabled' "%>> «·› &nbsp;
 						</td>
 					</tr>
 					</table></TD>
 			</tr>
-<%
-			tempWriteAnd=""
-			relatedQuotesText=""
-			hasRelatedQuotes = false
-			mySQL="SELECT InvoiceQuoteRelations.[Quote], Quotes.[order_kind], Quotes.[order_title] FROM InvoiceQuoteRelations INNER JOIN Quotes ON InvoiceQuoteRelations.[Quote] = Quotes.[ID] WHERE (InvoiceQuoteRelations.[Invoice] = '"& InvoiceID & "')"
-
-			Set RS1 = conn.Execute(mySQL)
-			While Not(RS1.eof) 
-				relatedQuotesText = relatedQuotesText & " <input type='hidden' name='selectedQuotes' value='"& RS1("Quote") & "'>"
-				relatedQuotesText = relatedQuotesText & tempWriteAnd & Link2TraceQuote(RS1("Quote"))
-				'relatedQuotesText = relatedQuotesText & " [ " & RS1("Order_Title") & " (" & RS1("Order_Kind") & ") ]"
-				tempWriteAnd=" Ê "
-				hasRelatedQuotes = true
-				RS1.moveNext
-			Wend
-			RS1.close
-			Set RS1 = Nothing 
-
-			If hasRelatedQuotes Then 
-%>
-				<tr bgcolor='#AAAAEE' height="30">
-					<td width="50%">
-						„—»Êÿ »Â «” ⁄·«„ :
-						<span id="quotes"><%=relatedQuotesText%></span>&nbsp;
-						<INPUT class="InvGenButton" TYPE="button" value=" €ÌÌ—" onClick="selectQuote();">
-						</TD>
-					<td width="50%">
-						&nbsp; 
-						<SCRIPT LANGUAGE="JavaScript">
-						<!--
-						function js_Link2Trace(num){
-							return "<A HREF='../order/Inquiry.asp?act=show&quote="+ num + "' target='_balnk'>"+ num + "</A>"
-						}
-						function selectQuote(){
-							theSpan=document.getElementById("quotes");
-							document.all.tmpDlgArg.value="";
-							window.showModalDialog('Quotes.asp?act=select&customer='+document.all.customerID.value,document.all.tmpDlgArg,'dialogHeight:500px; dialogWidth:380px; dialogTop:; dialogLeft:; edge:Raised; center:Yes; help:No; resizable:Yes; status:No;');
-							if (document.all.tmpDlgArg.value!="[Esc]"){
-								theSpan.innerHTML="";
-								Arguments=document.all.tmpDlgArg.value.split("#")
-								tempWriteAnd=""
-								for (i=1;i<=Arguments[0];i++){
-									theSpan.innerHTML += "<input type='hidden' name='selectedQuotes' value='"+Arguments[i]+"'>" + tempWriteAnd + js_Link2Trace(Arguments[i])
-									tempWriteAnd=" Ê "
-								}
-							}
-						}
-							
-						//-->
-						</SCRIPT>
-					</td>
-				</tr>
-<%			End If %>
-
 			<tr bgcolor='#CCCC88'>
-			<TD colspan="10"><div>
-			<TABLE Border="0" Cellspacing="1" Cellpadding="0" Dir="RTL" bgcolor="#558855">
-			<tr bgcolor='#CCCC88'>
-				<td align='center' width="25px"> # </td>
-				<td><INPUT class="InvHeadInput" readonly TYPE="text" value="¬Ì „" size="3" ></td>
-				<td><INPUT class="InvHeadInput2" readonly TYPE="text" value=" Ê÷ÌÕ« " size="30"></td>
-				<td><INPUT class="InvHeadInput2" readonly TYPE="text" Value="ÿÊ·" size="2"></td>
-				<td><INPUT class="InvHeadInput2" readonly TYPE="text" Value="⁄—÷" size="2"></td>
-				<td><INPUT class="InvHeadInput2" readonly TYPE="text" Value=" ⁄œ«œ" size="3"></td>
-				<td><INPUT class="InvHeadInput2" readonly TYPE="text" Value="›—„" size="2"></td>
-				<td><INPUT class="InvHeadInput" readonly TYPE="text" Value=" ⁄œ«œ „ÊÀ—" size="6"></td>
-				<td><INPUT class="InvHeadInput" readonly TYPE="text" Value="›Ì" size="7"></td>
-				<td><INPUT class="InvHeadInput" readonly TYPE="text" Value="ﬁÌ„ " size="9"></td>
-				<td><INPUT class="InvHeadInput" readonly TYPE="text" Value=" Œ›Ì›"size="7"></td><!-- S A M -->
-				<td><INPUT class="InvHeadInput" readonly TYPE="text" Value="»—ê‘ " size="5"></td><!-- S A M -->
-				<td><INPUT class="InvHeadInput4" readonly TYPE="text" Value="„«·Ì« " size="6"></td><!-- S A M -->
-				<td><INPUT class="InvHeadInput2" readonly TYPE="text" Value="ﬁ«»· Å—œ«Œ " size="9"></td>
-			</tr>
-			</TABLE></div></TD>
-			</TR>
-			<tr bgcolor='#CCCC88'>
-			<TD colspan="10"><div style="overflow:auto; height:190px; width:*;">
-			<TABLE Border="0" Cellspacing="1" Cellpadding="0" Dir="RTL" bgcolor="#558855">
-			<Tbody id="InvoiceLines">
-
+				<TD colspan="10">
+					<div id="header">
+						<div class="td15 InvHead">#</div>
+						<div class="td40 InvHead2">¬Ì „</div>
+						<div class="td170 InvHead2"> Ê÷ÌÕ« </div>
+						<div class="td25 InvHead2">ÿÊ·</div>
+						<div class="td25 InvHead2">⁄—÷</div>
+						<div class="td25 InvHead2"> ⁄œ«œ</div>
+						<div class="td25 InvHead2">›—„</div>
+						<div class="td50 InvHead"> ⁄œ«œ „ÊÀ—</div>
+						<div class="td40 InvHead">›Ì</div>
+						<div class="td50 InvHead">ﬁÌ„ </div>
+						<div class="td50 InvHead"> Œ›Ì›</div>
+						<div class="td40 InvHead">»—ê‘ </div>
+						<div class="td50 InvHead4">„«·Ì« </div>
+						<div class="td75 InvHead2">ﬁ«»· Å—œ«Œ </div>
+					</div>
+					<div id="tbody">
 <%		
 	i=0
 	mySQL="SELECT *,InvoiceLines.ID as lineID,isnull(invoiceItems.fee,0) as ItemFee FROM InvoiceLines LEFT OUTER JOIN invoiceItems ON InvoiceLines.item = invoiceItems.id WHERE (Invoice='"& InvoiceID & "') "
@@ -292,55 +274,44 @@ elseif request("act")="editInvoice" then
 	if RS1("Item") <> 39999 then
 		i=i+1
 %>
-			<tr bgcolor='#F0F0F0' onclick="setCurrentRow(this.rowIndex);" >
-				<td align='center' width="25px"><%=i%></td>
-				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Items" value="<%=RS1("Item")%>" size="3" Maxlength="6" onKeyPress="return mask(this,event);" onfocus="setCurrentRow(this.parentNode.parentNode.rowIndex);" onChange='return check(this);'>
-				<INPUT TYPE="hidden" name="type" value="<%=RS1("type")%>">
-				<INPUT TYPE="hidden" name="fee" value="<%=RS1("ItemFee")%>">
-				<input type='hidden' name='hasVat' value='<%=text2value(RS1("hasVat"))%>'>
-				<input type='hidden' name='lineID' value='<%=RS1("lineID")%>'>
-				</td>
-				<td dir="RTL"><INPUT class="InvRowInput2" TYPE="text" NAME="Descriptions" value="<%=RS1("Description")%>" size="30"></td>
-				<td dir="LTR"><INPUT class="InvRowInput2" TYPE="text" NAME="Lengths" value="<%=RS1("Length")%>" size="2" onBlur="setFeeQtty(this);"></td>
-				<td dir="LTR"><INPUT class="InvRowInput2" TYPE="text" NAME="Widths" value="<%=RS1("Width")%>" size="2" onBlur="setFeeQtty(this);"></td>
-				<td dir="LTR"><INPUT class="InvRowInput2" TYPE="text" NAME="Qttys" value="<%=RS1("Qtty")%>" size="3" onBlur="setFeeQtty(this);"></td>
-				<td dir="LTR"><INPUT class="InvRowInput2" TYPE="text" NAME="Sets" value="<%=RS1("Sets")%>" size="2" onBlur="setFeeQtty(this);"></td>
-				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="AppQttys" value="<%=Separate(RS1("AppQtty"))%>" size="6" onBlur="setPrice(this);"></td>
-				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Fees" <% if (cdbl(rs1("ItemFee"))>0 and cint(RS1("type"))<>0) then response.write " readonly='readonly' "%> value="<%if RS1("AppQtty") <> 0 then response.write Separate(RS1("Price")/RS1("AppQtty")) else response.write "0"%>" size="7" onBlur="setPrice(this);"></td>
-				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Prices" value="<%=Separate(RS1("Price"))%>" size="9" readonly tabIndex="9999"></td>
-				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Discounts" value="<%=Separate(RS1("Discount"))%>" size="7" onBlur="setPrice(this);"></td><!-- S A M -->
-				<td dir="LTR"><INPUT class="InvRowInput" TYPE="text" NAME="Reverses" value="<%=Separate(RS1("Reverse"))%>" size="5" onBlur="setPrice(this);" onfocus="setCurrentRow(this.parentNode.parentNode.rowIndex);"></td><!-- S A M -->
-				<td dir="LTR"><INPUT class="InvRowInput4" TYPE="text" Name="Vat" value="<%=Separate(RS1("Vat"))%>" size="6" readonly></td><!-- S A M -->
-				<td dir="LTR"><INPUT class="InvRowInput2" TYPE="text" NAME="AppPrices" value="<%=Separate(RS1("Price") - RS1("Discount") - RS1("Reverse") + RS1("Vat"))%>" size="9" readonly tabIndex="9999"></td><!-- S A M -->
-			</tr>
+					<div class="invRow">
+						<div class="td15 InvLine"><%=i%></div>
+						<div class="td40 InvLine2"><%=RS1("Item")%>
+							<input type='hidden' name='hasVat' value='<%=text2value(RS1("hasVat"))%>'>
+							<input type='hidden' name='lineID' value='<%=RS1("lineID")%>'>
+						</div>
+						<div class="td170 InvLine2" style="padding:2px 2px 3px 2px;">
+							<INPUT class="InvRowInput2" TYPE="text" NAME="Descriptions" value="<%=RS1("Description")%>" size="30">
+						</div>
+						<div class="td25 InvLine2"><%=RS1("Length")%></div>
+						<div class="td25 InvLine2"><%=RS1("Width")%></div>
+						<div class="td25 InvLine2"><%=RS1("Qtty")%></div>
+						<div class="td25 InvLine2"><%=RS1("Sets")%></div>
+						<div class="td50 InvLine"><%=Separate(RS1("AppQtty"))%></div>
+						<div class="td40 InvLine"><%=Separate(RS1("Price")/RS1("AppQtty"))%></div>
+						<div class="td50 InvLine"><%=Separate(RS1("Price"))%></div>
+						<div class="td50 InvLine"><%=Separate(RS1("Discount"))%></div>
+						<div class="td40 InvLine"><%=Separate(RS1("Reverse"))%></div>
+						<div class="td50 InvLine4"><%=Separate(RS1("Vat"))%></div>
+						<div class="td75 InvLine2"><%=Separate(RS1("Price") - RS1("Discount") - RS1("Reverse") + RS1("Vat"))%></div>
+					</div>
+
 <%
 	end if
 		RS1.moveNext
 	wend
 	RS1.close
 %>
-			<tr bgcolor='#F0F0F0' onclick="setCurrentRow(this.rowIndex);" >
-				<td colspan="15">
-					<INPUT class="InvGenButton" TYPE="button" value="«÷«›Â" onkeyDown="if(event.keyCode==9) {setCurrentRow(this.parentNode.parentNode.rowIndex); return false;};" onClick="addRow();">
-				</td>
-			</tr>
-			</Tbody></TABLE></div>
-			</TD>
-			</tr>
+							
+					</div>
+				</TD>
+			</TR>
+			
 			<tr bgcolor='#CCCC88'>
 			<TD colspan="10"><div>
 			<TABLE Border="0" Cellspacing="1" Cellpadding="0" Dir="RTL" bgcolor="#CCCC88">
 			<tr bgcolor='#CCCC88'>
 				<td colspan='9' width='500px'>*** Œ›Ì› —‰œ ›«ﬂ Ê— »⁄œ «“ À»  œ—Ã ŒÊ«Âœ ‘œ***</td>
-				<!--td align='center' width="25px"> &nbsp; </td>
-				<td><INPUT readonly class="InvHeadInput" TYPE="text" size="3" ></td>
-				<td><INPUT readonly class="InvHeadInput" TYPE="text" size="30"></td>
-				<td><INPUT readonly class="InvHeadInput" TYPE="text" size="2"></td>
-				<td><INPUT readonly class="InvHeadInput" TYPE="text" size="2"></td>
-				<td><INPUT readonly class="InvHeadInput" TYPE="text" size="3"></td>
-				<td><INPUT readonly class="InvHeadInput" TYPE="text" size="2"></td>
-				<td><INPUT readonly class="InvHeadInput" TYPE="text" size="6"></td>
-				<td><INPUT readonly class="InvHeadInput" TYPE="text" size="7"></td-->
 				<td dir="LTR"><INPUT readonly class="InvHeadInput3" Name="TotalPrice" value="<%=Separate(totalPrice)%>" TYPE="text" size="9"></td>
 				<!-- S A M -->
 				<td dir="LTR"><INPUT readonly class="InvHeadInput3" Name="TotalDiscount" value="<%=Separate(totalDiscount)%>" TYPE="text" size="7"></td>
@@ -388,27 +359,28 @@ elseif request("act")="submitEdit" then
 		CustomerID=		clng(request.form("CustomerID"))
 
 		issueDate=	request.form("issueDate")
-		
+' response.write "is A: " & request.form("IsA")
 
 		if request.form("IsA") = "on" then 
 			IsA=1 
 			InvoiceNo=request.form("InvoiceNo")
-			if InvoiceNo <> "" then InvoiceNo = clng(InvoiceNo)
+			if InvoiceNo <> "" then InvoiceNo = cdbl(InvoiceNo)
 		else 
 			set rs = Conn.Execute("select * from invoices where id=" & invoiceID)
 			IsA=0
 			InvoiceNo=""
-			if rs("issued") then 
+			if rs("issued") and not auth(6,"N") then
 				if rs("isA") then 
 					IsA=1 
 					InvoiceNo=request.form("InvoiceNo")
-					if InvoiceNo <> "" then InvoiceNo = clng(InvoiceNo)
+					if InvoiceNo <> "" then InvoiceNo = cdbl(InvoiceNo)
 				end if
 			end if
 		end if
-			
+' response.write "<br>is A now:" & IsA
+' response.end
 		for i=1 to request.form("selectedOrders").count
-			theOrder=		clng(request.form("selectedOrders")(i))
+			theOrder = clng(request.form("selectedOrders")(i))
 			mySQL="SELECT ID FROM Orders WHERE ID=" & theOrder 
 			Set rs=conn.Execute(mySQL)
 			if rs.eof then
@@ -439,7 +411,7 @@ elseif request("act")="submitEdit" then
 			approved=	rs("Approved")
 			isReverse=	rs("IsReverse")
 			ApprovedBy=	rs("ApprovedBy")
-			if issued then isA=rs("isA")
+			if issued and not auth(6 , "N") then isA=rs("isA")
 		else
 			errorFound=True
 		end if
@@ -640,15 +612,15 @@ elseif request("act")="submitEdit" then
 		mySQL ="UPDATE Orders SET Closed=0 WHERE ID IN (SELECT [Order] FROM InvoiceOrderRelations WHERE (Invoice = '" & InvoiceID & "') AND ([Order] NOT IN (SELECT InvoiceOrderRelations.[ORDER] FROM Invoices INNER JOIN InvoiceOrderRelations ON Invoices.ID = InvoiceOrderRelations.Invoice WHERE (Invoices.Issued = 1) AND (Invoices.Voided = 0) AND (Invoices.isReverse = 0) AND (Invoices.ID <> '" & InvoiceID & "'))))"
 		conn.Execute(mySQL)
 
-		mySQL ="DELETE FROM InvoiceOrderRelations WHERE (Invoice='" & InvoiceID & "')"
-		'mySQL ="DELETE FROM InvoiceOrderRelations WHERE (Invoice = '" & InvoiceID & "') AND ([Order] NOT IN (SELECT InvoiceOrderRelations.[ORDER] FROM Invoices INNER JOIN InvoiceOrderRelations ON Invoices.ID = InvoiceOrderRelations.Invoice WHERE (Invoices.Issued = 1) AND (Invoices.Voided = 0) AND (Invoices.isReverse = 0) AND (Invoices.ID <> '" & InvoiceID & "')))"
-		conn.Execute(mySQL)
-		
-		for i=1 to request.form("selectedOrders").count
-			theOrder=	clng(request.form("selectedOrders")(i))
-			mySQL="INSERT INTO InvoiceOrderRelations (Invoice,[Order]) VALUES ('" & InvoiceID & "', '" & theOrder & "')"
-			conn.Execute(mySQL)
-		next
+' 		mySQL ="DELETE FROM InvoiceOrderRelations WHERE (Invoice='" & InvoiceID & "')"
+' 		'mySQL ="DELETE FROM InvoiceOrderRelations WHERE (Invoice = '" & InvoiceID & "') AND ([Order] NOT IN (SELECT InvoiceOrderRelations.[ORDER] FROM Invoices INNER JOIN InvoiceOrderRelations ON Invoices.ID = InvoiceOrderRelations.Invoice WHERE (Invoices.Issued = 1) AND (Invoices.Voided = 0) AND (Invoices.isReverse = 0) AND (Invoices.ID <> '" & InvoiceID & "')))"
+' 		conn.Execute(mySQL)
+' 		
+' 		for i=1 to request.form("selectedOrders").count
+' 			theOrder=	clng(request.form("selectedOrders")(i))
+' 			mySQL="INSERT INTO InvoiceOrderRelations (Invoice,[Order]) VALUES ('" & InvoiceID & "', '" & theOrder & "')"
+' 			conn.Execute(mySQL)
+' 		next
 
 		conn.Execute("UPDATE Orders SET Closed=1 WHERE ID IN (SELECT [Order] FROM InvoiceOrderRelations WHERE (Invoice='" & InvoiceID & "'))")
 		'^^^^------------ Updating Invoice-Order Relations ------------^^^^
@@ -691,7 +663,7 @@ elseif request("act")="submitEdit" then
 					oldTotalReceivable = CLng(RSinvoice("TotalReceivable"))
 					
 					
-					mySQL="UPDATE Invoices SET Customer='"& CustomerID & "', Number='"& InvoiceNo & "', TotalPrice='"& TotalPrice & "', TotalDiscount='"& TotalDiscount & "', TotalReverse='"& TotalReverse & "', TotalReceivable='"& TotalReceivable & "' , IsA='"& IsA & "', TotalVat='" & totalVat & "' WHERE (ID='"& InvoiceID & "')"
+					mySQL="UPDATE Invoices SET Customer='"& CustomerID & "', Number='"& InvoiceNo & "', TotalPrice='"& TotalPrice & "', TotalDiscount='"& TotalDiscount & "', TotalReverse='"& TotalReverse & "', TotalReceivable='"& TotalReceivable & "' , IsA="& IsA & ", TotalVat='" & totalVat & "' WHERE (ID='"& InvoiceID & "')"
 					conn.Execute(mySQL)
 			
 					mySQL="DELETE FROM InvoiceLines WHERE (Invoice='"& InvoiceID & "')"
@@ -744,8 +716,10 @@ elseif request("act")="submitEdit" then
 						mySQL="INSERT INTO InvoiceLines (Invoice, Item, Description, Length, Width, Qtty, Sets, AppQtty, Price, Discount, Reverse, Vat) VALUES ('"& InvoiceID & "', '" & theItem & "', N'" & theDescription & "', '" & theLength & "', '" & theWidth & "', '" & theQtty & "', '" & theSets & "', '" & theAppQtty & "', '" & thePrice & "', '" & theDiscount & "', '" & theReverse & "', '" & theVat & "')"
 						conn.Execute(mySQL)
 					end if
-					mySQL="UPDATE ARItems SET AmountOriginal='"& TotalReceivable &"', RemainedAmount='"& TotalReceivable &"' ,Vat='"& totalVat &"' WHERE ID="&RSSS("ID")
-					conn.Execute(mySQL)
+					mySQL="UPDATE ARItems SET AmountOriginal='"& TotalReceivable &"', RemainedAmount='"& TotalReceivable &"' ,Vat='"& totalVat &"', FullyApplied = 0 WHERE ID=" & RSSS("ID")
+					Conn.Execute(mySQL)
+					Conn.Execute("Delete from ARItemsRelations where DebitARItem = " & RSSS("ID"))
+					Conn.Execute(mySQL)
 					mySQL="UPDATE Accounts SET ARBalance=ARBalance - "&TotalReceivable - oldTotalReceivable&" WHERE id=" & CustomerID
 					conn.Execute(mySQL)
 				end if
@@ -825,28 +799,28 @@ elseif request("act")="submitEdit" then
 		end if
 
 		'**************** Updating Invoice-Order Relations ****************
-		mySQL="DELETE FROM InvoiceOrderRelations WHERE (Invoice='" & InvoiceID & "')"
-		conn.Execute(mySQL)
+' 		mySQL="DELETE FROM InvoiceOrderRelations WHERE (Invoice='" & InvoiceID & "')"
+' 		conn.Execute(mySQL)
 '		response.write "aaaa:"
 '		response.write request.form("selectedOrders").count
-		for i=1 to request.form("selectedOrders").count
-			theOrder=	clng(request.form("selectedOrders")(i))
-			mySQL="INSERT INTO InvoiceOrderRelations (Invoice,[Order]) VALUES ('" & InvoiceID & "', '" & theOrder & "')"
-			'--------------------------SAM------------------------------
-'			response.write mySQL
-			'-----------------------------------------------------------
-			conn.Execute(mySQL)
-		next
+' 		for i=1 to request.form("selectedOrders").count
+' 			theOrder=	clng(request.form("selectedOrders")(i))
+' 			mySQL="INSERT INTO InvoiceOrderRelations (Invoice,[Order]) VALUES ('" & InvoiceID & "', '" & theOrder & "')"
+' 			'--------------------------SAM------------------------------
+' '			response.write mySQL
+' 			'-----------------------------------------------------------
+' 			conn.Execute(mySQL)
+' 		next
 		'^^^^------------ Updating Invoice-Order Relations ------------^^^^
 
-		'**************** Updating Invoice-Quote Relations ****************
-		mySQL="DELETE FROM InvoiceQuoteRelations WHERE (Invoice='" & InvoiceID & "')"
-		conn.Execute(mySQL)
-		for i=1 to request.form("selectedQuotes").count
-			theQuote=	clng(request.form("selectedQuotes")(i))
-			mySQL="INSERT INTO InvoiceQuoteRelations (Invoice,[Quote]) VALUES ('" & InvoiceID & "', '" & theQuote & "')"
-			conn.Execute(mySQL)
-		next
+		' '**************** Updating Invoice-Quote Relations ****************
+' 		mySQL="DELETE FROM InvoiceQuoteRelations WHERE (Invoice='" & InvoiceID & "')"
+' 		conn.Execute(mySQL)
+' 		for i=1 to request.form("selectedQuotes").count
+' 			theQuote=	clng(request.form("selectedQuotes")(i))
+' 			mySQL="INSERT INTO InvoiceQuoteRelations (Invoice,[Quote]) VALUES ('" & InvoiceID & "', '" & theQuote & "')"
+' 			conn.Execute(mySQL)
+' 		next
 		'^^^^------------ Updating Invoice-Quote Relations ------------^^^^
 
 	end if

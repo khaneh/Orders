@@ -5,6 +5,23 @@
   '		cusID	(Customer ID)
   '
 %>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$(".getName").each(function (index){
+			var TD = $(this);
+			$.ajax({
+				type:"POST",
+				url:"/service/json_getName.asp",
+				data:{act:TD.attr("act"),id:TD.attr("iID")},
+				dataType:"json",
+				cache: true
+			}).done(function (data){
+				TD.html(data.name);
+			});
+		});
+
+	});
+</script>
 <STYLE>
 	.GetCustTbl {font-family:tahoma; background-color: #DDDDDD; width:630; direction: RTL; }
 	.GetCustTbl td {padding:2; font-size: 9pt; height:25;}
@@ -23,14 +40,43 @@
 </STYLE>
 	  <Tr>
 		<Td colspan="2" valign="center" align="center">
-			<BR>
-			<% if Auth(2 , 9) then %><input class="GenButton" type="Button" value="ê—› ‰ «” ⁄·«„"onclick="window.open('../order/Inquiry.asp?act=getType&selectedCustomer=<%=cusID%>');" <% if AccountIsDisabled then %> disabled <% end if %>> <% end if %>
-			<% if Auth(2 , 1) then %><input class="GenButton" type="Button" value="ê—› ‰ ”›«—‘"onclick="window.open('../order/OrderInput.asp?act=getType&selectedCustomer=<%=cusID%>');" <% if AccountIsDisabled then %> disabled <% end if %>> <% end if %> 
-			<% if Auth(6 , 1) then %><input class="GenButton" type="button" value="Ê—Êœ ›«ﬂ Ê—" onclick="window.open('../AR/InvoiceInput.asp?act=selectOrder&selectedCustomer=<%=cusID%>');" <% if AccountIsDisabled then %> disabled <% end if %>> <% end if %> 
-			<% if Auth(6 , 2) then %><input class="GenButton" type="button" value="Ê—Êœ «⁄·«„ÌÂ" onclick="window.open('../AR/MemoInput.asp?act=getMemo&selectedCustomer=<%=cusID%>');" <% if AccountIsDisabled then %> disabled <% end if %>> <% end if %> 
-			<% if Auth(6 , 7) then %><input class="GenButton" type="button" value="œÊŒ ‰" onclick="window.open('../AR/ItemsRelation.asp?sys=AR&act=relate&selectedCustomer=<%=CusID%>');"> <% end if %> 
-			<% if Auth(6 , 6) then %><input class="GenButton" type="button" value="ê“«—‘ Õ”«»" onclick="window.open('../AR/AccountReport.asp?sys=AR&act=show&selectedCustomer=<%=CusID%>');" > <% end if %> 
-			<BR><BR>
+			<div class="btn-toolbar">
+				<% if Auth(2 , 9) then %>
+				<div class="btn-group">
+				  <button class="btn btn-inverse dropdown-toggle" data-toggle="dropdown">ê—› ‰ «” ⁄·«„
+				    <span class="caret"></span>
+				  </button>
+				  <ul class="dropdown-menu">
+				  <%
+					  if not AccountIsDisabled then 
+						  set rs=Conn.Execute("select * from orderTypes")
+						  while not rs.eof
+						  	Response.write "<li><a href='../order/order.asp?act=getNew&OrderType=" & rs("id") & "&selectedCustomer=" & cusID & "'>" & rs("name") & "</a></li>"
+						  	rs.MoveNext
+						  wend
+						end if
+				  %>
+				    
+				  </ul>
+				</div>
+				<% end if %>
+				
+				<% if Auth(6 , 2) then %>
+				<div class="btn-group">
+					<input class="btn btn-warning" type="button" value="Ê—Êœ «⁄·«„ÌÂ" onclick="window.open('../AR/MemoInput.asp?act=getMemo&selectedCustomer=<%=cusID%>');" <% if AccountIsDisabled then Response.write " disabled " %> /> 
+				</div>
+				<% end if %> 
+				<% if Auth(6 , 7) then %>
+				<div class="btn-group">
+					<input class="btn btn-success" type="button" value="œÊŒ ‰" onclick="window.open('../AR/ItemsRelation.asp?sys=AR&act=relate&selectedCustomer=<%=CusID%>');"/> 
+				</div>
+				<% end if %> 
+				<% if Auth(6 , 6) then %>
+				<div class="btn-group">
+					<input class="btn btn-info" type="button" value="ê“«—‘ Õ”«»" onclick="window.open('../AR/AccountReport.asp?sys=AR&act=show&selectedCustomer=<%=CusID%>');" /> 
+				</div>
+				<% end if %> 
+			</div>
 		</Td>
 	  </Tr>
 	  <Tr>
@@ -42,7 +88,7 @@
 				<%
 '				mySQL="SELECT Orders.ID, ISNULL(Invoices.Approved, 0) AS Approved, orders_trace.* FROM orders_trace RIGHT OUTER JOIN Orders ON orders_trace.radif_sefareshat = Orders.ID LEFT OUTER JOIN Invoices INNER JOIN InvoiceOrderRelations ON Invoices.ID = InvoiceOrderRelations.Invoice ON Orders.ID = InvoiceOrderRelations.[Order] WHERE (Orders.Customer = '"& cusID & "') AND (ISNULL(Invoices.Approved, 0) = 0) ORDER BY Orders.CreatedDate DESC, Orders.ID"
 '				Changed by kid 820817
-				mySQL="SELECT orders_trace.* FROM Orders INNER JOIN orders_trace ON Orders.ID = orders_trace.radif_sefareshat WHERE (Orders.Closed = 0) AND (Orders.Customer = '"& cusID & "') ORDER BY Orders.CreatedDate DESC, Orders.ID"
+				mySQL="SELECT * FROM Orders WHERE (isClosed = 0) and (isOrder=1) AND (Customer = '"& cusID & "') ORDER BY CreatedDate DESC, ID"
 
 				Set RS1 = conn.execute(mySQL)
 				if RS1.eof then
@@ -74,15 +120,15 @@
 						End if 
 						'alert(this.getElementByTagName('td').items(0).data);
 %>
-						<TR bgcolor="<%=tmpColor%>" style="cursor: hand;" onMouseOver="this.style.backgroundColor='<%=tmpColor2%>'" onMouseOut="this.style.backgroundColor='<%=tmpColor%>'" onclick="window.open('../order/TraceOrder.asp?act=show&order=<%=RS1("radif_sefareshat")%>');">
+						<TR bgcolor="<%=tmpColor%>" style="cursor: hand;" onMouseOver="this.style.backgroundColor='<%=tmpColor2%>'" onMouseOut="this.style.backgroundColor='<%=tmpColor%>'" onclick="window.open('../order/Order.asp?act=show&id=<%=RS1("ID")%>');">
 							<TD style="height:30px;"><%=tmpCounter%></TD>
-							<TD style="height:30px;"><%=RS1("radif_sefareshat")%></TD>
-							<TD><%=RS1("salesperson")%>&nbsp;</TD>
-							<TD dir="LTR" align='right'><%=RS1("order_date")%>&nbsp;</TD>
-							<TD dir="LTR" align='right'><%=RS1("return_date")%>&nbsp;</TD>
-							<TD><%=RS1("order_kind")%>&nbsp;</TD>
-							<TD><%=RS1("order_title")%>&nbsp;</TD>
-							<TD><%=RS1("marhale")%>&nbsp;</TD>
+							<TD style="height:30px;" class="orderID"><%=RS1("id")%></TD>
+							<TD class="getName" act="user" iID="<%=rs1("createdBy")%>"></TD>
+							<TD dir="LTR" align='right'><%=shamsiDate(RS1("createdDate"))%>&nbsp;</TD>
+							<TD dir="LTR" align='right'><%if not IsNull(RS1("returnDate")) then shamsiDate(RS1("returnDate"))%>&nbsp;</TD>
+							<TD class="getName" act="orderType" iID="<%=RS1("type")%>"></TD>
+							<TD><%=RS1("orderTitle")%>&nbsp;</TD>
+							<TD class="getName" act="orderStep" iID="<%=RS1("step")%>"></TD>
 						</TR>
 <%						RS1.moveNext
 					Loop
@@ -300,7 +346,7 @@
 					<td colspan="10" class="CusTableHeader" style="background-color:#3AC;">”›«—‘ùÂ«</td>
 				</tr>
 				<%
-				mySQL="select orders.id,orders_trace.order_title,orders_trace.qtty,orders_trace.order_date,invoices.issuedDate,invoices.totalReceivable,orders_trace.vazyat,orders_trace.marhale,invoices.id as invoice from orders inner join orders_trace on orders.id=orders_trace.radif_sefareshat left outer join InvoiceOrderRelations on InvoiceOrderRelations.[Order] = orders.id left outer join Invoices on InvoiceOrderRelations.Invoice=invoices.ID where orders.Customer=" & cusID & " order by orders_trace.order_date desc"
+				mySQL="select orders.id,orders.orderTitle, orders.qtty, orders.createdDate, invoices.issuedDate, invoices.totalReceivable, orderStatus.name as vazyat,orderSteps.name as marhale,invoices.id as invoice from orders inner join orderStatus on orders.status = orderStatus.id inner join orderSteps on orders.step = orderSteps.id left outer join InvoiceOrderRelations on InvoiceOrderRelations.[Order] = orders.id left outer join Invoices on InvoiceOrderRelations.Invoice=invoices.ID where orders.Customer=" & cusID & " and orders.isOrder=1 order by orders.createdDate desc"
 				set rs=Conn.Execute(mySQL)
 				if rs.eof then 
 				%>
@@ -330,10 +376,10 @@
 					End if 
 				%>
 				<tr bgcolor="<%=tmpColor%>" onMouseOver="this.style.backgroundColor='<%=tmpColor2%>'" onMouseOut="this.style.backgroundColor='<%=tmpColor%>'">
-					<td title="<%=rs("vazyat") & "° " & rs("marhale")%>"><a href='../order/TraceOrder.asp?act=show&order=<%=rs("id")%>'><%=rs("id")%></a></td>
-					<td><%=rs("order_title")%></td>
+					<td title="<%=rs("vazyat") & "° " & rs("marhale")%>"><a href='../order/Order.asp?act=show&id=<%=rs("id")%>'><%=rs("id")%></a></td>
+					<td><%=rs("orderTitle")%></td>
 					<td><%=rs("qtty")%></td>
-					<td><%=rs("order_date")%></td>
+					<td><%=shamsiDate(rs("createdDate"))%></td>
 					<td title="‰„«Ì‘ ›«ﬂ Ê—"><a href="../AR/AccountReport.asp?act=showInvoice&invoice=<%=rs("invoice")%>"><%=rs("issuedDate")%></a></td>
 					<td colspan=4><%=Separate(rs("totalReceivable"))%></td>
 				</tr>
@@ -353,7 +399,7 @@
 					<td colspan="10" class="CusTableHeader" style="background-color:#AAAAEE;">«” ⁄·«„ùÂ«</td>
 				</tr>
 				<%
-				mySQL="select * from Quotes where Customer=" & cusID
+				mySQL="select * from Orders where isOrder = 0 and Customer=" & cusID
 				set rs=Conn.Execute(mySQL)
 				if rs.eof then 
 				%>
@@ -382,9 +428,9 @@
 					End if 
 				%>
 				<tr bgcolor="<%=tmpColor%>" onMouseOver="this.style.backgroundColor='<%=tmpColor2%>'" onMouseOut="this.style.backgroundColor='<%=tmpColor%>'">
-					<td title="<%=rs("vazyat") & "° " & rs("marhale")%>"><a href="../order/Inquiry.asp?act=show&quote=<%=rs("id")%>"><%=rs("id")%></a></td>
-					<td><%=rs("order_title")%></td>
-					<td><%=rs("order_date")%></td>
+					<td><a href="../order/order.asp?act=show&id=<%=rs("id")%>"><%=rs("id")%></a></td>
+					<td><%=rs("orderTitle")%></td>
+					<td><%=shamsiDate(rs("createdDate"))%></td>
 					<td colspan="6"><%=rs("Notes")%></td>
 				</tr>
 				<%

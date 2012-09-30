@@ -10,9 +10,6 @@ if not Auth(3 , 7) then NotAllowdToViewThisPage()
 <STYLE>
 	li{margin: 8px 10px 0 0;}
 </STYLE>
-<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
-<script type="text/javascript" src="/js/jalaliCalendar.js"></script>
-<script type="text/javascript" src="/js/jquery.dateFormat-1.0.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
 	$.ajaxSetup({
@@ -223,7 +220,7 @@ $(document).ready(function(){
 			$("#startCounter").focus();
 		});
 	}
-	var loadUrl="cost_ajax_check.asp";
+	var loadUrl="/service/json_costCheck.asp";
 	var ajax_load = "<img src=\'/css/images/ajax-loader.gif\' width='20px' alt='Loading …'>";
 	$("#startCounter").blur(function(){
 		//$("#result").html(ajax_load).load(loadUrl,"act=counter");

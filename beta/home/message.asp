@@ -300,12 +300,14 @@ if request("act")<>"show" then
 			<% if RelatedID = "" then %>
 			<SELECT NAME="RelatedTable"  onchange="hideIT()" >
 				<option <% if RelatedTable="NaN" then %> selected <% end if %>value="NaN">ÂÌçÌ</option>
-				<option <% if RelatedTable="orders" then %> selected <% end if %>value="orders">”›«—‘ ‘„«—Â </option>
-				<option <% if RelatedTable="accounts" then %> selected <% end if %>value="accounts">‘„«—Â Õ”«» </option>
-				<option <% if RelatedTable="invoices" then %> selected <% end if %>value="invoices">›«ﬂ Ê— ‘„«—Â </option>
+				<option <% if RelatedTable="orders" then %> selected <% end if %>value="orders">”›«—‘/«” ⁄·«„ (‘„«—Â)</option>
+				<option <% if RelatedTable="accounts" then %> selected <% end if %>value="accounts">Õ”«» (‘„«—Â)</option>
+				<option <% if RelatedTable="invoices" then %> selected <% end if %>value="invoices">›«ﬂ Ê— (‘„«—Â)</option>
 	
-				</SELECT><span name="relatedIDSpan"  id="relatedIDSpan">
-				<INPUT TYPE="text" NAME="relatedID" size=9 value="<%=RelatedID%>"  onKeyPress="return maskNumber(this);" ></span>
+			</SELECT>
+			<span name="relatedIDSpan"  id="relatedIDSpan">
+				<INPUT TYPE="text" NAME="relatedID" size=9 value="<%=RelatedID%>"  onKeyPress="return maskNumber(this);" >
+			</span>
 			<% else %>
 				<INPUT TYPE="hidden" NAME="RelatedTable" value="<%=RelatedTable%>"><INPUT TYPE="text" NAME="alak" value="<%=RelatedTableName%>"size=17 readonly> <INPUT TYPE="text" NAME="relatedID" size=9 value="<%=RelatedID%>"  readonly>
 			<% end if %>
@@ -350,24 +352,18 @@ if request("act")<>"show" then
 <%
 end if
 %>
-<SCRIPT LANGUAGE="JavaScript">
-<!--
-function hideIT()
-{
-if(''+document.all.RelatedTable.value!="NaN") 
-	{
-		document.all.relatedIDSpan.style.visibility= 'visible'
-		document.all.relatedID.value = "0"
-		document.all.relatedID.focus()
+<SCRIPT type="text/javascript">
+	$(document).ready(function(){
+		hideIT();
+	});
+	function hideIT(){
+		if ($("select[name=RelatedTable]").val()=='NaN'){
+			$("#relatedIDSpan").css("visibility","hidden");
+		} else {
+			$("#relatedIDSpan").css("visibility","visible");
+			$("[name=relatedID]").focus();
+		}
 	}
-	else
-	{
-		document.all.relatedIDSpan.style.visibility= 'hidden'
-		document.all.relatedID.value = "0"
-	}
-}
-hideIT();
-//-->
 </SCRIPT>
 
 </TD>
