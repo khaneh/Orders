@@ -25,7 +25,10 @@
 					<xsl:value-of select="./customer/id"/> - <xsl:value-of select="./customer/accountTitle"/>
 				</a>
 			</td>
-			<td align="left">ЗУКЪбЗг ђнСдПе:</td>
+			<td align="left">
+				<xsl:if test="./isOrder!='yes'">ЗУКЪбЗг ђнСдПе:</xsl:if>
+				<xsl:if test="./isOrder='yes'">УЭЗСФ ђнСдПе:</xsl:if>
+			</td>
 			<td><xsl:value-of select="./salesPerson"/></td>
 			<td align="left">
 				<xsl:if test="./isOrder!='yes'">джЪ ЗУКЪбЗг:</xsl:if>
@@ -69,8 +72,9 @@
 					<td align="right" colspan="2">
 						<xsl:if test="concat(./today/retDate,'')=''">
 							<h6 class="isBlack">
-								<span style="margin-right: 18px;">КЗСнО КНжнб ЮСЗСПЗПЎ ЭЪбЗ гЪбжг днУК!</span>
-								<!--input name="returnDateNull" type="checkbox"/-->
+								<xsl:if test="./today/retIsNull='yes'">
+									<span style="margin-right: 18px;">КЗСнО КНжнб ЮСЗСПЗПЎ ЭЪбЗ гЪбжг днУК!</span>
+								</xsl:if>
 							</h6>
 						</xsl:if>
 					</td>

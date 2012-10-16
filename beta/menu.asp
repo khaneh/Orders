@@ -74,6 +74,7 @@ End Function
 <link rel="StyleSheet" href="/css/font.css" type="text/css">
 <script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
 <script type="text/javascript" src="/js/jquery.dateFormat-1.0.js"></script>
+<script type="text/javascript" src="/js/jquery.jsonSuggest-2.min.js"></script>
 <script type="text/javascript" src="/js/jalaliCalendar.js"></script>
 <script type="text/javascript" src="/js/xslTransform.js"></script>
 <script type="text/javascript" src="/js/jame.js"></script>

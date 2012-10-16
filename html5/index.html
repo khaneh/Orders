@@ -168,10 +168,10 @@ $(document).ready(function(){
 		cache: false
 	});
 	$.getJSON("/service/json_getFile.asp",
-		{act:"list"},
+		{act:"list",orderID:"111"},
 		function (js){
 			$.each(js, function(i,s){
-				$('<div title='+s.itemName+' class="fileName"><a href="'+s.itemPath+'">'+s.itemPath+'</a><span class="fileSize">'+getReadableFileSizeString(s.itemSize)+' </span></div>').appendTo('#dropbox');
+				$('<div title='+s.itemName+' class="fileName"><a href="'+s.realPath+'">'+s.itemPath+'</a><span class="fileSize">'+getReadableFileSizeString(s.itemSize)+' </span></div>').appendTo('#dropbox');
 			});
 		});
 });

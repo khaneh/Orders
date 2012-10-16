@@ -208,10 +208,10 @@ elseif request("act")="getReceipt" then
 	<hr>
 	<input type="hidden" Name='tmpDlgArg' value=''>
 	<input type="hidden" Name='tmpDlgTxt' value=''>
+	<FORM METHOD=POST ACTION="?act=submitReceipt" onsubmit="return submitCeck2();" id="form1">
 	<TABLE Cellspacing="0" Cellpadding="10" align="center">
 	<TR><TD valign='top'>
 		<table class="RcpMainTable" Cellspacing="1" Cellpadding="0" Width="500" align="center">
-		<FORM METHOD=POST ACTION="?act=submitReceipt" onsubmit="return submitCeck();" name="f1">
 			<tr class="RcpMainTableTH">
 			<td colspan="10" align='center' height='25px'>ÕäÏæŞ <span dir='LTR'><%=CashRegName%></span> - <%=CSRName%> 
 				<INPUT TYPE="hidden" Name="CashRegID" Value="<%=CashRegID%>">
@@ -307,7 +307,7 @@ elseif request("act")="getReceipt" then
 			<tr>
 				<td class="RcpHeadInput" align='center' width="25px"> &nbsp; </td>
 				<td class="RcpHeadInput" colspan=2>ÈÏåíåÇí ÇäÊÎÇÈ ÔÏå:</td>
-				<td class="RcpHeadInput"><INPUT class="RcpHeadInput" readonly TYPE="text" size="10" tabindex="9999" name="SelectedTotalPrice" onclick="document.all.CashAmount.value=document.all.SelectedTotalPrice.value;document.all.CashAmount.focus();"></td>
+				<td class="RcpHeadInput"><INPUT class="RcpHeadInput" readonly TYPE="text" size="10" tabindex="9999" name="SelectedTotalPrice" onclick="$('input[name=CashAmount]').val($('input[name=SelectedTotalPrice]').val());$('input[name=CashAmount]').focus();"></td>
 				<td class="RcpHeadInput"><INPUT class="RcpHeadInput" readonly TYPE="text" Value="ÌãÚ:" size="20" tabindex="9999"></td>
 				<td class="RcpHeadInput"><INPUT class="RcpHeadInput3" readonly dir="LTR" TYPE="text" Name="TotalAmount" Value="" size="15" tabindex="9999"></td>
 			</tr>
@@ -316,7 +316,7 @@ elseif request("act")="getReceipt" then
 		</table>
 		<TABLE class="RcpTable" Border="0" Cellspacing="5" Cellpadding="1" Dir="RTL">
 		<tr>
-			<td align='center' bgcolor="#000000"><INPUT class="RcpGenInput" style="text-align:center" TYPE="button" value="ĞÎíÑå" onclick="submitCeck()"></td>
+			<td align='center' bgcolor="#000000"><INPUT class="RcpGenInput" style="text-align:center" TYPE="button" value="ĞÎíÑå" onclick="$('#form1').submit();"></td>
 			<td align='center' bgcolor="#000000"><INPUT class="RcpGenInput" style="text-align:center" TYPE="button" value="ÇäÕÑÇİ" onclick="window.location='';"></td>
 		</tr>
 		</TABLE>
@@ -393,13 +393,17 @@ elseif request("act")="getReceipt" then
 	end if
 %>		
 		</Tbody>
-		</TABLE></TD>
+		</TABLE>
+		
+		</TD>
 	</TR>
-		</FORM>
 	</TABLE>
+	</FORM>
 <SCRIPT LANGUAGE="JavaScript">
 <!--
-document.all.CashAmount.focus();
+$(document).ready(function(){
+	$('input[name=CashAmount]').focus();
+});
 
 tmpColor="#FFDDDD"
 tmpColor2="#FFFFBB"
@@ -410,46 +414,44 @@ function changeSystem(){
 
 function setPrice2(obj){
 	document.getElementById('asInvoice').checked=true;
+	$("#asInvoice").prop("checked",true)
 	a= obj.type
-	ii=parseInt(obj.id) 
-	if(obj.checked){
-		theTR = obj.parentNode.parentNode
-		theTR.setAttribute("bgColor",tmpColor2)
+	ii=parseInt(obj.id)
+	ii = parseInt($(obj).val());
+	if($(obj).is(":checked")){
+		var theTR = $(obj).closest("tr");
+		theTR.prop("bgColor",tmpColor2);
 	}
 	else{
-		theTR = obj.parentNode.parentNode
-		theTR.setAttribute("bgColor",tmpColor)
+		var theTR = $(obj).closest("tr");
+		theTR.prop("bgColor",tmpColor);
 	}
 	addAllPrice2();
 }
 function addAllPrice2(){
-	totalPrice = 0 
-	va=""
-	description="ÈÇÈÊ "
-	checkBoxList = document.getElementsByName("DebitItems")
-	for(i=0;i<document.getElementsByName("price2").length;i++) {
-		if(checkBoxList[i].checked){
-			totalPrice =  txt2val(totalPrice) + txt2val(document.getElementsByName("price2")[i].value) ;
-			description = description + va + document.getElementsByName("price2")[i].parentNode.parentNode.parentNode.getElementsByTagName("td")[0].innerText;
-			va = " æ "
+	var totalPrice = 0 ;
+	var va = "";
+	var description = "ÈÇÈÊ ";
+	$("input[name=DebitItems]").each(function(i){
+		if ($(this).is(":checked")){
+			totalPrice += getNum($($("input[name=price2]")[i]).val());
+			description += va + $(this).closest("tr").find("a").text();
+			va = " æ ";
 		}
-	}
-	if (description == "ÈÇÈÊ ") description=""
-	document.all.SelectedTotalPrice.value = val2txt(totalPrice)
-	document.all.CashDescription.value  = description;
-}
-function submitCeck(){	
-	//alert(submitCeck2())
-	if (submitCeck2()) 
-	document.all.f1.submit();
+	});
+	if (description == "ÈÇÈÊ ") 
+		description = "";
+	$("input[name=SelectedTotalPrice]").val(echoNum(totalPrice));
+	$("input[name=CashDescription]").val(description);
+	
 }
 
 function submitCeck2(){
-	if (document.getElementsByName('TotalAmount')[0].value=='0') return false;
-	if (document.all.SelectedTotalPrice.value==0) return true;
+	if (parseInt($('input[name=TotalAmount]:first').val())==0) return false;
+	if (parseInt($('input[name=SelectedTotalPrice]:first').val())==0) return true;
 	//if (document.all.AccountTitle.value=='') return false;
-	if (document.all.SelectedTotalPrice.value!=document.all.TotalAmount.value)
-		return confirm("ãÈáÛ ÏÑíÇİÊí ÈÇ ÈÏåí åÇí ÇäÊÎÇÈ ÔÏå ÈÑÇÈÑ äíÓÊ. ÇÏÇãå ãí ÏåíÏ¿")
+	if (parseInt($('input[name=SelectedTotalPrice]:first').val())!=parseInt($('input[name=TotalAmount]:first').val()))
+		return confirm("ãÈáÛ ÏÑíÇİÊí ÈÇ ÈÏåí åÇí ÇäÊÎÇÈ ÔÏå ÈÑÇÈÑ äíÓÊ. ÇÏÇãå ãí ÏåíÏ¿");
 	return true;
 }
 addAllPrice2();
@@ -762,21 +764,21 @@ function addRow(rowNo){
 
 function setPrice(src){
 /* 	echoNum(src); */
-	myRow=src.parentNode.parentNode.rowIndex
 
-	if ($(src).attr("name")=="Amounts" && $("ChequeNos")[myRow].val()==''){
+	if ($(src).attr("name")=="Amounts" && $(src).closest("tr").find("input[name=ChequeNos]").val()==''){
 		$(src).val(0);
 	}
 	else{
-		if (isNaN($(src).val()))
+		if (!isNaN(echoNum(getNum($(src).val()))))
 			$(src).val(0);
 		else
 			$(src).val(echoNum(getNum($(src).val())));
 	}
+	if ($("input[name=CashAmount]:first").val()=="NaN") $("input[name=CashAmount]:first").val(0);
 	cashAmount=getNum($("input[name=CashAmount]:first").val());
 	totalAmount = cashAmount;
 	$("input[name=Amounts]").each(function(i,amount){
-		if (!isNaN($(amount).val()) && $(amount).val()!='')
+		if ($(amount).val()!='NaN' && $(amount).val()!='')
 			totalAmount += getNum($(amount).val());
 	});
 	$("input[name=TotalAmount]:first").val(echoNum(totalAmount));

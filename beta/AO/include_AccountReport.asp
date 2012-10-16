@@ -1719,6 +1719,8 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 				if Auth(6 , "E") then					' Has the Priviledge to PRINT the Invoice / Rev. Invoice
 					ReportLogRow = PrepareReport ("InvoicePre.rpt", "Invoice_ID", InvoiceID, "/beta/dialog_printManager.asp?act=Fin") 
 					Response.write "<INPUT Class='btn btn-info' TYPE='button' value=' Ç íÔäæíÓ ' onclick=""window.location='../AR/InvoicePrint.asp?r=" & ReportLogRow & "';"">"	
+				end if
+				if Auth(6,"O") then
 				 	ReportLogRow = PrepareReport ("InvoiceNew.rpt", "Invoice_ID", InvoiceID, "/beta/dialog_printManager.asp?act=Fin") 
 				 	Response.write "<INPUT Class='btn btn-info' TYPE='button' value=' Ç ' onclick=""window.location='../AR/InvoicePrint.asp?r=" & ReportLogRow & "';"">"
 				end if

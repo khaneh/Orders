@@ -9,7 +9,7 @@ select case request("act")
 	case "itemListFromInvoiceItem":
 		set j = jsArray()
 		invoiceItem = CInt(Request("invoiceItem"))
-		set rs = Conn.Execute("select inventoryItem,InventoryItems.* from InventoryInvoiceRelations inner join InventoryItems on InventoryItems.id=InventoryInvoiceRelations.inventoryItem where invoiceItem=" & invoiceItem)
+		set rs = Conn.Execute("select inventoryItem,InventoryItems.* from InventoryInvoiceRelations inner join InventoryItems on InventoryItems.id=InventoryInvoiceRelations.inventoryItem where invoiceItem=" & invoiceItem & " order by InventoryItems.name")
 		while not rs.eof
 			set j(null) = jsObject()
 			j(null)("inventoryItem") = rs("inventoryItem")
@@ -23,6 +23,11 @@ select case request("act")
 		set j = jsObject()
 		id= CDbl(Request("id"))
 		Conn.Execute("update InventoryItemRequests set itemID= " & Request("itemID") & ",unit=N'" & Request("unit") & "' where id=" & id)
+		j("status")="ok"
+	case "delInvRequest":
+		set j = jsObject()
+		id= CDbl(Request("id"))
+		Conn.Execute("update InventoryItemRequests set status= 'del' where id=" & id)
 		j("status")="ok"
 end select
 Response.Write toJSON(j)

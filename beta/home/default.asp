@@ -184,7 +184,7 @@ function selectAll(src){
 
 				if trim(RS1("RelatedTable")) = "orders" then 
 					RelatedTable="”›«—‘ "
-					RelatedLink = "../order/TraceOrder.asp?act=show&order=" & RS1("RelatedID")
+					RelatedLink = "../order/order.asp?act=show&id=" & RS1("RelatedID")
 				elseif trim(RS1("RelatedTable")) = "accounts" then 
 					RelatedTable="Õ”«» "
 					RelatedLink = "../CRM/AccountInfo.asp?act=show&SelectedCustomer="& RS1("RelatedID")

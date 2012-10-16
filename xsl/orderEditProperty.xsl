@@ -45,46 +45,67 @@
 				<div class="priceGroup">
 					<div class="priceGroupValue">
 						<xsl:variable name="gname" select="./@name" />
-						<input type="text" size="2" class="myInput" onclick="clearThis(this);" out='yes' dir="ltr" rel="tooltip" data-original-title="ÊÎÝíÝ">
-							<xsl:attribute name="name"><xsl:value-of select="./@name"/>-dis</xsl:attribute>
-							<xsl:attribute name="onblur">calc_<xsl:value-of select="./@name"/>(this)</xsl:attribute>
-							<xsl:if test="concat(./@disable,'')='yes' and concat(./@hasValue,'')!='yes'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
-							<xsl:if test="concat(./@dis,'')=''">
-								<xsl:attribute name="value">0</xsl:attribute>
-							</xsl:if>
-							<xsl:if test="./@dis!=''">
-								<xsl:attribute name="value">
-									<xsl:value-of select="./@dis"/>
-								</xsl:attribute>
-							</xsl:if>
-						</input>
-						<input type="text" size="2" class="myInput" onclick="clearThis(this);" out='yes' dir="ltr" rel="tooltip" data-original-title="ãÇÒÇÏ">
-							<xsl:attribute name="name"><xsl:value-of select="./@name"/>-over</xsl:attribute>
-							<xsl:attribute name="onblur">calc_<xsl:value-of select="./@name"/>(this)</xsl:attribute>
-							<xsl:if test="./@disable='yes' and ./@hasValue!='yes'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
-							<xsl:if test="concat(./@over,'')=''">
-								<xsl:attribute name="value">0</xsl:attribute>
-							</xsl:if>
-							<xsl:if test="./@over!=''">
-								<xsl:attribute name="value">
-									<xsl:value-of select="./@over"/>
-								</xsl:attribute>
-							</xsl:if>
-						</input>
-						<input type="text" size="12" class="myInput" out='yes' dir="ltr" rel="tooltip" data-original-title="ÈåÇí ßá">
-							<xsl:attribute name="name"><xsl:value-of select="./@name"/>-price</xsl:attribute>
-							<xsl:attribute name="onblur">calc_<xsl:value-of select="./@name"/>(this)</xsl:attribute>
-							<xsl:if test="./@disable='yes' and ./@hasValue!='yes'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
-							<xsl:if test="./@isPrice='yes'"><xsl:attribute name="readonly">true</xsl:attribute></xsl:if>
-							<xsl:if test="concat(./@price,'')=''">
-								<xsl:attribute name="value">0</xsl:attribute>
-							</xsl:if>
-							<xsl:if test="./@price!=''">
-								<xsl:attribute name="value">
-									<xsl:value-of select="./@price"/>
-								</xsl:attribute>
-							</xsl:if>
-						</input>
+						<div>
+							<input type="text" size="12" class="myInput" out='yes' dir="ltr" rel="tooltip" data-placement="right" data-original-title="ÈåÇí ßá">
+								<xsl:attribute name="name"><xsl:value-of select="./@name"/>-price</xsl:attribute>
+								<xsl:attribute name="onblur">calc_<xsl:value-of select="./@name"/>(this)</xsl:attribute>
+								<xsl:if test="./@disable='yes' and ./@hasValue!='yes'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+								<xsl:if test="./@isPrice='yes'"><xsl:attribute name="readonly">true</xsl:attribute></xsl:if>
+								<xsl:if test="concat(./@price,'')=''">
+									<xsl:attribute name="value">0</xsl:attribute>
+								</xsl:if>
+								<xsl:if test="./@price!=''">
+									<xsl:attribute name="value">
+										<xsl:value-of select="./@price"/>
+									</xsl:attribute>
+								</xsl:if>
+							</input>
+						</div>
+						<div>
+							<input type="text" size="12" class="myInput" onclick="clearThis(this);" out='yes' dir="ltr" rel="tooltip" data-placement="right" data-original-title="ÊÎÝíÝ">
+								<xsl:attribute name="name"><xsl:value-of select="./@name"/>-dis</xsl:attribute>
+								<xsl:attribute name="onblur">calc_<xsl:value-of select="./@name"/>(this)</xsl:attribute>
+								<xsl:if test="concat(./@disable,'')='yes' and concat(./@hasValue,'')!='yes'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+								<xsl:if test="concat(./@dis,'')=''">
+									<xsl:attribute name="value">0</xsl:attribute>
+								</xsl:if>
+								<xsl:if test="./@dis!=''">
+									<xsl:attribute name="value">
+										<xsl:value-of select="./@dis"/>
+									</xsl:attribute>
+								</xsl:if>
+							</input>
+						</div>
+						<div>
+							<input type="text" size="12" class="myInput" onclick="clearThis(this);" out='yes' dir="ltr" rel="tooltip" data-placement="right" data-original-title="ãÇÒÇÏ">
+								<xsl:attribute name="name"><xsl:value-of select="./@name"/>-over</xsl:attribute>
+								<xsl:attribute name="onblur">calc_<xsl:value-of select="./@name"/>(this)</xsl:attribute>
+								<xsl:if test="./@disable='yes' and ./@hasValue!='yes'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+								<xsl:if test="concat(./@over,'')=''">
+									<xsl:attribute name="value">0</xsl:attribute>
+								</xsl:if>
+								<xsl:if test="./@over!=''">
+									<xsl:attribute name="value">
+										<xsl:value-of select="./@over"/>
+									</xsl:attribute>
+								</xsl:if>
+							</input>
+						</div>
+						<div>
+							<input type="text" size="12" class="myInput" onclick="clearThis(this);" out='yes' dir="ltr" rel="tooltip" data-placement="right" data-original-title="ÈÑÔÊ">
+								<xsl:attribute name="name"><xsl:value-of select="./@name"/>-reverse</xsl:attribute>
+								<xsl:attribute name="onblur">calc_<xsl:value-of select="./@name"/>(this)</xsl:attribute>
+								<xsl:if test="./@disable='yes' and ./@hasValue!='yes'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+								<xsl:if test="concat(./@reverse,'')=''">
+									<xsl:attribute name="value">0</xsl:attribute>
+								</xsl:if>
+								<xsl:if test="./@reverse!=''">
+									<xsl:attribute name="value">
+										<xsl:value-of select="./@reverse"/>
+									</xsl:attribute>
+								</xsl:if>
+							</input>
+						</div>
 						<input type="hidden" out='yes'>
 							<xsl:attribute name="name"><xsl:value-of select="./@name"/>-w</xsl:attribute>
 							<xsl:attribute name="value">
@@ -97,7 +118,7 @@
 								<xsl:value-of select="./@l"/>
 							</xsl:attribute>
 						</input>
-						<xsl:if test="./@hasStock='yes'">
+						<xsl:if test="./@hasStock='yes' or ./@hasStock='option'">
 							<input type="hidden" out='yes'>
 								<xsl:attribute name="name"><xsl:value-of select="./@name"/>-stockDesc</xsl:attribute>
 								<xsl:attribute name="value">
@@ -302,6 +323,11 @@
 												<xsl:if test="./@addr!=''">
 													<xsl:attribute name="addr">
 														<xsl:value-of select="./@addr"/>
+													</xsl:attribute>
+												</xsl:if>
+												<xsl:if test="./@hasStock!=''">
+													<xsl:attribute name="hasStock">
+														<xsl:value-of select="./@hasStock"/>
 													</xsl:attribute>
 												</xsl:if>
 												<xsl:if test="../@value=.">

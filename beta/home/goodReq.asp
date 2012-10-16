@@ -56,7 +56,7 @@ if request.form("Submit")="À»  œ—ŒÊ«”  ﬂ«·«" then
 		end if
 		RS4.close
 		
-		mySql="INSERT INTO InventoryItemRequests (order_ID, ItemName, ItemID, comment, ReqDate, Qtty, unit, CreatedBy) VALUES ("& order_ID & ", N'"& otype & "', "& item & ", N'"& comment & "',N'"& shamsiToday() & "', "& Qtty & ", N'"& unit & "' , "& CreatedBy & " )"
+		mySql="INSERT INTO InventoryItemRequests (orderID, ItemName, ItemID, comment, ReqDate, Qtty, unit, CreatedBy) VALUES ("& order_ID & ", N'"& otype & "', "& item & ", N'"& comment & "',getDate(), "& Qtty & ", N'"& unit & "' , "& CreatedBy & " )"
 		conn.Execute mySql
 		'RS1.close
 		response.redirect "goodReq.asp" 
@@ -125,7 +125,7 @@ end if
 	<%
 	'Gets Request for services list from DB
 
-	set RS3=Conn.Execute ("SELECT InventoryItemRequests.*, InventoryItemRequests.ID AS Expr2, InventoryPickuplists.Status AS Expr1 FROM InventoryPickuplists FULL OUTER JOIN InventoryPickuplistItems ON InventoryPickuplists.id = InventoryPickuplistItems.pickupListID FULL OUTER JOIN InventoryItemRequests ON InventoryPickuplistItems.RequestID = InventoryItemRequests.ID WHERE (InventoryItemRequests.Order_ID = - 1) AND (InventoryItemRequests.CreatedBy =  "& session("id") & ") AND (NOT (InventoryItemRequests.Status = 'del' or InventoryItemRequests.Status = 'pick')) AND (NOT InventoryPickuplists.Status = N'done' OR InventoryPickuplists.Status IS NULL)")
+	set RS3=Conn.Execute ("SELECT InventoryItemRequests.*, InventoryItemRequests.ID AS Expr2, InventoryPickuplists.Status AS Expr1 FROM InventoryPickuplists FULL OUTER JOIN InventoryPickuplistItems ON InventoryPickuplists.id = InventoryPickuplistItems.pickupListID FULL OUTER JOIN InventoryItemRequests ON InventoryPickuplistItems.RequestID = InventoryItemRequests.ID WHERE (InventoryItemRequests.OrderID = - 1) AND (InventoryItemRequests.CreatedBy =  "& session("id") & ") AND (NOT (InventoryItemRequests.Status = 'del' or InventoryItemRequests.Status = 'pick')) AND (NOT InventoryPickuplists.Status = N'done' OR InventoryPickuplists.Status IS NULL)")
 	%>
 		<%
 		Do while not RS3.eof

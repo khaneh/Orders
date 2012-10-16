@@ -29,7 +29,7 @@ if request("act")="show" then
 	ON ERROR RESUME NEXT
 
 		Category =		cint(request("Category"))
-
+		if auth("C","B") then Category = 8
 		isA =			clng(request("isA"))
 
 		FromDate =		sqlSafe(request("FromDate"))

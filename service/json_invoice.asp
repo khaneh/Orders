@@ -26,6 +26,7 @@ select case request("act")
 		set rs = Conn.Execute("select * from invoices where id=" & id)
 		isIssued = CBool(rs("issued"))
 		isApproved = CBool(rs("approved"))
+		isReverse = CBool(rs("isReverse"))
 		orgIsA = CBool(rs("isA"))
 		hasVat = false
 		if CDbl(rs("totalVat"))>0 then hasVat = true
@@ -51,19 +52,21 @@ select case request("act")
 				case 0:
 					Conn.Execute("update Invoices set isa=0 where id=" & id)
 					Conn.Execute("update InvoiceLines set vat=0 where invoice=" & id)
+					glAccount = "91002"
 				case 1:
 					Conn.Execute("update Invoices set isa=1 where id=" & id)
-					Conn.Execute("update InvoiceLines set vat=price * " & session("VatRate") & "/100 where hasVat=1 and invoice=" & id)
-					
+					Conn.Execute("update InvoiceLines set vat=(price - Discount - Reverse) * " & session("VatRate") & "/100 where hasVat=1 and invoice=" & id)
+					glAccount = "91001"
 				case -1:
 					Conn.Execute("update InvoiceLines set vat=0 where invoice=" & id)
 					Conn.Execute("update Invoices set isa=1 where id=" & id)
-	
+					glAccount = "91001"
 			end select
 			set rs=Conn.Execute("select * from InvoiceLines where invoice=" & id)
 			totalReceivable = 0
 			totalDiscount = 0
 			totalReverse = 0
+			totalPrice = 0
 			totalVat = 0
 			rfdID = 0
 			while not rs.eof
@@ -71,7 +74,8 @@ select case request("act")
 					totalVat = totalVat + CDbl(rs("vat"))
 					totalReverse = totalReverse + CDbl(rs("reverse"))
 					totalDiscount = totalDiscount + CDbl(rs("discount"))
-					totalReceivable = totalReceivable + CDbl(rs("price")) + CDbl(rs("vat")) + CDbl(rs("reverse")) + CDbl(rs("discount"))
+					totalPrice = totalPrice + CDbl(rs("price"))
+					totalReceivable = totalReceivable + CDbl(rs("price")) + CDbl(rs("vat")) - CDbl(rs("reverse")) - CDbl(rs("discount"))
 				else
 					rfdID=rs("id")
 				end if
@@ -90,7 +94,45 @@ select case request("act")
 				else
 					if rfdID>0 then Conn.Execute("delete InvoiceLines where id=" & rfdID)
 			end if
-			Conn.Execute("update Invoices set totalVat= " & totalVat & ",totalReceivable=" & totalReceivable & ",totalDiscount=" & totalDiscount & " where id=" & id)
+			Conn.Execute("update Invoices set totalPrice=" & totalPrice & ", totalVat= " & totalVat & ",totalReceivable=" & totalReceivable & ",totalDiscount=" & totalDiscount & " where id=" & id)
+			if isIssued then 
+				if isReverse then
+					isCredit=1
+					itemType=4 
+				else
+					isCredit=0
+					itemType=1
+				end if
+				mySQL="SELECT ID FROM ARItems WHERE (Type = '"& itemType & "') AND (Link='"& id & "')"
+				Set RS1=conn.Execute(mySQL)
+				voidedARItem=RS1("ID")
+				'*********  Finding other ARItems related to this Item
+				if isReverse then
+					mySQL="SELECT ID AS RelationID, DebitARItem, Amount FROM ARItemsRelations WHERE (CreditARItem = '"& voidedARItem & "')"
+					Set RS1=conn.Execute(mySQL)
+					Do While not (RS1.eof)
+						'*********  Adding back the amount in the relation, to the credit ARItem ...
+						conn.Execute("UPDATE ARItems SET RemainedAmount=RemainedAmount+ '"& RS1("Amount") & "', FullyApplied=0 WHERE (ID = '"& RS1("DebitARItem") & "')")
+				
+						'*********  Deleting the relation
+						conn.Execute("DELETE FROM ARItemsRelations WHERE ID='"& RS1("RelationID") & "'")
+						
+						RS1.movenext
+					Loop
+				else
+					mySQL="SELECT ID AS RelationID, CreditARItem, Amount FROM ARItemsRelations WHERE (DebitARItem = '"& voidedARItem & "')"
+					Set RS1=conn.Execute(mySQL)
+					Do While not (RS1.eof)
+						'*********  Adding back the amount in the relation, to the credit ARItem ...
+						conn.Execute("UPDATE ARItems SET RemainedAmount=RemainedAmount+ '"& RS1("Amount") & "', FullyApplied=0 WHERE (ID = '"& RS1("CreditARItem") & "')")
+				
+						'*********  Deleting the relation
+						conn.Execute("DELETE FROM ARItemsRelations WHERE ID='"& RS1("RelationID") & "'")
+						
+						RS1.movenext
+					Loop
+				end if
+			end if
 			set rs=Conn.Execute("select * from Invoices where id=" & id)
 			j("isa")=rs("isa")
 		end if
@@ -236,12 +278,15 @@ select case request("act")
 					if j("err")<>1 then
 						mySQL="UPDATE Invoices SET Issued=1, IssuedDate=N'"& issueDate & "', IssuedBy='"& session("ID") & "' WHERE (ID='"& InvoiceID & "')"
 						conn.Execute(mySQL)
+						invoiceFee = RS1("TotalReceivable")
 						if rs1("isReverse") then
 							isCredit=1
 							itemType=4 
+							isReverse = true
 						else
 							isCredit=0
 							itemType=1
+							isReverse = false
 						'----------------------- Declaring the related orders as closed --------------
 						conn.Execute("UPDATE Orders SET isClosed=1 WHERE ID IN (SELECT [Order] FROM InvoiceOrderRelations WHERE (Invoice='" & InvoiceID & "'))")
 						end if
@@ -382,6 +427,12 @@ select case request("act")
 				
 				conn.Execute(mySQL)
 				
+				'-------------- Check invoice Print Form
+				set rs = Conn.Execute("select * from InvoicePrintForms where InvoiceID=" & invoiceID)
+				if not rs.eof then '-------------- if has invoice print form DELETED
+					Conn.Execute("delete from InvoicePrintFormLines where invoicePrintForm=" & rs("id"))
+					Conn.Execute("delete from InvoicePrintForms where InvoiceID=" & invoiceID)
+				end if
 				'***
 				'***---------------- End of  Voiding ARItem of Invoice / Reverse Invoice ----------------
 				

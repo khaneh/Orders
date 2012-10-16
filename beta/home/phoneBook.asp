@@ -156,8 +156,8 @@ end if
 if request("act")="search" then
 	'SELECT COUNT(*) AS qtty, company_name, customer_name, telephone FROM orders_trace GROUP BY company_name, customer_name, telephone
 	myCriteria= "REPLACE([company_name], ' ', '') LIKE REPLACE(N'%"& sqlSafeNoEnter(request("search_box")) & "%', ' ', '') OR REPLACE([customer_name], ' ', '') LIKE REPLACE(N'%"& sqlSafeNoEnter(request("search_box")) & "%', ' ', '')"
-	set RS1=Conn.Execute ("SELECT company_name, customer_name, telephone FROM orders_trace WHERE ("& myCriteria & ") GROUP BY company_name, customer_name, telephone ORDER BY [customer_name]")
-	if not RS1.eof then
+' 	set RS1=Conn.Execute ("SELECT company_name, customer_name, telephone FROM orders_trace WHERE ("& myCriteria & ") GROUP BY company_name, customer_name, telephone ORDER BY [customer_name]")
+	if 0 then
 		tmpCounter=0
 %>
 		<br>

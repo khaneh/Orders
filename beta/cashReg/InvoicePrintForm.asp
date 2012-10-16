@@ -29,54 +29,48 @@ end function
 </style>
 <SCRIPT LANGUAGE="JavaScript">
 <!--
-var selectedRow=-1;
-function selectAndDelete(rowNo){
-	if (selectedRow==rowNo){
-		delAndShiftUp(rowNo);
-		document.getElementById("InvoiceLines").getElementsByTagName("TR")[selectedRow].getElementsByTagName("TD")[0].setAttribute("bgColor","");
-		selectedRow=-1;
-		calcAndCheck();
+/* var selectedRow=-1; */
+function selectAndDelete(td){
+	console.log($(td).html());
+	var tr = $(td).closest("tr");
+	if ($(td).prop("bgColor")=="red"){
+		$(td).prop("bgColor","");
+		for(trNext=tr;trNext.next().size()>0;trNext=trNext.next()){
+			trNext.find("input[name=Descriptions]").val(trNext.next().find("input[name=Descriptions]").val());
+			trNext.find("input[name=Qttys]").val(trNext.next().find("input[name=Qttys]").val());
+			trNext.find("input[name=Fees]").val(trNext.next().find("input[name=Fees]").val());
+			trNext.find("input[name=Prices]").val(trNext.next().find("input[name=Prices]").val());
+			trNext.find("input[name=Dis]").val(trNext.next().find("input[name=Dis]").val());
+			trNext.find("input[name=Vat]").val(trNext.next().find("input[name=Vat]").val());
+		}
+		$($("#InvoiceLines tr")[9]).find("input[name=Descriptions]").val("");
+		$($("#InvoiceLines tr")[9]).find("input[name=Qttys]").val("");
+		$($("#InvoiceLines tr")[9]).find("input[name=Fees]").val("");
+		$($("#InvoiceLines tr")[9]).find("input[name=Prices]").val("");
+		$($("#InvoiceLines tr")[9]).find("input[name=Dis]").val("");
+		$($("#InvoiceLines tr")[9]).find("input[name=Vat]").val("");
+	} else {
+		$("#InvoiceLines tr").find("td:first").prop("bgColor","");
+		$(td).prop("bgColor","red");
 	}
-	else{
-		if (selectedRow != -1)
-			document.getElementById("InvoiceLines").getElementsByTagName("TR")[selectedRow].getElementsByTagName("TD")[0].setAttribute("bgColor","");
-		document.getElementById("InvoiceLines").getElementsByTagName("TR")[rowNo].getElementsByTagName("TD")[0].setAttribute("bgColor","red");
-		selectedRow=rowNo;
-	}
+	calcAndCheck();
 }
-function delAndShiftUp(rowNo){
-	for (i=rowNo;i<9;i++){
-		document.getElementsByName("Descriptions")[i].value=document.getElementsByName("Descriptions")[i+1].value;
-		document.getElementsByName("Qttys")[i].value=document.getElementsByName("Qttys")[i+1].value;
-		document.getElementsByName("Units")[i].value=document.getElementsByName("Units")[i+1].value;
-		document.getElementsByName("Fees")[i].value=document.getElementsByName("Fees")[i+1].value;
-		document.getElementsByName("Prices")[i].value=document.getElementsByName("Prices")[i+1].value;
-		document.getElementsByName("Dis")[i].value=document.getElementsByName("Dis")[i+1].value;
-		document.getElementsByName("Vat")[i].value=document.getElementsByName("Vat")[i+1].value;
-	}
-	document.getElementsByName("Descriptions")[9].value="";
-	document.getElementsByName("Qttys")[9].value="";
-	document.getElementsByName("Units")[9].value="";
-	document.getElementsByName("Fees")[9].value="";
-	document.getElementsByName("Prices")[9].value="";
-	document.getElementsByName("Dis")[9].value="";
-	document.getElementsByName("Vat")[9].value="";
-}
+
 function setPrice(src){
-	if (src.name == "Qttys" || src.name == "Fees" || src.name == "Dis"){
-		src.value = val2txt(txt2val(src.value))
-		rowNo = src.parentNode.parentNode.rowIndex;
-		tmpFee = txt2val(document.getElementsByName("Fees")[rowNo].value);
-		tmpQtty = txt2val(document.getElementsByName("Qttys")[rowNo].value);
-		vat = txt2val(document.getElementsByName("Vat")[rowNo].value);
-		dis = txt2val(document.getElementsByName("Dis")[rowNo].value);
-		
-		tmpPrice= tmpFee * tmpQtty - dis;
+	var name = $(src).attr("name");
+	var tr = $(src).closest("tr");
+	if (name == "Qttys" || name == "Fees" || name == "Dis"){
+		$(src).val(echoNum(getNum($(src).val())));
+		var tmpFee = getNum(tr.find("input[name=Fees]").val());
+		var tmpQtty = getNum(tr.find("input[name=Qttys]").val());
+		var vat = getNum(tr.find("input[name=Vat]").val());
+		var dis = getNum(tr.find("input[name=Dis]").val());		
+		var tmpPrice= tmpFee * tmpQtty - dis;
 		//alert(val2txt(tmpPrice * .03));
 		if (vat > 0){
-			document.getElementsByName("Vat")[rowNo].value = Math.floor(tmpPrice * txt2val(document.getElementById("VatRate").value)/100); //sam change this in 90
+			tr.find("input[name=Vat]").val(echoNum(Math.floor(tmpPrice * parseFloat($('input[name=VatRate]').val()/100))));
 		}
-		document.getElementsByName("Prices")[rowNo].value = val2txt(parseInt(tmpPrice));
+		tr.find("input[name=Prices]").val(echoNum(parseInt(tmpPrice)));
 	}
 
 	calcAndCheck();
@@ -87,41 +81,34 @@ function calcAndCheck(){
 	var payable=0;
 	var vat=0;
 	var checkVat=false;
-//alert('hi');
-	for(i = 0; i < 10; i++){
-		total += txt2val(document.getElementsByName("Prices")[i].value);
-		dis += txt2val(document.getElementsByName("Dis")[i].value);
-		vat += txt2val(document.getElementsByName("Vat")[i].value);
-	}
-	if (txt2val(document.getElementsByName("totalVat")[0].value) != vat){
-		document.getElementsByName("message")[0].value = "ÇÎØÇÑ! ÌãÚ ãÇáíÇÊ ÇÔÊÈÇå ãíÈÇÔÏ.";
-		document.getElementsByName("totalVat")[0].style.backgroundColor = "#FF4848";
-		checkVat = false;			
-	}
-	else{
-		document.getElementsByName("message")[0].value = "";
-		document.getElementsByName("totalVat")[0].style.backgroundColor = "#F0F0F0";
+/* 	console.log("calcAndCheck"); */
+	$("#InvoiceLines tr").each(function(i){
+		total += getNum($(this).find("[name=Prices]").val());
+		dis += getNum($(this).find("[name=Dis]").val());
+		vat += getNum($(this).find("[name=Vat]").val());
+	});
+	if (getNum($("input[name=totalVat]").val()) !=vat){
+//	console.log('calc vat: '+ vat + ' get vat: ' + getNum($("input[name=totalVat]").val()))
+		$("input[name=message]").val("ÇÎØÇÑ! ÌãÚ ãÇáíÇÊ ÇÔÊÈÇå ãíÈÇÔÏ.");
+		$("input[name=totalVat]").css("backgroundColor","#FF4848");
+		checkVat = false;
+	} else {
+		$("input[name=message]").val("");
+		$("input[name=totalVat]").css("backgroundColor","#F0F0F0");
 		checkVat = true;
 	}
-
-	document.getElementsByName("TotalPrice")[0].value = val2txt(total + vat);
-	document.getElementsByName("Discount")[0].value = val2txt(dis);
+	$("input[name=TotalPrice]").val(echoNum(total + vat));
+	$("input[name=Discount]").val(echoNum(dis));
 	payable = total + vat;
-	//payable += txt2val(document.getElementsByName("Vat")[0].value);
-	document.getElementsByName("Payable")[0].value=val2txt(payable);
-
-	if(document.getElementsByName("Payable")[0].value==document.getElementsByName("MustBe")[0].value){
-		document.getElementsByName("Payable")[0].style.backgroundColor='#00FF00';
-		if (checkVat){
+	$("input[name=Payable]").val(echoNum(payable));
+	if (getNum($("input[name=Payable]").val()) == getNum($("input[name=MustBe]").val())){
+		$("input[name=Payable]").css("backgroundColor","#00FF00");
+		if (checkVat)
 			return true;
-		}
-		else{
+		else
 			return false;
-		}
-		
-	}
-	else{
-		document.getElementsByName("Payable")[0].style.backgroundColor='#FF0000';
+	} else {
+		$("input[name=Payable]").css("backgroundColor","#FF0000");
 		return false;
 	}
 }
@@ -154,72 +141,66 @@ function autoComplete(src){
 }
 function combine()
 {
-	priceVat = 0;
-	priceNoVat = 0;
-	totalVat = 0;
-	totalDisOnVat = 0;
-	totalDisNoVat = 0;
-	rfd = 0;
-
-	for(i = 0; i < 10; i++)
-	{
-		if (txt2val(document.getElementsByName("Vat")[i].value) == 0)
-		{
-			if (txt2val(document.getElementsByName("Prices")[i].value) <= 0)
-			{
-				rfd += txt2val(document.getElementsByName("Dis")[i].value);
+	var priceVat = 0;
+	var priceNoVat = 0;
+	var totalVat = 0;
+	var totalDisOnVat = 0;
+	var totalDisNoVat = 0;
+	var rfd = 0;
+	$("#InvoiceLines tr").each(function(i){
+		if (getNum($(this).find("input[name=Vat]").val())==0){
+			if (getNum($(this).find("input[name=Prices]").val()) <= 0){
+				rfd += getNum($(this).find("input[name=Dis]").val());
+			} else {
+				totalDisNoVat += getNum($(this).find("input[name=Dis]").val());
+				priceNoVat += getNum($(this).find("input[name=Fees]").val()) * getNum($(this).find("input[name=Qttys]").val());
 			}
-			else{
-				totalDisNoVat += txt2val(document.getElementsByName("Dis")[i].value);
-				priceNoVat += txt2val(document.getElementsByName("Fees")[i].value) * txt2val(document.getElementsByName("Qttys")[i].value);
-			}
-		}
-		else
-		{	
-			priceVat += txt2val(document.getElementsByName("Fees")[i].value) * txt2val(document.getElementsByName("Qttys")[i].value);
-			totalVat += txt2val(document.getElementsByName("Vat")[i].value);
-			if (txt2val(document.getElementsByName("Prices")[i].value) <= 0)
-			{
-				rfd += txt2val(document.getElementsByName("Dis")[i].value);
-			}
-			else{
-				totalDisOnVat += txt2val(document.getElementsByName("Dis")[i].value);
+		} else {
+			priceVat += getNum($(this).find("input[name=Fees]").val()) * getNum($(this).find("input[name=Qttys]").val());
+			totalVat += getNum($(this).find("input[name=Vat]").val());
+			if (getNum($(this).find("input[name=Prices]").val()) <= 0){
+				rfd += getNum($(this).find("input[name=Dis]").val());
+			} else {
+				totalDisOnVat += getNum($(this).find("input[name=Dis]").val());
 			}
 		}
-		
-		document.getElementsByName("Descriptions")[i].value = "";
-		document.getElementsByName("Qttys")[i].value = "";
-		document.getElementsByName("Units")[i].value = "";
-		document.getElementsByName("Fees")[i].value = "";
-		document.getElementsByName("Prices")[i].value = "";
-		document.getElementsByName("Vat")[i].value = "";
-		document.getElementsByName("Dis")[i].value = "";
+		$(this).find("input[name=Descriptions]").val("");
+		$(this).find("input[name=Qttys]").val("");
+		$(this).find("input[name=Units]").val("");
+		$(this).find("input[name=Fees]").val("");
+		$(this).find("input[name=Prices]").val("");
+		$(this).find("input[name=Vat]").val("");
+		$(this).find("input[name=Dis]").val("");
+	});
+	
+	var tr;
+	if (priceNoVat > 0){
+		tr = $($("#InvoiceLines tr")[1]);
+		tr.find("input[name=Descriptions]").val("ßÇÛÐ æ ãÞæÇ ÌåÊ Ç");
+		tr.find("input[name=Qttys]").val("1");
+		tr.find("input[name=Units]").val("");
+		tr.find("input[name=Fees]").val(echoNum(priceNoVat));
+		tr.find("input[name=Prices]").val(echoNum(priceNoVat - totalDisNoVat));
+		tr.find("input[name=Vat]").val("0");
+		tr.find("input[name=Dis]").val(echoNum(totalDisNoVat));
 	}
-	if (priceNoVat > 0)
-	{
-		document.getElementsByName("Descriptions")[1].value = "ßÇÛÐ æ ãÞæÇ ÌåÊ Ç";
-		document.getElementsByName("Qttys")[1].value = "1";
-		document.getElementsByName("Units")[1].value = "";
-		document.getElementsByName("Fees")[1].value = val2txt(parseInt(priceNoVat));
-		document.getElementsByName("Prices")[1].value = val2txt(parseInt(priceNoVat) - parseInt(totalDisNoVat));
-		document.getElementsByName("Vat")[1].value = "0";
-		document.getElementsByName("Dis")[1].value = val2txt(parseInt(totalDisNoVat));
-	}
-	document.getElementsByName("Descriptions")[0].value = "ÎÏãÇÊ Ç";
-	document.getElementsByName("Qttys")[0].value = "1";
-	document.getElementsByName("Units")[0].value = "";
-	document.getElementsByName("Fees")[0].value = val2txt(parseInt(priceVat));
-	document.getElementsByName("Prices")[0].value = val2txt(parseInt(priceVat) - parseInt(totalDisOnVat));
-	document.getElementsByName("Vat")[0].value = val2txt(parseInt(totalVat));
-	document.getElementsByName("Dis")[0].value = val2txt(parseInt(totalDisOnVat));
+	tr = $($("#InvoiceLines tr")[0]);
+	tr.find("input[name=Descriptions]").val("ÎÏãÇÊ Ç");
+	tr.find("input[name=Qttys]").val("1");
+	tr.find("input[name=Units]").val("");
+	tr.find("input[name=Fees]").val(echoNum(priceVat));
+	tr.find("input[name=Prices]").val(echoNum(priceVat - totalDisOnVat));
+	tr.find("input[name=Vat]").val(echoNum(totalVat));
+	tr.find("input[name=Dis]").val(echoNum(totalDisOnVat));
+	tr = $($("#InvoiceLines tr")[2]);
 	//---------------------------
-	document.getElementsByName("Descriptions")[2].value = "ÊÎÝíÝ ÑäÏ ÝÇßÊæÑ";
-	document.getElementsByName("Qttys")[2].value = "1";
-	document.getElementsByName("Units")[2].value = "";
-	document.getElementsByName("Fees")[2].value = "0";
-	document.getElementsByName("Prices")[2].value = val2txt(parseInt(-rfd));
-	document.getElementsByName("Vat")[2].value = "0";
-	document.getElementsByName("Dis")[2].value = val2txt(parseInt(rfd));
+	tr.find("input[name=Descriptions]").val("ÊÎÝíÝ ÑäÏ ÝÇßÊæÑ");
+	tr.find("input[name=Qttys]").val("1");
+	tr.find("input[name=Units]").val("");
+	tr.find("input[name=Fees]").val("0");
+	tr.find("input[name=Prices]").val(echoNum(-rfd));
+	tr.find("input[name=Vat]").val("0");
+	tr.find("input[name=Dis]").val(echoNum(rfd));
 	calcAndCheck();
 }
 //-->
@@ -463,15 +444,15 @@ elseif request("act")="getPrintForm" then
 		End If 
 			
 		for i=1 to 10
-%>
-			<TR bgcolor='#F0F0F0'>
-				<TD align='center' width="25px" onclick="selectAndDelete(this.parentNode.rowIndex);"><%=i%></TD>
+			%>
+			<TR bgcolor="#F0F0F0">
+				<TD align="center" width="25px" onclick="selectAndDelete(this);"><%=i%></TD>
 				<TD><INPUT class="InvRowInput2" TYPE="text" Name="Descriptions" value="<%=Descriptions(i)%>" size="65"></TD>
 				<TD><INPUT class="InvRowInput"  TYPE="text" Name="Qttys" value="<%=Qttys(i)%>" size="5" onBlur="setPrice(this);"></TD>   
 				<TD><INPUT class="InvRowInput"  TYPE="text" Name="Units" Value="<%=Units(i)%>" size="8" onKeyPress="autoComplete(this);"></TD>       
 				<TD><INPUT class="InvRowInput"  TYPE="text" Name="Fees" Value="<%=Fees(i)%>" size="8" onBlur="setPrice(this);"></TD>        
-				<TD><input class="InvRowInput" type="text" name="Dis" value="<%=Dis(i)%>" Size="8" onBlur="setPrice(this)"></TD>
-				<TD><INPUT readonly class="InvRowInput3" TYPE="text" Name="Prices" Value="<%=Prices(i) - Dis(i)%>" size="13" onBlur="this.value=val2txt(txt2val(this.value));calcAndCheck();"></TD>
+				<TD><input class="InvRowInput" type="text" name="Dis" value="<%=Dis(i)%>" Size="8" onBlur="setPrice(this);"></TD>
+				<TD><INPUT readonly class="InvRowInput3" TYPE="text" Name="Prices" Value="<%=Separate(Prices(i) - Dis(i))%>" size="13" onBlur="this.value=echoNum(getNum(this.value));calcAndCheck();"></TD>
 				<TD><input readonly class='InvRowInput4' type='text' name='Vat' value='<%=Vat(i)%>' size='8'></TD>
 			</TR>
 <%
@@ -525,10 +506,9 @@ elseif request("act")="getPrintForm" then
 	</FORM>
 	<br>
 	<SCRIPT LANGUAGE="JavaScript">
-	
-//		document.getElementsByName("Items")[0].focus();
+$(document).ready(function(){
 		calcAndCheck();
-	
+});
 	</SCRIPT>
 <%
 '------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -802,15 +782,15 @@ elseif request("act")="showPrintForm" then
 		End if
 
 		for i=1 to 10
-%>
+			%>
 			<TR bgcolor='#F0F0F0'>
-				<TD align='center' width="25px" onclick="selectAndDelete(this.parentNode.rowIndex);"><%=i%></TD>
+				<TD align='center' width="25px" onclick="selectAndDelete(this);"><%=i%></TD>
 				<TD><INPUT class="InvRowInput2" TYPE="text" Name="Descriptions" value="<%=Descriptions(i)%>" size="65"></TD>
 				<TD><INPUT class="InvRowInput"  TYPE="text" Name="Qttys" value="<%=Qttys(i)%>" size="5" onBlur="setPrice(this);"></TD>   
 				<TD><INPUT class="InvRowInput"  TYPE="text" Name="Units" Value="<%=Units(i)%>" size="8" onKeyPress="autoComplete(this);"></TD>        
 				<TD><INPUT class="InvRowInput"  TYPE="text" Name="Fees" Value="<%=Fees(i)%>" size="8" onBlur="setPrice(this);"></TD>  
 				<TD><input class="InvRowInput" type="text" name="Dis" value="<%=Dis(i)%>" size="8" onBlur="setPrice(this);"><TD>
-				<TD><INPUT readonly class="InvRowInput3" TYPE="text" Name="Prices" Value="<%=Prices(i)%>" size="13" onBlur="this.value=val2txt(txt2val(this.value));calcAndCheck();"></TD>    
+				<TD><INPUT readonly class="InvRowInput3" TYPE="text" Name="Prices" Value="<%=Prices(i)%>" size="13" onBlur="this.value=echoNum(getNum(this.value));calcAndCheck();"></TD>    
 				<TD><input readonly class='InvRowInput4' type='text' name='Vat' value='<%=Vat(i)%>' size='8'></TD>
 			</TR>
 <%

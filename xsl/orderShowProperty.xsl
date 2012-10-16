@@ -21,17 +21,12 @@
 			</xsl:if>
 			<xsl:if test="./@isPrice!='no'">
 				<div class="priceGroup">
-					<div class="priceGroupTitle">
-						<span class="sp1">»Â«Ì ﬂ·</span>
-						<span class="sp2"> Œ›Ì›</span>
-						<span class="sp2">„«“«œ</span>
-					</div>
-					<div class="clear"></div>
 					<div class="priceGroup">
 					<xsl:variable name="gname" select="./@name" />
-						<span class="price sp1"><xsl:value-of select="./key[@name=concat($gname,'-price')]"/></span>
-						<span class="dis sp2"><xsl:value-of select="./key[@name=concat($gname,'-dis')]"/></span>
-						<span class="over sp2"><xsl:value-of select="./key[@name=concat($gname,'-over')]"/></span>
+						<div class="price" rel="tooltip" data-placement="right" data-original-title="»Â«Ì „Õ«”»Â ‘œ"><xsl:value-of select="./key[@name=concat($gname,'-price')]"/></div>
+						<div class="dis" rel="tooltip" data-placement="right" data-original-title=" Œ›Ì›"><xsl:value-of select="./key[@name=concat($gname,'-dis')]"/></div>
+						<div class="over" rel="tooltip" data-placement="right" data-original-title="„«“«œ"><xsl:value-of select="./key[@name=concat($gname,'-over')]"/></div>
+						<div class="reverse" rel="tooltip" data-placement="right" data-original-title="»—ê‘ "><xsl:value-of select="./key[@name=concat($gname,'-reverse')]"/></div>
 					</div>
 				</div>
 			</xsl:if>

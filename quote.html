@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>print css test by mtness</title>
+    <style type="text/css">
+    @media print {
+        #watermark { 
+            display: block;
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 5;
+        }
+
+        p { 
+            position: relative;
+            top: 40pt;
+            display: block;
+            page-break-after: always;
+            z-index: 0;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div id="watermark">AWESOME!</div>
+    <p>page1</p>
+    <p>page2</p>
+    <p>page3</p>
+</body>
+</html>

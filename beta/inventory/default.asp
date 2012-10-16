@@ -636,11 +636,31 @@ end if
 %>
 <style>
 	.changeItem{cursor: pointer;}
+	td.delBtn {position: relative;}
+	td.delBtn span {position: absolute;opacity: .6;cursor: pointer;top:2px;left: 0px;font-size: 8px;font-family: tahoma;}
 </style>
 <script type="text/javascript">
 	$(document).ready(function(){
 		$.ajaxSetup({
 			cache: false
+		});
+		$("td.delBtn span").css('display','none');
+		$("td.delBtn").mouseover(function(event){
+			$(this).find("span").css("display","block");
+		});
+		$("td.delBtn").mouseout(function(event){
+			$(this).find("span").css("display","none");
+		});	
+		$("td.delBtn span").click(function(){
+			var requestID = $(this).closest("td").find("input[name=itemReq]").val();
+			$("#comfirmDel input").val(requestID);
+			if (parseInt($(this).closest("td").find("input[name=itemReq]").attr("invoiceitem")) > 0){
+				$("#comfirmDel h3").html(" ÊÃÂ° œ— ’Ê—   «ÌÌœ „Ãœœ ”›«—‘ «Ì‰ œ—ŒÊ«”  »Â ’Ê—  ŒÊœﬂ«— „Ãœœ «ÌÃ«œ ŒÊ«Âœ ‘œ");
+			} else {
+				$("#comfirmDel h3").html("«“ Õ–› «Ì‰ œ—ŒÊ«”  «ÿ„Ì‰«‰ œ«—Ìœø");
+			}
+			$("#comfirmDel").dialog("open");
+			
 		});
 		$('.changeItem').prop('title','ÃÂ   €ÌÌ—/ ⁄ÌÌ‰ ¬Ì „ ﬂ·Ìﬂ ﬂ‰Ìœ');
 		$('.changeItem').click(function(){
@@ -669,7 +689,7 @@ end if
 				$.ajax({
 					type:"POST",
 					url:"/service/json_getInventory.asp",
-					data:{act:"updateItemRequest",id:$("#itemReq").val(),unit:$("#itemID option:selected").attr("unit"),itemID:$("#itemID option:selected").val()},
+					data:{act: "updateItemRequest" ,id: $("#itemReq").val(), unit: $("#itemID option:selected").attr("unit"), itemID:$("#itemID option:selected").val()},
 					dataType:"json"
 				}).done(function (data){
 					if (data.status=="ok")
@@ -680,11 +700,31 @@ end if
 			}},
 			title: "«‰ Œ«» ¬Ì „"
 		});
+		$("#comfirmDel").dialog({
+			autoOpen: false,
+			buttons: {" «ÌÌœ":function(){
+				$.ajax({
+					type:"POST",
+					url:"/service/json_getInventory.asp",
+					data:{act:"delInvRequest",id:$("#comfirmDel input").val()},
+					dataType:"json"
+				}).done(function(data){
+					if (data.status=="ok")
+						$("[name=itemReq][value=" + $("#comfirmDel input").val() + "]").closest("tr").remove();
+				});
+				$(this).dialog("close");
+			}},
+			title: "Õ–› œ—ŒÊ«” "
+		});
 	});
 </script>
 <div id='changeItemDlg'>
 	<input type="hidden" id="itemReq"/>
 	<select id='itemID'></select>
+</div>
+<div id='comfirmDel'>
+	<h3></h3>
+	<input type="hidden" name="reqID"/>
 </div>
 <BR><BR>
 <br>
@@ -737,7 +777,12 @@ if Auth(5 , 9) then
 
 		%>
 		<TR bgcolor="<%=tmpColor%>" >
-			<TD><INPUT TYPE="hidden" name=color1 value="<%=tmpColor%>"><INPUT TYPE="hidden" name=color2 value="<%=tmpColor2%>"><INPUT TYPE="checkbox"  onclick="setPrice(this)" <%if IsNull(rss("itemID")) then response.write "disabled='disabled'"%> invoiceItem="<%=rss("invoiceItem")%>" NAME="itemReq" VALUE="<%=RSS("id")%>"></TD>
+			<TD class="delBtn">
+				<INPUT TYPE="hidden" name=color1 value="<%=tmpColor%>"/>
+				<INPUT TYPE="hidden" name=color2 value="<%=tmpColor2%>"/>
+				<INPUT TYPE="checkbox"  onclick="setPrice(this)" <%if IsNull(rss("itemID")) then response.write "disabled='disabled'"%> invoiceItem="<%=rss("invoiceItem")%>" NAME="itemReq" VALUE="<%=RSS("id")%>"/>
+				<span class="label label-important">X</span>
+			</TD>
 			<TD <%if not IsNull(rss("invoiceItem")) then Response.write " class='changeItem'"%>><%=RSS("ItemName")%></TD>
 			<TD><%=shamsidate(RSS("ReqDate"))%></small></TD>
 			<TD><%=RSS("Qtty")%> <%=rss("unit")%></TD>

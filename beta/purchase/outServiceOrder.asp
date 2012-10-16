@@ -538,7 +538,7 @@ function checkValidation(){
 				tmpColor2="#EEEEBB"
 			End if 
 
-			orderIDpos = clng(RSS("Order_ID"))
+			orderIDpos = clng(RSS("OrderID"))
 			if orderIDpos<>-1 then 
 				orderLink="<small><a href='../shopfloor/manageOrder.asp?radif=" & orderIDpos & "'>" & orderIDpos & "</a></small>"
 			else

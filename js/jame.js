@@ -1,3 +1,27 @@
+function getNum(n){
+	var out = 0;
+	if (typeof(n)=="number")
+		out = parseInt(n);
+	else if (typeof(n)=="string")
+		if (n=="")
+			out=0;
+		else
+			out = parseInt(n.replace(/,/gi,''));
+	if (isNaN(out))
+		out=0;
+	return out;
+}
+function echoNum(str){
+	var regex = /(-?[0-9]+)([0-9]{3})/;
+	str = Math.floor(str);
+    str += '';
+    while (regex.test(str)) {
+        str = str.replace(regex, '$1,$2');
+    }
+    //str += ' kr';
+    return str;
+}
+
 $(document).ready(function(){
 	$("input.date").blur(function(){
 		var obj=$(this);

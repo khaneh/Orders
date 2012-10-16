@@ -243,7 +243,10 @@ function delRow(rowNo){
 }
 
 function setPrice(src){
-	src.value=val2txt(txt2val(src.value));
+	if (echoNum(getNum($(src).val()))=="NaN")
+		$(src).val(0);
+	else
+		$(src).val(echoNum(getNum($(src).val())));
 }
 
 function mask(src){ 

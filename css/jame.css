@@ -2,13 +2,15 @@ body {direction: rtl;font-family: Tahoma;font-size: 8pt;}
 .price{background-color: #FFC;border-width: 0px;margin: 0px;padding: 0px;}
 .dis{background-color: #F9A;border-width: 0px;margin: 0px;padding: 0px;}
 .over{background-color: #BF6;border-width: 0px;margin: 0px;padding: 0px;}
+.reverse{background-color: #A8B2FF;border-width: 0px;margin: 0px;padding: 0px;}
+
 .forceErr{border-color: #FFA6A6;border-style: solid;border-width: 1px;background-color: #FFF2F2;}
 
 .clear{clear: both;}
 .isRed{color: red;}
 .isBlue{color: blue;}
 .isBlack{color: black;}
-span.data{font-weight: bold;white-space: nowrap;font-family: "b titr","b yekan", tahoma;font-size: 10pt;display: inline;line-height: 18px;margin: 0 10px 0 0;}
+span.data{font-weight: bold;font-family: "b zar","b yekan", tahoma;font-size: 10pt;display: block;line-height: 18px;margin: 0 10px 0 0;text-align: justify;}
 table.list{direction: rtl;}
 table.list tr:nth-child(even) {background-color: #FFF;}
 table.list tr:nth-child(odd) {background-color: #DDD;}
@@ -17,6 +19,7 @@ input.date{direction: ltr;}
 input.num{direction: ltr;}
 div.inPage{margin: 10px 15px 0 15px;}
 ul.msg{list-style-type: none;margin: 0;padding: 0;}
+ul.msg li{position: relative;}
 li.msg{margin-top: 2px; padding: 7px 5px 4px;}
 li.urgent0{background-color: #EDEFF4;}
 li.urgent1{background-color: #FDD;}
@@ -1722,7 +1725,7 @@ h4,
 h5,
 h6 {
   margin: 0;
-  font-family: "b titr","b yekan", tahoma;
+  font-family: "b zar","b yekan", tahoma;
   font-weight: bold;
   color: inherit;
   text-rendering: optimizelegibility;

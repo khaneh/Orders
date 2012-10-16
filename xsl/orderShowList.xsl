@@ -3,7 +3,8 @@
 <xsl:template match="/rows">
 	<table class="list" border="1" cellspacing="0" cellpadding="2" dir="RTL"  borderColor="#555588" >
 		<TR valign="top" class="head">
-			<TD width="40">#</TD>
+			<TD>#</TD>
+			<TD width="40">‘„«—Â</TD>
 			<TD width="65"> «—ÌŒ À» <br/> «—ÌŒ  ÕÊÌ·/«⁄ »«—</TD>
 			<TD width="130">‰«„ ‘—ﬂ  - „‘ —Ì</TD>
 			<TD width="80">⁄‰Ê«‰ ﬂ«—</TD>
@@ -16,6 +17,7 @@
 		</TR>
 		<xsl:for-each select="./row">
 			<tr>
+				<td/>
 				<td>
 					<a>
 						<xsl:attribute name="href">order.asp?act=show&amp;id=<xsl:value-of select="./id"/></xsl:attribute>
@@ -66,10 +68,24 @@
 						</xsl:attribute>
 					</img>
 				</td>
-				<td><xsl:value-of select="./invStatus"/></td>
+				<td>
+					<xsl:if test="./invoiceID=0">
+						<xsl:value-of select="./invStatus"/>
+					</xsl:if>
+					<xsl:if test="./invoiceID>0">
+						<a>
+							<xsl:attribute name="href">../AR/AccountReport.asp?act=showInvoice&amp;invoice=<xsl:value-of select="./invoiceID"/></xsl:attribute>
+							<xsl:value-of select="./invStatus"/>
+						</a>
+					</xsl:if>
+				</td>
 				<td><xsl:value-of select="./Price"/></td>
 			</tr>
 		</xsl:for-each>
+		<tr class="sumTotal">
+			<td colspan="10">Ã„⁄</td>
+			<td/>
+		</tr>
 	</table>
 </xsl:template>
 </xsl:stylesheet>

@@ -98,11 +98,11 @@ if request("act")="" then
 	%>
 	</div>
 	<div class="NewRow">
-		<input type="submit" name="submit" value=" «ÌÌœ">
-		<a class="link" href="Inquiry.asp?act=advancedSearch&Submit= «ÌÌœ&check_marhale=on&marhale_not_check=on&marhale_box=4&check_closed=on">—œ Ê ”›«—‘ ‰‘œÂùÂ«</a>
+		<input type="submit" name="submit" value=" «ÌÌœ" class="btn">
 		
 	</div>
 </form>
+
 <div style="clear: both;margin:20px 0 0 0;">
 <center>
 <%
@@ -130,7 +130,7 @@ rs.close
 		next
 		if len(orderTypes)>0 then 
 			orderTypes = mid(orderTypes,1,len(orderTypes)-1)
-			condition=" and Quotes.type in (" & orderTypes & ")"
+			condition=" and Orders.type in (" & orderTypes & ")"
 		end if
 		if request("isDelay")="on" or request("today")="on" or request("tomorrow")="on" or request("nextWeek")="on" or request("moreNextWeek")="on" then
 		 	condition = condition & " and ( 0=1"
@@ -192,10 +192,14 @@ rs.close
 rs.close
 elseif request("act")="show" then
 %>
-<div id='traceResult'></div>
+<div id='traceResult'>
+	<center>
+		<img style="margin:50px;" src="/images/ajaxLoad.gif"/>
+	</center>
+</div>
 <SCRIPT type="text/javascript">
 	$(document).ready(function(){
-		TransformXmlURL('/service/xml_getOrderTrace.asp?act=getQuoteFolow&isClose=<%=request("isClose")%>&fromDate=<%=request("fromDate")%>&toDate=<%=request("toDate")%>&orderTypes=<%=request("orderTypes")%>',"/xsl/orderShowList.xsl", function(result){
+		TransformXmlURL('/service/xml_getOrderTrace.asp?act=getQuoteFolow&isClose=<%=request("isClose")%>&fromDate=<%=request("fromDate")%>&toDate=<%=request("toDate")%>&orderTypes=<%=request("orderTypes")%>',"/xsl/orderShowList.xsl?v=<%=version%>", function(result){
 			$("#traceResult").html(result);
 			$("#traceResult td.orderDates").each(function(i){
 				var createdDate = $(this).find(".createdDate");
@@ -223,6 +227,14 @@ elseif request("act")="show" then
 				createdTime.html("("+((myTime.getHours()<10)?('0'+myTime.getHours()):myTime.getHours())+':'+((myTime.getMinutes() < 10)?('0'+myTime.getMinutes()):(myTime.getMinutes()))+")");
 				
 			});
+			$(".list tr:not(.head):not(.sumTotal)").find("td:first").each(function(i,no){
+				$(no).html(i+1);
+			});
+			var sumTotal = 0;
+			$(".list tr:not(.head):not(.sumTotal)").find("td:last").each(function(i,no){
+				sumTotal += getNum($(no).html());
+			});
+			$(".list .sumTotal td:last").html(echoNum(sumTotal));
 		});
 	});
 </script>

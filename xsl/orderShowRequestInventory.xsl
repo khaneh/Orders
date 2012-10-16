@@ -4,7 +4,7 @@
 <div class="well well-small">
 	<center class="label label-inverse">œ—ŒÊ«” Â«Ì ﬂ«·« «“ «‰»«—</center>
 	<xsl:for-each select="./req">
-		<div>
+		<div class="customerHasInventory">
 			<xsl:attribute name="title">
 				<xsl:value-of select="./Comment/."/>
 			</xsl:attribute>
@@ -19,6 +19,9 @@
 			<xsl:value-of select="./Qtty/."/> 
 			<xsl:value-of select="./unit/."/>
 			<span>)</span>
+			<xsl:if test="./customer=-1">
+				<div class="label label-info">«—”«·Ì</div>
+			</xsl:if>
 		</div>
 	</xsl:for-each>
 </div>

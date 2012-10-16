@@ -5,24 +5,33 @@
 	<center class="label label-inverse">оянФгсйЕгМ няМо сяФМс Ф ъгАг</center>
 	<xsl:for-each select="./req">
 		<div>
-			<xsl:attribute name="title">
-				<xsl:value-of select="./Comment/."/>
-			</xsl:attribute>
-			<xsl:if test="./Status='new'">
-				<span class="label label-info">лоМо</span>
-			</xsl:if>
-			<xsl:if test="./Status='ord'">
-				<span class="label label-success">сщгят</span>
-			</xsl:if>
-			<xsl:if test="./Status='del'">
-				<span class="label label-important">мпщ тоЕ</span>
-			</xsl:if>
-			<span><xsl:value-of select="./TypeName/."/></span>
-			<span>(йзого </span>
-			<xsl:value-of select="./Qtty/."/> 
-			<span> чМЦй </span>
-			<xsl:value-of select="./Price/."/>
-			<span>)</span>
+			<a>
+				<xsl:attribute name="href">
+					<xsl:if test="./Ord_ID/.=0">
+						<xsl:if test="./Status != 'del'">../purchase/outServiceOrder.asp</xsl:if>
+					</xsl:if>
+					<xsl:if test="./Status='del'"></xsl:if>
+					<xsl:if test="./Ord_ID/. > 0">../purchase/outServiceTrace.asp?od=<xsl:value-of select="./Ord_ID/."/></xsl:if>
+				</xsl:attribute>
+				<xsl:attribute name="title">
+					<xsl:value-of select="./Comment/."/>
+				</xsl:attribute>
+				<xsl:if test="./Status='new'">
+					<span class="label label-info">лоМо</span>
+				</xsl:if>
+				<xsl:if test="./Status='ord'">
+					<span class="label label-success">сщгят</span>
+				</xsl:if>
+				<xsl:if test="./Status='del'">
+					<span class="label label-important">мпщ тоЕ</span>
+				</xsl:if>
+				<span><xsl:value-of select="./TypeName/."/></span>
+				<span>(йзого </span>
+				<xsl:value-of select="./Qtty/."/> 
+				<span> чМЦй </span>
+				<xsl:value-of select="./Price/."/>
+				<span>)</span>
+			</a>
 		</div>
 	</xsl:for-each>
 </div>

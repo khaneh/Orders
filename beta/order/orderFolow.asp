@@ -88,7 +88,7 @@ if request("act")="" then
 				if request("orderType-" & rs("id"))="on" then response.write " checked='checked' "
 			else 
 				response.write " checked='checked' "
-			end if%> name="orderType-<%=rs("id")%>"
+			end if%> name="orderType-<%=rs("id")%>"/>
 			<label><%=rs("name")%></label>
 		</div>
 	<%
@@ -161,52 +161,53 @@ wend
 				fromDate=""
 				toDate=""
 				orderTypes=""
-				condition="" 
+				typeCondition="" 
+				dateCondition="" 
 				if request("submit")="ÊÇííÏ" then 
 					for ii=0 to orderTypeCount
 						if request(orderType(ii))="on" then orderTypes = orderTypes & Split(orderType(ii),"-")(1) & ","
 					next
 					if len(orderTypes)>0 then 
 						orderTypes = mid(orderTypes,1,len(orderTypes)-1)
-						condition=" and orders.type in (" & orderTypes & ")"
+						typeCondition=" and orders.type in (" & orderTypes & ")"
 					end if
 					if request("isDelay")="on" or request("today")="on" or request("tomorrow")="on" or request("nextWeek")="on" or request("moreNextWeek")="on" then
-					 	condition = condition & " and ( 0=1"
+					 	dateCondition = dateCondition & " and ( 0=1"
 					 	if request("isDelay")="on" then 
-					 		condition = condition & " or orders.returnDate between '2010-03-21' and '" & dateadd("d",-1,date()) & "'"
+					 		dateCondition = dateCondition & " or orders.returnDate between '2010-03-21' and '" & dateadd("d",-1,date()) & "'"
 					 		fromDate = "2010-03-21"
 					 		toDate = shamsiDate(dateadd("d",-1,date()))
 					 	end if
 						if request("today")="on" then 
-							condition = condition & " or orders.returnDate = '" & Date() & "'"
+							dateCondition = dateCondition & " or orders.returnDate = '" & Date() & "'"
 							if fromDate = "" then fromDate = shamsiToday()
 							toDate = shamsiToday()
 						end if
 						if request("tomorrow")="on" then 
-							condition = condition & " or orders.returnDate = '" & dateadd("d",1,date()) & "'"
+							dateCondition = dateCondition & " or orders.returnDate = '" & dateadd("d",1,date()) & "'"
 							if fromDate = "" then fromDate = dateadd("d",1,date())
 							toDate = dateadd("d",1,date())
 						end if
 						if request("nextWeek")="on" then 
-							condition = condition & " or orders.returnDate between '" & dateadd("d",2,date()) & "' and '" & dateadd("d",7,date()) & "'"
+							dateCondition = dateCondition & " or orders.returnDate between '" & dateadd("d",2,date()) & "' and '" & dateadd("d",7,date()) & "'"
 							if fromDate = "" then fromDate = dateadd("d",2,date())
 							toDate = dateadd("d",7,date())
 						end if
 						if request("moreNextWeek")="on" then 
-							condition = condition & " or orders.returnDate > '" & dateadd("d",7,date()) & "'"
+							dateCondition = dateCondition & " or orders.returnDate > '" & dateadd("d",7,date()) & "'"
 							if fromDate = "" then fromDate = dateadd("d",8,date())
 							toDate = "2100-12-30"
 							'response.write toDate
 						end if
-						condition = condition & ")"
+						dateCondition = dateCondition & ")"
 					end if
 				end if
 				'response.write request("moreNextWeek")
 				if fromDate="" then fromDate="2010-03-21"
 				if toDate="" then toDate="2100-12-30"
-				mySQL = "select orderSteps.name,isnull(drv.orderCount,0) as orderCount from orderSteps left outer join (select step, count(id) as orderCount from orders where isClosed=0 and isOrder=1 and ((returnDate >'2010-03-21' " & condition & ") or returnDate is null) group by step) drv on orderSteps.id=drv.step where orderSteps.id=" & steps(s,i)
+				mySQL = "select orderSteps.name,isnull(drv.orderCount,0) as orderCount from orderSteps left outer join (select step, count(id) as orderCount from orders where isClosed=0 and isOrder=1 and step = " & steps(s,i) & typeCondition & " and ((returnDate >'2010-03-21' " & dateCondition & ") or returnDate is null) group by step) drv on orderSteps.id=drv.step where orderSteps.id=" & steps(s,i)
 				
-				'response.write mySQL
+				'if steps(s,i)=1 then response.write mySQL
 				set rs=Conn.Execute(mySQL)
 	%>
 			<td title="ÈÑÇí ãÔÇåÏå ÌÒÆíÇÊ ßáíß ßäíÏ">
@@ -235,10 +236,14 @@ wend
 <%
 elseif request("act")="show" then
 %>
-<div id='traceResult'></div>
+<div id='traceResult'>
+	<center>
+		<img style="margin:50px;" src="/images/ajaxLoad.gif"/>
+	</center>
+</div>
 <SCRIPT type="text/javascript">
 	$(document).ready(function(){
-		TransformXmlURL('/service/xml_getOrderTrace.asp?act=getFolow&isOrder=1&fromDate=<%=request("fromDate")%>&toDate=<%=request("toDate")%>&orderTypes=<%=request("orderTypes")%>&step=<%=request("step")%>',"/xsl/orderShowList.xsl", function(result){
+		TransformXmlURL('/service/xml_getOrderTrace.asp?act=getFolow&isOrder=1&fromDate=<%=request("fromDate")%>&toDate=<%=request("toDate")%>&orderTypes=<%=request("orderTypes")%>&step=<%=request("step")%>',"/xsl/orderShowList.xsl?v=<%=version%>", function(result){
 			$("#traceResult").html(result);
 			$("#traceResult td.orderDates").each(function(i){
 				var createdDate = $(this).find(".createdDate");
@@ -266,6 +271,14 @@ elseif request("act")="show" then
 				createdTime.html("("+((myTime.getHours()<10)?('0'+myTime.getHours()):myTime.getHours())+':'+((myTime.getMinutes() < 10)?('0'+myTime.getMinutes()):(myTime.getMinutes()))+")");
 				
 			});
+			$(".list tr:not(.head):not(.sumTotal)").find("td:first").each(function(i,no){
+				$(no).html(i+1);
+			});
+			var sumTotal = 0;
+			$(".list tr:not(.head):not(.sumTotal)").find("td:last").each(function(i,no){
+				sumTotal += getNum($(no).html());
+			});
+			$(".list .sumTotal td:last").html(echoNum(sumTotal));
 		});
 	});
 </script>

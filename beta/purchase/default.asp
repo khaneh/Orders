@@ -111,7 +111,7 @@ if request.form("Submit")="À»  œ—ŒÊ«”  Œ—Ìœ ﬂ«·«" then
 		end if
 		RS4.close
 		
-		mySql="INSERT INTO purchaseRequests (Order_ID, TypeName, TypeID, comment, ReqDate, Qtty, CreatedBy, Price, priceComment, DueDate, IsService) VALUES ( "& orderID & ", N'"& otype & "', "& item & " , N'"& comment & "',N'"& shamsiToday() & "', "& Qtty & ", "& CreatedBy & " , "& Price & " , N'"& priceComment & "', N'"& date1 & "', 0 )"
+		mySql="INSERT INTO purchaseRequests (OrderID, TypeName, TypeID, comment, ReqDate, Qtty, CreatedBy, Price, priceComment, DueDate, IsService) VALUES ( "& orderID & ", N'"& otype & "', "& item & " , N'"& comment & "',getDate(), "& Qtty & ", "& CreatedBy & " , "& Price & " , N'"& priceComment & "', dbo.udf_date_solarToDate(" & mid(date1,1,4) & "," & mid(date1,6,2) & "," & mid(date1,9,2) & "), 0 )"
 		conn.Execute mySql
 		'RS1.close
 		response.write "<center><br><br>œ—ŒÊ«”  À»  ‘œ </center><br>"

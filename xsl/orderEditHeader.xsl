@@ -20,7 +20,12 @@
 			<td align="right" height="25px">
 				<font color="YELLOW"><xsl:value-of select="./customer/id"/> - <xsl:value-of select="./customer/accountTitle"/></font>
 			</td>
-			<td align="left"><font color="YELLOW">«” ⁄·«„ êÌ—‰œÂ:</font></td>
+			<td align="left">
+				<font color="YELLOW">
+					<xsl:if test="./isOrder!='yes'">«” ⁄·«„ êÌ—‰œÂ:</xsl:if>
+					<xsl:if test="./isOrder='yes'">”›«—‘ êÌ—‰œÂ:</xsl:if>
+				</font>
+			</td>
 			<td>
 				<input type="Text" readonly="readonly" name="SalesPerson" style="font-family: tahoma,arial ; font-size: 9pt; font-weight: bold; width: 100px">
 					<xsl:attribute name="value"><xsl:value-of select="./salesPerson"/></xsl:attribute>
@@ -87,7 +92,11 @@
 				<xsl:if test="./isOrder='yes'">
 					<td align="right" colspan="2">
 						<span style="margin-right: 18px;"> «—ÌŒ  ÕÊÌ· ﬁ—«—œ«œ° ›⁄·« „⁄·Ê„ ‰Ì” !</span>
-						<input name="returnDateNull" type="checkbox"/>
+						<input name="returnDateNull" type="checkbox">
+							<xsl:if test="./today/retIsNull='yes'">
+								<xsl:attribute name="checked">true</xsl:attribute>
+							</xsl:if>
+						</input>
 					</td>
 				</xsl:if>
 				<td align="left">
@@ -104,9 +113,14 @@
 					<xsl:if test="./isOrder='yes'">”«⁄   ÕÊÌ·:</xsl:if>
 				</td>
 				<td align="right">
-					<input type="text" name="ReturnTime" value="16:30" maxlength="5" size="3" dir="LTR" onblur="acceptTime(this);">
-					<xsl:if test="./today/retTime!=''">
-						<xsl:attribute name="value"><xsl:value-of select="./today/retTime"/></xsl:attribute>
+					<input type="text" name="ReturnTime" maxlength="5" size="3" dir="LTR" onblur="acceptTime(this);">
+					<xsl:if test="concat(./today/retIsNull,'')!='yes'">
+						<xsl:if test="concat(./today/retTime,'')!=''">
+							<xsl:attribute name="value"><xsl:value-of select="./today/retTime"/></xsl:attribute>
+						</xsl:if>
+						<xsl:if test="concat(./today/retTime,'')=''">
+							<xsl:attribute name="value">16:30</xsl:attribute>
+						</xsl:if>
 					</xsl:if>
 					</input>
 				</td>
@@ -137,7 +151,7 @@
 				</td>
 				<td align="left"> Ê÷ÌÕ«  »Ì‘ —:</td>
 				<td align="right" colspan="3" rowspan="3">
-					<textarea name="Notes" row="6" style="width:100%"><xsl:value-of select="./notes"/></textarea>
+					<textarea name="Notes" row="6" class="orderNotes"><xsl:value-of select="./notes"/></textarea>
 				</td>
 			</tr>
 			<tr class="grayColor">
@@ -158,6 +172,6 @@
 			</tr>
 	</table>
 	<div id="errMsg"></div>
-	<textarea id="outXML" name="myXML" style="display: none;"></textarea>
+	<input type="hidden" id="outXML" name="myXML"/>
 </xsl:template>
 </xsl:stylesheet>

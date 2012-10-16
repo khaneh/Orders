@@ -27,7 +27,7 @@ select case request("act")
 	case else
 		SubmenuItem=3		
 end select
-
+if Request("act")<>"printQuote" then 
 %>
 <!--#include file="top.asp" -->
 <!--#include File="../include_farsiDateHandling.asp"-->
@@ -48,7 +48,7 @@ end select
 	.rowTitle {margin: -5px 3px 0 0;color: #666;text-align: center;float: right;position: absolute;top: 0;}
 	div.myRow {margin: 10px 0 20px 0;padding: 0 3px 5px 0;}
 	div.exteraArea {margin: 5px 0;padding: 30px 3px 5px 0;position: relative;background-color: #DfDfDf;border-radius: 10px;border-width: 1px;border-color: #D1D1D1;border-style: solid;}
-	label.key-label {margin: 0px 3px 0 0px;white-space: nowrap;padding: 0 5px 0 5px;display: inline;vertical-align: middle;overflow: hidden;text-overflow: ellipsis;font-size: 11pt;font-family: "b compset"}
+	label.key-label {margin: 0px 3px 0 0px;padding: 0 5px 0 5px;display: block;vertical-align: middle;width: 80px;font-size: 11pt;font-family: "b compset"}
 	div.key-label{overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
 	.myProp {font-weight: bold;color: #40F; margin: 0px 3px 0 0px;padding: 5px 0 5px 0;}
 	div.btn label{background-color:yellow;color: blue;padding: 3px 30px 3px 30px;cursor: pointer;}
@@ -69,11 +69,19 @@ end select
 	.orderColor {background-color: black;color: yellow;}
 	.quoteColor {background-color: #559;color: yellow;}
 	.quoteColor td a:link{color: yellow;}
+	.quoteColor td a:visited{color: #47FF00;}
+	.quoteColor td a:hover{color: red;}
 	.orderColor td a:link{color: yellow;}
+	.orderColor td a:visited{color: #47FF00;}
+	.orderColor td a:hover{color: red;}
 	div.top1 {margin-top: 10px;margin-right: 20px;}
 	.grayColor{background-color: #ccc;}
-	
-	div.topBtn {margin: 10px 0 5px 0; text-align: center;}
+	.jsonSuggest li a img {float:left;margin-right:5px;}
+	.jsonSuggest li a small {display:block;text-align:right;}
+	.jsonSuggest { font-size:0.8em; }
+	ul.jsonSuggest{width: 214px;}
+	div.topBtn {margin: 10px 0 5px 0; text-align: center;position: relative;}
+	#isApprovedStamp {background-image: url("/images/approved.gif"); position: absolute;top: 0px;left: -30px;height: 92px;width: 199px;-webkit-filter: hue-rotate(120deg) drop-shadow(20px 15px 20px #000);-webkit-transform: rotate(-40deg);-moz-filter: hue-rotate(120deg) drop-shadow(20px 15px 20px #000);-moz-transform: rotate(-40deg);}
 	div.mySearch{border-color: #555599;border-width: 5px;border-style: solid;background-color: #AAAAEE;padding: 10px;margin: 10px;}
 	div.group {margin: 0px;padding: 0px 0 5px 0;min-height: 35px;position: relative;}
 	fieldset.group {
@@ -98,8 +106,8 @@ end select
 	}
 	span.groupName {
 		font-weight: bold;
-		font-size: 9pt;
-		font-family: "B titr","B yekan";
+		font-size: 13pt;
+		font-family: "B zar","B yekan";
 		padding: 2px 10px;
 		margin: 0 -3px;
 	}
@@ -122,8 +130,17 @@ end select
 	#orderPurchase{width: 350px;margin: 10px 20px 0 0;float: right;}
 	span.delCostBtn{float: left;opacity: .6;display: none;cursor: pointer;position: absolute;top:3px;left: 0;}
 	td.delCost{position: relative;}
+	div.customerHasInventory{position: relative;}
+	div.customerHasInventory div{position: absolute;top:0;left: 0;opacity: .7;}
+	textarea.orderNotes{width: 100%;height: 70px;}
+	#voidedIcon{background-image: url('/images/voided.gif');width: 200px;height: 122px;position: absolute;top: 65px;left: 290px;}
+	#printArea{position: relative;}
+	#orderFiles{position: relative;margin:10px;width: 95%; direction: ltr;}
+	#orderFiles div.fileName {font-size: small;padding: 3px 0;}
+	#orderFiles span.fileSize{font-size: smaller;margin-left: 10px;}
 </STYLE>
 <%
+end if
 if not Auth(2 , 9) then NotAllowdToViewThisPage() '«” ⁄·«„ 
 isOrder=request("isOrder")
 select case request("act")
@@ -178,7 +195,11 @@ select case request("act")
 	});
 </script>
 <hr>
-<div id='traceResult'></div>
+<div id='traceResult'>
+	<center>
+		<img style="margin:50px;" src="/images/ajaxLoad.gif"/>
+	</center>
+</div>
 <%	
 		'-----------------------------------------------------------------------------------------------------	
 	case "":				'---------------------------------------------------------------------------------
@@ -339,7 +360,11 @@ select case request("act")
 	</div>
 </FORM>
 <hr>
-<div id='traceResult'></div>
+<div id='traceResult'>
+	<center>
+		<img style="margin:50px;" src="/images/ajaxLoad.gif"/>
+	</center>
+</div>
 <script type="text/javascript">
 $(document).ready(function(){
 	$(".sec input:not(.check)").each(function(){
@@ -401,6 +426,14 @@ $(".check").click(function(){
 				createdTime.html("("+((myTime.getHours()<10)?('0'+myTime.getHours()):myTime.getHours())+':'+((myTime.getMinutes() < 10)?('0'+myTime.getMinutes()):(myTime.getMinutes()))+")");
 				
 			});
+			$(".list tr:not(.head):not(.sumTotal)").find("td:first").each(function(i,no){
+				$(no).html(i+1);
+			});
+			var sumTotal = 0;
+			$(".list tr:not(.head):not(.sumTotal)").find("td:last").each(function(i,no){
+				sumTotal += getNum($(no).html());
+			});
+			$(".list .sumTotal td:last").html(echoNum(sumTotal));
 		});
 	});
 </script>
@@ -476,6 +509,7 @@ $(".check").click(function(){
 		'-----------------------------------------------------------------------------------------------------
 		orderID=request("id")
 %>
+<script type="text/javascript" src="/js/jquery.printElement.min.js"></script>
 <script type="text/javascript">
 	TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=<%=orderID%>","/xsl/orderShowHeader.xsl?v=<%=version%>", function(result){
 		$("#orderHeader").html(result);	
@@ -485,7 +519,10 @@ $(".check").click(function(){
 		});
 	});
 	TransformXmlURL("/service/xml_getOrderProperty.asp?act=showOrder&id=<%=orderID%>","/xsl/orderShowProperty.xsl?v=<%=version%>", function(result){
-		$("#orderDetails").html(result);	
+		$("#orderDetails").html(result);
+		$('div.priceGroup').tooltip({
+	      selector: "div[rel=tooltip]"
+	    });	
 	});
 	TransformXmlURL("/service/xml_getOrderProperty.asp?act=showLog&id=<%=orderID%>","/xsl/orderShowlogs.xsl?v=<%=version%>", function(result){
 		$("#orderLogs").html(result);	
@@ -567,8 +604,77 @@ $(".check").click(function(){
 			else
 				$("#approveOrder").dialog("open");
 		});
+		$("#changeCustomer").dialog({
+			autoOpen: false,
+			title: " €ÌÌ— Õ”«» ”›«—‘",
+			height: 350
+		});
+		$("#cancelBtn").click(function(){
+			$("#cancelDlg").dialog("open");
+		});
+		$("#cancelDlg").dialog({
+			autoOpen: false,
+			title: "—œ «” ⁄·«„/”›«—‘",
+			buttons: {" «ÌÌœ":function(){
+				if ($("#cancelDlg input[name=cancelReason]").val()!=''){
+					document.location='?act=cancel&id=<%=orderID%>&reason=' + escape($("#cancelDlg input[name=cancelReason]").val());
+					$(this).dialog("close");
+				}
+			}},
+		});
+		$('#changeCustomerBtn').click(function(){
+			$("#changeCustomer").dialog("open");
+		});
+		$("input[name=search]").jsonSuggest({
+			url: '/service/json_getAccount.asp?act=account' + escape($("input[name=search]").val()),
+			minCharacters: 5,
+			maxResults: 20,
+			width: 214,
+			caseSensitive: false,
+			onSelect: function(sel){
+				document.location='?act=changeCustomer&id=<%=orderID%>&customer='+sel.id;
+			}
+		});
+		$("#printBtn").click(function(){
+			if ($("#isOrder").val()=='False'){
+				$("#printQuoteDlg").dialog("open");
+			} else {
+				$('#printArea').printElement({overrideElementCSS:['/css/order_property.css','/css/jame.css'],pageTitle:'›—„ ”›«—‘ - " & OrderID & "',printMode:'popup'});
+			}
+			
+		});
+		$("#printQuoteDlg").dialog({
+			autoOpen: false,
+			title: "‰ÕÊÂ ç«Å «” ⁄·«„",
+			buttons: {" «ÌÌœ": function(){
+				$("#printQuoteDlg").dialog("close");
+				document.location='?act=printQuote&id=<%=orderID%>&inShort=' + $("#inShort").prop("checked");
+			}}
+		});
+/*
+		if ($("#isClosed").val()!='False')
+			$("#voidedIcon").css("display","block");
+		else
+			$("#voidedIcon").css("display","none");
+*/
+		$.getJSON("/service/json_getFile.asp",
+			{act:"list",orderID:"<%=orderID%>"},
+			function (js){
+				$.each(js, function(i,s){
+					$('<div title='+s.itemName+' class="fileName"><a href="'+s.realPath+'">'+s.itemPath+'</a><span class="fileSize">'+getReadableFileSizeString(s.itemSize)+' </span></div>').appendTo('#orderFiles');
+				});
+			});
 	});
+	function getReadableFileSizeString(fileSizeInBytes) {
+	    var i = -1;
+	    var byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB'];
+	    do {
+	        fileSizeInBytes = fileSizeInBytes / 1024;
+	        i++;
+	    } while (fileSizeInBytes > 1024);
 	
+	    return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i];
+	};
 </script>
 <%
 	set rs = Conn.Execute("SELECT orders.id, orders.isClosed,orders.isApproved,orders.isOrder, isnull(invoices.Approved,0) as Approved,isnull(invoices.Issued,0) as Issued FROM orders left outer join InvoiceOrderRelations on InvoiceOrderRelations.[Order] = orders.id left outer join Invoices on Invoices.ID=InvoiceOrderRelations.Invoice WHERE orders.ID=" & orderID)
@@ -593,17 +699,33 @@ $(".check").click(function(){
 		<li>«” ⁄·«„ »—«Ì „‘ —Ì «—”«· ‘œÂ «” </li>
 	</lu>
 </div>
+<div id="changeCustomer">
+	<h5>‰«„ Ê Ì« ‘„«—Â „‘ —Ì —« Ê«—œ ﬂ‰Ìœ</h5>
+	<input type="text" size="40" name="search"/>
+	<input type="hidden" name="customerID"/>
+</div>
+<div id="cancelDlg">
+	<h3>·ÿ›« œ·Ì· ŒÊœ —« ‘—Õ œÂÌœ</h3>
+	<input type="text" size="30" name="cancelReason"/>
+</div>
+<div id="printQuoteDlg">
+	<input type="checkbox" id="inShort"/>	
+	<span>Œ·«’Â »«‘œ</span>
+</div>
 <input type="hidden" id='isOrder' value="<%=rs("isOrder")%>">
+<input type="hidden" id='isClosed' value="<%=rs("isClosed")%>">
 <input type="hidden" id='orderID' value="<%=rs("id")%>">
 <div class="topBtn">
 <%	
-	
-	if (not CBool(rs("isClosed")) and Not CBool(rs("approved")) and not CBool(rs("issued"))) then Response.write "<a class='btn' href='?act=edit&id=" & orderID & "'>ÊÌ—«Ì‘</a>"
-	if (not CBool(rs("isOrder")) and CBool(rs("isApproved"))) then Response.write "<a class='btn btn-success' href='?act=convertToOrder&id=" & orderID & "'> »œÌ· »Â ”›«—‘</a>"
-	if (not rs("isApproved")) then Response.write "<a class='btn btn-primary' href='#' id='approvedBtn'> «ÌÌœ</a>"
-	if (not CBool(rs("isClosed")) and CBool(rs("isOrder"))) then Response.write "<a class='btn' href='?act=pause&id=" & orderID & "'> Êﬁ›</a>"
-	if (not rs("isClosed") and rs("isOrder")) then Response.write "<a class='btn btn-danger' href='?act=cancel&id=" & orderID & "'>ﬂ‰”·</a>"
-	if (not rs("isClosed") and not rs("isOrder")) then Response.write "<a class='btn btn-danger' href='?act=cancel&id=" & orderID & "'>—œ «” ⁄·«„</a>"
+	isOrder = rs("isOrder")
+	if rs("isApproved") then Response.write "<div id='isApprovedStamp'></div>"
+	if (auth(2,4) and not CBool(rs("isClosed")) and not CBool(rs("issued"))) then Response.write "<a class='btn btn-primary' href='#' id='changeCustomerBtn'> €ÌÌ— Õ”«»</a>"
+	if (auth(2,2) and not CBool(rs("isClosed")) and Not CBool(rs("approved")) and not CBool(rs("issued"))) then Response.write "<a class='btn' href='?act=edit&id=" & orderID & "'>ÊÌ—«Ì‘</a>"
+	if (auth(2,1) and not CBool(rs("isOrder")) and CBool(rs("isApproved"))) then Response.write "<a class='btn btn-success' href='?act=convertToOrder&id=" & orderID & "'> »œÌ· »Â ”›«—‘</a>"
+	if (auth(2,"A") and not CBool(rs("isApproved")) and not CBool(rs("isClosed"))) then Response.write "<a class='btn btn-primary' href='#' id='approvedBtn'> «ÌÌœ</a>"
+	if (auth(2,2) and not CBool(rs("isClosed")) and CBool(rs("isOrder"))) then Response.write "<a class='btn' href='?act=pause&id=" & orderID & "'> Êﬁ›</a>"
+	if (auth(2,"C") and not rs("isClosed") and rs("isOrder")) then Response.write "<a class='btn btn-danger' href='#' id='cancelBtn'>ﬂ‰”·</a>"
+	if (not rs("isClosed") and not rs("isOrder")) then Response.write "<a class='btn btn-danger' href='#' id='cancelBtn'>—œ «” ⁄·«„</a>"
 	if (rs("isApproved")) then
 		set rs = Conn.Execute("select * from InvoiceOrderRelations where [order]=" & orderID)
 		while not rs.eof
@@ -611,16 +733,30 @@ $(".check").click(function(){
 			rs.MoveNext
 		wend
 	end if
+	if (auth(2,"B")) then Response.write "<a class='btn' href='#' id='printBtn'>ç«Å</a>" '--- print 
 %>
 </div>
 <div id="orderLogs"></div>
-<div id="orderHeader"></div>
-<div id="orderDetails"></div>
+<div id="printArea">
+<!-- 	<div id="voidedIcon"></div> -->
+	<div id="orderHeader"></div>
+	<div id="orderDetails"></div>
+</div>
 <div id="orderMessages"></div>
 <div id="orderStock"></div>
 <div id="orderPurchase"></div>
 <div id="orderCosts"></div>
+<div id="orderFiles" class="well well-small"></div>
 <%		
+		'-----------------------------------------------------------------------------------------------------
+	case "changeCustomer":		'-----------------------------------------------------------------------------
+		'-----------------------------------------------------------------------------------------------------
+		orderID = cdbl(Request("id"))
+		customerID = cdbl(Request("customer"))
+		if not Auth(2 , 4) then NotAllowdToViewThisPage()
+		conn.Execute("update orders set customer = " & customerID & " where id = " & orderID)
+		conn.Execute("update invoices set customer = " & customerID & " from invoices inner join invoiceOrderRelations on invoiceOrderRelations.invoice = invoices.id where invoiceOrderRelations.[order] = " & orderID)
+		response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode("„‘ —Ì «Ì‰ ”›«—‘  €ÌÌ— ÅÌœ« ﬂ—œ")
 		'-----------------------------------------------------------------------------------------------------
 	case "submitNew":		'---------------------------------------------------------------------------------
 		'-----------------------------------------------------------------------------------------------------
@@ -638,14 +774,42 @@ $(".check").click(function(){
 	case "submitEdit":		'---------------------------------------------------------------------------------
 		'-----------------------------------------------------------------------------------------------------
 		orderID=cdbl(request("id"))
-		Conn.Execute ("update orders set property=N'" & request.form("myXML") & "', productionDuration=" &cint(request.form("productionDuration"))& ", Notes=N'" &sqlSafe(request.form("Notes"))& "', returnDate=N'" &request.form("returnDateTime")& "', paperSize=N'" &sqlSafe(request.form("paperSize"))& "', OrderTitle=N'" &sqlSafe(request.form("OrderTitle"))& "', qtty=" &cdbl(request.form("qtty"))& ", price='" & sqlSafe(request.form("totalPrice")) & "',LastUpdatedDate=getDate(), LastUpdatedBy=" &session("ID")& ", Customer=" &sqlSafe(request.form("customerID"))& ",isApproved=0 where id="&orderID)
-		conn.Execute("delete InvoiceLines where Invoice in (select invoice from InvoiceOrderRelations where [Order]=" & orderID & ")")
-		response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode("«ÿ·«⁄«  »Â —Ê“ ‘œ")
+		set rs = Conn.Execute("select orders.isClosed, orders.isApproved, orders.isOrder, isnull(invoices.approved,0) as approved, isnull(invoices.issued,0) as issued from orders left outer join InvoiceOrderRelations on orders.id=InvoiceOrderRelations.[order] left outer join invoices on InvoiceOrderRelations.invoice = invoices.id where orders.id = " & orderID)
+		msg=""
+		errMsg=""
+		if rs.eof then 
+			errMsg = "ç‰Ì‰ ‘„«—Â ”›«—‘/«” ⁄·«„ «Ì ÅÌœ« ‰‘œ!!!!"
+		elseif rs("isClosed") then 
+			errMsg = "”›«—‘ »” Â ‘œÂ! ›·–« «„ﬂ«‰ ÊÌ—«Ì‘ ¬‰ ÊÃÊœ ‰œ«—œ"
+		elseif rs("issued") then 
+			errMsg = "Œÿ«Ì ⁄ÃÌ»! ”›«—‘ »” Â ‰‘œÂ «„« ’«œ— ‘œÂ!!!"
+		elseif rs("approved") then 
+			errMsg = "’Ê— Õ”«»  «ÌÌœ ‘œÂ"
+		elseif rs("isApproved") then 
+			msg = "”›«—‘/«” ⁄·«„  «ÌÌœ ‘œÂ —« ÊÌ—«Ì‘ ‰„ÊœÌœ°<br> ›·–« «“  «ÌÌœ Œ«—Ã ‘œ<br>"
+		end if
+		if errMsg="" then
+			if Request.form("returnDateNull")="on" then 
+				returnDateTime="null"
+			else
+				returnDateTime = "N'" & request.form("returnDateTime") & "'"
+			end if
+			if request.form("myXML")<>"" then 
+				Conn.Execute ("update orders set property=N'" & request.form("myXML") & "', productionDuration=" &cint(request.form("productionDuration"))& ", Notes=N'" &sqlSafe(request.form("Notes"))& "', returnDate=" & returnDateTime & ", paperSize=N'" &sqlSafe(request.form("paperSize"))& "', OrderTitle=N'" &sqlSafe(request.form("OrderTitle"))& "', qtty=" &cdbl(request.form("qtty"))& ", price='" & sqlSafe(request.form("totalPrice")) & "',LastUpdatedDate=getDate(), LastUpdatedBy=" &session("ID")& ", Customer=" &sqlSafe(request.form("customerID"))& ",isApproved=0 where id="&orderID)
+				conn.Execute("delete InvoiceLines where Invoice in (select invoice from InvoiceOrderRelations where [Order]=" & orderID & ")")
+				response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode(msg & "«ÿ·«⁄«  »Â —Ê“ ‘œ")
+			else	
+				response.redirect "?act=show&id=" & orderID & "&errMsg=" & Server.URLEncode("Œÿ«ÌÌ —Œ œ«œÂ!")
+			end if
+		else
+			response.redirect "?act=show&id=" & orderID & "&errMsg=" & Server.URLEncode(errMsg)
+		end if
 		'-----------------------------------------------------------------------------------------------------
 	case "convertToOrder":	'---------------------------------------------------------------------------------
 		'-----------------------------------------------------------------------------------------------------
 		orderID=cdbl(request("id"))
-		set rs = Conn.Execute("select orders.*, accounts.arBalance, accounts.creditLimit from orders inner join accounts on orders.customer=accounts.id where orders.id=" & orderID)
+		if not Auth(2 , 1) then NotAllowdToViewThisPage()
+		set rs = Conn.Execute("select orders.*, accounts.arBalance, accounts.creditLimit, accounts.status as accountStatus from orders inner join accounts on orders.customer=accounts.id where orders.id=" & orderID)
 		if rs("isOrder") then 
 			Conn.Close
 			response.redirect "?act=show&id=" & orderID &"&errmsg=" & Server.URLEncode("ﬁ»·« »Â ”›«—‘  »œÌ· ‘œÂ!")
@@ -653,8 +817,13 @@ $(".check").click(function(){
 			Conn.Close
 			response.redirect "?act=show&id=" & orderID &"&errmsg=" & Server.URLEncode("«» œ« «Ì‰ «” ⁄·«„ —«  «ÌÌœ ﬂ‰Ìœ!")
 		elseif (cdbl(rs("arBalance"))+cdbl(rs("creditLimit")) < 0) then 
+			CustomerID = cdbl(rs("customer"))
 			Conn.Close
 			response.redirect "?act=show&id=" & orderID &"&errmsg=" & Server.URLEncode("»œÂÌ «Ì‰ Õ”«» «“ „Ì“«‰ «⁄ »«— ¬‰ »Ì‘ — ‘œÂ°<br> ·ÿ›« »« ”—Å—”  ›—Ê‘ Â„«Â‰ê ﬂ‰Ìœ.<br><a href='../CRM/AccountInfo.asp?act=show&selectedCustomer=" & CustomerID & "'>‰„«Ì‘ Õ”«»</a>")
+		elseif CInt(rs("accountStatus"))<>1 then 
+			CustomerID = cdbl(rs("customer"))
+			Conn.Close
+			response.redirect "?act=show&id=" & orderID &"&errmsg=" & Server.URLEncode("«Ì‰ Õ”«» ›⁄«· ‰Ì” !<br> ·ÿ›« »« ”—Å—”  ›—Ê‘ Â„«Â‰ê ﬂ‰Ìœ.<br><a href='../CRM/AccountInfo.asp?act=show&selectedCustomer=" & CustomerID & "'>‰„«Ì‘ Õ”«»</a>")
 		else
 			Conn.Execute("update orders set isOrder=1,isApproved=0,returnDate=null where id=" & orderID)
 			Conn.Close
@@ -672,6 +841,7 @@ $(".check").click(function(){
 		else
 			if (not rs("isOrder")) then 
 				Conn.execute("update orders set isApproved=1,approvedDate=getDate() where id="& orderID)
+				response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode("«” ⁄·«„  «ÌÌœ ‘œ")
 			else
 				set data=server.createobject("MSXML2.DomDocument")
 				set keys=server.createobject("MSXML2.DomDocument")
@@ -746,17 +916,27 @@ $(".check").click(function(){
 						if rowDesc<>"" then desc = desc & "(" & rowDesc & ")"
 						if hasKey>0 then 
 							'-----------------------STOCK
-							if hasStock="yes" then
+							if hasStock="yes" or hasStock="option" then
+								customerHasStock = "0"
 								set tmp = row.selectNodes("./key[@name='" & groupName & "-stockName']")
 								if tmp.length>0 then 
 									stockName =  tmp(0).text
+									if stockName = "" then 
+										hasStock = "no" 
+									else
+										hasStock = "yes" 
+									end if
 									set tmp = row.selectNodes("./key[@name='" & groupName & "-stockDesc']")
 									if tmp.length>0 then
 										stockDesc = tmp(0).text
 									else
 										stockDesc = ""
 									end if
-								end if							
+									set tmp = row.selectNodes("./key[@name='" & groupName & "-customer']")
+									if tmp.length>0 then
+										if tmp(0).text="on" then customerHasStock = "1"
+									end if
+								end if
 							end if 
 							'-----------------------PURCHACE
 							if hasPurchase="yes" then 
@@ -774,9 +954,15 @@ $(".check").click(function(){
 	' 						Response.write "<br>" & groupName & "<br>"
 							thePrice = cdbl(Replace(tmp.text,",",""))
 							set tmp = row.selectSingleNode("./key[@name='" & groupName & "-dis']")
-							dis = CDbl(Replace(tmp.text,"%",""))
+							dis = tmp.text
 							set tmp = row.selectSingleNode("./key[@name='" & groupName & "-over']")
-							over = CDbl(Replace(tmp.text,"%",""))
+							over = tmp.text
+							set tmp = row.selectNodes("./key[@name='" & groupName & "-reverse']")
+							if tmp.length>0 then 
+								reverse = tmp(0).text
+							else
+								reverse = 0
+							end if
 							if row.selectNodes("./key[@name='" & groupName & "-qtty']").length>0 then 
 								set tmp = row.selectSingleNode("./key[@name='" & groupName & "-qtty']")
 								qtty = CDbl(Replace(tmp.text,",",""))
@@ -792,42 +978,77 @@ $(".check").click(function(){
 							else
 								sets = 1
 							end if
-							if row.selectNodes("./key[@name='" & groupName & "-size']").length>0 then 
-								set tmp = row.selectSingleNode("./key[@name='" & groupName & "-size']")
-								if InStr(tmp.text,"X")>0 then
-									l = CDbl(split(tmp.text,"X")(0))
-									w = CDbl(split(tmp.text,"X")(1))
-								elseif InStr(tmp.GetAttribute("label"),"3")>0 then 
-									l=42
-									w=30
-								elseif InStr(tmp.GetAttribute("label"),"4")>0 then
-									l=21
-									w=30
+							if row.selectNodes("./key[@name='" & groupName & "-l']").length>0 then 
+								set tmp = row.selectSingleNode("./key[@name='" & groupName & "-l']")
+								l = CDbl(tmp.text)
+								set tmp = row.selectSingleNode("./key[@name='" & groupName & "-w']")
+								w = CDbl(tmp.text)
+							else
+								if row.selectNodes("./key[@name='" & groupName & "-size']").length>0 then 
+									set tmp = row.selectSingleNode("./key[@name='" & groupName & "-size']")
+									if InStr(tmp.text,"X")>0 then
+										l = CDbl(split(replace(tmp.text,"other:",""),"X")(0))
+										w = CDbl(split(replace(tmp.text,"other:",""),"X")(1))
+									elseif InStr(tmp.GetAttribute("label"),"3")>0 then 
+										l=42
+										w=30
+									elseif InStr(tmp.GetAttribute("label"),"4")>0 then
+										l=21
+										w=30
+									else
+										sizeID=tmp.text
+										if sGroup.selectNodes("./key[@name='" & groupName & "-size']/option[" & sizeID & "]").length>0 then 
+											set tmp = sGroup.selectSingleNode("./key[@name='" & groupName & "-size']/option[" & sizeID & "]")
+											if InStr(tmp.GetAttribute("label"),"X")>0 then 
+												l = CDbl(split(tmp.GetAttribute("label"),"X")(0))
+												w = CDbl(split(tmp.GetAttribute("label"),"X")(1))
+											end if
+										end if
+									end if
 								else
-									sizeID=tmp.text
-									if sGroup.selectNodes("./key[@name='" & groupName & "-size']/option[" & sizeID & "]").length>0 then 
-										set tmp = sGroup.selectSingleNode("./key[@name='" & groupName & "-size']/option[" & sizeID & "]")
-										if InStr(tmp.GetAttribute("label"),"X")>0 then 
-											l = CDbl(split(tmp.GetAttribute("label"),"X")(0))
-											w = CDbl(split(tmp.GetAttribute("label"),"X")(1))
+									l=0
+									w=0
+								end if
+							end if
+	 						appQtty = qtty * sets
+	 						
+	 						if InStr(dis,"%")<>0 then
+		 						dis = CDbl(Replace(dis,"%",""))
+								if dis<>100 then 
+									if InStr(reverse,"%")<>0 then
+										price = thePrice * (100/(100-dis-CDbl(Replace(reverse,"%",""))))
+									else
+										price = thePrice * (100/(100-dis)) + CDbl(reverse)
+									end if
+								else
+									if thePrice = 0 then 
+										price = 0
+									else
+										if InStr(over,"%")<>0 then
+											over = CDbl(Replace(over,"%",""))
+											price = thePrice * (100/over)
+										else
+											over = CDbl(over)
+											price = thePrice + over
 										end if
 									end if
 								end if
-							else
-								l=0
-								w=0
-							end if
-	 						appQtty = qtty * sets
-							if dis<>100 then 
-								price = thePrice * (100/(100-dis))
-							else
-								if thePrice = 0 then 
-									price = 0
+								discount = price * dis / 100
+								if InStr(reverse,"%")<>0 then
+									theReverse = price * CDbl(Replace(reverse,"%","")) / 100
 								else
-									price = thePrice * (100/over)
+									theReverse = CDbl(reverse)
+								end if
+							else
+								discount = CDbl(dis)
+								if InStr(reverse,"%")<>0 then
+									price = (thePrice + discount) * (100/(100-CDbl(Replace(reverse,"%","")))) 
+									theReverse = price * CDbl(Replace(reverse,"%","")) / 100
+								else
+									theReverse = CDbl(reverse)
+									price = thePrice + discount + theReverse
 								end if
 							end if
-							discount = price * dis / 100
 							if isADefault then 
 								if groupName<>"paper" then
 									vat = thePrice * vatRate / 100
@@ -840,18 +1061,18 @@ $(".check").click(function(){
 							hasVat = 1
 							if groupName="paper" then hasVat=0
 							'-------------------- INVOICE Insert
-							mySQL = "INSERT INTO InvoiceLines (Invoice, Item, Description, Length, Width, Qtty, Sets, AppQtty, Price, Discount, [Reverse], Vat, hasVat) VALUES (" & InvoiceID & ", " & item & ", N'" & left(desc,100) & "', " & l & ", " & w & ", " & qtty & ", " & sets & ", " & appQtty & ", " & price & ", " & discount & ", 0, " & vat & ", " & hasVat & ")"
+							mySQL = "INSERT INTO InvoiceLines (Invoice, Item, Description, Length, Width, Qtty, Sets, AppQtty, Price, Discount, [Reverse], Vat, hasVat) VALUES (" & InvoiceID & ", " & item & ", N'" & left(desc,100) & "', " & l & ", " & w & ", " & qtty & ", " & sets & ", " & appQtty & ", " & price & ", " & discount & ", " & theReverse & ", " & vat & ", " & hasVat & ")"
 							'Response.write mySQL
 							Conn.Execute(mySQL)
 							TotalPrice = TotalPrice + price
 							TotalDiscount = TotalDiscount + discount
-							TotalReverse = TotalReverse + 0
+							TotalReverse = TotalReverse + theReverse
 							TotalReceivable = TotalReceivable + thePrice + vat
 							totalVat = totalVat + vat
 							'-------------------- STOCK Insert
 							if hasStock = "yes" then 
 								if requestID="" then
-									mySQL = "INSERT INTO InventoryItemRequests (orderID,ItemName,comment,qtty,createdBy,invoiceItem,rowID) VALUES (" & orderID & ",N'" & stockName & "',N'" & stockDesc & "'," & appQtty & "," & Session("ID") &"," & item & "," & rowID & ")"
+									mySQL = "INSERT INTO InventoryItemRequests (orderID,ItemName,comment,qtty,createdBy,invoiceItem,rowID, customerHaveInvItem) VALUES (" & orderID & ",N'" & stockName & "',N'" & stockDesc & "'," & appQtty & "," & Session("ID") &"," & item & "," & rowID & "," & customerHasStock & ")"
 									Conn.Execute(mySQL)
 								else
 									'----------- Check UPDATE or INSERT ?
@@ -859,19 +1080,19 @@ $(".check").click(function(){
 	' 								Response.write mySQL
 									set rsr = Conn.Execute(mySQL)
 									if rsr.eof then 
-										mySQL = "INSERT INTO InventoryItemRequests (orderID,ItemName,comment,qtty,createdBy,invoiceItem,rowID) VALUES (" & orderID & ",N'" & stockName & "',N'" & stockDesc & "'," & appQtty & "," & Session("ID") &"," & item & "," & rowID & ")"
+										mySQL = "INSERT INTO InventoryItemRequests (orderID,ItemName,comment,qtty,createdBy,invoiceItem,rowID, customerHaveInvItem) VALUES (" & orderID & ",N'" & stockName & "',N'" & stockDesc & "'," & appQtty & "," & Session("ID") &"," & item & "," & rowID & "," & customerHasStock & ")"
 										Conn.Execute(mySQL)
 									else
 										requestID = Replace(requestID,rsr("id") & ",","")
-										if rsr("status")="new" and (rsr("qtty")<>appQtty or rsr("itemName")<>stockName or rsr("comment")<>stockDesc) then 
+										if rsr("status")="new" and (cdbl(rsr("qtty")) <> cdbl(appQtty) or Trim(rsr("itemName")) <> Trim(stockName) or Trim(rsr("comment")) <> Trim(stockDesc) or CBool(rsr("customerHaveInvItem"))<> CBool(customerHasStock)) then 
 											'------- IF CHANGE UPDATE
-											mySQL = "UPDATE InventoryItemRequests SET ItemName=N'" & stockName & "',comment=N'" & stockDesc & "',qtty=" & appQtty & ",createdBy=" & Session("ID") & " where id=" & rsr("id")
+											mySQL = "UPDATE InventoryItemRequests SET ItemName=N'" & stockName & "', comment=N'" & stockDesc & "', qtty=" & appQtty & ", createdBy=" & Session("ID") & ", customerHaveInvItem=" & customerHasStock & " where id=" & rsr("id")
 											Conn.Execute(mySQL)
 										elseif rsr("status")="del" then 
 											'------- IF delete Insert new request
-											mySQL = "INSERT INTO InventoryItemRequests (orderID,ItemName,comment,qtty,createdBy,invoiceItem,rowID) VALUES (" & orderID & ",N'" & stockName & "',N'" & stockDesc & "'," & appQtty & "," & Session("ID") &"," & item & "," & rowID & ")"
+											mySQL = "INSERT INTO InventoryItemRequests (orderID,ItemName,comment,qtty,createdBy,invoiceItem,rowID,customerHaveInvItem) VALUES (" & orderID & ",N'" & stockName & "',N'" & stockDesc & "'," & appQtty & "," & Session("ID") &"," & item & "," & rowID & "," & customerHasStock & ")"
 										Conn.Execute(mySQL)
-										elseif rsr("qtty")<>appQtty or rsr("itemName")<>stockName or rsr("comment")<>stockDesc then
+										elseif CDbl(rsr("qtty")) <> CDbl(appQtty) or Trim(rsr("itemName"))<> Trim(stockName) or Trim(rsr("comment")) <> Trim(stockDesc) or CBool(rsr("customerHaveInvItem"))<> CBool(customerHasStock) then
 											errMSG = errMSG & "»—«Ì "  & stockName & " ÕÊ«·Â ’«œ— ‘œÂ. Å”  €ÌÌ— œ— ¬‰ „„ﬂ‰ ‰Ì” <br>"
 										end if
 									end if
@@ -894,13 +1115,13 @@ $(".check").click(function(){
 										Conn.Execute(mySQL)
 									else
 										purchaseID = Replace(purchaseID,rsp("id") & ",","")
-										if rsp("status")="new" and (rsp("qtty")<>appQtty or rsp("typeName")<>purchaseName or rsr("comment")<>purchaseDesc or rsp("typeID")<>purchaseTypeID or rsp("price")<>thePrice) then
+										if rsp("status")="new" and (cdbl(rsp("qtty")) <> cdbl(appQtty) or trim(rsp("typeName")) <> trim(purchaseName) or trim(rsr("comment")) <> trim(purchaseDesc) or cdbl(rsp("typeID")) <> cdbl(purchaseTypeID) or cdbl(rsp("price")) <> cdbl(thePrice)) then
 											mySQL = "UPDATE PurchaseRequests SET typeName = N'" & purchaseName & "',comment = N'" & purchaseDesc & "', typeID = " & purchaseTypeID & ", qtty = " & appQtty & ", price=" & thePrice & " WHERE id=" & rsp("id")
 											Conn.Execute(mySQL)
 										elseif rsp("status")="del" then 
 											mySQL="INSERT INTO PurchaseRequests (orderID,typeName,comment,typeID,qtty,createdBy,price,isService,rowID) VALUES (" & orderID & ",N'" & purchaseName & "',N'" & purchaseDesc & "'," & purchaseTypeID & "," & appQtty & "," & Session("ID") &"," & thePrice & ",1," & rowID & ")"
 											Conn.Execute(mySQL)
-										elseif rsp("qtty")<>appQtty or rsp("typeName")<>purchaseName or rsr("comment")<>purchaseDesc or rsp("typeID")<>purchaseTypeID then
+										elseif cdbl(rsp("qtty")) <> cdbl(appQtty) or cdbl(rsp("typeID")) <> cdbl(purchaseTypeID) then
 											errMSG = errMSG & "»—«Ì "  & purchaseName & " ”›«—‘ Œ—Ìœ «ÌÃ«œ ‘œÂ. Å”  €ÌÌ— œ— ¬‰ „„ﬂ‰ ‰Ì” <br>"
 										end if
 									end if
@@ -946,9 +1167,11 @@ $(".check").click(function(){
 				if errMSG="" then 
 					Conn.execute("update orders set isApproved=1,approvedDate=getDate() where id="& orderID)
 					'response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode("<b> «ÌÌœ ‘œ</b>")
-					Response.write "<a href='?act=show&id=" & orderID & "&msg=" & Server.URLEncode("<b> «ÌÌœ ‘œ</b>")&"'>»—Ê »Â</a>"
+' 					Response.write "<a href='?act=show&id=" & orderID & "&msg=" & Server.URLEncode("<b> «ÌÌœ ‘œ</b>")&"'>»—Ê »Â</a>"
+					response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode("<b> «ÌÌœ ‘œ</b>")
 				else
-					Response.write "<a href='?act=show&id=" & orderID & "&errmsg=" & Server.URLEncode(errMSG)&"'>»—Ê »Â</a>"
+					response.redirect "?act=show&id=" & orderID & "&errmsg=" & Server.URLEncode(errMSG)
+' 					Response.write "<a href='?act=show&id=" & orderID & "&errmsg=" & Server.URLEncode(errMSG)&"'>»—Ê »Â</a>"
 				end if
 				rs.Close
 				set rs=Nothing
@@ -965,8 +1188,77 @@ $(".check").click(function(){
 		'-----------------------------------------------------------------------------------------------------
 	case "cancel":			'---------------------------------------------------------------------------------
 		'-----------------------------------------------------------------------------------------------------
-		
-		
+		if not Auth(2 , "C") then NotAllowdToViewThisPage()
+		orderID=cdbl(request("id"))
+		set rs = Conn.Execute("select orders.createdBy, orders.isClosed, orders.isApproved, orders.isOrder, isnull(invoices.approved,0) as approved, isnull(invoices.issued,0) as issued from orders left outer join InvoiceOrderRelations on orders.id=InvoiceOrderRelations.[order] left outer join invoices on InvoiceOrderRelations.invoice = invoices.id where orders.id = " & orderID)
+		errMsg = ""
+		msg = ""
+		msgTo = rs("createdBy")
+		if Request("reason")="" then
+			errMsg = "Õ „« »«Ìœ œ·Ì· œ«‘ Â »«‘Â"
+		elseif rs.eof then 
+			errMsg = "ç‰Ì‰ ”›«—‘Ì ÅÌœ« ‰‘œ!"
+		elseif CBool(rs("issued")) then 
+			errMsg = "«Ì‰ ”›«—‘ ›«ﬂ Ê— ’«œ— ‘œÂ œ«—œ! ›·–« ﬂ‰”·Ì ¬‰ „„ﬂ‰ ‰Ì” "
+		elseif CBool(rs("approved")) then 
+			errMsg = "«Ì‰ ”›«—‘ ›«ﬂ Ê—  «ÌÌœ ‘œÂ œ«—œ! ›·–« ﬂ‰”·Ì ¬‰ „„ﬂ‰ ‰Ì” ° „ê— ›«ﬂ Ê— „—»ÊÿÂ «“  «ÌÌœ Œ«—Ã ‘Êœ"
+		elseif CBool(rs("isClosed")) then
+			errMsg = "«Ì‰ ”›«—‘ ﬁ»·« ﬂ‰”· ‘œÂ"
+		elseif not CBool(rs("isOrder")) then
+			conn.Execute("update orders set isClosed=1 where id=" & orderID)
+			msgFrom=session("id")
+' 			msgTo=rs(-1)
+			msgTitle		= "—œ «” ⁄·«„"
+			msgBody			= Request("reason")
+			RelatedTable	= "orders"
+			relatedID		= orderID
+			replyTo			= "null"
+			IsReply			= 0
+			urgent			= 1
+			MsgDate			= shamsiToday()
+			MsgTime			= currentTime10()
+			msgType			= 0
+			MySQL = "INSERT INTO Messages (MsgFrom, MsgTo, MsgTime, MsgDate, IsRead, MsgTitle, MsgBody, replyTo, IsReply, relatedID, RelatedTable, urgent, type) VALUES ( "& MsgFrom & ", "& MsgTo & ", N'"& MsgTime & "', N'"& MsgDate & "', 0, N'"& MsgTitle & "', N'"& MsgBody & "', "& replyTo & ", "& IsReply & ", '"& relatedID & "', '"& RelatedTable & "', "& urgent & ", " & msgType & ")"
+			conn.Execute MySQL
+			msg = "«” ⁄·«„ —œ ‘œ"
+		elseif CBool(rs("isOrder")) then
+			set rs = conn.Execute("select * from InventoryItemRequests where status<>'del' and OrderID=" & orderID)
+			while not rs.EOF
+				if rs("status") = "pick" then errMsg = errMsg & "»—«Ì " & rs("itemName") & " ÕÊ«·Â ’«œ— ‘œÂ<br>"
+				rs.MoveNext
+			wend
+			set rs = conn.Execute("select * from PurchaseRequests where status<>'del' and OrderID=" & orderID)
+			while not rs.EOF
+				if rs("status") = "ord" then errMsg = errMsg & "»—«Ì " & rs("typeName") & " ”›«—‘ Œ—Ìœ «ÌÃ«œ ‘œÂ<br>"
+				rs.MoveNext
+			wend
+			if errMsg="" then 
+				Conn.Execute("update InventoryItemRequests set status='del' where status='new' and orderID = " & orderID)
+				Conn.Execute("update PurchaseRequests set status='del' where status='new' and orderID = " & orderID)
+				conn.Execute("update invoices set voided = 1, voidedBy = " & Session("id") & ", voidedDate = '" & shamsitoday() & "' where id in (select invoice from InvoiceOrderRelations where [order]=" & orderID & ")")
+				conn.Execute("update orders set isClosed=1 where id=" & orderID)
+				msgFrom=session("id")
+' 				msgTo=0
+				msgTitle		= "ﬂ‰”· ”›«—‘"
+				msgBody			= Request("reason")
+				RelatedTable	= "orders"
+				relatedID		= orderID
+				replyTo			= "null"
+				IsReply			= 0
+				urgent			= 1
+				MsgDate			= shamsiToday()
+				MsgTime			= currentTime10()
+				msgType			= 0
+				MySQL = "INSERT INTO Messages (MsgFrom, MsgTo, MsgTime, MsgDate, IsRead, MsgTitle, MsgBody, replyTo, IsReply, relatedID, RelatedTable, urgent, type) VALUES ( "& MsgFrom & ", "& MsgTo & ", N'"& MsgTime & "', N'"& MsgDate & "', 0, N'"& MsgTitle & "', N'"& MsgBody & "', "& replyTo & ", "& IsReply & ", '"& relatedID & "', '"& RelatedTable & "', "& urgent & ", " & msgType & ")"
+				conn.Execute MySQL
+				msg = "”€«—‘ ﬂ‰”· ‘œ"
+			end if
+		end if
+		if errMsg<>"" then 
+			response.redirect "?act=show&id=" & orderID & "&errMsg=" & Server.URLEncode(errMsg)
+		else
+			response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode(msg)
+		end if
 		'-----------------------------------------------------------------------------------------------------
 	case "customerSearch":	'---------------------------------------------------------------------------------
 		'-----------------------------------------------------------------------------------------------------
@@ -1085,6 +1377,10 @@ $(".check").click(function(){
 			$("#errMsg").html(" Ì—«é —« Ê«—œ ﬂ‰Ìœ");
 			$('input[name=qtty]').focus();
 			return false;
+		} else if ($("[name=productionDuration]").size()==1 && $("[name=productionDuration]").val()==''){
+			$("#errMsg").html("“„«‰  Ê·Ìœ —« Ê«—œ ﬂ‰Ìœ");
+			$('input[name=productionDuration]').focus();
+			return false;
 		} else {
 			return makeOutXML();
 		} 
@@ -1116,19 +1412,23 @@ $(".check").click(function(){
 	case "edit":		'---------------------------------------------------------------------------------
 		'-----------------------------------------------------------------------------------------------------
 		orderID=request("id")
+		if not Auth(2 , 2) then NotAllowdToViewThisPage()
 %>
 <script type="text/javascript" src="calcOrder.js"></script>
 <script type="text/javascript">
 function checkValidation() {
-	if ($("input[name=ReturnDate]").val().replace(/^\s*|\s*$/g,'')==''){
-		$("#errMsg").html("„Ê⁄œ «⁄ »«— —« Ê«—œ ﬂ‰Ìœ");
-		$('input[name=ReturnDate]').focus();
-		return false;
-	} else if ($('input[name="ReturnTime"]').val().replace(/^\s*|\s*$/g,'')==''){
-		$("#errMsg").html("“„«‰ (”«⁄ ) «⁄ »«— —« Ê«—œ ﬂ‰Ìœ");
-		$('input[name=ReturnTime]').focus();
-		return false;
-	} else if ($('input[name=OrderTitle]').val().replace(/^\s*|\s*$/g,'')==''){
+	if (!$("[name=returnDateNull]").is(":checked")){
+		if ($("input[name=ReturnDate]").val().replace(/^\s*|\s*$/g,'')==''){
+			$("#errMsg").html("„Ê⁄œ  ÕÊÌ· ⁄„·Ì —« Ê«—œ ﬂ‰Ìœ");
+			$('input[name=ReturnDate]').focus();
+			return false;
+		} else if ($('input[name="ReturnTime"]').val().replace(/^\s*|\s*$/g,'')==''){
+			$("#errMsg").html("“„«‰ (”«⁄ )  ÕÊÌ· ⁄„·Ì —« Ê«—œ ﬂ‰Ìœ");
+			$('input[name=ReturnTime]').focus();
+			return false;
+		} 
+	} 
+	if ($('input[name=OrderTitle]').val().replace(/^\s*|\s*$/g,'')==''){
 		$("#errMsg").html("⁄‰Ê«‰ ﬂ«— œ«Œ· ›«Ì· —« Ê«—œ ﬂ‰Ìœ");
 		$('input[name=OrderTitle]').focus();
 		return false;
@@ -1150,6 +1450,10 @@ TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=<%=orderID%>"
 			window.open('../CRM/AccountInfo.asp?act=show&selectedCustomer='+$('a#customerID').attr("myID"), 'showCustomer');
 			e.preventDefault();
 		});
+		$("[name=returnDateNull]").click(function(){
+			$("[name=ReturnDate]").val("");
+			$("[name=ReturnTime]").val("");
+		});
 	});
 	TransformXmlURL("/service/xml_getOrderProperty.asp?act=editOrder&id=<%=orderID%>","/xsl/orderEditProperty.xsl?v=<%=version%>", function(result){
 		$("#orderDetails").html(result);
@@ -1170,6 +1474,66 @@ TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=<%=orderID%>"
 	</div>
 </FORM>
 <div id='orderDetails'></div>
+<%		'-----------------------------------------------------------------------------------------------------
+	case "printQuote":		'---------------------------------------------------------------------------------
+		'-----------------------------------------------------------------------------------------------------
+%>		<!--#include File="../version.asp" -->	<%
+		orderID=request("id")
+%>	
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=windows-1256">
+	<meta http-equiv="Content-Language" content="fa">
+	<title></title>
+	<link rel="StyleSheet" href="/css/jame.css" type="text/css">
+	<link rel="StyleSheet" href="/css/font.css" type="text/css">
+	<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
+	<script type="text/javascript" src="/js/xslTransform.js"></script>
+	<style>
+		.logo{margin: 10px 0px 0 0; }
+		.logo img{width: 220px;height: 60px;}
+		body{font-family: "b zar","b yaghut", "b compset", tahoma;font-size: 14pt; direction: rtl;}
+		.sign{position: relative;}
+		.sign p{position:absolute;left: 20px;top:30px;text-align: center;}
+		.inthename{font-weight: bold;text-align: center;margin: 30px 0 0 0;}
+		.date{text-align: left;}
+		.tail{position: fixed;bottom: 5px;right: -130px; text-align: right;width: 100%; font-size: 12pt;}
+	</style>
+	<script type="text/javascript">
+		var queries = {};
+		$.each(document.location.search.substr(1).split('&'),function(c,q){
+			var i = q.split('=');
+			queries[i[0].toString()] = i[1].toString();
+		});
+		TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=" + queries['id'],"/xsl/quotePrintHead.xsl?v=<%=version%>", function(result){
+			$("#head").html(result);
+			TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=" + queries['id'],"/xsl/quotePrintTail.xsl?v=<%=version%>", function(result){
+				$("#tail").html(result);
+				
+				var xslURL;
+				if (queries['inShort']=="false")
+					xslURL = "/xsl/quotePrintProperty.xsl?v=<%=version%>";
+				else
+					xslURL = "/xsl/quotePrintPropertyShort.xsl?v=<%=version%>";
+				TransformXmlURL("/service/xml_getOrderProperty.asp?act=showOrder&id=" + queries['id'], xslURL, function(result){
+					$("#quote").html(result);
+					window.print();
+					document.location='?act=show&id=<%=orderID%>';
+				});
+			});
+		});
+		 
+		
+	</script>
+</head>
+
+<body>
+	<div id="head"></div>
+	<div id="quote"></div>
+	<div id="tail"></div>
+</body>
+</html>
 <%			
 end select
 %>

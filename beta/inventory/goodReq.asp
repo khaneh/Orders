@@ -62,7 +62,7 @@ if request.form("Submit")="À»  œ—ŒÊ«”  ﬂ«·«" then
 		end if
 		RS4.close
 		
-		mySql="INSERT INTO InventoryItemRequests (order_ID, ItemName, ItemID, comment, ReqDate, Qtty, unit, CreatedBy) VALUES ("& order_ID & ", N'"& otype & "', "& item & ", N'"& comment & "',N'"& shamsiToday() & "', '"& Qtty & "', N'"& unit & "' , "& CreatedBy & " )"
+		mySql="INSERT INTO InventoryItemRequests (orderID, ItemName, ItemID, comment, ReqDate, Qtty, unit, CreatedBy) VALUES ("& order_ID & ", N'"& otype & "', "& item & ", N'"& comment & "',getDate(), '"& Qtty & "', N'"& unit & "' , "& CreatedBy & " )"
 		conn.Execute mySql
 		'RS1.close
 		response.redirect "goodReq.asp" 
