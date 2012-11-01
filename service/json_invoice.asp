@@ -81,7 +81,7 @@ select case request("act")
 				end if
 				rs.MoveNext
 			wend		
-			RFD = TotalReceivable - fix(TotalReceivable / 1000) * 1000
+			RFD = TotalReceivable - fix(TotalReceivable / 5000) * 5000
 			TotalReceivable = TotalReceivable - RFD
 			TotalDiscount = TotalDiscount + RFD
 			if RFD > 0 then
@@ -166,7 +166,7 @@ select case request("act")
 				j("err")=1
 				j("msg")="خطا"
 			else
-				mySQL="SELECT Invoices.*,orders.isApproved FROM Invoices inner join InvoiceOrderRelations on Invoices.ID=InvoiceOrderRelations.Invoice inner join orders on InvoiceOrderRelations.[Order] = orders.id WHERE Invoices.ID="& InvoiceID
+				mySQL="SELECT Invoices.*,orders.isApproved, orders.status FROM Invoices inner join InvoiceOrderRelations on Invoices.ID=InvoiceOrderRelations.Invoice inner join orders on InvoiceOrderRelations.[Order] = orders.id WHERE Invoices.ID="& InvoiceID
 				Set RS1 = conn.Execute(mySQL)
 				if not RS1.eof then
 					if RS1("Voided") = True then
@@ -181,6 +181,12 @@ select case request("act")
 					elseif RS1("isApproved") = False then
 						j("err")=1
 						j("msg")="لطفا سفارش را تاييد كنيد"
+					elseif rs1("status")="3" then 
+						j("err")=1
+						j("msg")="سفارش این فاکتور به دلیل خطایی که سفارش رخ داده متوقف شده. <br>دلیل آن در یادداشتی در ذیل سفارش شرح داده شده. <br>فلذا آنرا تایید نمی‌کنیم!"
+					elseif rs1("status")<>"1" then 
+						j("err")=1
+						j("msg")="سفارش در جریان نیست! پس کاری نمی شود کرد!"
 					end if
 					mySQL = "SELECT COUNT(Invoice) AS OrderCount FROM (SELECT DISTINCT InvoiceOrderRelations.Invoice FROM InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice = Invoices.ID WHERE InvoiceOrderRelations.[Order] IN (SELECT [Order] FROM InvoiceOrderRelations WHERE Invoice=204133) and Invoices.Voided=0) tbl"
 					set RS1= conn.Execute(mySQL)
@@ -262,7 +268,7 @@ select case request("act")
 				j("err")=1
 				j("msg")="خطا! سال مالي جاري بسته شده و شما قادر به تغيير در آن نيستيد."
 			else
-				mySQL="SELECT Invoices.*,orders.isApproved FROM Invoices inner join InvoiceOrderRelations on Invoices.ID=InvoiceOrderRelations.Invoice inner join orders on InvoiceOrderRelations.[Order] = orders.id WHERE Invoices.ID="& InvoiceID
+				mySQL="SELECT Invoices.*,orders.isApproved,orders.status FROM Invoices inner join InvoiceOrderRelations on Invoices.ID=InvoiceOrderRelations.Invoice inner join orders on InvoiceOrderRelations.[Order] = orders.id WHERE Invoices.ID="& InvoiceID
 				Set RS1 = conn.Execute(mySQL)
 				if not RS1.eof then
 					if RS1("Voided") = True then
@@ -274,6 +280,12 @@ select case request("act")
 					elseif RS1("isApproved") = False then
 						j("err")=1
 						j("msg")="لطفا سفارش را تاييد كنيد"
+					elseif rs1("status")="3" then 
+						j("err")=1
+						j("msg")="سفارش این فاکتور به دلیل خطایی که سفارش رخ داده متوقف شده. <br>دلیل آن در یادداشتی در ذیل سفارش شرح داده شده. <br>فلذا آنرا صادر نمی‌کنیم!"
+					elseif rs1("status")<>"1" then 
+						j("err")=1
+						j("msg")="سفارش در جریان نیست! پس کاری نمی شود کرد!"
 					end if
 					if j("err")<>1 then
 						mySQL="UPDATE Invoices SET Issued=1, IssuedDate=N'"& issueDate & "', IssuedBy='"& session("ID") & "' WHERE (ID='"& InvoiceID & "')"
@@ -383,7 +395,7 @@ select case request("act")
 				'*** Type = 4 means ARItem is a Reverse Invoice
 				'***
 				'*********  Finding the ARItem of Invoice / Reverse Invoice
-				mySQL="SELECT ID FROM ARItems WHERE (Type = '"& itemType & "') AND (Link='"& InvoiceID & "')"
+				mySQL="SELECT ID FROM ARItems WHERE Voided=0 and (Type = '"& itemType & "') AND (Link='"& InvoiceID & "')"
 				Set RS1=conn.Execute(mySQL)
 				voidedARItem=RS1("ID")
 				'*********  Finding other ARItems related to this Item

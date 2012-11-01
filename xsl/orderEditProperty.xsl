@@ -371,7 +371,13 @@
 												<xsl:value-of select="./@label"/>
 											</option>
 										</xsl:for-each>
-										<option value='-1'>”«Ì—</option>
+										<option value='-1'>
+											<xsl:if test="concat(substring(./@value,1,6),'')='other:'">
+												<xsl:attribute name="selected">true</xsl:attribute>
+												<xsl:value-of select="substring(./@value,7)"/>
+											</xsl:if>
+											<xsl:if test="concat(substring(./@value,1,6),'')!='other:'">”«Ì—</xsl:if>
+										</option>
 									</select>
 									<input type='text' onblur='addOther(this);'>
 										<xsl:attribute name="name"><xsl:value-of select="./@name"/>-addValue</xsl:attribute>

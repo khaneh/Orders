@@ -157,22 +157,24 @@ function readyForm() {
 		else
 			$(this).addClass("forceErr");
 	});
-	$.getJSON("/service/json_getService.asp",
-		{act:"getList"},
-		function (json){
-			var thisItem;
-			var myAppend;
-			$("select[name=service-item]").each(function(j){
-				thisItem = $(this);
-				$.each(json, function(i,s){
-					myAppend = "<option ";
-					if (s.id == thisItem.attr("thisValue"))
-						myAppend += "selected ";
-					myAppend +="value="+s.id+">"+s.name+"</option>"
-					thisItem.append(myAppend);
+	if ($("select[name=service-item]").size()>0){
+		$.getJSON("/service/json_getService.asp",
+			{act:"getList"},
+			function (json){
+				var thisItem;
+				var myAppend;
+				$("select[name=service-item]").each(function(j){
+					thisItem = $(this);
+					$.each(json, function(i,s){
+						myAppend = "<option ";
+						if (s.id == thisItem.attr("thisValue"))
+							myAppend += "selected ";
+						myAppend +="value="+s.id+">"+s.name+"</option>"
+						thisItem.append(myAppend);
+					});
 				});
-			});
-	});
+		});
+	}
 	$('.funcBtn p').tooltip({
       selector: "a[rel=tooltip]"
     });
@@ -182,6 +184,49 @@ function readyForm() {
 	$('div.priceGroupValue').tooltip({
       selector: "input[rel=tooltip]"
     });
+    if ($("input[name=catalogItem-code]").size()>0){
+	    $("input[name=catalogItem-code]").focus(function(){
+	    	var mySearch = $(this);
+		    $("input[name=catalogItem-code]").jsonSuggest({
+				url: '/service/json_getCatalog.asp?act=find&a=1' + escape(mySearch.val()),
+				minCharacters: 5,
+				maxResults: 20,
+				width: 214,
+				caseSensitive: false,
+				onSelect: function(sel){
+					var mySel = sel.id.split("|");
+					var myGroup = $(mySearch).closest("div.group");
+					mySearch.val(mySel[2]);
+					myGroup.find("input[name=catalogItem-qtty]").val(mySel[1]);
+					var price = parseInt(mySel[0]);
+					calcDisOver(myGroup,price);
+					myGroup.find("input[name=catalogItem-group]").val(mySel[3]);
+					myGroup.find("input[name=catalogItem-desc]").val(mySel[4]);
+					checkForce(mySearch);
+					
+				}
+			});
+	    });
+    }
+    if ($("input[name=invRequest-itemCode]").size()>0){
+	    $("input[name=invRequest-itemCode]").focus(function(){
+	    	var mySearch = $(this);
+		    $("input[name=invRequest-itemCode]").jsonSuggest({
+				url: '/service/json_getInventory.asp?act=findItem&a=1' + escape(mySearch.val()),
+				minCharacters: 5,
+				maxResults: 20,
+				width: 214,
+				caseSensitive: false,
+				onSelect: function(sel){
+					var mySel = sel.id.split("|");
+					var myGroup = $(mySearch).closest("div.group");
+					myGroup.find("input[name=invRequest-name]").val(mySel[1]);
+					mySearch.val(mySel[0]);					
+				}
+			});
+	    });
+    }
+
 }
 function checkForce(e){
 	var myGroup = $(e).closest("div.group");
@@ -258,6 +303,47 @@ function cloneRow(e){
 	var myRow = $(e).closest(".exteraArea");
 	
 	var newRow = myRow.clone();
+	if (newRow.find("input[name=catalogItem-code]").size()>0){
+	    newRow.find("input[name=catalogItem-code]").focus(function(){
+	    	var mySearch = $(this);
+		    newRow.find("input[name=catalogItem-code]").jsonSuggest({
+				url: '/service/json_getCatalog.asp?act=find',
+				minCharacters: 5,
+				maxResults: 20,
+				width: 214,
+				caseSensitive: false,
+				onSelect: function(sel){
+					var mySel = sel.id.split("|");
+					var myGroup = $(mySearch).closest("div.group");
+					mySearch.val(mySel[2]);
+					myGroup.find("input[name=catalogItem-qtty]").val(mySel[1]);
+					var price = parseInt(mySel[0]);
+					calcDisOver(myGroup,price);
+					myGroup.find("input[name=catalogItem-group]").val(mySel[3]);
+					myGroup.find("input[name=catalogItem-desc]").val(mySel[4]);
+					checkForce(mySearch);
+				}
+			});
+	    });
+    }
+    if (newRow.find("input[name=invRequest-itemCode]").size()>0){
+	    newRow.find("input[name=invRequest-itemCode]").focus(function(){
+	    	var mySearch = $(this);
+		    $("input[name=invRequest-itemCode]").jsonSuggest({
+				url: '/service/json_getInventory.asp?act=findItem',
+				minCharacters: 5,
+				maxResults: 20,
+				width: 214,
+				caseSensitive: false,
+				onSelect: function(sel){
+					var mySel = sel.id.split("|");
+					var myGroup = $(mySearch).closest("div.group");
+					myGroup.find("input[name=invRequest-name]").val(mySel[1]);
+					mySearch.val(mySel[0]);	
+				}
+			});
+	    });
+    }
 /*
 	$('input:checkbox',newRow).each(function (){
 		if ($(this).val().substr(0,3)=='on-')
@@ -388,10 +474,26 @@ function calc_plate(e){
 	calc_addedPaper(e);
 	calc_total();
 }
+function calc_invRequest(e){
+	var myGroup = $(e).closest("div.group");
+	if (myGroup.find("[name$=-disBtn]").is(":checked")){
+		if (!parseInt(myGroup.find("input[name=invRequest-qtty]").val()))
+			myGroup.find("input[name=invRequest-qtty]").val("");
+		else
+			myGroup.find("input[name=invRequest-qtty]").val(parseInt(myGroup.find("input[name=invRequest-qtty]").val()));
+		myGroup.find("input[name$=-stockName]").val(myGroup.find("input[name$=-name]").val());
+		myGroup.find("input[name$=-stockDesc]").val(myGroup.find("input[name$=-desc]").val());
+		calcDisOver(myGroup,getNum(myGroup.find("input[name$=-price]").val()));
+	} else {
+		calcDisOver(myGroup,0);
+	}
+	checkForce(e);
+	calc_total();
+}
 function calc_print(e){
 	var myGroup = $(e).closest("div.group");
 	if (myGroup.find("[name$=-disBtn]").is(":checked")){
-		var color = parseInt(myGroup.parent().find("input[name=plate-color-count]:first").val());
+		var color = parseInt(myGroup.find("input[name=print-color]:first").val());
 		var spcolor = parseInt(myGroup.find("input[name=print-sp-color]:first").val());
 		var form = parseInt(myGroup.find("input[name=print-form]:first").val());
 		var qtty = getNum(myGroup.find("input[name=print-qtty]:first").val());
@@ -428,11 +530,37 @@ function calc_print(e){
 			calc_selefon(myGroup.parent().find("[name=selefon-disBtn]"));
 		if (myGroup.parent().find("[name=uv-disBtn]").is(":checked"))
 			calc_uv(myGroup.parent().find("[name=uv-disBtn]"));
+	} else if ($(e).attr("name")=="print-type"){
+		if (myGroup.parent().find("[name=verni-disBtn]").is(":checked")){
+			myGroup.parent().find("select[name=verni-type] option[value=" + myGroup.find("select[name=print-type] option:selected").val() + "]").prop("selected",true);
+			calc_verni(myGroup.parent().find("[name=verni-disBtn]"));
+		}
 	}
 	checkForce(e);
 	calc_addedPaper(e);
 	calc_paper(myGroup.parent().find("[name=paper-weight]"));
 	calc_verni(myGroup.parent().find("[name=verni-mat]"));
+	calc_total();
+}
+function calc_transport(e){
+	var myGroup = $(e).closest("div.group");
+	if (myGroup.find("[name$=-disBtn]").is(":checked")){
+		switch ($(e).attr("name")){
+			case 'transport-price':
+				$(e).val(echoNum(getNum($(e).val())));
+				break;
+			case 'transport-dis':
+				var price=getNum(myGroup.find("input[name$=-price]:first").val());
+				calcDisOver(myGroup,price);			
+				break;
+			case 'transport-over':
+				var price=getNum(myGroup.find("input[name$=-price]:first").val());
+				calcDisOver(myGroup,price);
+				break;
+		}	
+	} else
+		calcDisOver(myGroup,0);		
+	checkForce(e);
 	calc_total();
 }
 function calc_binding(e){
@@ -485,15 +613,7 @@ function calc_binding(e){
 function calc_paper(e){
 	var myGroup = $(e).closest("div.group");
 	if (myGroup.find("[name$=-disBtn]").is(":checked")){
-		var qtty = 0;
-		if (myGroup.parent().find("[name=print-disBtn]").is("checked")) {
-			myGroup.find("[name=paper-after-cut_qtty]").prop("readonly",true);
-		} else {
-			myGroup.find("input[name=paper-after-cut_qtty]").prop("readonly",false);
-			qtty = getNum(myGroup.find("input[name=paper-after-cut_qtty]").val());
-			myGroup.find("input[name=paper-after-cut_qtty]").val(echoNum(qtty));
-			myGroup.find("input[name=paper-qtty]").val(echoNum(qtty));
-		}
+		
 		var afterCut = myGroup.find("[name=paper-after-cut_size]");
 		var beforCut = myGroup.find("[name=paper-size]:first").children(":selected");
 		afterCut.val(afterCut.val().replace("x","X").replace("-","X").replace("*","X").replace(" ","X"));
@@ -502,26 +622,37 @@ function calc_paper(e){
 		var bw=parseFloat(beforCut.text().split("X")[0]);
 		var bh=parseFloat(beforCut.text().split("X")[1]);
 		if ((bh*bw)<(ah*aw)){
-			rate = 1;
+			var rate = 1;
 			afterCut.val(beforCut.text());
 		} else {
 			var rate = parseInt(bh * bw / (ah * aw));
+		}
+		if (myGroup.parent().find("[name=print-disBtn]").is(":checked")) {
+			myGroup.find("[name=paper-after-cut_qtty]").prop("readonly",true);
+		} else {
+			myGroup.find("input[name=paper-after-cut_qtty]").prop("readonly",false);
+			var paperAfter = getNum(myGroup.find("input[name=paper-after-cut_qtty]").val());
+			myGroup.find("input[name=paper-after-cut_qtty]").val(echoNum(paperAfter));
+			myGroup.find("input[name=paper-qtty]").val(echoNum( Math.ceil(paperAfter/rate)));
+//			console.log(qtty);
+//			console.log(rate);
+			
 		}
 		//console.log(bw +" X " + bh);
 		myGroup.find("input[name$=-l]").val(bh);
 		myGroup.find("input[name$=-w]").val(bw);
 		myGroup.find("input[name=paper-in-form]").val(rate);
-		if ($(e).attr("name")!="paper-price" || ($(e).val()=="" && $(e).attr("name")=="paper-price")){
-			var weight = parseInt(myGroup.find("[name=paper-weight]").children(":selected").text());
-			var price = parseInt(myGroup.find("[name=paper-type]").children(":selected").attr("price"));
-			qtty = getNum(myGroup.find("[name=paper-qtty]").val());
-			myGroup.find("[name=paper-qtty]").val(echoNum(qtty));
-			var customer = 1;
-			if (myGroup.find("[name=paper-customer]").is(":checked"))
-				customer = 0;
-			price *= customer * bh * bw / 10000 * weight / 1000 * qtty;
-			calcDisOver(myGroup,price);
-		}
+		var weight = parseInt(myGroup.find("[name=paper-weight]").children(":selected").text());
+		var price = parseInt(myGroup.find("[name=paper-type]").children(":selected").attr("price"));
+		var qtty = getNum(myGroup.find("input[name=paper-qtty]").val());
+		myGroup.find("input[name=paper-qtty]").val(echoNum(qtty));
+		var customer = 1;
+		if (myGroup.find("[name=paper-customer]").is(":checked"))
+			customer = 0;
+		//console.log("h: " + bh + ",w: " + bw + ",weight: " + weight + ",qtty: " + qtty + ",price: " + price);
+		price *= customer * bh * bw / 10000 * weight / 1000 * qtty;
+		
+		calcDisOver(myGroup,price);
 		//------------- Related Event -------------
 		if ($(e).attr("name")=="paper-after-cut_size"){
 			if (myGroup.parent().find("[name=selefon-disBtn]").is(":checked"))
@@ -655,12 +786,15 @@ function calc_addedPaper(e){
 			}
 		}
 	
-		result = Math.ceil(result); 
+		var result = Math.ceil(result); 
 		thisRow.find("input[name=paper-wastepaper]:first").val(echoNum(result));
 		var rate = parseInt(thisRow.find("input[name=paper-in-form]:first").val());
 		var paperAfter = getNum(thisRow.find("input[name=paper-after-cut_qtty]:first").val());
 		//console.log("r: "+rate + " after: "+ paperAfter);
-		paperQtty = Math.ceil((result + paperAfter)/rate);
+		var paperQtty = Math.ceil((result + paperAfter)/rate);
+		if (!thisRow.find("[name=print-disBtn]").is(":checked") && paperAfter<rate) {
+			paperQtty = 1;
+		}
 		thisRow.find("input[name=paper-qtty]:first").val(echoNum(paperQtty));
 	}
 	//calc_paper(thisRow.children("div[groupname=paper]:first").children("input[name=paper-in-form]:first"));
@@ -687,14 +821,15 @@ function calc_verni(e){
 		if (!myPrint.find("[name$=-disBtn]").is(":checked"))
 			alert("ÇÎØÇÑ! áØÝÇ Ç ÑÇ ÇäÊÎÇÈ ßäíÏ. ãÍÇÓÈå ÈÇ ÎØÇ ÑæÈÑæ ÎæÇåÏ ÔÏ.");
 		var qtty = getNum(myGroup.find("input[name=verni-qtty]:first").val());
+		myGroup.find("input[name=verni-qtty]:first").val(echoNum(qtty));
 		if (qtty<5000)
 			qtty = 5000;
 		var form = parseInt(myGroup.find("input[name=verni-form]:first").val());
 		var verni_wat = parseInt(myGroup.find("select[name=verni-wat]:first").children(":selected").val());
-		var printType = parseInt(myPrint.find("select[name=print-type]:first").children(":selected").val());
-		var printPrice = parseInt(myPrint.find("select[name=print-type]:first").children(":selected").attr("price"));
+		var price = parseInt(myGroup.find("select[name=verni-type]:first").children(":selected").attr("price"));
+		var type = parseInt(myGroup.find("select[name=verni-type]:first").children(":selected").val());
 		var rate = 30; 
-		if (printType==3) {
+		if (type==3) {
 			myGroup.children("select[name=verni-wat]:first").val(1);
 			if (parseInt(myGroup.find("select[name=verni-mat] option:selected").val())==1)
 				rate = 50;
@@ -708,7 +843,7 @@ function calc_verni(e){
 		
 		//var price = parseInt(myGroup.find("select[name=verni-mat]:first").children(":selected").attr("price").split(",")[verni_wat-1]);
 	/* 	console.log("rate:" + rate+", form:"+form+", qtty:"+qtty+", price:"+machinPrice); */
-		var price = printPrice * (100 + rate)/100;
+		price *= (100 + rate)/100;
 		price *= qtty * form;
 		calcDisOver(myGroup,price);	
 	} else {
@@ -739,6 +874,7 @@ function calc_selefon(e){
 		var mat = parseInt(myGroup.find("[name=selefon-mat]:first").children(":selected").val());
 		var price = parseFloat(myGroup.find("[name=selefon-hot]:first").children(":selected").attr("price").split(",")[mat-1]);
 		var qtty = getNum(myGroup.find("input[name=selefon-qtty]:first").val());
+		myGroup.find("input[name=selefon-qtty]:first").val(echoNum(qtty));
 		if (qtty<1000)
 			qtty = 1000;
 		var form = parseInt(myGroup.find("input[name=selefon-form]:first").val());
@@ -775,6 +911,7 @@ function calc_uv(e){
 	var myGroup = $(e).closest("div.group");
 	if (myGroup.find("[name=uv-disBtn]").is(":checked")){
 		var qtty = getNum(myGroup.find("input[name=uv-qtty]:first").val());
+		myGroup.find("input[name=uv-qtty]:first").val(echoNum(qtty));
 		var form = parseInt(myGroup.find("input[name=uv-form]:first").val());
 		var mat = parseInt(myGroup.find("[name=uv-mat]:first").children(":selected").val()) - 1;
 		var spot = parseInt(myGroup.find("[name=uv-spot]:first").children(":selected").val()) - 1;
@@ -812,18 +949,22 @@ function calc_uv(e){
 }
 function calc_fold(e){
 	var myGroup = $(e).closest("div.group");
-	switch ($(e).attr("name")){
-		case 'fold-price':
-			$(e).val(echoNum(getNum($(e).val())));
-			break;
-		case 'fold-dis':
-			var price=getNum(myGroup.find("input[name$=-price]:first").val());
-			calcDisOver(myGroup,price);	
-			break;
-		case 'fold-over':
-			var price=getNum(myGroup.find("input[name$=-price]:first").val());
-			calcDisOver(myGroup,price);	
-			break;
+	if (myGroup.find("[name$=-disBtn]").is(":checked")){
+		switch ($(e).attr("name")){
+			case 'fold-price':
+				$(e).val(echoNum(getNum($(e).val())));
+				break;
+			case 'fold-dis':
+				var price=getNum(myGroup.find("input[name$=-price]:first").val());
+				calcDisOver(myGroup,price);	
+				break;
+			case 'fold-over':
+				var price=getNum(myGroup.find("input[name$=-price]:first").val());
+				calcDisOver(myGroup,price);	
+				break;
+		}
+	} else {
+		calcDisOver(myGroup,0);
 	}
 	checkForce(e);
 	calc_total();
@@ -832,6 +973,7 @@ function calc_fold(e){
 function calc_packing(e){
 	var myGroup = $(e).closest("div.group");
 //	console.log($(e));
+
 	var qtty = parseInt(myGroup.find("input[name$=-qtty]").val());
 	var price = parseInt(myGroup.find("select[name$=-type] option:selected").attr("price"));
 	price *= qtty;
@@ -848,25 +990,29 @@ function calc_packing(e){
 
 function calc_service(e){
 	var myGroup = $(e).closest("div.group");
-	switch ($(e).attr("name")){
-		case 'service-price':
-			$(e).val(echoNum(getNum($(e).val())));
-			break;
-		case 'service-dis':
-			var price=getNum(myGroup.find("input[name$=-price]:first").val());
-			calcDisOver(myGroup,price);	
-			break;
-		case 'service-over':
-			var price=getNum(myGroup.find("input[name$=-price]:first").val());
-			calcDisOver(myGroup,price);	
-			break;
+	if (myGroup.find("[name$=-disBtn]").is(":checked")){
+		switch ($(e).attr("name")){
+			case 'service-price':
+				$(e).val(echoNum(getNum($(e).val())));
+				break;
+			case 'service-dis':
+				var price=getNum(myGroup.find("input[name$=-price]:first").val());
+				calcDisOver(myGroup,price);	
+				break;
+			case 'service-over':
+				var price=getNum(myGroup.find("input[name$=-price]:first").val());
+				calcDisOver(myGroup,price);	
+				break;
+		}
+		myGroup.find("input[name$=-purchaseName]").val(myGroup.find("[name=service-item] option:selected").text());
+		myGroup.find("input[name$=-purchaseDesc]").val((myGroup.find("[name=service-description]")[0]).value);
+		myGroup.find("input[name$=-purchaseTypeID]").val(myGroup.find("[name=service-item] option:selected").val());
+		$("[name=print-type]").each(function(i){
+			calc_addedPaper($(this));
+		});
+	} else {
+		calcDisOver(myGroup,0);
 	}
-	myGroup.find("input[name$=-purchaseName]").val(myGroup.find("[name=service-item] option:selected").text());
-	myGroup.find("input[name$=-purchaseDesc]").val((myGroup.find("[name=service-description]")[0]).value);
-	myGroup.find("input[name$=-purchaseTypeID]").val(myGroup.find("[name=service-item] option:selected").val());
-	$("[name=print-type]").each(function(i){
-		calc_addedPaper($(this));
-	});
 	checkForce(e);
 	calc_total();
 }
@@ -890,101 +1036,115 @@ function calc_serviceIN(e){
 }
 function calc_proof(e){
 	var myGroup = $(e).closest("div.group");
-	if ($(e).attr("name")=='proof-date'){
-		if ($(e).val()=="//") {
-			var today = new Date();
-			$(e).val($.format.date(today,"yyyy/MM/dd"));
-		} else {
-			var rege=/^(13)?[7-9][0-9]\/[0-1]?[0-9]\/[0-3]?[0-9]$/;
-			if( rege.test($(e).val()) ) {
-				var SP = $(e).val().split("/");
-				if (SP[0].length == 2) SP[0] = "13" + SP[0] ;
-				if (SP[1].length == 1) SP[1] = "0"  + SP[1] ;
-				if (SP[2].length == 1) SP[2] = "0"  + SP[2] ;
-				$(e).val(SP.join("/"));	
-			}
-			if(!rege.test($(e).val())||( SP[0]<'1376' || SP[1]>'12' || SP[2]>'31' )) {
-				$(e).val("ÎØÇ!");
-				$(e).focus();
+	if (myGroup.find("[name$=-disBtn]").is(":checked")){
+		if ($(e).attr("name")=='proof-date'){
+			if ($(e).val()=="//") {
+				var today = new Date();
+				$(e).val($.format.date(today,"yyyy/MM/dd"));
+			} else {
+				var rege=/^(13)?[7-9][0-9]\/[0-1]?[0-9]\/[0-3]?[0-9]$/;
+				if( rege.test($(e).val()) ) {
+					var SP = $(e).val().split("/");
+					if (SP[0].length == 2) SP[0] = "13" + SP[0] ;
+					if (SP[1].length == 1) SP[1] = "0"  + SP[1] ;
+					if (SP[2].length == 1) SP[2] = "0"  + SP[2] ;
+					$(e).val(SP.join("/"));	
+				}
+				if(!rege.test($(e).val())||( SP[0]<'1376' || SP[1]>'12' || SP[2]>'31' )) {
+					$(e).val("ÎØÇ!");
+					$(e).focus();
+				}
 			}
 		}
+		var form = parseInt(myGroup.find("input[name=proof-form]:first").val());
+		var proofSize = myGroup.find("input[name=proof-size]");
+		proofSize.val(proofSize.val().replace("x","X").replace("-","X").replace("*","X").replace(" ","X"));
+		var w = parseFloat(proofSize.val().split("X")[0]);
+		var h = parseFloat(proofSize.val().split("X")[1]);
+		if (w>0 && h>0)
+			myGroup.parent().find("input[name=paper-after-cut_size]").val(w + "X" + h);
+		myGroup.parent().find("input[name=print-form]:first").val(form);
+		myGroup.parent().find("input[name=plate-qtty]:first").val(form);
+		myGroup.parent().find("input[name=verni-form]:first").val(form);
+		myGroup.parent().find("input[name=uv-form]:first").val(form);
+		myGroup.parent().find("input[name=selefon-form]:first").val(form);
+		calc_print(myGroup.parent().find("input[name=print-form]:first"));
+		calc_verni(myGroup.parent().find("input[name=verni-form]:first"));
+		calc_uv(myGroup.parent().find("input[name=uv-form]:first"));
+		calc_selefon(myGroup.parent().find("input[name=selefon-form]:first"));
+		calc_plate(myGroup.parent().find("input[name=plate-qtty]:first"));
+	
+		var result = 0;
+		if (myGroup.find("[name=proof-dammy]").is(":checked"))
+			result += Math.round(parseInt(myGroup.find("[name=proof-dammy]").attr("price")) * w * h * form);
+		if (myGroup.find("[name=proof_digital]").is(":checked"))
+			result += parseInt(myGroup.find("[name=proof_digital]").attr("price")) * form;
+		if (myGroup.children("[name=proof_iso]").is(":checked"))
+			result += Math.round(parseInt(myGroup.find("[name=proof_iso]").attr("price")) * w * h * form);
+		calcDisOver(myGroup,result);
+	} else {
+		calcDisOver(myGroup,0);
 	}
-	var form = parseInt(myGroup.find("input[name=proof-form]:first").val());
-	var proofSize = myGroup.find("input[name=proof-size]");
-	proofSize.val(proofSize.val().replace("x","X").replace("-","X").replace("*","X").replace(" ","X"));
-	var w = parseFloat(proofSize.val().split("X")[0]);
-	var h = parseFloat(proofSize.val().split("X")[1]);
-	myGroup.parent().find("input[name=paper-after-cut_size]").val(w + "X" + h);
-	myGroup.parent().find("input[name=print-form]:first").val(form);
-	myGroup.parent().find("input[name=plate-qtty]:first").val(form);
-	myGroup.parent().find("input[name=verni-form]:first").val(form);
-	myGroup.parent().find("input[name=uv-form]:first").val(form);
-	myGroup.parent().find("input[name=selefon-form]:first").val(form);
-	calc_print(myGroup.parent().find("input[name=print-form]:first"));
-	calc_verni(myGroup.parent().find("input[name=verni-form]:first"));
-	calc_uv(myGroup.parent().find("input[name=uv-form]:first"));
-	calc_selefon(myGroup.parent().find("input[name=selefon-form]:first"));
-	calc_plate(myGroup.parent().find("input[name=plate-qtty]:first"));
-
-	var result = 0;
-	if (myGroup.find("[name=proof-dammy]").is(":checked"))
-		result += Math.round(parseInt(myGroup.find("[name=proof-dammy]").attr("price")) * w * h * form);
-	if (myGroup.find("[name=proof_digital]").is(":checked"))
-		result += parseInt(myGroup.find("[name=proof_digital]").attr("price")) * form;
-	if (myGroup.children("[name=proof_iso]").is(":checked"))
-		result += Math.round(parseInt(myGroup.find("[name=proof_iso]").attr("price")) * w * h * form);
-	calcDisOver(myGroup,result);
+	
 	checkForce(e);
 	calc_total();
 }
 function calc_delivery(e){
 	var myGroup = $(e).closest("div.group");
-	switch ($(e).attr("name")){
-		case 'delivery-price':
-			$(e).val(echoNum(getNum($(e).val())));
-			break;
-		case 'delivery-dis':
-			var price=getNum(myGroup.find("input[name$=-price]:first").val());
-			calcDisOver(myGroup,price);			
-			break;
-		case 'delivery-over':
-			var price=getNum(myGroup.find("input[name$=-price]:first").val());
-			calcDisOver(myGroup,price);
-			break;
-		case 'delivery-point':
-			myGroup.find("[name=delivery-address]").val($(e).children(":selected").attr("addr"));
-			if ($(e).children(":selected").val()==3){
-				$.getJSON("../CRM/json_getAccount.asp",
-					{act:"getAddr",id:$("input[name=customerID]:first").val()},
-					function(json){
-						if (json.addr1!="")
-							myGroup.find("[name=delivery-address]").val(json.addr1);
-						else
-							myGroup.find("[name=delivery-address]").val(json.addr2);
-					});
-			}
-			break;
-	}		
+	if (myGroup.find("[name$=-disBtn]").is(":checked")){
+		switch ($(e).attr("name")){
+			case 'delivery-price':
+				$(e).val(echoNum(getNum($(e).val())));
+				break;
+			case 'delivery-dis':
+				var price=getNum(myGroup.find("input[name$=-price]:first").val());
+				calcDisOver(myGroup,price);			
+				break;
+			case 'delivery-over':
+				var price=getNum(myGroup.find("input[name$=-price]:first").val());
+				calcDisOver(myGroup,price);
+				break;
+			case 'delivery-point':
+				myGroup.find("[name=delivery-address]").val($(e).children(":selected").attr("addr"));
+				if ($(e).children(":selected").val()==3){
+					$.getJSON("../CRM/json_getAccount.asp",
+						{act:"getAddr",id:$("input[name=customerID]:first").val()},
+						function(json){
+							if (json.addr1!="")
+								myGroup.find("[name=delivery-address]").val(json.addr1);
+							else
+								myGroup.find("[name=delivery-address]").val(json.addr2);
+						});
+				}
+				break;
+		}	
+	} else {
+		calcDisOver(myGroup,0);
+	}	
 	checkForce(e);
 	calc_total();
 
 }
 function calc_cutting(e){
 	var myGroup = $(e).closest("div.group");
-	switch ($(e).attr("name")){
-		case 'cutting-price':
-			$(e).val(echoNum(getNum($(e).val())));
-			myGroup.find("input[name$=-dis]:first").val("0%");
-			myGroup.find("input[name$=-over]:first").val("0%");
-			break;
-		case 'cutting-dis':
-			var price=getNum(myGroup.find("input[name$=-price]:first").val());
-			calcDisOver(myGroup,price);
-			break;
-		case 'cutting-over':
-			var price=getNum(myGroup.find("input[name$=-price]:first").val());
-			calcDisOver(myGroup,price);
-			break;
+	if (myGroup.find("[name$=-disBtn]").is(":checked")){
+		switch ($(e).attr("name")){
+			case 'cutting-price':
+				$(e).val(echoNum(getNum($(e).val())));
+				myGroup.find("input[name$=-dis]:first").val("0%");
+				myGroup.find("input[name$=-over]:first").val("0%");
+				break;
+			case 'cutting-dis':
+				var price=getNum(myGroup.find("input[name$=-price]:first").val());
+				calcDisOver(myGroup,price);
+				break;
+			case 'cutting-over':
+				var price=getNum(myGroup.find("input[name$=-price]:first").val());
+				calcDisOver(myGroup,price);
+				break;
+		}
+	} else {
+		calcDisOver(myGroup,0);
 	}
 	checkForce(e);
 	calc_total();
@@ -1383,6 +1543,11 @@ function calc_piramonFrame(e){
 	} else {
 		calcDisOver(myGroup,0);
 	}
+	checkForce(e);
+	calc_total();
+}
+function calc_catalogItem(e){
+	var myGroup = $(e).closest("div.group");
 	checkForce(e);
 	calc_total();
 }

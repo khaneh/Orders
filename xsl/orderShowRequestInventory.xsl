@@ -8,17 +8,24 @@
 			<xsl:attribute name="title">
 				<xsl:value-of select="./Comment/."/>
 			</xsl:attribute>
-			<span>
-				<xsl:attribute name="class">
-					<xsl:value-of select="./StatusClass/."/>
+			<a>
+				<xsl:attribute name="href">
+					<xsl:if test="concat(./link/.,'')!=''">
+						<xsl:value-of select="concat('../inventory/default.asp?show=',./link/.)"/>
+					</xsl:if>
 				</xsl:attribute>
-				<xsl:value-of select="./Status/."/>
-			</span>
-			<span><xsl:value-of select="./ItemName/."/></span>
-			<span>(йзого </span>
-			<xsl:value-of select="./Qtty/."/> 
-			<xsl:value-of select="./unit/."/>
-			<span>)</span>
+				<span>
+					<xsl:attribute name="class">
+						<xsl:value-of select="./StatusClass/."/>
+					</xsl:attribute>
+					<xsl:value-of select="./Status/."/>
+				</span>
+				<span><xsl:value-of select="./ItemName/."/></span>
+				<span>(йзого </span>
+				<xsl:value-of select="./Qtty/."/> 
+				<xsl:value-of select="./unit/."/>
+				<span>)</span>
+			</a>
 			<xsl:if test="./customer=-1">
 				<div class="label label-info">гясгАМ</div>
 			</xsl:if>

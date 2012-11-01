@@ -98,3 +98,5 @@ div.customerHasInventory{position: relative;}
 div.customerHasInventory div{position: absolute;top:0;left: 0;opacity: .7;}
 textarea.orderNotes{width: 100%;height: 70px;}
 #orderHeader table{font-family: "b compset"}
+.isPrice{display: none;}
+#logStamp{display: none;}

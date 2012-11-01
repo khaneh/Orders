@@ -20,7 +20,7 @@ select case request("act")
 		set rs = nothing
 	case "showLog":
 		orderID = CDbl(request("id")) 
-		set rs = Conn.Execute("select orderLogs.customer, orderLogs.returnDate, convert(varchar, orderLogs.insertedDate, 120) as insertedDate ,users.realName, orderSteps.name as stepName, orderStatus.name as statusName from orderLogs inner join users on users.id=orderLogs.insertedBy inner join orderStatus on orderLogs.status=orderStatus.id inner join orderSteps on orderSteps.id=orderLogs.step where orderID = " & orderID & " order by insertedDate") 
+		set rs = Conn.Execute("select orderLogs.id, isnull(orderCustomerApprovedTypes.name,N' «ÌÌœ ‰‘œÂ') as customerApprovedTypeName, isnull(orderLogs.customerApprovedType,0) as customerApprovedType, isnull(orderLogs.isPrinted,0) as isPrinted, orderLogs.isOrder,orderLogs.isApproved, orderLogs.price, orderLogs.status, orderLogs.step, orderLogs.customer, orderLogs.returnDate, convert(varchar, orderLogs.insertedDate, 120) as insertedDate ,users.realName, orderSteps.name as stepName, orderStatus.name as statusName from orderLogs inner join users on users.id=orderLogs.insertedBy inner join orderStatus on orderLogs.status=orderStatus.id inner join orderSteps on orderSteps.id=orderLogs.step left outer join orderCustomerApprovedTypes on orderCustomerApprovedTypes.id=orderLogs.customerApprovedType where orderID = " & orderID & " order by insertedDate") 
 		set logs=server.createobject("MSXML2.DomDocument")
 		logs.loadXML("<logs/>")
 		while not rs.eof
@@ -41,8 +41,13 @@ select case request("act")
 		rs.close
 		set rs = nothing
 	case "showOrder":
-		orderID=Cdbl(request("id"))
-		set rs = Conn.Execute("select * from orders where id=" & orderID)
+		if Request("logID")<>"" then
+			logID=CDbl(Request("logID"))
+			set rs = Conn.Execute("select * from orderLogs where id=" & logID)
+		else
+			orderID=Cdbl(request("id"))
+			set rs = Conn.Execute("select * from orders where id=" & orderID)
+		end if
 		orderType=rs("type")
 		set orderProp = server.createobject("MSXML2.DomDocument")
 		orderProp.loadXML(rs("property"))
@@ -98,7 +103,7 @@ select case request("act")
 							if optionKey.length>0 then 
 								outKey.text = optionKey(0).getAttribute("label")
 							else
-								outKey.text = key.text
+								outKey.text = replace(key.text,"other:","")
 							end if
 						case "option-fromTable":
 							tbl=typeKey.getAttribute("table")
@@ -188,6 +193,9 @@ select case request("act")
 		if orderProp.SelectSingleNode("/data") is Nothing then
 			orderProp.loadXML("<data/>")
 		end if
+		for each group in typeProp.selectNodes("//group[@hasValue='yes']")
+			group.removeAttribute("hasValue")
+		next
 		for each row in typeProp.SelectNodes("//rows")
 			rowName = row.GetAttribute("name")
 			if orderProp.SelectSingleNode("//row[@name='" & rowName & "']") is Nothing then
@@ -361,11 +369,21 @@ select case request("act")
 		node.AppendChild today
 		response.write(head.xml)
 	case "showHead":
-		orderID=Cdbl(request("id"))
+		if Request("logID")<>"" then 
+			LogID = CDbl(Request("logID"))
+			orderID=0
+		else
+			orderID=Cdbl(request("id"))
+			LogID = 0
+		end if
 		set head = server.createobject("MSXML2.DomDocument")
 		head.loadXML( "<head/>" )
-		
-		set rs = Conn.Execute("select orders.*, Accounts.tel1, Accounts.tel2, Accounts.dear1, Accounts.dear2, Accounts.firstName1, Accounts.firstName2, Accounts.lastName1,Accounts.lastName2, Accounts.companyName, Accounts.accountTitle,orderTypes.name as orderTypeName,users.realName, users.extention from Orders inner join Accounts on orders.customer=Accounts.ID inner join orderTypes on orders.type=orderTypes.id inner join users on orders.createdBy=users.id where orders.id=" & orderID)
+		if orderID>0 and logID=0 then 
+			mySQL = "select orders.*, Accounts.tel1, Accounts.tel2, Accounts.dear1, Accounts.dear2, Accounts.firstName1, Accounts.firstName2, Accounts.lastName1,Accounts.lastName2, Accounts.companyName, Accounts.accountTitle,orderTypes.name as orderTypeName,users.realName, users.extention, isnull(invoices.Approved,-1) as invoiceApproved, isnull(invoices.Issued,-1) as invoiceIssued, orderSteps.name as stepName, orderStatus.name as statusName from Orders inner join orderSteps on orders.step=orderSteps.id inner join orderStatus on orderStatus.id=orders.status inner join Accounts on orders.customer=Accounts.ID inner join orderTypes on orders.type=orderTypes.id inner join users on orders.createdBy=users.id left outer join InvoiceOrderRelations on InvoiceOrderRelations.[order]=orders.id left outer join invoices on InvoiceOrderRelations.invoice = invoices.id and invoices.voided=0 where orders.id=" & orderID
+		elseif orderID=0 and logID>0 then
+			mySQL = "select orderlogs.*, orders.createdDate, Accounts.tel1, Accounts.tel2, Accounts.dear1, Accounts.dear2, Accounts.firstName1, Accounts.firstName2, Accounts.lastName1,Accounts.lastName2, Accounts.companyName, Accounts.accountTitle,orderTypes.name as orderTypeName,users.realName, users.extention, isnull(invoices.Approved,-1) as invoiceApproved, isnull(invoices.Issued,-1) as invoiceIssued, orderSteps.name as stepName, orderStatus.name as statusName from orderlogs inner join orderSteps on orderlogs.step=orderSteps.id inner join orderStatus on orderStatus.id=orderlogs.status inner join orders on orderLogs.orderID=orders.id inner join Accounts on orderlogs.customer=Accounts.ID inner join orderTypes on orderlogs.type=orderTypes.id inner join users on orders.createdBy=users.id left outer join InvoiceOrderRelations on InvoiceOrderRelations.[order]=orderlogs.orderID left outer join invoices on InvoiceOrderRelations.invoice = invoices.id and invoices.voided=0 where orderlogs.id=" & logID
+		end if
+		set rs = Conn.Execute(mySQL)
 		set node = head.createElement("status")	
 		head.documentElement.AppendChild node 
 		set stat = head.createElement("isOrder")
@@ -379,6 +397,18 @@ select case request("act")
 		node.AppendChild stat
 		set stat = head.createElement("step")
 		stat.text = rs("step") 
+		node.AppendChild stat
+		set stat = head.createElement("statusName")
+		stat.text = rs("statusName") 
+		node.AppendChild stat
+		set stat = head.createElement("stepName")
+		stat.text = rs("stepName") 
+		node.AppendChild stat
+		set stat = head.createElement("invoiceApproved")
+		stat.text = rs("invoiceApproved") 
+		node.AppendChild stat
+		set stat = head.createElement("invoiceIssued")
+		stat.text = rs("invoiceIssued") 
 		node.AppendChild stat
 		
 		set node = head.createElement("customer")
@@ -425,7 +455,11 @@ select case request("act")
 		end if
 		head.documentElement.AppendChild node
 		Set node = head.createElement("orderID")
-		node.text=orderID
+		if orderID=0 then 
+			node.text = rs("orderID")
+		else
+			node.text=orderID
+		end if
 		head.documentElement.AppendChild node
 		Set node = head.createElement("productionDuration")
 		node.text=rs("productionDuration")
@@ -508,7 +542,7 @@ select case request("act")
 		response.write(head.xml)
 	case "stock":
 		orderID=Cdbl(request("id"))
-		set rs = Conn.Execute("select InventoryItemRequests.*, InventoryPickuplists.status as pickStatus, InventoryPickuplistItems.qtty as pickQtty, InventoryPickuplistItems.unit as pickUnit from InventoryItemRequests left outer join InventoryPickuplistItems on InventoryPickuplistItems.requestID=InventoryItemRequests.id left outer join InventoryPickuplists on InventoryPickuplists.id=InventoryPickuplistItems.pickupListID where isnull(InventoryPickuplists.status,'')<>'del' and  InventoryItemRequests.orderID=" & orderID)
+		set rs = Conn.Execute("select InventoryItemRequests.*, InventoryPickuplists.status as pickStatus, InventoryPickuplistItems.pickupListID, InventoryPickuplistItems.qtty as pickQtty, InventoryPickuplistItems.unit as pickUnit from InventoryItemRequests left outer join InventoryPickuplistItems on InventoryPickuplistItems.requestID=InventoryItemRequests.id left outer join InventoryPickuplists on InventoryPickuplists.id=InventoryPickuplistItems.pickupListID where isnull(InventoryPickuplists.status,'')<>'del' and  InventoryItemRequests.orderID=" & orderID)
 		set stock=server.createobject("MSXML2.DomDocument")
 		stock.loadXML("<stock/>")
 		while not rs.eof
@@ -525,20 +559,40 @@ select case request("act")
 			set tmp = stock.createElement("customer")
 			tmp.text=rs("customerHaveInvItem") 
 			req.AppendChild tmp
+			set tmp = stock.createElement("rowID")
+			if IsNull(rs("rowID")) then 
+				tmp.text = ""
+			else
+				tmp.text=rs("rowID") 
+			end if
+			req.AppendChild tmp
+			set tmp = stock.createElement("invoiceItem")
+			if IsNull(rs("invoiceItem")) then
+				tmp.text=""
+			else
+				tmp.text=rs("invoiceItem") 
+			end if
+			req.AppendChild tmp
+			set tmp = stock.createElement("reqStatus")
+			tmp.text=rs("Status") 
+			req.AppendChild tmp
 			set st = stock.createElement("Status")
 			set stClass = stock.createElement("StatusClass")
 			set unit = stock.createElement("unit")
 			set qtty = stock.createElement("Qtty")
+			set link = stock.createElement("link")
 			if rs("pickStatus")="done" then 
 				st.text="Œ—ÊÃ «‰Ã«„ ‘œÂ"
 				qtty.text = rs("pickQtty")
 				unit.text = rs("pickUnit")
 				stClass.text="label label-success"
+				link.text = rs("pickupListID")
 			elseif rs("Status")="pick" then
 				st.text="ÕÊ«·Â"
 				qtty.text = rs("pickQtty")
 				unit.text = rs("pickUnit")
 				stClass.text="label label-inverse"
+				link.text = rs("pickupListID")
 			elseif rs("Status")="new" then
 				st.text="ÃœÌœ"
 				qtty.text = rs("Qtty")
@@ -562,6 +616,7 @@ select case request("act")
 				qtty.text = rs("pickQtty")
 				unit.text = rs("pickUnit")
 				stClass.text="label label-important"
+				link.text = rs("pickupListID")
 			else
 				st.text="⁄ÃÌ»!"
 				qtty.text = rs("Qtty")
@@ -572,8 +627,7 @@ select case request("act")
 			req.AppendChild stClass
 			req.AppendChild qtty
 			req.AppendChild unit
-				
-
+			req.AppendChild link
 			stock.documentElement.AppendChild req
 			rs.moveNext
 		wend

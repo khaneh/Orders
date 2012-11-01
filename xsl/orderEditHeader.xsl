@@ -83,7 +83,7 @@
 				<xsl:if test="./isOrder!='yes'">
 					<td align="left">рЦгД йФАМо:</td>
 					<td>
-						<input type="text" name="productionDuration" size="5">
+						<input type="text" name="productionDuration" size="5" class="forceErr" onblur="checkForceHead(this);">
 							<xsl:attribute name="value"><xsl:value-of select="./productionDuration"/></xsl:attribute>
 						</input>
 						<span>яФр(зооумМм)</span>
@@ -104,7 +104,7 @@
 					<xsl:if test="./isOrder='yes'">йгяМн ймФМА чягяого:</xsl:if>
 				</td>
 				<td>
-					<input type="text" name="ReturnDate" onblur="acceptDate(this)" maxlength="10" size="10" dir="LTR">
+					<input type="text" name="ReturnDate" onblur="acceptDate(this);checkForceHead(this);" maxlength="10" size="10" dir="LTR">
 						<xsl:attribute name="value"><xsl:value-of select="./today/retDate"/></xsl:attribute>
 					</input>
 				</td>
@@ -129,14 +129,14 @@
 			<tr class="grayColor">
 				<td align="left">сгМр:</td>
 				<td>
-					<input type="text" name="paperSize" size="5" onblur="acceptPaper(this);">
+					<input type="text" name="paperSize" size="5" onblur="acceptPaper(this);checkForceHead(this);" class="forceErr">
 						<xsl:attribute name="value"><xsl:value-of select="./paperSize"/></xsl:attribute>
 					</input>
 					<span>ЦгДДо: 21X30</span>
 				</td>
 				<td align="left">зДФгД ъгя огнА щгМА:</td>
 				<td align="right" colspan="3">
-					<input type="text" name="OrderTitle" maxlength="255" size="50" style="width:100%">
+					<input type="text" name="OrderTitle" maxlength="255" size="50" style="width:100%" class="forceErr" onblur="checkForceHead(this);"> 
 						<xsl:attribute name="value"><xsl:value-of select="./orderTitle"/></xsl:attribute>
 					</input>
 				</td>
@@ -144,7 +144,7 @@
 			<tr class="grayColor">
 				<td align="left">йМяг▌:</td>
 				<td>
-					<input type="text" name="qtty" size="5">
+					<input type="text" name="qtty" size="5" class="forceErr" onblur="checkForceHead(this);">
 						<xsl:attribute name="value"><xsl:value-of select="./qtty"/></xsl:attribute>
 					</input>
 					<span>Мъ зоо умМм</span>

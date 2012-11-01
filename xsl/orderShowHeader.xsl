@@ -128,7 +128,7 @@
 					</h6>
 				</td>
 				<td align="left"> Ê÷ÌÕ«  »Ì‘ —:</td>
-				<td align="right" colspan="3" rowspan="2">
+				<td align="right" colspan="3" rowspan="3">
 					<h6 class="isBlack">
 						<xsl:value-of select="./notes"/>
 					</h6>
@@ -137,9 +137,21 @@
 			<tr class="grayColor">
 				<td align="left">ﬁÌ„  ﬂ·:</td>
 				<td colspan="2">
-					<h6 class="isBlack">
+					<h6 class="isBlack isPrice">
 						<xsl:value-of select="./totalPrice"/>
 					</h6>
+				</td>
+			</tr>
+			<tr class="grayColor">
+				<td colspan="3" align="center">
+					<span>Ê÷⁄Ì :</span>
+					<span class="stName">
+						<xsl:value-of select="./status/statusName"/>
+					</span>
+					<span>„—Õ·Â:</span>
+					<span class="stName">
+						<xsl:value-of select="./status/stepName"/>
+					</span>
 				</td>
 			</tr>
 	</table>

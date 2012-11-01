@@ -202,7 +202,7 @@ if CSR = "" then CSR = session("ID")
 				<td align='left' <% if not Auth(1,7) and editFlag=1 then response.write "title='‘„« „Ã«“ »Â ÊÌ—«Ì‘ «Ì‰ ¬Ì „ ‰Ì” Ìœ!'"%>><span <% if Auth(1,7) or editFlag=0 then response.write "onclick='setAccountTitle();'" %>>⁄‰Ê«‰ Õ”«» :</span></td>
 				<td colspan='3' <% if not Auth(1,7) and editFlag=1 then response.write "title='‘„« „Ã«“ »Â ÊÌ—«Ì‘ «Ì‰ ¬Ì „ ‰Ì” Ìœ!'"%>>
 					<INPUT class="CustGenInput" TYPE="text" NAME="AccountTitle" VALUE="<%=AccountTitle%>" size="30" MaxLength="200" onfocus="//if (this.value=='') this.value=document.all.Dear.value+' '+document.all.Name.value;" <%if Not Auth(1,7) and editFlag=1 then response.write "readonly"%>> 
-					<INPUT class="CustGenInput" TYPE="checkbox" NAME="IsPersonal" <% if IsPersonal then %> checked <% end if %>onclick='showCompanyName();'>Õ”«» ‘Œ’Ì «”  
+					<INPUT class="CustGenInput" TYPE="checkbox" NAME="IsPersonal" <% if IsPersonal then %> checked <% end if %> onclick='showCompanyName();'><span>Õ”«» ‘Œ’Ì «” </span>
 				</td>
 				<td width='130px' align='left'>„”Ê·: 
 					<%if Auth(1 , 4) then %>
@@ -224,7 +224,7 @@ if CSR = "" then CSR = session("ID")
 
 					</select> 
 					<% else %>
-						<%
+<%
 						set RSV=Conn.Execute ("SELECT * FROM Users WHERE Display=1 ORDER BY RealName") 
 						Do while not RSV.eof
 							if RSV("ID")=CSR then
@@ -233,8 +233,9 @@ if CSR = "" then CSR = session("ID")
 						RSV.moveNext
 						Loop
 						RSV.close					
-						%><INPUT TYPE="text" NAME="" value="<%=a%>" size=9 readonly>
-							<INPUT TYPE="hidden" NAME="CSR" value="<%=CSR%>" size=9 readonly>
+%> 						
+						<INPUT TYPE="text" NAME="" value="<%=a%>" size=9 readonly>
+						<INPUT TYPE="hidden" NAME="CSR" value="<%=CSR%>" size=9 readonly>
 					<% end if %>
 					
 				</td >
@@ -255,7 +256,7 @@ if CSR = "" then CSR = session("ID")
 						rs.moveNext
 					wend
 					rs.close
-					%>
+%> 
 					</select>
 				</td>
 			</tr>
