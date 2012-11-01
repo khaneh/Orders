@@ -144,6 +144,12 @@ elseif request("act")="getMemo" then
 		<!--
 //			document.all.CashAmount.focus();
 		//-->
+		function setPrice(src){
+			if (echoNum(getNum($(src).val()))=="NaN")
+				$(src).val(0);
+			else
+				$(src).val(echoNum(getNum($(src).val())));
+		}
 		</SCRIPT>
 
 <%elseif request("act")="submitMemo" then

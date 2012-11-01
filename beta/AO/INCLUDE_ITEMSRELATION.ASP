@@ -12,8 +12,9 @@ end function
 	.GenTable { font-family:tahoma; font-size: 9pt; border:0; padding:0; }
 	.GenInput { font-family:tahoma; font-size: 9pt; border: none; text-align:right; direction: LTR;}
 	.GenButton { font-family:tahoma; font-size: 9pt; border: 1px solid black; }
-	.GrayOutLine {border: 1px solid gray; }
+	.GrayOutLine .rowName {border: 1px solid gray; }
 	.RelInput { font-family:tahoma; font-size: 8pt; border: none; text-align:right; direction: LTR; background: transparent;}
+	
 
 </style>
 <%
@@ -117,7 +118,7 @@ elseif request("act")="relate" then
 
 %>
 		<TABLE class="GenTable" align="center" cellspacing="5" cellpadding="2" dir="RTL" border="0" width="100%">
-		<Tbody ID="DebitsTAble" name='DebitsTable'>
+		<Tbody ID="DebitsTable" name='DebitsTable'>
 <%		TotalDebit=0
 		while Not (RS1.EOF)
 			description = ""
@@ -196,18 +197,18 @@ elseif request("act")="relate" then
 				sourceLink="<a href='javascript:void(0);'>" & "‰«‘‰«”" & "</a>"
 			end if
 
-%>			<tr bgcolor="white" height='70' valign='top' onclick="slctDdit(this)"><td  class="GrayOutLine">
+%>			<tr class="unsel" bgcolor="white" height='70' valign='top' onclick="slctDdit(this)"><td  class="GrayOutLine">
 			<input type='hidden' name='DebitItems' value='<%=RS1("ID")%>'>
 			<table class='GenTable' width="300" cellspacing='4' cellpadding='1'>
 				<tr bgcolor='#FFDDDD'>
-					<td class="GrayOutLine"><%=sourceLink%></td>
+					<td class="rowName"><%=sourceLink%></td>
 					<td class="GrayOutLine"><span dir='LTR'><%=RS1("EffectiveDate")%></span></td>
 					<td class="GrayOutLine">„»·€ ﬂ·: <INPUT class='RelInput' readonly value='<%=Separate(RS1("AmountOriginal"))%>' size='10'></td>
 				</tr>
 				<tr>
 					<td colspan="3">
 					<a disabled><%=description%></a><BR>
-					<span>
+					<span class="desc">
 					<%
 					mySQL2="SELECT * From "& sys & "ItemsRelations INNER JOIN  "&sys & "Items ON "& sys & "ItemsRelations.Credit"& sys & "Item = "& sys & "Items.ID WHERE ("& sys & "ItemsRelations.Debit"& sys & "Item = "& RS1("id") & ") "
 					Set RS2 = conn.Execute(mySQL2)
@@ -222,7 +223,7 @@ elseif request("act")="relate" then
 				</tr>
 				<tr>
 					<td class="GrayOutLine" colspan="2">„«‰œÂ: <span><INPUT class='RelInput' readonly Name='DebitRemained' value='<%=Separate(RS1("RemainedAmount"))%>' size='10'></span></td>
-					<td align="center"><span style="visibility:hidden;color:red;"><b>Å«” ‘œ</b></span></td>
+					<td align="center"><span class="isPass" style="visibility:hidden;color:red;"><b>Å«” ‘œ</b></span></td>
 				</tr>
 			</table></td>
 			</tr>
@@ -329,18 +330,18 @@ elseif request("act")="relate" then
 				sourceLink="<a href='javascript:void(0);'>" & "‰«‘‰«”" & "</a>"
 			end if
 
-%>			<tr bgcolor="white" height='70' valign='top' onclick="slctCrdit(this)"><td class="GrayOutLine">
+%>			<tr class="unsel" bgcolor="white" height='70' valign='top' onclick="slctCrdit(this)"><td class="GrayOutLine">
 			<input type='hidden' name='CreditItems' value='<%=RS1("ID")%>'>
 			<table class='GenTable' width="300" cellspacing='4' cellpadding='1'>
 				<tr bgcolor='#CCEECC'>
-					<td class="GrayOutLine"><%=sourceLink%></td>
+					<td class="rowName"><%=sourceLink%></td>
 					<td class="GrayOutLine"><span dir='LTR'><%=RS1("EffectiveDate")%></span></td>
 					<td class="GrayOutLine">„»·€ ﬂ·: <INPUT class='RelInput' readonly value='<%=Separate(RS1("AmountOriginal"))%>' size='10'></td>
 				</tr>
 				<tr>
 					<td colspan="3">
 					<a disabled><%=description%></a><BR>
-					<span>
+					<span class="desc">
 					<%
 					mySQL2="SELECT * From "& sys & "ItemsRelations INNER JOIN  "&sys & "Items ON "& sys & "ItemsRelations.Debit"& sys & "Item = "& sys & "Items.ID WHERE ("& sys & "ItemsRelations.Credit"& sys & "Item = "& RS1("id") & ") "
 					Set RS2 = conn.Execute(mySQL2)
@@ -355,7 +356,7 @@ elseif request("act")="relate" then
 				</tr>
 				<tr>
 					<td class="GrayOutLine" colspan="2">„«‰œÂ: <span><INPUT class='RelInput' readonly Name='CreditRemained' value=<%=Separate(RS1("RemainedAmount"))%> size='10'></span></td>
-					<td align="center"><span style="visibility:hidden;color:green;"><b>Å«” ‘œ</b></span></td>
+					<td align="center"><span class="isPass" style="visibility:hidden;color:green;"><b>Å«” ‘œ</b></span></td>
 				</tr>
 			</table></td>
 			</tr>
@@ -485,55 +486,52 @@ if not (noJavaScript=true) then %>
 //---------------------------------------------
 var slctRowClr='#FFFF00'
 function slctCrdit(srcRow){
-	if (srcRow.getElementsByTagName("tr")[2].getElementsByTagName("input")[0].value==0)
+	var e = $(srcRow);
+	if (getNum(e.find("input[name=CreditRemained]").val())==0)
 		return 0;
-	document.getElementsByName("CreditsTable")[0].style.cursor="auto"
-	document.all.selectedCreditItem.value=srcRow.rowIndex
-	for (i=0;i<document.getElementsByName("CreditItems").length;i++){
-		theRow=document.getElementsByName("CreditItems")[i].parentNode.parentNode;
-		theRow.setAttribute("bgColor","#FFFFFF")
-	}
-	srcRow.setAttribute("bgColor",slctRowClr)
-
-	if(document.all.selectedDebitItem.value!=''){
-
-		dstRow=document.getElementsByName("DebitItems")[document.all.selectedDebitItem.value].parentNode.parentNode;
-		dstSpan=dstRow.getElementsByTagName("span")[1]
-		dstName=dstRow.getElementsByTagName("td")[1].innerText
-		dstRemained=dstRow.getElementsByTagName("tr")[2].getElementsByTagName("input")[0]
-
-		srcSpan=srcRow.getElementsByTagName("span")[1]
-		srcName=srcRow.getElementsByTagName("td")[1].innerText
-		srcRemained=srcRow.getElementsByTagName("tr")[2].getElementsByTagName("input")[0]
-
-		suggest=Math.min(parseInt(txt2val(srcRemained.value)),parseInt(txt2val(dstRemained.value)))
-		amount=parseInt(txt2val(prompt("„»·€ „Ê—œ‰Ÿ— —« Ê«—œ ﬂ‰Ìœ",suggest)))
-
-		if (amount!='0' && amount <= suggest){
-			srcRemained.value = val2txt(parseInt(txt2val(srcRemained.value)) - parseInt(amount));
-			dstRemained.value = val2txt(parseInt(txt2val(dstRemained.value)) - parseInt(amount));
-			srcSpan.innerHTML+="<input class='RelInput' readonly value='"+val2txt(amount)+"' size='10'>"+"»Â "+dstName +"<br>&nbsp;"
-			dstSpan.innerHTML+="<input class='RelInput' readonly value='"+val2txt(amount)+"' size='10'>"+"«“ "+srcName +"<br>&nbsp;"
-
-			document.getElementById("Relations").innerHTML+="<input type='hidden' name='CreditARItem' value='"+srcRow.getElementsByTagName("input")[0].value+"'>"
-			document.getElementById("Relations").innerHTML+="<input type='hidden' name='DebitARItem' value='"+dstRow.getElementsByTagName("input")[0].value+"'>"
-			document.getElementById("Relations").innerHTML+="<input type='hidden' name='Amount' value='"+amount+"'>"
+	$("[name=CreditsTable]").css("cursor","auto");
+/* 	$("#selectedCreditItem").val(e.index()); // must check. may be no more needed! */
+	$("[name=CreditItems]").parent().parent().prop("bgColor","#FFFFFF");
+	$("[name=CreditItems]").parent().parent().prop("selected","no");
+	e.prop("bgColor",slctRowClr);
+	e.removeClass("unsel");
+	e.addClass("sel");
+	if ($("[name=DebitsTable] tr.sel").size()!=0){
+		var dstRow = $("[name=DebitsTable] tr.sel");
+		var dstSpan = dstRow.find("span.desc");
+		var dstName = dstRow.find("td.rowName").text();
+		var dstRemained = dstRow.find("input[name=DebitRemained]");
+		var srcSpan = e.find("span.desc");
+		var srcName = e.find("td.rowName").text();
+		var srcRemained = e.find("input[name=CreditRemained]");
+		var suggest = Math.min(getNum(srcRemained.val()),getNum(dstRemained.val()));
+		var amount = getNum(prompt("„»·€ „Ê—œ‰Ÿ— —« Ê«—œ ﬂ‰Ìœ",suggest));
+		if (amount != 0 && amount <= suggest){
+			srcRemained.val(echoNum(getNum(srcRemained.val()) - parseInt(amount)));
+			dstRemained.val(echoNum(getNum(dstRemained.val()) - parseInt(amount)));
+			srcSpan.append("<input class='RelInput' readonly value='"+echoNum(amount)+"' size='10'>"+"»Â "+dstName +"<br>&nbsp;");
+			dstSpan.append("<input class='RelInput' readonly value='"+echoNum(amount)+"' size='10'>"+"«“ "+srcName +"<br>&nbsp;");
+			$("#Relations").append("<input type='hidden' name='CreditARItem' value='"+e.find("input[name=CreditItems]").val()+"'>");
+			$("#Relations").append("<input type='hidden' name='DebitARItem' value='"+dstRow.find("input[name=DebitItems]").val()+"'>");
+			$("#Relations").append("<input type='hidden' name='Amount' value='"+amount+"'>");
 			setRemained();
 		}
-		if (dstRemained.value =='0'){
-			dstRow.getElementsByTagName("tr")[2].getElementsByTagName("span")[1].style.visibility="visible"
-			document.all.selectedDebitItem.value=""
-			dstRow.setAttribute("bgColor","#FFFFFF")
+		if (getNum(dstRemained.val())==0){
+			dstRow.find("span.isPass").css("visibility","visible");
+			dstRow.removeClass("sel");
+			dstRow.removeClass("unsel");
+			dstRow.addClass("unsel");
+			dstRow.prop("bgColor","#FFFFFF");
 		}
-		if (srcRemained.value =='0'){
-			srcRow.getElementsByTagName("tr")[2].getElementsByTagName("span")[1].style.visibility="visible"
-			document.all.selectedCreditItem.value=""
-			srcRow.setAttribute("bgColor","#FFFFFF")
+		if (getNum(srcRemained.val()==0)){
+			e.find("span.isPass").css("visibility","visible");
+			e.removeClass("sel");
+			e.removeClass("unsel");
+			e.addClass("unsel");
+			e.prop("bgColor","#FFFFFF");
 		}
-
-	}
-	else{
-		document.getElementsByName("DebitsTable")[0].style.cursor="crosshair"
+	} else {
+		$("[name=DebitsTable]").css("cursor","crosshair");
 	}
 
 }
@@ -542,58 +540,53 @@ function slctCrdit(srcRow){
 //---------------------------------------------
 //---------------------------------------------
 function slctDdit(dstRow){
-	if (dstRow.getElementsByTagName("tr")[2].getElementsByTagName("input")[0].value==0)
+	var e = $(dstRow);
+	if (getNum(e.find("input[name=DebitRemained]").val())==0)
 		return 0;
+	$("[name=DebitsTable]").css("cursor","auto");	
 
-	document.getElementsByName("DebitsTable")[0].style.cursor="auto"
-	document.all.selectedDebitItem.value=dstRow.rowIndex
-
-	for (i=0;i<document.getElementsByName("DebitItems").length;i++){
-		theRow=document.getElementsByName("DebitItems")[i].parentNode.parentNode;
-		theRow.setAttribute("bgColor","#FFFFFF");
-	}
-	dstRow.setAttribute("bgColor",slctRowClr)
-
-	if(document.all.selectedCreditItem.value!=''){
-
-		srcRow=document.getElementsByName("CreditItems")[document.all.selectedCreditItem.value].parentNode.parentNode;
-		srcSpan=srcRow.getElementsByTagName("span")[1]
-		srcName=srcRow.getElementsByTagName("td")[1].innerText
-		srcRemained=srcRow.getElementsByTagName("tr")[2].getElementsByTagName("input")[0]
-
-		dstSpan=dstRow.getElementsByTagName("span")[1]
-		dstName=dstRow.getElementsByTagName("td")[1].innerText
-		dstRemained=dstRow.getElementsByTagName("tr")[2].getElementsByTagName("input")[0]
-
-		suggest=Math.min(parseInt(txt2val(dstRemained.value)),parseInt(txt2val(srcRemained.value)))
-		amount=parseInt(txt2val(prompt("„»·€ „Ê—œ‰Ÿ— —« Ê«—œ ﬂ‰Ìœ",suggest)))
-
-		if (amount!='0' && amount <= suggest){
-			dstRemained.value = val2txt(parseInt(txt2val(dstRemained.value)) - parseInt(amount));
-			srcRemained.value = val2txt(parseInt(txt2val(srcRemained.value)) - parseInt(amount));
-			dstSpan.innerHTML+="<input class='RelInput' readonly value='"+val2txt(amount)+"' size='10'>"+"«“ "+srcName +"<br>&nbsp;"
-			srcSpan.innerHTML+="<input class='RelInput' readonly value='"+val2txt(amount)+"' size='10'>"+"»Â "+dstName +"<br>&nbsp;"
-
-			document.getElementById("Relations").innerHTML+="<input type='hidden' name='CreditARItem' value='"+srcRow.getElementsByTagName("input")[0].value+"'>"
-			document.getElementById("Relations").innerHTML+="<input type='hidden' name='DebitARItem' value='"+dstRow.getElementsByTagName("input")[0].value+"'>"
-			document.getElementById("Relations").innerHTML+="<input type='hidden' name='Amount' value='"+amount+"'>"
+/* 	document.all.selectedDebitItem.value=dstRow.rowIndex */
+	$("[name=DebitItems]").parent().parent().prop("bgColor","#FFFFFF");
+	$("[name=DebitItems]").parent().parent().prop("selected","yes");
+	e.prop("bgColor",slctRowClr);
+	e.removeClass("unsel");
+	e.addClass("sel");
+	if ($("[name=CreditsTable] tr.sel").size()!=0){
+		var dstSpan = e.find("span.desc");
+		var dstName = e.find("td.rowName").text();
+		var dstRemained = e.find("input[name=DebitRemained]");
+		var srcRow = $("[name=CreditsTable] tr.sel");
+		var srcSpan = srcRow.find("span.desc");
+		var srcName = srcRow.find("td.rowName").text();
+		var srcRemained = srcRow.find("input[name=CreditRemained]");
+		var suggest = Math.min(getNum(srcRemained.val()),getNum(dstRemained.val()));
+		var amount = getNum(prompt("„»·€ „Ê—œ‰Ÿ— —« Ê«—œ ﬂ‰Ìœ",suggest));
+		if (amount != 0 && amount <= suggest){
+			srcRemained.val(echoNum(getNum(srcRemained.val()) - parseInt(amount)));
+			dstRemained.val(echoNum(getNum(dstRemained.val()) - parseInt(amount)));
+			srcSpan.append("<input class='RelInput' readonly value='"+echoNum(amount)+"' size='10'>"+"»Â "+dstName +"<br>&nbsp;");
+			dstSpan.append("<input class='RelInput' readonly value='"+echoNum(amount)+"' size='10'>"+"«“ "+srcName +"<br>&nbsp;");
+			$("#Relations").append("<input type='hidden' name='CreditARItem' value='"+srcRow.find("input[name=CreditItems]").val()+"'>");
+			$("#Relations").append("<input type='hidden' name='DebitARItem' value='"+e.find("input[name=DebitItems]").val()+"'>");
+			$("#Relations").append("<input type='hidden' name='Amount' value='"+amount+"'>");
 			setRemained();
 		}
-
-		if (srcRemained.value =='0'){
-			srcRow.getElementsByTagName("tr")[2].getElementsByTagName("span")[1].style.visibility="visible"
-			document.all.selectedCreditItem.value=""
-			srcRow.setAttribute("bgColor","#FFFFFF")
+		if (getNum(srcRemained.val())==0){
+			srcRow.find("span.isPass").css("visibility","visible");
+			srcRow.removeClass("sel");
+			srcRow.removeClass("unsel");
+			srcRow.addClass("unsel");
+			srcRow.prop("bgColor","#FFFFFF");
 		}
-		if (dstRemained.value =='0'){
-			dstRow.getElementsByTagName("tr")[2].getElementsByTagName("span")[1].style.visibility="visible"
-			document.all.selectedDebitItem.value=""
-			dstRow.setAttribute("bgColor","#FFFFFF")
+		if (getNum(dstRemained.val())==0){
+			e.find("span.isPass").css("visibility","visible");
+			e.removeClass("sel");
+			e.removeClass("unsel");
+			e.addClass("unsel");
+			e.prop("bgColor","#FFFFFF");
 		}
-
-	}
-	else{
-		document.getElementsByName("CreditsTable")[0].style.cursor="crosshair"
+	} else {
+		$("[name=CreditsTable]").css("cursor","crosshair");
 	}
 }
 
@@ -601,35 +594,30 @@ function slctDdit(dstRow){
 //---------------------------------------------
 //---------------------------------------------
 function setRemained(){
-	totalDebit=0
-	for (i=0;i<document.getElementsByName("DebitItems").length;i++){
-		theRow=document.getElementsByName("DebitItems")[i].parentNode.parentNode;
-		totalDebit+= parseInt(txt2val(theRow.getElementsByTagName("tr")[2].getElementsByTagName("input")[0].value));
-	}
-	document.all.TotalDebitRemained.value=val2txt(totalDebit);
-
-	totalCredit=0
-	for (i=0;i<document.getElementsByName("CreditItems").length;i++){
-		theRow=document.getElementsByName("CreditItems")[i].parentNode.parentNode;
-		totalCredit += parseInt(txt2val(theRow.getElementsByTagName("tr")[2].getElementsByTagName("input")[0].value));
-	}
-	document.all.TotalCreditRemained.value=val2txt(totalCredit);
+	var totalDebit = 0;
+	var totalCredit = 0
+	$("input[name=DebitRemained]").each(function(i){
+		totalDebit += getNum($(this).val());
+	});
+	$("input[name=CreditRemained]").each(function(i){
+		totalCredit += getNum($(this).val());
+	});
+	$("input[name=TotalDebitRemained]").val(echoNum(totalDebit));
+	$("input[name=TotalCreditRemained]").val(echoNum(totalCredit));
 }
 
 //---------------------------------------------
 //---------------------------------------------
 //---------------------------------------------
 function unselect(){
-	document.getElementsByName("CreditsTable")[0].style.cursor="auto"
-	document.getElementsByName("DebitsTable")[0].style.cursor="auto"
-	if(document.all.selectedCreditItem.value!=''){
-		document.getElementsByName("CreditItems")[document.all.selectedCreditItem.value].parentNode.parentNode.setAttribute("bgColor","#FFFFFF");
-		document.all.selectedCreditItem.value=''
-	}
-	if(document.all.selectedDebitItem.value!=''){
-		document.getElementsByName("DebitItems")[document.all.selectedDebitItem.value].parentNode.parentNode.setAttribute("bgColor","#FFFFFF");
-		document.all.selectedDebitItem.value=''
-	}
+	$("[name=DebitsTable]").css("cursor","auto");
+	$("[name=CreditsTable]").css("cursor","auto");
+	$("[name=DebitsTable] tr.sel").prop("bgColor","#fff");
+	$("[name=DebitsTable] tr.sel").addClass("unsel");
+	$("[name=DebitsTable] tr.sel").removeClass("sel");
+	$("[name=CreditsTable] tr.sel").prop("bgColor","#fff");
+	$("[name=CreditsTable] tr.sel").addClass("unsel");
+	$("[name=CreditsTable] tr.sel").removeClass("sel");
 }
 
 //---------------------------------------------

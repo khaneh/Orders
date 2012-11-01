@@ -81,12 +81,14 @@ end if
 
 		<FORM METHOD=POST ACTION="goodReq.asp"><BR>
 			<INPUT TYPE="hidden" name="radif" value="-1">
-			<input type="hidden" Name='tmpDlgArg' value=''>
-			<input type="hidden" Name='tmpDlgTxt' value=''>
-			ﬂœ ﬂ«·«: &nbsp;&nbsp;&nbsp;<INPUT  dir="LTR"  TYPE="text" NAME="item" maxlength="10" size="13"   onKeyPress='return mask(this);' onBlur='check(this);'> &nbsp;&nbsp; <INPUT TYPE="text" NAME="accountName" size=30 readonly  value="<%=accountName%>" style="background-color:transparent">
+			<span>ﬂœ ﬂ«·«:</span>
+			<INPUT  dir="LTR"  TYPE="text" NAME="item" maxlength="10" size="13">
+			<INPUT TYPE="text" NAME="accountName" size=30 readonly  value="<%=accountName%>" style="background-color:transparent">
 			<br><br>
-			 ⁄œ«œ: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<INPUT TYPE="text" NAME="qtty" size=40 ><br><br>
-			 Ê÷ÌÕ« : <TEXTAREA NAME="comment" ROWS="7" COLS="32"></TEXTAREA>
+			<span> ⁄œ«œ:</span>
+			<INPUT TYPE="text" NAME="qtty" size=40 ><br><br>
+			<span> Ê÷ÌÕ« :</span>
+			<TEXTAREA NAME="comment" ROWS="7" COLS="32"></TEXTAREA>
 			<br><center>
 			<INPUT TYPE="submit" Name="Submit" Value="À»  œ—ŒÊ«”  ﬂ«·«"  style="width:120px;" tabIndex="14">
 			</center>
@@ -134,48 +136,29 @@ end if
 	</table><BR>
 
 	<SCRIPT LANGUAGE="JavaScript">
-	<!--
-	document.all.item.focus()
-	var dialogActive=false;
-
-	function mask(src){ 
-		var theKey=event.keyCode;
-
-		if (theKey==13){
-			event.keyCode=9
-			dialogActive=true
-			document.all.tmpDlgArg.value="#"
-			document.all.tmpDlgTxt.value="Ã” ÃÊ œ— ﬂ«·«Â«Ì «‰»«—"
-			var myTinyWindow = window.showModalDialog('../dialog_GenInput.asp',document.all.tmpDlgTxt,'dialogHeight:200px; dialogWidth:440px; dialogTop:; dialogLeft:; edge:None; center:Yes; help:No; resizable:No; status:No;');
-			if (document.all.tmpDlgTxt.value !="") {
-				var myTinyWindow = window.showModalDialog('dialog_selectInvItem.asp?act=select&name='+escape(document.all.tmpDlgTxt.value),document.all.tmpDlgArg,'dialogHeight:500px; dialogWidth:380px; dialogTop:; dialogLeft:; edge:Raised; center:Yes; help:No; resizable:Yes; status:No;');
-				dialogActive=false
-				if (document.all.tmpDlgArg.value!="#"){
-					Arguments=document.all.tmpDlgArg.value.split("#")
-					src.value=Arguments[0];
-					document.all.accountName.value=Arguments[1];
-				}
+	$(document).ready(function(){
+		$.ajaxSetup({
+			cache: false
+		});
+		$("input[name=item]").focus();
+		$("input[name=item]").keypress(function(event){
+			if (event.keyCode == 10 || event.keyCode == 13) 
+		        event.preventDefault();
+		});
+	    $("input[name=item]").jsonSuggest({
+			url: '/service/json_getInventory.asp?act=findItem&a=1' + escape($("input[name=item]").val()),
+			minCharacters: 5,
+			maxResults: 20,
+			width: 214,
+			caseSensitive: false,
+			onSelect: function(sel){
+				var mySel = sel.id.split("|");
+				$("input[name=accountName]").val(mySel[1]);
+				$("input[name=item]").val(mySel[0]);					
 			}
-		}
-	}
+		});
 
-	function check(src){ 
-		if (!dialogActive){
-			badCode = false;
-			if (window.XMLHttpRequest) {
-				var objHTTP=new XMLHttpRequest();
-			} else if (window.ActiveXObject) {
-				var objHTTP = new ActiveXObject("Microsoft.XMLHTTP");
-			}
-			objHTTP.open('GET','xml_InventoryItem.asp?id='+src.value,false)
-			objHTTP.send()
-			tmpStr = unescape(objHTTP.responseText)
-			document.all.accountName.value=tmpStr;
-			}
-	}
-
-
-	//-->
+	});
 	</SCRIPT>
 	
 	<!--#include file="tah.asp" -->

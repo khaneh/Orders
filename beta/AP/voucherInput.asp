@@ -398,7 +398,7 @@ function setPrice(obj)
 {
 	a= obj.type
 	if (a=="text")
-		obj.value=val2txt(txt2val(obj.value))
+		obj.value=echoNum(getNum(obj.value))
 	else
 		{
 		ii=parseInt(obj.id) 
@@ -419,10 +419,10 @@ function setPrice(obj)
 	checkBoxList = document.getElementsByName("pcheck")
 	for(i=0;i<document.getElementsByName("price").length;i++) {
 			if(checkBoxList[i].checked)
-			totalPrice = totalPrice + txt2val(document.getElementsByName("price")[i].value);
+			totalPrice = totalPrice + getNum(document.getElementsByName("price")[i].value);
 		}
-	totalPrice = totalPrice + txt2val(document.getElementsByName("totalVat")[0].value);
-	document.all.totalPrice.value = val2txt(totalPrice) ;
+	totalPrice = totalPrice + getNum(document.getElementsByName("totalVat")[0].value);
+	$("input[name=totalPrice]").val(getNum(totalPrice));
 }
 //-->
 </SCRIPT>
