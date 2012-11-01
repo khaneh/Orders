@@ -10,12 +10,59 @@ if not Auth(3 , 8) then NotAllowdToViewThisPage()
 	.w td{padding: 5px;}
 	.g{background-color: #CCC;}
 	.g td{padding: 5px;}
-	th{background: #dd5;}
+	th{background: #dd5;font-size: 13px;}
+	td {position: relative;}
+	span.chgPriceBtn{float: left;opacity: .6;display: none;cursor: pointer;position: absolute;top:2px;left: 0;}
+	#purchasePrice{direction: ltr;};
 </style>
+<script type="text/javascript">
+$(document).ready(function(){
+	$.ajaxSetup({
+		cache: false
+	});	
+	$(".chgPrice").mouseover(function(event){
+		$(this).find(".chgPriceBtn").css("display","block");
+	});
+	$(".chgPrice").mouseout(function(event){
+		$(this).find(".chgPriceBtn").css("display","none");
+	});
+	$(".chgPriceBtn").click(function(){
+		$("#paperType").val($(this).closest("tr").attr("typeID"));
+		$("#chgPriceDlg h5").html("»Â«Ì Œ—Ìœ " + $($(this).closest("tr").find("td")[0]).html() + " —« Ê«—œ ﬂ‰Ìœ");
+		$("#purchasePrice").val($(this).closest("tr").find(".paperPrice").html());
+		$("#chgPriceDlg").dialog("open");
+	});
+	$("#purchasePrice").blur(function(){
+		$("#calcPrice").html(echoNum(Math.ceil(getNum($(this).val()) * 1.25)));
+	});
+	$("#chgPriceDlg").dialog({
+		autoOpen: false,
+		buttons: {" «ÌÌœ":function(){
+			$.ajax({
+				type:"POST",
+				url:"/service/json_getInventory.asp",
+				data:{act:"updatePaperPrice",paperType:$("#paperType").val(),price: Math.ceil(getNum($("#purchasePrice").val()) * 1.25)},
+				dataType:"json"
+			}).done(function (data){
+				if (parseInt(data.price)>0)
+					$("tr.chgPrice[typeid=" + $("#paperType").val() + "]").find("span.paperPrice").html(echoNum(data.price));
+			});
+			$(this).dialog("close");
+		}},
+		title: "Ê—Êœ ﬁÌ„  ÃœÌœ"
+	});
+});
+</script>
+<div id="chgPriceDlg">
+	<h5></h5>
+	<input id="purchasePrice" type="text" size="10"/>
+	<span id="calcPrice"></span>
+	<input id="paperType" type="hidden"/>
+	<div>* ·ÿ›« ﬁÌ„  Œ—Ìœ —« Ê«—œ ﬂ‰Ìœ.</div>
+</div>
 <br>
 <br>
-<br>
-<center>
+<div class="rspan5">
 	<table cellspacing="0">
 	<tr>
 		<th>ﬂœ «‰»«—</th>
@@ -42,5 +89,35 @@ if not Auth(3 , 8) then NotAllowdToViewThisPage()
 	wend
 	%>
 	</table>
-</center>
+</div>
+<div class="rspan4">
+	<table cellspacing="0">
+		<tr>
+			<th>‰Ê⁄ ﬂ«€–</th>
+			<th>»Â«Ì ›—Ê‘° <small>Â—ﬂÌ·Ê</small></th>
+		</tr>
+		<%
+	set rs = conn.Execute("select * from orderTypes where id=2")
+	set prop=server.createobject("MSXML2.DomDocument")
+	prop.loadXML(rs("property"))
+	rs.close
+	set rs = Nothing
+	set paper = prop.SelectNodes("//key[@name='paper-type']/option")
+	for each paperType in paper
+		if cls="w" then
+			cls="g"
+		else
+			cls="w"
+		end if
+		Response.write "<tr class='" & cls & " chgPrice' typeID='"_ 
+			& paperType.text & "'><td>"_ 
+			& paperType.GetAttribute("label") & "</td><td><span class='paperPrice'>"_ 
+			& Separate(paperType.GetAttribute("price")) & "</span>"
+		if auth(3,"B") then response.write "<span class='chgPriceBtn label'> €ÌÌ—</span>"
+		Response.write "</td></tr>"
+	next
+	
+		%>
+	</table>	
+</div>
 <!--#include file="tah.asp" -->
