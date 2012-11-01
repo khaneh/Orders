@@ -1409,9 +1409,13 @@ $(".check").click(function(){
 		'-----------------------------------------------------------------------------------------------------
 	case "cancel":			'---------------------------------------------------------------------------------
 		'-----------------------------------------------------------------------------------------------------
-		if not Auth(2 , "C") then NotAllowdToViewThisPage()
 		orderID=cdbl(request("id"))
 		set rs = Conn.Execute("select orders.createdBy, orders.isClosed, orders.isApproved, orders.isOrder, isnull(invoices.approved,0) as approved, isnull(invoices.issued,0) as issued from orders left outer join InvoiceOrderRelations on orders.id=InvoiceOrderRelations.[order] left outer join invoices on InvoiceOrderRelations.invoice = invoices.id where orders.id = " & orderID)
+		if CBool(rs("isOrder")) then 
+			if not Auth(2 , "C") then NotAllowdToViewThisPage()
+		else
+			if not Auth(2 , 2) then NotAllowdToViewThisPage()
+		end if
 		errMsg = ""
 		msg = ""
 		msgTo = rs("createdBy")
