@@ -61,7 +61,6 @@ if request.form("Submit")=" «ÌÌœ" then
 		qtty		=	RSI("qtty")
 		order_ID	=	RSI("order_ID")
 		RequestID	=	RSI("RequestID")
-		storeID		=	request("store")
 		RelatedInvoiceID	=	RSI("RelatedInvoiceID")
 		if trim(RelatedInvoiceID) = "" or isnull(RelatedInvoiceID) then
 			RelatedInvoiceID = 0
@@ -72,25 +71,20 @@ if request.form("Submit")=" «ÌÌœ" then
 		else
 			owner	= "-1"
 		end if
-		mySQL = "SET NOCOUNT ON;INSERT INTO InventoryLog (storeID,ItemID, RelatedID, Qtty, logDate, CreatedBy, owner, IsInput, comments, type, RelatedInvoiceID,price,gl_update) VALUES (" & storeID & ","& ItemID & ","& PickID& ","& Qtty& ",N'"& logDate& "', "& session("ID") & ", " & owner & " , 0, N'" & comments & "', 1, "& RelatedInvoiceID & ", null,0);select @@identity as newID;SET NOCOUNT OFF;"
+		mySQL = "SET NOCOUNT ON;INSERT INTO InventoryLog (ItemID, RelatedID, Qtty, logDate, CreatedBy, owner, IsInput, comments, type, RelatedInvoiceID,price,gl_update) VALUES ("& ItemID & ","& PickID& ","& Qtty& ",N'"& logDate& "', "& session("ID") & ", " & owner & " , 0, N'" & comments & "', 1, "& RelatedInvoiceID & ", null,0);select @@identity as newID;SET NOCOUNT OFF;"
 		'response.write mySQL 
 		'response.end
 		set rs = Conn.Execute(mySQL)
 		newOut = rs.Fields("newID").value
 		rs.close
 		set rs= nothing
-		
 		if RSI("CustomerHaveInvItem") then
 			set RSW=Conn.Execute ("SELECT SUM((CONVERT(tinyint, dbo.InventoryLog.IsInput) - .5) * 2 * dbo.InventoryLog.Qtty) AS sumQtty, dbo.Accounts.AccountTitle FROM dbo.Orders INNER JOIN dbo.InventoryLog ON dbo.Orders.Customer = dbo.InventoryLog.owner INNER JOIN dbo.Accounts ON dbo.Orders.Customer = dbo.Accounts.ID WHERE (dbo.InventoryLog.ItemID = " & ItemID & " and dbo.InventoryLog.voided=0) GROUP BY dbo.Orders.ID, dbo.Accounts.AccountTitle HAVING (dbo.Orders.ID = " & order_ID  & ")")
 			newItemQtty = RSW("sumQtty")
 			RSW.close
 			set RSW = nothing
-			'--------- UPDATE customer Qtty in inventoryItemsInStore
-			Conn.Execute("update inventoryItemsInStore set custQtty = (select SUM(IsInput * Qtty) - SUM((1 - IsInput) * Qtty) AS sumQtty from inventoryLog where itemID=" & itemID & " and owner<>-1 and voided=0 and storeID=" & storeID & ") where ItemID=" & itemID & " and storeID=" & storeID )
 		else
-			'--------- UPDATE Qtty in inventoryItemsInStore
-			Conn.Execute("update inventoryItemsInStore set Qtty = (select SUM(IsInput * Qtty) - SUM((1 - IsInput) * Qtty) AS sumQtty from inventoryLog where itemID=" & itemID & " and owner=-1 and voided=0 and storeID=" & storeID & ") where ItemID=" & itemID & " and storeID=" & storeID )
-			set RSW=Conn.Execute ("SELECT * FROM inventoryItemsInStore WHERE (itemID = "& ItemID & " AND storeID=" & storeID & ")" )
+			set RSW=Conn.Execute ("SELECT * FROM InventoryItems WHERE (id = "& ItemID & ")" )
 			newItemQtty = RSW("qtty")
 			RSW.close
 			set RSW = nothing
@@ -101,7 +95,8 @@ if request.form("Submit")=" «ÌÌœ" then
 			response.end
 		end if
 '		Conn.Execute ("update InventoryItems set qtty="& newItemQtty & " where (id = "& ItemID & ")")
-		Conn.Execute("execute dbo.outFIFO")
+' --------------- TEmPORARY DISABLE
+'		Conn.Execute("execute dbo.outFIFO")
 		set rs=conn.Execute("select * from InventoryFIFORelations where outID=" & newOut)
 		while not rs.eof
 			response.write("<li> Œ—ÊÃ «“ Ê—Êœ <a href='invReport.asp?oldItemID=-1&itemID=" & itemID & "'>" & rs("inID") & "</a> »Â  ⁄œ«œ " & rs("qtty") & " «‰Ã«„ ‘œ.<br>")
@@ -196,23 +191,20 @@ if request.form("Submit")="«‰ Œ«» »—«Ì Œ—ÊÃ" then
 		else
 			owner	= "-1"
 		end if
-		' new Inventory on 91.3.17 by SAM
-		'set RSW=Conn.Execute ("SELECT * FROM InventoryItems WHERE (id = "& ItemID & ")" )
-		set RSW = Conn.Execute("select SUM(IsInput * Qtty) - SUM((1 - IsInput) * Qtty) AS sumQtty from inventoryLog where itemID=" & itemID & " and owner=" & owner & " and voided=0 and storeID=" & request("store"))
-		'OldItemID = RSW("OldItemID")
-		'if owner = "-1" then
-		itemQtty = RSW("sumQtty")
-		RSW.close
-		set RSW = Conn.Execute("select * from inventoryItems where id=" & itemID)
-		invCode = RSW("invCode")
-		RSW.close
-		set RSW=nothing
-		
+
+		set RSW=Conn.Execute ("SELECT * FROM InventoryItems WHERE (id = "& ItemID & ")" )
+		OldItemID = RSW("OldItemID")
+		if owner = "-1" then
+			itemQtty = RSW("qtty")
+		else
+			itemQtty = RSW("cusQtty")
+		end if
+
 		if itemQtty < Qtty then 
-			response.write "<span><li  style='background-color: #FF9933'> "& invCode & " - " & ItemName & " (œ—ŒÊ«” Ì: " & Qtty & " " &  unit & " - „ÊÃÊœÌ: "& itemQtty & " "& unit & ")</span>"
+			response.write "<span><li  style='background-color: #FF9933'> "& OldItemID & " - " & ItemName & " (œ—ŒÊ«” Ì: " & Qtty & " " &  unit & " - „ÊÃÊœÌ: "& itemQtty & " "& unit & ")</span>"
 			notAvailable = "yes"
 		else
-			response.write "<li> "& invCode & " - " & ItemName & " (" & Qtty & " " &  unit & ")"
+			response.write "<li> "& OldItemID & " - " & ItemName & " (" & Qtty & " " &  unit & ")"
 			if not owner = "-1" then
 				response.write "<b> «—”«·Ì " & owner & " </b>" 
 			end if
@@ -232,7 +224,6 @@ if notAvailable <> "yes" then
 %>
 	 Ê÷ÌÕ«  <TEXTAREA NAME='comments' style="width:200px;" ></TEXTAREA><br><br>
 	<INPUT TYPE='submit' name='submit' class=inputBut value=' «ÌÌœ'> &nbsp;&nbsp;
-	<input type="hidden" name='store' value="<%=request("store")%>">
 	<INPUT TYPE='submit' name='submit' class=inputBut value='«‰’—«›'>
 <%
 else
@@ -243,27 +234,14 @@ end if
 response.end
 
 end if
-
+if Request("act")="" then 
 set RSS=Conn.Execute ("SELECT InventoryPickuplists.*, Users.RealName AS RealName FROM InventoryPickuplists INNER JOIN Users ON InventoryPickuplists.GiveTo = Users.ID WHERE (InventoryPickuplists.Status = 'new') ORDER BY InventoryPickuplists.ID" )
-%>
+ %>
 <BR>
 <FORM METHOD=POST ACTION="">
 <TABLE dir=rtl align=center width=600 cellspacing=0>
 <TR bgcolor="eeeeee" >
-	<TD align=center colspan=4><B>ÕÊ«·Â Â«Ì Œ—ÊÃ ﬂ«·« «“ «‰»«—</B></TD>
-	<td>
-		<select name="store">
-<%
-		set rs=Conn.Execute("select * from storeHouses")
-		while not rs.eof
-			response.write("<option value='" & rs("id") & "'>" & rs("name") & "</option>")
-			rs.moveNext
-		wend
-		rs.close
-		set rs=nothing
-%>			
-		</select>
-	</td>
+	<TD align=center colspan=6><B>ÕÊ«·Â Â«Ì Œ—ÊÃ ﬂ«·«</B></TD>
 </TR>
 <TR bgcolor="eeeeee" >
 	<TD style="border-bottom: solid 1pt black" ><INPUT TYPE="radio" NAME="" disabled></TD>
@@ -320,10 +298,16 @@ RSS.moveNext
 Loop
 %>
 </TABLE><br>
-<center><INPUT TYPE="submit" Name="Submit" Value="Õ–› ÕÊ«·Â" onclick="return confirm('¬Ì« „ÿ„∆‰« „Ì ŒÊ«ÂÌœ «Ì‰ œ—ŒÊ«”  —« Õ–› ﬂ‰Ìœø')" class="inputBut" style="width:150px;" tabIndex="14"> <INPUT TYPE="submit" Name="Submit" Value="«‰ Œ«» »—«Ì Œ—ÊÃ" class="inputBut" style="width:150px;" tabIndex="14">
-</form>
+<center>
+	<INPUT TYPE="submit" Name="Submit" Value="Õ–› ÕÊ«·Â" onclick="return confirm('¬Ì« „ÿ„∆‰« „Ì ŒÊ«ÂÌœ «Ì‰ œ—ŒÊ«”  —« Õ–› ﬂ‰Ìœø')" class="btn" style="width:150px;" tabIndex="14"> 
+	<INPUT TYPE="submit" Name="Submit" Value="«‰ Œ«» »—«Ì Œ—ÊÃ" class="btn" style="width:150px;" tabIndex="14">
 </center>
-
+</form>
+<%
+		
+	end if
+	
+%>
 <SCRIPT LANGUAGE="JavaScript">
 <!--
 

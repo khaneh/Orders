@@ -629,6 +629,137 @@ if request("Submit")="’œÊ— ÕÊ«·Â Œ—ÊÃ" or request("Submit")="sodoor" then
 	response.end
 end if
 
+if Request("act")="waste" then 
+	if not Auth(5 , "K") then NotAllowdToViewThisPage()
+ %>
+<div class="inPage">
+	<span>‘„«—Â ”›«—‘: </span>
+	<input id="orderID" size="6" class="boot"/>
+	<div id="message" class="well well-small"><ul></ul></div>
+</div>
+<div id="orderHeader" class="well"></div>
+<div id="confirm">
+	<h4></h4>
+	<h5>œ·Ì· ŒÊœ —« »—«Ì «Ì‰ œ—ŒÊ«”  ‘—Õ œÂÌœ</h5>
+	<input name="comment" type="text" size="20"/>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#confirm").dialog({
+		autoOpen: false,
+		buttons: {" «ÌÌœ":function(){
+			var thisLI = $("#message ul li input[name=add].btn-danger").closest("li");
+			$.ajax({
+				type:"POST",
+				url:"/service/json_getInventory.asp",
+				data:{
+					act:"addWasteRequest",
+					orderID:$("#orderID").val(),
+					rowName: thisLI.find("input[name=rowName]").val(),
+					rowID: thisLI.find("input[name=rowID]").val(),
+					maxRowID: thisLI.find("input[name=maxRowID]").val(),
+					groupName: thisLI.find("input[name=groupName]").val(),
+					qtty: thisLI.find("input[name=qtty]").val(),
+					reqID: thisLI.find("input[name=reqID]").val(),
+					comment: $("#confirm input[name=comment]").val()
+				},
+				dataType:"json"
+			}).done(function (data){
+				$("#message").append(data.status);
+				$(this).dialog("close");
+			});
+			//thisLI.find("input[name=add]").removeClass("btn-danger");
+			//$("#message ul li input[name=add]").prop("disabled",false);
+			
+		}},
+		title: " «ÌÌœ"
+	});
+	
+	$("#orderID").blur(function(){
+		var orderID = Number($("#orderID").val());
+		$("#message ul").html("");
+		if (!isNaN(orderID) && orderID!='') {
+			loadXMLDoc("/service/xml_getOrderProperty.asp?act=showHead&id=" + orderID, function(orderXML){
+				
+				var isOrder = $(orderXML).find("status isOrder").text();
+				var isClosed = $(orderXML).find("status isClosed").text();
+				var isApproved = $(orderXML).find("status isApproved").text();
+				var invoiceIssued = $(orderXML).find("status invoiceIssued").text();
+				var invoiceApproved = $(orderXML).find("status invoiceApproved").text();
+				var step = $(orderXML).find("status step").text();
+				var dis="";
+				if (isOrder=='0'){
+					$("#message").html("«” ⁄·«„ ﬂÂ ÷«Ì⁄«  ‰œ«—Â!!!!!");
+					dis = "disabled='disabled'";
+				} else
+				if (isClosed!='0'){
+					$("#message").html("”›«—‘ »” Â ‘œÂ!");
+					dis = "disabled='disabled'";
+				} else if (isApproved=='0'){
+					$("#message").html("”›«—‘  «ÌÌœ ‰‘œÂ");
+					dis = "";
+				} else if (invoiceIssued!='0') {
+					$("#message").html("⁄ÃÌ»! ›«ﬂ Ê— ’«œ— ‘œÂ!");
+					dis = "disabled='disabled'";
+				} else if (invoiceApproved!='0'){
+					$("#message").html("›«ﬂ Ê— «Ì‰ ”›«—‘  «ÌÌœ ‘œÂ° ›·–« œŒ· Ê  ’—› œ— ¬‰ „„ﬂ‰ ‰Ì” ");
+					dis = "disabled='disabled'";
+				} else {
+					dis = "";
+				}	
+				
+				TransformXml(orderXML, "/xsl/orderShowHeader.xsl", function(result){
+					$("#orderHeader").html(result);	
+					$('a#customerID').click(function(e){
+						window.open('../CRM/AccountInfo.asp?act=show&selectedCustomer='+$('a#customerID').attr("myID"), 'showCustomer');
+						e.preventDefault();
+					});
+				});
+				loadXMLDoc("/service/xml_getOrderProperty.asp?act=editOrder&id=" + orderID, function(propXML){
+					loadXMLDoc("/service/xml_getOrderProperty.asp?act=stock&id=" + orderID, function(stockXML){
+						$(propXML).find("group[hasStock=yes]").each(function(i){
+							var rowName = $(this).closest("rows").attr("name");
+							var groupName = $(this).attr("name");
+							var invoiceItem = $(this).attr("item");
+							var rowID = $(this).closest("row").attr("id");
+							var req = $(stockXML).find("req/invoiceItem:contains(" + invoiceItem + ")").find("rowID:contains(" + rowID + ")").parent().find("reqStatus:not(:contains('del'))").parent();
+							if (req.size()!=0){
+								$("#message ul").append("<li><span name='itemName'>" + $(req).find("ItemName").text() + 
+									"</span><input name='qtty' value='" + $(req).find("Qtty").text() + 
+									"' size='4'/><input name='add' " + dis + 
+									" type='button' class='btn' value='À»  œ—ŒÊ«” ' onclick='addRequest(this)'/><span name='unit'>" + 
+									$(req).find("unit").text() + "</span><input type='hidden' name='rowName' value='" + 
+									rowName + "'/><input type='hidden' name='reqID' value='" + $(req).find("ID").text() + 
+									"'/><input type='hidden' name='groupName' value='" + groupName + 
+									"'/><input type='hidden' name='rowID' value='" + rowID + 
+									"'/><input type='hidden' name='maxRowID' value='0'/></li>");
+							}
+							
+						});
+						$("#message ul li").each(function(i){
+							var rowName = $(this).find("input[name=rowName]").val();
+							var rowID = parseInt($(this).find("input[name=rowID]").val());
+							var maxRowID = parseInt($(this).find("input[name=maxRowID]").val());
+							if (rowID > maxRowID)
+								$("#message ul li input[name=rowName]").parent().find("input[name=maxRowID]").val(rowID);
+						});
+					});
+				});
+			});
+		} 
+	});
+});
+function addRequest(e){
+	var thisLI = $(e).closest("li");
+	$("#confirm h4").html("¬Ì« «ÿ„Ì‰«‰ œ«—Ìœ ﬂÂ »—«Ì " + thisLI.find("span[name=itemName]").text() + " " + thisLI.find("input[name=qtty]").val() + " " + thisLI.find("span[name=unit]").text() + " »Â œ·Ì· Œ—«»Ì/÷«Ì⁄«  œ—ŒÊ«”  ê—œœø");
+	thisLI.find("input[name=add]").addClass("btn-danger");
+	$("#message ul li input[name=add]").prop("disabled",true);
+	$("#confirm").dialog("open");
+}
+</script>
+<%	
+	Response.end
+end if
 
 '-----------------------------------------------------------------------------------------------------
 '--------------------------------------------------------------------- LIST Inventory Item Pickuplists
@@ -637,7 +768,7 @@ end if
 <style>
 	.changeItem{cursor: pointer;}
 	td.delBtn {position: relative;}
-	td.delBtn span {position: absolute;opacity: .6;cursor: pointer;top:2px;left: 0px;font-size: 8px;font-family: tahoma;}
+	td.delBtn span {position: absolute;opacity: .6;cursor: pointer;top:2px;left: 20px;font-size: 8px;font-family: tahoma;}
 </style>
 <script type="text/javascript">
 	$(document).ready(function(){
@@ -805,7 +936,7 @@ if Auth(5 , 9) then
 		%>
 		<TR >
 			<TD align=center colspan=6 height=50><INPUT TYPE="hidden" name=color1 value=""><INPUT TYPE="hidden" name=color2 value="">
-				<center><INPUT TYPE="submit" Name="Submit" Value="Õ–› œ—ŒÊ«” "  style="width:150px;" tabIndex="14" onclick="return confirm('¬Ì« „ÿ„∆‰« „Ì ŒÊ«ÂÌœ «Ì‰ œ—ŒÊ«”  —« Õ–› ﬂ‰Ìœø')"> <INPUT TYPE="submit" Name="Submit" Value="’œÊ— ÕÊ«·Â Œ—ÊÃ"  style="width:150px;" tabIndex="14"> 
+				<center><INPUT TYPE="submit" Name="Submit" Value="Õ–› œ—ŒÊ«” "  style="width:150px;" tabIndex="14" class="btn" onclick="return confirm('¬Ì« „ÿ„∆‰« „Ì ŒÊ«ÂÌœ «Ì‰ œ—ŒÊ«”  —« Õ–› ﬂ‰Ìœø')"> <INPUT TYPE="submit" Name="Submit" Value="’œÊ— ÕÊ«·Â Œ—ÊÃ"  style="width:150px;" class="btn" tabIndex="14"> 
 				</center>	<BR>
 			</TD>
 		</TR>
@@ -862,9 +993,12 @@ if Auth(5 , 1) then
 		Loop
 		%>
 		</TABLE><br>
-		<center><INPUT TYPE="submit" Name="Submit" Value="Õ–› œ—ŒÊ«” "  style="width:150px;" tabIndex="14" onclick="return confirm('¬Ì« „ÿ„∆‰« „Ì ŒÊ«ÂÌœ «Ì‰ œ—ŒÊ«”  —« Õ–› ﬂ‰Ìœø')"> <INPUT TYPE="submit" Name="Submit" Value="’œÊ— ÕÊ«·Â Œ—ÊÃ"  style="width:150px;" tabIndex="14">
-		</form>
+		<center>
+			<INPUT TYPE="submit" Name="Submit" Value="Õ–› œ—ŒÊ«” "  style="width:150px;" tabIndex="14" class="btn" onclick="return confirm('¬Ì« „ÿ„∆‰« „Ì ŒÊ«ÂÌœ «Ì‰ œ—ŒÊ«”  —« Õ–› ﬂ‰Ìœø')"/> 
+			<INPUT TYPE="submit" Name="Submit" Value="’œÊ— ÕÊ«·Â Œ—ÊÃ"  style="width:150px;" tabIndex="14" class="btn"/>
+			<a href="?act=waste" class="btn" style="width:150px;">’œÊ— ÕÊ«·Â »—ê‘ Ì</a>
 		</center>
+		</form>
 	<% end if %>
 	<BR><BR>
 	<TABLE align=center width=50%>
