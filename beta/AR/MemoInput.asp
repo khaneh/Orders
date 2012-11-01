@@ -182,7 +182,10 @@ elseif request("act")="getMemo" then
 		response.redirect "?errMsg=" & Server.URLEncode("ÎØÇ! ÓÇá ãÇáí ÌÇÑí ÈÓÊå ÔÏå æ ÔãÇ ŞÇÏÑ Èå ÊÛííÑ ÏÑ Âä äíÓÊíÏ.")
 	end if 
 	'----
-	
+	if (trim(Description)="") then
+		Conn.close
+		response.redirect "?errMsg=" & Server.URLEncode("ÎØÇ!ÈÏæä ÔÑÍ ËÈÊ äãíßäíã.")
+	end if 
 	creationDate=	shamsiToday()
 
 	GLAccount=		"91001"	'This must be changed... (Sales A)
