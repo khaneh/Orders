@@ -361,7 +361,8 @@ conn.Close
 <script language="JavaScript">
 <!--
 function setPrice(src){
-	src.value=val2txt(txt2val(src.value));
+/* 	src.value=val2txt(txt2val(src.value)); */
+	$(src).val(echoNum(getNum($(src).val())));
 }
 
 //-->
