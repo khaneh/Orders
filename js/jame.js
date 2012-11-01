@@ -146,6 +146,9 @@ $(document).ready(function(){
         }
     	
     });
+    $("input.num").blur(function(){
+	    $(this).val(echoNum(getNum($(this).val())));
+    });
 });
 /* ===========================================================
  * bootstrap-tooltip.js v2.1.1
