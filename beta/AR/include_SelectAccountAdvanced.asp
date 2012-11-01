@@ -36,7 +36,9 @@ if SA_SearchBox="" then SA_SearchBox="CustomerNameSearchBox"
 		if isPostable = "no" then 
 			extraConditions = extraConditions & " AND (Postable1=0 OR Postable2=0) "
 		end if
-		
+		if createdBy<>"0" then
+			extraConditions = extraConditions & " and Accounts.createdBy = " & createdBy
+		end if
 		if lastInvoiceDateFrom <> "" then 
 			extraConditions = extraConditions & " AND Accounts.ID IN (select customer from invoices where voided=0 and issued=1 and IsReverse=0 group by customer having max(issuedDate) >='" & lastInvoiceDateFrom &"') "
 		end if
@@ -158,7 +160,7 @@ if SA_SearchBox="" then SA_SearchBox="CustomerNameSearchBox"
 						<td  style="border-bottom: solid 1pt black;"><INPUT TYPE="radio" NAME="selectedCustomer" Value="<%=SA_RS1("ID")%>" <% if SA_RS1("status")="3" then %> disabled <% end if %> onclick="okToProceed=true;setColor(this)" ></td>
 						<td  style="border-bottom: solid 1pt black">
 						<%if Auth(1 , 1) then %>
-							<A href="../CRM/AccountInfo.asp?act=show&selectedCustomer=<%=SA_AccountNo%>&searchtype=advanced&createDateFrom=<%=createDateFrom%>&createDateTo=<%=createDateTo%>&accountGroup=<%=accountGroup%>&isPostable=<%=isPostable%>&lastInvoiceDateFrom=<%=lastInvoiceDateFrom%>&lastInvoiceDateTo=<%=lastInvoiceDateTo%>&submitButton=<%=submitButton%>" target='_blank'><%=SA_AccountTitle%></A>  <% if SA_RS1("status")="3" then %> <FONT COLOR="red"><B>„”œÊœ</B></FONT> <% end if %> 
+							<A href="../CRM/AccountInfo.asp?act=show&selectedCustomer=<%=SA_AccountNo%>&searchtype=advanced&createDateFrom=<%=createDateFrom%>&createDateTo=<%=createDateTo%>&accountGroup=<%=accountGroup%>&isPostable=<%=isPostable%>&lastInvoiceDateFrom=<%=lastInvoiceDateFrom%>&lastInvoiceDateTo=<%=lastInvoiceDateTo%>&salesInvoiceDateFrom=<%=salesInvoiceDateFrom%>&salesInvoiceDateTo=<%=salesInvoiceDateTo%>&createdBy=<%=createdBy%>&submitButton=<%=submitButton%>" target='_blank'><%=SA_AccountTitle%></A>  <% if SA_RS1("status")="3" then %> <FONT COLOR="red"><B>„”œÊœ</B></FONT> <% end if %> 
 						<%else
 							response.write SA_AccountTitle
 						end if%>
@@ -194,7 +196,7 @@ if SA_SearchBox="" then SA_SearchBox="CustomerNameSearchBox"
 					if i = page then %>
 						[<%=i%>]&nbsp;
 <%					else%>
-						<A HREF="?p=<%=i%>&<%=SA_SearchBox%>=<%=SA_TitleOrName%>&act=<%=SA_ActName%>&createDateFrom=<%=createDateFrom%>&createDateTo=<%=createDateTo%>&accountGroup=<%=accountGroup%>&isPostable=<%=isPostable%>&lastInvoiceDateFrom=<%=lastInvoiceDateFrom%>&lastInvoiceDateTo=<%=lastInvoiceDateTo%>&submitButton=<%=submitButton%>&ord=<%=ord%>&salesInvoiceDateFrom=<%=salesInvoiceDateFrom%>&salesInvoiceDateTo=<%=salesInvoiceDateTo%>"><%=i%></A>&nbsp;
+						<A HREF="?p=<%=i%>&<%=SA_SearchBox%>=<%=SA_TitleOrName%>&act=<%=SA_ActName%>&createDateFrom=<%=createDateFrom%>&createDateTo=<%=createDateTo%>&accountGroup=<%=accountGroup%>&isPostable=<%=isPostable%>&lastInvoiceDateFrom=<%=lastInvoiceDateFrom%>&lastInvoiceDateTo=<%=lastInvoiceDateTo%>&createdBy=<%=createdBy%>&submitButton=<%=submitButton%>&ord=<%=ord%>&salesInvoiceDateFrom=<%=salesInvoiceDateFrom%>&salesInvoiceDateTo=<%=salesInvoiceDateTo%>"><%=i%></A>&nbsp;
 <%					end if 
 				next 
 			end if
@@ -244,7 +246,7 @@ function go2Page(p,ord) {
 	//document.getElementsByName('Page')[0].value=p;
 	//document.getElementsByName('Ord')[0].value=ord;
 	//document.forms[0].submit();
-	str = "?p="+p+"&<%=SA_SearchBox%>=<%=SA_TitleOrName%>&act=<%=SA_ActName%>&createDateFrom=<%=createDateFrom%>&createDateTo=<%=createDateTo%>&accountGroup=<%=accountGroup%>&isPostable=<%=isPostable%>&lastInvoiceDateFrom=<%=lastInvoiceDateFrom%>&lastInvoiceDateTo=<%=lastInvoiceDateTo%>&submitButton=<%=submitButton%>&ord="+ord+"&salesInvoiceDateFrom=<%=salesInvoiceDateFrom%>&salesInvoiceDateTo=<%=salesInvoiceDateTo%>"
+	str = "?p="+p+"&<%=SA_SearchBox%>=<%=SA_TitleOrName%>&act=<%=SA_ActName%>&createDateFrom=<%=createDateFrom%>&createDateTo=<%=createDateTo%>&accountGroup=<%=accountGroup%>&isPostable=<%=isPostable%>&lastInvoiceDateFrom=<%=lastInvoiceDateFrom%>&lastInvoiceDateTo=<%=lastInvoiceDateTo%>&submitButton=<%=submitButton%>&createdBy=<%=createdBy%>&ord="+ord+"&salesInvoiceDateFrom=<%=salesInvoiceDateFrom%>&salesInvoiceDateTo=<%=salesInvoiceDateTo%>"
 	window.location = str;
 }
 //-->

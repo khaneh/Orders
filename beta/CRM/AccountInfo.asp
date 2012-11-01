@@ -75,7 +75,7 @@ if request("act")="select" then
   elseif request("submitButton")="Ã” ÃÊ ÅÌ‘—› Â" then
   'response.write "test"
     'if request("search") <> "" then
-		SA_TitleOrName=Replace(Replace(request("search"),"Ì","Ì"),"ﬂ","ﬂ")
+		SA_TitleOrName=request("search")
 		SA_Action="return selectOperations();"
 		SA_SearchAgainURL="AccountInfo.asp"
 		SA_StepText="" '"ê«„ œÊ„ : «‰ Œ«» Õ”«»"
@@ -85,6 +85,7 @@ if request("act")="select" then
 		createDateTo = request("createDateTo")
 		accountGroup = request("accountGroup")
 		isPostable = request("isPostable")
+		createdBy = request("createdBy")
 		lastInvoiceDateFrom = request("lastInvoiceDateFrom")
 		lastInvoiceDateTo = request("lastInvoiceDateTo")
 		salesInvoiceDateFrom = request("salesInvoiceDateFrom")
@@ -127,6 +128,7 @@ elseif request("act")="show" then
 		createDateTo = request("createDateTo")
 		accountGroup = request("accountGroup")
 		isPostable = request("isPostable")
+		createdBy = request("createdBy")
 		lastInvoiceDateFrom = request("lastInvoiceDateFrom")
 		lastInvoiceDateTo = request("lastInvoiceDateTo")
 		salesInvoiceDateFrom = request("salesInvoiceDateFrom")
@@ -148,10 +150,19 @@ elseif request("act")="show" then
 			extraConditions = extraConditions & " AND (Postable1=0 OR Postable2=0) "
 		end if
 		if lastInvoiceDateFrom <> "" then 
-			extraConditions = extraConditions & " AND Accounts.ID IN (select distinct customer from Invoices where issuedDate >='" & lastInvoiceDateFrom & "' and voided=0 and issued=1 and IsReverse=0) "
+			extraConditions = extraConditions & " AND Accounts.ID IN (select distinct customer from Invoices where voided=0 and issued=1 and IsReverse=0 group by customer having max(issuedDate) >='" & lastInvoiceDateFrom & "') "
 		end if
 		if lastInvoiceDateTo <> "" then 
-			extraConditions = extraConditions & " AND Accounts.ID IN (select distinct customer from Invoices where issuedDate <='" & lastInvoiceDateTo & "' and voided=0 and issued=1 and IsReverse=0) "
+			extraConditions = extraConditions & " AND Accounts.ID IN (select distinct customer from Invoices where voided=0 and issued=1 and IsReverse=0 group by customer having max(issuedDate) <='" & lastInvoiceDateTo & "') "
+		end if
+		if salesInvoiceDateFrom <> "" then 
+			extraConditions = extraConditions & " AND Accounts.ID IN (select distinct customer from Invoices where issuedDate >='" & salesInvoiceDateFrom & "' and voided=0 and issued=1 and IsReverse=0) "
+		end if
+		if salesInvoiceDateTo <> "" then 
+			extraConditions = extraConditions & " AND Accounts.ID IN (select distinct customer from Invoices where issuedDate <='" & salesInvoiceDateTo & "' and voided=0 and issued=1 and IsReverse=0) "
+		end if
+		if createdBy<>"0" then
+			extraConditions = extraConditions & " and Accounts.createdBy = " & createdBy
 		end if
 	end if
 	'---------------------------------------------S A M-------------------------------
@@ -190,7 +201,7 @@ elseif request("act")="show" then
 					if not Rs1.eof then
 						CusID = RS1("ID")
 						'response.write cusID
-						LinkToNext="<a href=""?act=show&NextOf="& CusID & "&searchtype=advanced&createDateFrom="&createDateFrom&"&createDateTo="&createDateTo&"&accountGroup=" &accountGroup& "&isPostable=" &isPostable & "&lastInvoiceDateFrom="& lastInvoiceDateFrom &"&lastInvoiceDateTo="&lastInvoiceDateTo&"&submitButton="& submitButton &""">»⁄œÌ &gt;</a>"
+						LinkToNext="<a href=""?act=show&NextOf="& CusID & "&searchtype=advanced&createDateFrom="&createDateFrom&"&createDateTo="&createDateTo&"&accountGroup=" &accountGroup& "&isPostable=" &isPostable & "&lastInvoiceDateFrom="& lastInvoiceDateFrom &"&lastInvoiceDateTo="&lastInvoiceDateTo&"&salesInvoiceDateFrom=" & salesInvoiceDateFrom & "&salesInvoiceDateTo=" & salesInvoiceDateTo & "&createdBy=" &createdBy& "&submitButton=" & submitButton &""">»⁄œÌ &gt;</a>"
 					else
 						CusID = NextOf
 						LinkToNext="»⁄œÌ ‰œ«—œ"
@@ -208,7 +219,7 @@ elseif request("act")="show" then
 			end if
 		end if
 		if request("searchtype")="advanced" then 
-			LinkToPrev="<a href=""?act=show&PrevOf="& CusID & "&searchtype=advanced&createDateFrom="&createDateFrom&"&createDateTo="&createDateTo&"&accountGroup=" &accountGroup& "&isPostable=" &isPostable & "&lastInvoiceDateFrom="& lastInvoiceDateFrom &"&lastInvoiceDateTo="&lastInvoiceDateTo&"&submitButton="& submitButton &""">&lt; ﬁ»·Ì</a>"
+			LinkToPrev="<a href=""?act=show&PrevOf="& CusID & "&searchtype=advanced&createDateFrom="&createDateFrom&"&createDateTo="&createDateTo&"&accountGroup=" &accountGroup& "&isPostable=" &isPostable & "&lastInvoiceDateFrom="& lastInvoiceDateFrom &"&lastInvoiceDateTo="&lastInvoiceDateTo& "&salesInvoiceDateFrom=" &salesInvoiceDateFrom &"&salesInvoiceDateTo="&salesInvoiceDateTo&"&createdBy="&createdBy& "&submitButton="& submitButton &""">&lt; ﬁ»·Ì</a>"
 		else
 			LinkToPrev="<a href=""?act=show&PrevOf="& CusID & """>&lt; ﬁ»·Ì</a>"
 		end if
@@ -234,6 +245,7 @@ elseif request("act")="show" then
 		else
 			mySQL="SELECT TOP 1 ID FROM Accounts WHERE (ID < '"& PrevOf & "') Order BY ID DESC"
 		end if
+		'Response.write mySQL
 		set RS1=Conn.execute(mySQL)
 		if request("searchtype")="advanced" then 
 			while not RS1.eof and break<>"exit"
@@ -247,7 +259,7 @@ elseif request("act")="show" then
 				LinkToPrev="ﬁ»·Ì ‰œ«—œ"
 			else
 				CusID = tmp
-				LinkToPrev="<a href=""?act=show&PrevOf="& CusID & "&searchtype=advanced&createDateFrom="&createDateFrom&"&createDateTo="&createDateTo&"&accountGroup=" &accountGroup& "&isPostable=" &isPostable & "&lastInvoiceDateFrom="& lastInvoiceDateFrom &"&lastInvoiceDateTo="&lastInvoiceDateTo&"&submitButton="& submitButton &""">&lt; ﬁ»·Ì</a>"
+				LinkToPrev="<a href=""?act=show&PrevOf="& CusID & "&searchtype=advanced&createDateFrom="&createDateFrom&"&createDateTo="&createDateTo&"&accountGroup=" &accountGroup& "&isPostable=" &isPostable & "&lastInvoiceDateFrom="& lastInvoiceDateFrom &"&lastInvoiceDateTo="&lastInvoiceDateTo&"&salesInvoiceDateFrom=" & salesInvoiceDateFrom&"&salesInvoiceDateTo="&salesInvoiceDateTo&"&createdBy="&createdBy& "&submitButton="& submitButton &""">&lt; ﬁ»·Ì</a>"
 			end if
 		else
 			if not Rs1.eof then
@@ -259,15 +271,15 @@ elseif request("act")="show" then
 			end if
 		end if
 		if request("searchtype")="advanced" then 
-			LinkToNext="<a href=""?act=show&NextOf="& CusID & "&searchtype=advanced&createDateFrom="&createDateFrom&"&createDateTo="&createDateTo&"&accountGroup=" &accountGroup& "&isPostable=" &isPostable & "&lastInvoiceDateFrom="& lastInvoiceDateFrom &"&lastInvoiceDateTo="&lastInvoiceDateTo&"&submitButton="& submitButton &""">»⁄œÌ &gt;</a>"
+			LinkToNext="<a href=""?act=show&NextOf="& CusID & "&searchtype=advanced&createDateFrom="&createDateFrom&"&createDateTo="&createDateTo&"&accountGroup=" &accountGroup& "&isPostable=" &isPostable & "&lastInvoiceDateFrom="& lastInvoiceDateFrom &"&lastInvoiceDateTo="&lastInvoiceDateTo& "&salesInvoiceDateFrom=" &salesInvoiceDateFrom&"&salesInvoiceDateTo="&salesInvoiceDateTo&"&createdBy="&createdBy& "&submitButton="& submitButton &""">»⁄œÌ &gt;</a>"
 		else
 			LinkToNext="<a href=""?act=show&NextOf="& CusID & """>»⁄œÌ &gt;</a>"
 		end if
 	elseif CusID <> "" AND isNumeric(CusID) then
 		CusID=clng(CusID)
 		if request("searchtype")="advanced" then 
-			LinkToNext="<a href=""?act=show&NextOf="& CusID & "&searchtype=advanced&createDateFrom="&createDateFrom&"&createDateTo="&createDateTo&"&accountGroup=" &accountGroup& "&isPostable=" &isPostable & "&lastInvoiceDateFrom="& lastInvoiceDateFrom &"&lastInvoiceDateTo="&lastInvoiceDateTo&"&submitButton="& submitButton &""">»⁄œÌ &gt;</a>"
-			LinkToPrev="<a href=""?act=show&PrevOf="& CusID & "&searchtype=advanced&createDateFrom="&createDateFrom&"&createDateTo="&createDateTo&"&accountGroup=" &accountGroup& "&isPostable=" &isPostable & "&lastInvoiceDateFrom="& lastInvoiceDateFrom &"&lastInvoiceDateTo="&lastInvoiceDateTo&"&submitButton="& submitButton &""">&lt; ﬁ»·Ì</a>"
+			LinkToNext="<a href=""?act=show&NextOf="& CusID & "&searchtype=advanced&createDateFrom="&createDateFrom&"&createDateTo="&createDateTo&"&accountGroup=" &accountGroup& "&isPostable=" &isPostable & "&lastInvoiceDateFrom="& lastInvoiceDateFrom &"&lastInvoiceDateTo="&lastInvoiceDateTo& "&salesInvoiceDateFrom=" &salesInvoiceDateFrom&"&salesInvoiceDateTo="&salesInvoiceDateTo&"&createdBy="&createdBy& "&submitButton="& submitButton &""">»⁄œÌ &gt;</a>"
+			LinkToPrev="<a href=""?act=show&PrevOf="& CusID & "&searchtype=advanced&createDateFrom="&createDateFrom&"&createDateTo="&createDateTo&"&accountGroup=" &accountGroup& "&isPostable=" &isPostable & "&lastInvoiceDateFrom="& lastInvoiceDateFrom &"&lastInvoiceDateTo="&lastInvoiceDateTo& "&salesInvoiceDateFrom=" &salesInvoiceDateFrom&"&salesInvoiceDateTo="&salesInvoiceDateTo&"&createdBy="&createdBy& "&submitButton="& submitButton &""">&lt; ﬁ»·Ì</a>"
 		else 
 			LinkToNext="<a href=""?act=show&NextOf="& CusID & """>»⁄œÌ &gt;</a>"
 			LinkToPrev="<a href=""?act=show&PrevOf="& CusID & """>&lt; ﬁ»·Ì</a>"
@@ -404,7 +416,8 @@ session("tab") = tab
 	</TABLE>
 <%
   end if
-else%>
+else
+ %> 
 	<br>
 	<FORM METHOD=POST ACTION="?act=select" onsubmit="if ((document.all.search.value=='') && (document.getElementById('btnSearch').value!='Ã” ÃÊ ÅÌ‘—› Â')) return false;">
 	<div dir='rtl'><B>ê«„ «Ê· : Ã” ÃÊ »—«Ì ‰«„ Ì« ‘„«—Â Õ”«»</B>
@@ -461,13 +474,29 @@ else%>
 			<tr>
 				<td>ﬁ«»· Å” :</td>
 				<td></td>
-				<td colspan=3>
+				<td colspan="3">
 					<input type="radio" name="isPostable" value="yes"><span>»«‘œ</span>
 					<input type="radio" name="isPostable" value="no"><span>‰»«‘œ</span>
 					<input type="radio" name="isPostable" value="all" checked><span>Â„Â</span>
 				</td>
 			</tr>
-			
+			<tr>
+				<td>«ÌÃ«œ ﬂ‰‰œÂ:</td>
+				<td></td>
+				<td colspan="3">
+					<select name="createdBy">
+						<option value="0">---- «‰ Œ«» ﬂ‰Ìœ ----</option>
+					<%
+						set rs=Conn.Execute("select * from users where display=1 order by realName")
+						while not rs.eof
+							Response.write "<option value='" & rs("id") & "'>" & rs("realName") & "</option>"
+							rs.MoveNext
+						wend
+						rs.close
+					%>
+					</select>
+				</td>
+			</tr>
 		</table>
 	</div>
 	</FORM>
