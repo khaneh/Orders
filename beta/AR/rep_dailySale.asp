@@ -69,7 +69,7 @@ select case Ord
 		order="EffectiveDate"
 		Ord=1
 end select	
-mySQL="select SUM(AmountOriginal) as AmountOriginal,SUM(RemainedAmount) as RemainedAmount, MAX(arBalance) as arBalance, count(ARItems.ID) AS totalItems from ARItems inner join Accounts on ARItems.Account=Accounts.ID where (ARItems.EffectiveDate between '" & input_date_start & "' and '" & input_date_end & "') and ARItems.Type=1"
+mySQL="select SUM(AmountOriginal) as AmountOriginal,SUM(RemainedAmount) as RemainedAmount, MAX(arBalance) as arBalance, count(ARItems.ID) AS totalItems from ARItems inner join Accounts on ARItems.Account=Accounts.ID where (ARItems.EffectiveDate between '" & input_date_start & "' and '" & input_date_end & "') and ARItems.Type=1 and ARItems.voided=0"
 if fullyApplied=1 then mySQL=mySQL&" AND FullyApplied=0"
 
 %>
@@ -135,7 +135,7 @@ if rs.eof then
 	SumRemain=0
 	tmpCounter=0
 
-	mySQL="select Accounts.arBalance,Accounts.AccountTitle, ARItems.* from ARItems inner join Accounts on ARItems.Account=Accounts.ID where (ARItems.EffectiveDate between '" & input_date_start & "' and '" & input_date_end & "')  and ARItems.Type=1" 
+	mySQL="select Accounts.arBalance,Accounts.AccountTitle, ARItems.* from ARItems inner join Accounts on ARItems.Account=Accounts.ID where (ARItems.EffectiveDate between '" & input_date_start & "' and '" & input_date_end & "')  and ARItems.Type=1 and ARItems.voided=0" 
 	if fullyApplied=1 then mySQL=mySQL&" AND ARItems.FullyApplied=0"
 	mySQL= mySQL & " ORDER BY " & order
 	Set rs=Server.CreateObject("ADODB.Recordset")'Conn.Execute(mySQL)

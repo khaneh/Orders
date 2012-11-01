@@ -442,9 +442,9 @@ End Sub
 				select case ItemType
 					case 1:
 						number =  RS1("Number")
-						if number = "" then 
+						if number = "" or number="-" then 
 							number = RS1("Link") & " ”Ì” „"
-							if RS1("IsA") then disabled="disabled"
+							if CBool(RS1("IsA")) then disabled="disabled"
 						end if
 						if cdbl(RS1("GLAccount")) = 13003 then 
 							LineDescription="»Â«Ì ›«ﬂ Ê— ›—Ê‘ ‘„«—Â "& number 
@@ -456,7 +456,7 @@ End Sub
 						LineDescription=RS1("MmoDescription")
 					case 4:
 						number =  RS1("Number")
-						if number = "" then 
+						if number = "" or IsNull(number) then 
 							number = RS1("Link") & " ”Ì” „"
 						end if
 						LineDescription="»—ê‘  «“ ›—Ê‘ »Â "& RS1("AccountTitle") & " ÿÌ ›«ﬂ Ê— »—ê‘  ‘„«—Â "& number

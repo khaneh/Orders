@@ -6,10 +6,6 @@ if not Auth(1 , 8) then NotAllowdToViewThisPage()
 
 %>
 <!--#include file="top.asp" -->
-<link type="text/css" href="/css/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
-<script type="text/javascript" src="/js/jquery-1.7.min.js"></script>
-<script type="text/javascript" src="/js/jquery-ui-1.8.16.custom.min.js"></script>
-<script type="text/javascript" src="/js/jquery.dateFormat-1.0.js"></script>
 <script type="text/javascript" src="/js/jquery.ui.datepicker-cc.js"></script>
 <script type="text/javascript" src="/js/calendar.js"></script>
 <script type="text/javascript" src="/js/jquery.ui.datepicker-cc-ar.js"></script>
@@ -117,16 +113,16 @@ if request("act")="" then
 <table class="myTable" cellpadding="8px" cellspacing="0">
 	<tr>
 		<td>
-			<a href="rfmModel.asp?accountGroup=<%=accountGroup%>&ord=<%if request("ord")="1" then response.write "-1" else response.write "1"%>">¬Œ—Ì‰ ”›«—‘</a>
+			<a href="rfmModel.asp?accountGroup=<%=accountGroup%>&ord=<%if request("ord")="1" then response.write "-1" else response.write "1" %>">¬Œ—Ì‰ ”›«—‘</a>
 		</td>
 		<td>
-			<a href="rfmModel.asp?accountGroup=<%=accountGroup%>&ord=<%if request("ord")="2" then response.write "-2" else response.write "2"%>"> ‰«Ê» ”›«—‘</a>
+			<a href="rfmModel.asp?accountGroup=<%=accountGroup%>&ord=<%if request("ord")="2" then response.write "-2" else response.write "2" %>"> ‰«Ê» ”›«—‘</a>
 		</td>
 		<td>
-			<a href="rfmModel.asp?accountGroup=<%=accountGroup%>&ord=<%if request("ord")="3" then response.write "-3" else response.write "3"%>">„Ì«‰êÌ‰ —Ì«·</a>
+			<a href="rfmModel.asp?accountGroup=<%=accountGroup%>&ord=<%if request("ord")="3" then response.write "-3" else response.write "3" %>">„Ì«‰êÌ‰ —Ì«·</a>
 		</td>
 		<td>
-			<a href="rfmModel.asp?accountGroup=<%=accountGroup%>&ord=<%if request("ord")="4" then response.write "-4" else response.write "4"%>"> ⁄œ«œ</a>
+			<a href="rfmModel.asp?accountGroup=<%=accountGroup%>&ord=<%if request("ord")="4" then response.write "-4" else response.write "4" %>"> ⁄œ«œ</a>
 		</td>
 	</tr>
 <%
@@ -140,16 +136,16 @@ if request("act")="" then
 	sDate = splitDate (faDate)
 	if accountGroup = -1 then 
 		myCond=""
-		mySQLCool="select count(Accounts.id) as [count] from Accounts where Accounts.type in (2,4) and Accounts.id not in (select distinct customer from Orders where createdDate < dbo.udf_date_solarToDate("&sDate(0)&","&sDate(1)&","&sDate(2)&") union select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'" & faDate & "')"
+		mySQLCool="declare @date datetime;set @date = dbo.udf_date_solarToDate("&sDate(0)&","&sDate(1)&","&sDate(2)&");select count(Accounts.id) as [count] from Accounts where Accounts.type in (2,4) and Accounts.id not in (select distinct customer from Orders where createdDate < @date union select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'" & faDate & "')"
 		'select * from Accounts where type in (2,4) and id not in (select distinct customer from Orders where createdDate<'1390/10/21' union select distinct customer from quotes where order_date<'1390/10/21' union select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'1390/10/21') order by id
-		mySQLWarm="select count(id) as [count] from accounts where id in (select distinct customer from (select customer from Orders where createdDate < dbo.udf_date_solarToDate("&sDate(0)&","&sDate(1)&","&sDate(2)&") and isOrder=0 union select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'" & faDate & "') as ddr where Customer not in (select distinct customer from Orders where createdDate < dbo.udf_date_solarToDate("&sDate(0)&","&sDate(1)&","&sDate(2)&") and isOrder=1))"
+		mySQLWarm="declare @date datetime;set @date = dbo.udf_date_solarToDate("&sDate(0)&","&sDate(1)&","&sDate(2)&");select count(id) as [count] from accounts where id in (select distinct customer from (select customer from Orders where createdDate < @date and isOrder=0 union select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'" & faDate & "') as ddr where Customer not in (select distinct customer from Orders where createdDate < @date and isOrder=1))"
 		'select * from accounts where id in (select customer from (select distinct customer from (select customer from Quotes where order_date<'1390/10/21' union select relatedID as customer from messages where RelatedTable='accounts' and msgDate<'1390/10/21') as ddr where Customer not in (select distinct customer from Orders where createdDate<'1390/10/21')) drv) order by id
 		mySQLThreshold="select count(customer) as [count] from Orders where Customer in (select customer from invoices where Issued=0 and voided=0 and customer not in (select customer from Invoices where Voided=0 and issued=1))"
 	else 
 		myCond=" inner join AccountGroupRelations on AccountGroupRelations.account = R.customer  where AccountGroupRelations.accountGroup=" & accountGroup
-		mySQLCool="select count(Accounts.id) as [count] from Accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & accountGroup & " and Accounts.type in (2,4) and Accounts.id not in (select distinct customer from Orders where createdDate< dbo.udf_date_solarToDate("&sDate(0)&","&sDate(1)&","&sDate(2)&")) and accounts.id not in (select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'" & faDate & "')"
-		mySQLWarm="select count(accounts.id) as [count] from accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & accountGroup & " and id in (select customer from (select distinct customer from (select customer from Orders where createdDate < dbo.udf_date_solarToDate("&sDate(0)&","&sDate(1)&","&sDate(2)&") and isOrder=0 union select  relatedID as customer from messages where RelatedTable='accounts' and msgDate<'" & faDate & "') as ddr where Customer not in (select distinct customer from Orders where createdDate < dbo.udf_date_solarToDate("&sDate(0)&","&sDate(1)&","&sDate(2)&") and isOrder=1)) drv)"
-		mySQLThreshold="select count(customer) as [count] from Orders inner join AccountGroupRelations on AccountGroupRelations.account=orders.customer where orders.createdDate < dbo.udf_date_solarToDate("&sDate(0)&","&sDate(1)&","&sDate(2)&") and AccountGroupRelations.accountGroup=" & accountGroup & "  and Customer in (select customer from invoices where Issued=0 and voided=0 and customer not in (select customer from Invoices where Voided=0 and issued=1))"
+		mySQLCool="declare @date datetime;set @date = dbo.udf_date_solarToDate("&sDate(0)&","&sDate(1)&","&sDate(2)&");select count(Accounts.id) as [count] from Accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & accountGroup & " and Accounts.type in (2,4) and Accounts.id not in (select distinct customer from Orders where createdDate< @date) and accounts.id not in (select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'" & faDate & "')"
+		mySQLWarm="declare @date datetime;set @date = dbo.udf_date_solarToDate("&sDate(0)&","&sDate(1)&","&sDate(2)&");select count(accounts.id) as [count] from accounts inner join AccountGroupRelations on AccountGroupRelations.account=accounts.id where AccountGroupRelations.accountGroup=" & accountGroup & " and id in (select customer from (select distinct customer from (select customer from Orders where createdDate < @date and isOrder=0 union select  relatedID as customer from messages where RelatedTable='accounts' and msgDate<'" & faDate & "') as ddr where Customer not in (select distinct customer from Orders where createdDate < @date and isOrder=1)) drv)"
+		mySQLThreshold="declare @date datetime;set @date = dbo.udf_date_solarToDate("&sDate(0)&","&sDate(1)&","&sDate(2)&");select count(customer) as [count] from Orders inner join AccountGroupRelations on AccountGroupRelations.account=orders.customer where orders.createdDate < @date and AccountGroupRelations.accountGroup=" & accountGroup & "  and Customer in (select customer from invoices where Issued=0 and voided=0 and customer not in (select customer from Invoices where Voided=0 and issued=1))"
 	end if
 	
 	'response.write mydate
@@ -164,39 +160,38 @@ if request("act")="" then
 	'response.end
 	set rs=Conn.Execute(mySQL)
 	while not rs.eof
-%>
-	<tr>
-		<td style='background-color:<% if not isnull(rs("Recency")) then response.write color(rs("Recency"))%>'>
-			<% 
-			if not isnull(rs("Recency")) then 
-				response.write text_r(rs("Recency")) & "<br>(" & rs("Recency") & ")"
-			else 
-				response.write "‰œ«—œ" 
-			end if%>
-		</td>
-		<td style='background-color:<% if not isnull(rs("Frequency")) then response.write color(rs("Frequency"))%>'>
-			<% 
-			if not isnull(rs("Frequency")) then 
-				response.write text_f(rs("Frequency")) & "<br>(" & rs("Frequency") & ")"
-			else 
-				response.write "‰œ«—œ" 
-			end if%>
-		</td>
-		<td style='background-color:<% if not isnull(rs("Value")) then response.write color(rs("Value"))%>'>
-			<% 
-			if not isnull(rs("Value")) then 
-				response.write text_v(rs("Value")) & "<br>(" & rs("Value") & ")"
-			else 
-				response.write "‰œ«—œ" 
-			end if%>
-		</td>
-		<td><a href="rfmModel.asp?act=show&accountGroup=<%=accountGroup%>&value=<%=rs("Value")%>&recency=<%=rs("Recency")%>&frequency=<%=rs("Frequency")%>&myDate=<%=Server.URLEncode(myDate)%>"><%=Separate(rs("c"))%></a></td>
-	</tr>
-<%
+		myRow = "<tr><td"
+		if not isnull(rs("Recency")) then myRow = myRow & " style='background-color:" & color(rs("Recency")) & "'"
+		myRow = myRow & ">"
+		if not isnull(rs("Recency")) then 
+			myRow = myRow & text_r(rs("Recency")) & "<br>(" & rs("Recency") & ")"
+		else 
+			myRow = myRow & "‰œ«—œ" 
+		end if
+		myRow = myRow & "</td><td"
+		if not isnull(rs("Frequency")) then myRow = myRow & " style='background-color:" & color(rs("Frequency")) & "'"
+		myRow = myRow & ">"
+		if not isnull(rs("Frequency")) then 
+			myRow = myRow & text_f(rs("Frequency")) & "<br>(" & rs("Frequency") & ")"
+		else 
+			myRow = myRow & "‰œ«—œ" 
+		end if
+		myRow = myRow & "</td><td"
+		if not isnull(rs("Value")) then myRow = myRow & " style='background-color:" & color(rs("Value")) & "'"
+		myRow = myRow & ">"
+		if not isnull(rs("Value")) then 
+			myRow = myRow & text_v(rs("Value")) & "<br>(" & rs("Value") & ")"
+		else 
+			myRow = myRow & "‰œ«—œ" 
+		end if
+		myRow = myRow & "</td><td><a href='rfmModel.asp?act=show&accountGroup=" & accountGroup & "&value=" & rs("Value") & "&recency=" & rs("Recency") & "&frequency=" & rs("Frequency") & "&myDate=" & Server.URLEncode(myDate) & "'>" & Separate(rs("c")) & "</a></td></tr>"
+		Response.write myRow
 		rs.moveNext
 	wend
 	rs.close
-	set rs=Conn.execute(mySQLCool)
+' 	Response.write mySQLCool
+
+ 	set rs=Conn.execute(mySQLCool)
 %>
 	<tr>
 		<td title="„‘ —ÌùÂ«ÌÌ ﬂÂ ‰Â ”›«—‘ œ«—‰œ Ê ‰Â «” ⁄·«„ Ê ‰Â Ì«œœ«‘ Ì »—«Ì ¬‰Â« À»  ‘œÂ" colspan="3">—«»ÿÂ ”—œ</td>
@@ -204,6 +199,7 @@ if request("act")="" then
 	</tr>
 <%
 	rs.close
+' 	Response.end
 	set rs=Conn.execute(mySQLWarm)
 %>
 	<tr>
@@ -244,7 +240,7 @@ elseif request("act")="show" then
 			<a href="rfmModel.asp?act=show&accountGroup=<%=request("accountGroup")%>&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&myDate=<%=Server.URLEncode(request("myDate"))%>&ord=<%if request("ord")="6" then response.write "-6" else response.write "6"%>">„‘ —Ì</a>
 		</td>
 		<td>
-			<a href="rfmModel.asp?act=show&accountGroup=<%=request("accountGroup")%>&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&myDate=<%=Server.URLEncode(request("myDate"))%>&ord=<%if request("ord")="7" then response.write "-7" else response.write "7"%>">Ã„⁄ „«‰œÂ</a>
+			<a href="rfmModel.asp?act=show&accountGroup=<%=request("accountGroup")%>&value=<%=request("value")%>&recency=<%=request("recency")%>&frequency=<%=request("frequency")%>&myDate=<%=Server.URLEncode(request("myDate"))%>&ord=<%if request("ord")="7" then response.write "-7" else response.write "7" %>">Ã„⁄ „«‰œÂ</a>
 		</td>
 	</tr>
 <%
@@ -342,20 +338,20 @@ elseif request("act")="showCool" then '---------------------------- C O O L ----
 		ord= " createdDate desc"
 	end if
 	sDate = splitDate(request("faDate"))
-%>
+ %>
 <table class="myTable" cellpadding="5px" cellspacing="0">
 	<tr>
 		<td>
-			<a href="rfmModel.asp?act=showCool&ord=<%if request("ord")="1" then response.write "-1" else response.write "1"%>">‘„«—Â „‘ —Ì</a>
+			<a href="rfmModel.asp?act=showCool&ord=<%if request("ord")="1" then response.write "-1" else response.write "1" %>">‘„«—Â „‘ —Ì</a>
 		</td>
 		<td>
-			<a href="rfmModel.asp?act=showCool&ord=<%if request("ord")="2" then response.write "-2" else response.write "2"%>">‰«„ „‘ —Ì</a>
+			<a href="rfmModel.asp?act=showCool&ord=<%if request("ord")="2" then response.write "-2" else response.write "2" %>">‰«„ „‘ —Ì</a>
 		</td>
 		<td>
-			<a href="rfmModel.asp?act=showCool&ord=<%if request("ord")="3" then response.write "-3" else response.write "3"%>"> «—ÌŒ «ÌÃ«œ</a>
+			<a href="rfmModel.asp?act=showCool&ord=<%if request("ord")="3" then response.write "-3" else response.write "3" %>"> «—ÌŒ «ÌÃ«œ</a>
 		</td>
 	</tr>
-<%
+ <%
 	if request("accountGroup")="" or request("accountGroup")="-1" then 
 		mySQL="select * from Accounts where type in (2,4) and id not in (select distinct customer from Orders where createdDate<'" & request("faDate")& "' union select distinct customer from quotes where order_date<'" & request("faDate") & "' union select distinct relatedID from messages where RelatedTable='accounts' and msgDate<'" & request("faDate") & "') order by " & ord
 	else 
@@ -404,16 +400,16 @@ elseif request("act")="showWarm" then '---------------------------------- W A R 
 <table class="myTable" cellpadding="5px" cellspacing="0">
 	<tr>
 		<td>
-			<a href="rfmModel.asp?act=showWarm&ord=<%if request("ord")="1" then response.write "-1" else response.write "1"%>">‘„«—Â „‘ —Ì</a>
+			<a href="rfmModel.asp?act=showWarm&ord=<% if request("ord")="1" then response.write "-1" else response.write "1" %>">‘„«—Â „‘ —Ì</a>
 		</td>
 		<td>
-			<a href="rfmModel.asp?act=showWarm&ord=<%if request("ord")="2" then response.write "-2" else response.write "2"%>">‰«„ „‘ —Ì</a>
+			<a href="rfmModel.asp?act=showWarm&ord=<% if request("ord")="2" then response.write "-2" else response.write "2" %>">‰«„ „‘ —Ì</a>
 		</td>
 		<td>
-			<a href="rfmModel.asp?act=showWarm&ord=<%if request("ord")="3" then response.write "-3" else response.write "3"%>"> «—ÌŒ «ÌÃ«œ</a>
+			<a href="rfmModel.asp?act=showWarm&ord=<% if request("ord")="3" then response.write "-3" else response.write "3" %>"> «—ÌŒ «ÌÃ«œ</a>
 		</td>
 	</tr>
-<%
+ <%
 	if request("accountGroup")="" or request("accountGroup")="-1" then 
 		mySQL="select * from accounts where id in (select customer from (select distinct customer from (select customer from Quotes where order_date<'" & request("faDate") & "' union select relatedID as customer from messages where RelatedTable='accounts' and msgDate<'" & request("faDate") & "') as ddr where Customer not in (select distinct customer from Orders where createdDate<'" & request("faDate")& "')) drv) order by " & ord
 	else

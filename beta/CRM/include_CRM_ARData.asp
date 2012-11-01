@@ -286,7 +286,7 @@
 					<td colspan="10" class="CusTableHeader" style="background-color:#CCAA99;">Ё«я ж— е«н ’«ѕ— ‘ѕе ( ”жне д‘ѕе)</td>
 				</tr>
 				<%
-				mySQL="SELECT Invoices.ID, Invoices.CreatedDate, Users.RealName AS Creator, Invoices.ApprovedDate, Invoices.TotalReceivable, Users_1.RealName AS Approver,  Users_2.RealName AS Issuer, Invoices.IssuedDate, ARItems.RemainedAmount FROM Invoices INNER JOIN Users ON Invoices.CreatedBy = Users.ID INNER JOIN Users Users_1 ON Invoices.ApprovedBy = Users_1.ID INNER JOIN Users Users_2 ON Invoices.IssuedBy = Users_2.ID INNER JOIN ARItems ON Invoices.ID = ARItems.Link WHERE (Invoices.Customer = '"& cusID & "') AND (Invoices.Voided = 0) AND (Invoices.Issued = 1) AND (ARItems.Type = 1) AND (ARItems.RemainedAmount > 0) ORDER BY Invoices.CreatedDate DESC, Invoices.ID"
+				mySQL="SELECT Invoices.ID, Invoices.CreatedDate, Users.RealName AS Creator, Invoices.ApprovedDate, Invoices.TotalReceivable, Users_1.RealName AS Approver,  Users_2.RealName AS Issuer, Invoices.IssuedDate, ARItems.RemainedAmount FROM Invoices INNER JOIN Users ON Invoices.CreatedBy = Users.ID INNER JOIN Users Users_1 ON Invoices.ApprovedBy = Users_1.ID INNER JOIN Users Users_2 ON Invoices.IssuedBy = Users_2.ID INNER JOIN ARItems ON Invoices.ID = ARItems.Link and ARItems.Type = 1 and ARItems.voided = 0  WHERE (Invoices.Customer = '"& cusID & "') AND (Invoices.Voided = 0) AND (Invoices.Issued = 1) AND (ARItems.RemainedAmount > 0) ORDER BY Invoices.CreatedDate DESC, Invoices.ID"
 				'response.write mysql
 				Set RS1 = conn.execute(mySQL)
 				if RS1.eof then
