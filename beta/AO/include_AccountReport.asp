@@ -1429,7 +1429,11 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 	sys = "AR"
 
 	customerID=		RS1("Customer")
-	totalPrice=		cdbl(RS1("totalPrice"))
+	if IsNull(RS1("totalPrice")) then
+		totalPrice=0
+	else
+		totalPrice=cdbl(RS1("totalPrice"))
+	end if
 	totalDiscount=	cdbl(RS1("totalDiscount"))
 	totalReverse=	cdbl(RS1("totalReverse"))
 	totalVat =		cdbl(RS1("totalVat"))
@@ -1450,7 +1454,7 @@ elseif request("act")="showInvoice" AND request("invoice") <> "" then
 
 	if IsReverse then itemType=4 else itemType=1
 
-	Set RS2 = conn.Execute("SELECT ID FROM "& sys & "Items WHERE (Type = "& itemType & ") AND (Link = "& InvoiceID & ")")
+	Set RS2 = conn.Execute("SELECT ID FROM "& sys & "Items WHERE (Type = "& itemType & ") AND (Link = "& InvoiceID & ") and voided=0")
 	if not RS2.EOF then	AnyItemID = RS2("ID")
 
 	TotalReceivable= totalPrice - totalDiscount - totalReverse + totalVat
