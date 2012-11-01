@@ -1163,7 +1163,7 @@ function calc_photobookBlock(e){
 	var myGroup = $(e).closest("div.group");
 	var descGroup = myGroup.parent().children("div[groupname=photobookDesc]");
 	var qtty = parseInt(descGroup.find("[name=photobook-qtty]").val());
-	var thickness = parseInt(myGroup.find("[name=thickness]").children(":selected").val());
+	var thickness = parseInt(myGroup.find("[name^=thickness]").children(":selected").val());
 	var siz = parseInt(descGroup.find("[name=album-size]:first").children(":selected").val());
 	var lasterQtty = parseInt(myGroup.find("[name=block-qtty-luster]:first").val());
 	var silkQtty = parseInt(myGroup.find("[name=block-qtty-silk]:first").val());
@@ -1173,14 +1173,14 @@ function calc_photobookBlock(e){
 		var h = parseFloat(descGroup.find("[name=album-size]:first").children(":selected").text().split("X")[1]);
 		var priceLaster = parseFloat(myGroup.find("[name=thickness]:checked").attr("price").split(",")[0].split("|")[0]);
 		var priceSilk = parseFloat(myGroup.find("[name=thickness]:checked").attr("price").split(",")[0].split("|")[1]);
-		var priceMetalic = parseFloat(myGroup.find("[name=thickness]:checked").attr("price").split(",")[0].split("|")[2]);
+		var priceMetalic = parseFloat(myGroup.find("[name^=thickness]:checked").attr("price").split(",")[0].split("|")[2]);
 		priceLaster *= lasterQtty * w * h;
 		priceSilk *= silkQtty * w * h;
 		priceMetalic *= metalicQtty * w * h;
 	} else {
-		var priceLaster = parseFloat(myGroup.find("[name=thickness]:checked").attr("price").split(",")[siz].split("|")[0]);
-		var priceSilk = parseFloat(myGroup.find("[name=thickness]:checked").attr("price").split(",")[siz].split("|")[1]);
-		var priceMetalic = parseFloat(myGroup.find("[name=thickness]:checked").attr("price").split(",")[siz].split("|")[2]);
+		var priceLaster = parseFloat(myGroup.find("[name^=thickness]:checked").attr("price").split(",")[siz].split("|")[0]);
+		var priceSilk = parseFloat(myGroup.find("[name^=thickness]:checked").attr("price").split(",")[siz].split("|")[1]);
+		var priceMetalic = parseFloat(myGroup.find("[name^=thickness]:checked").attr("price").split(",")[siz].split("|")[2]);
 		if (priceLaster==0) 
 			myGroup.find("[name=block-qtty-luster]:first").val(0);
 		if (priceSilk==0) 
@@ -1199,7 +1199,7 @@ function calc_photobookCover(e){
 	var myGroup = $(e).closest("div.group");
 	var descGroup = myGroup.parent().children("div[groupname=photobookDesc]");
 	var qtty = parseInt(descGroup.find("[name=photobook-qtty]").val());
-	var astar = parseInt(myGroup.find("[name=cover-astar]:checked").val());
+	var astar = parseInt(myGroup.find("[name^=cover-astar]:checked").val());
 	var coverType = parseInt(myGroup.find("[name=cover-type]:first").children(":selected").val());
 	var siz = parseInt(descGroup.find("[name=album-size]:first").children(":selected").val());
 	var price = 0;
@@ -1209,7 +1209,7 @@ function calc_photobookCover(e){
 		var w = parseFloat(descGroup.find("[name=album-size]:first").children(":selected").text().split("X")[0]);
 		var h = parseFloat(descGroup.find("[name=album-size]:first").children(":selected").text().split("X")[1]);
 		coverPrice = parseFloat(myGroup.find("[name=cover-type]:first").children(":selected").attr("price").split(",")[0]) * h * w;
-		astarPrice = parseFloat(myGroup.find("[name=cover-astar]:checked").attr("price").split(",")[0]) * h * w;
+		astarPrice = parseFloat(myGroup.find("[name=^cover-astar]:checked").attr("price").split(",")[0]) * h * w;
 	} else {
 		if (coverType!=0){
 				coverPrice = parseFloat(myGroup.find("[name=cover-type]:first").children(":selected").attr("price").split(",")[siz]);
@@ -1217,10 +1217,10 @@ function calc_photobookCover(e){
 				myGroup.find("[name=cover-type]:first").children(":first").prop("selected",true);
 		}
 		if (astar!=0){
-			astarPrice = parseFloat(myGroup.find("[name=cover-astar]:checked").attr("price").split(",")[siz]);
+			astarPrice = parseFloat(myGroup.find("[name^=cover-astar]:checked").attr("price").split(",")[siz]);
 			console.log(astarPrice);
 			if (astarPrice == 0)
-				myGroup.find("[name=cover-astar]:first").prop("checked",true);
+				myGroup.find("[name=^cover-astar]:first").prop("checked",true);
 		}
 	}
 	price = (coverPrice + astarPrice) * qtty;
