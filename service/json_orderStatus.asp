@@ -25,7 +25,7 @@ select case request("act")
 		end if
 	case "set":
 		if IsNumeric(request("orderID")) then 
-			Conn.Execute ("UPDATE orders set step=" & Request("step") & ",lastUpdatedBy=" & Session("ID") & ", lastUpdatedDate=getdate() where id=" & Request("orderID"))
+			Conn.Execute ("UPDATE orders set step=" & Request("step") & ", isPrinted=0,lastUpdatedBy=" & Session("ID") & ", lastUpdatedDate=getdate() where id=" & Request("orderID"))
 			set rs = Conn.Execute("select orderSteps.name from orders inner join orderSteps on orders.step=orderSteps.id where orders.id=" & Request("orderID"))
 			if not rs.eof then
 				result("status")="done"
@@ -33,6 +33,12 @@ select case request("act")
 			end if
 			rs.Close
 			set rs = Nothing
+		end if
+	case "print":
+		if IsNumeric(request("orderID")) then 
+			orderID= CDbl(Request("orderID"))
+			conn.Execute("update orders set isPrinted=1, LastUpdatedDate=getDate(),LastUpdatedBy=" & Session("id") & " where id=" & orderID)
+			result("status")="ok"
 		end if
 end select
 Response.Write toJSON(result)

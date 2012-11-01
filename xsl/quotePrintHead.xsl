@@ -4,13 +4,16 @@
 	<div class="logo"><img src="/images/logo-bw.jpg"/></div>
 	<p class="inthename">хЕ ДгЦ ног</p>
 	<p class="date"><xsl:value-of select="./today/shamsiToday"/></p>
-	<xsl:if test="concat(./companyName,'')!=''">
-		<p class="company">тяъй ЦмйяЦ <xsl:value-of select="./companyName"/></p>
+	<xsl:if test="concat(./customer/companyName,'')!=''">
+		<p class="company">тяъй ЦмйяЦ <xsl:value-of select="./customer/companyName"/></p>
 	</xsl:if>
 	
 	<p class="name">
-		<xsl:if test="concat(./dear,'')='бчгМ'"><span>лДгх</span></xsl:if>
-		<xsl:if test="concat(./dear,'')='нгДЦ'"><span>сяъгя</span></xsl:if> <xsl:value-of select="./dear"/> <xsl:value-of select="./customerName"/></p>
+		<xsl:if test="concat(./customer/dear,'')='бчгМ'"><span>лДгх</span></xsl:if>
+		<xsl:if test="concat(./customer/dear,'')='нгДЦ'"><span>сяъгя</span></xsl:if>
+		<span><xsl:value-of select="./customer/dear"/></span>
+		<span><xsl:value-of select="./customer/customerName"/></span>
+	</p>
 	<p>хг сАгЦ║</p>
 	<p>гмйягЦг гсйзАгЦ оянФгсйМ гр ьящ бД ЦлЦФзЕ ЦмйяЦ хЕ тям пМА гзАгЦ ЦМ²░яоо:</p>
 	<p>ЕрМДЕ йФАМо <xsl:value-of select="./qtty"/> зоо <xsl:value-of select="./orderTitle"/> оя гхзго <xsl:value-of select="./paperSize"/> оя ЦлЦФз  <xsl:value-of select="./totalPrice"/> яМгА ЦМ²хгто. ъЕ хЕ тям пМА ЦМ²хгто:</p>
