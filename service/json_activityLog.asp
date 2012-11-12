@@ -27,10 +27,9 @@ select case request("act")
 	case "quote":
 		id=0
 		if isNumeric(request("id")) then id=request("id")
-		myDate = "dbo.udf_date_solarToDate(" & mid(request("date"),1,4) & "," & mid(request("date"),6,2) & "," & mid(request("date"),9,2) & ")"
 		'Response.write "select orders.*, orderType.name as order_kind, accounts.accountTitle from orders inner join Accounts on orders.customer=accounts.id inner join orderTypes on orders.type = orderTypes.id where orders.isOrder=0 and orders.id>" & id &" and createdDate between DATEADD(DAY, 0, DATEDIFF(DAY, 0, " & myDate & ")) and DATEADD(DAY, 1, DATEDIFF(DAY, 0, " & myDate & "))"
 		'Response.end
-		set rs=Conn.Execute("select orders.*, orderTypes.name as order_kind, accounts.accountTitle from orders inner join Accounts on orders.customer=accounts.id inner join orderTypes on orders.type = orderTypes.id where orders.isOrder=0 and orders.id>" & id &" and orders.createdDate between DATEADD(DAY, 0, DATEDIFF(DAY, 0, " & myDate & ")) and DATEADD(DAY, 1, DATEDIFF(DAY, 0, " & myDate & "))")
+		set rs=Conn.Execute("declare @myDate datetime;set @myDate = dbo.udf_date_solarToDate(" & mid(request("date"),1,4) & "," & mid(request("date"),6,2) & "," & mid(request("date"),9,2) & ");select orders.*, orderTypes.name as order_kind, accounts.accountTitle from orders inner join Accounts on orders.customer=accounts.id inner join orderTypes on orders.type = orderTypes.id where orders.isOrder=0 and orders.id>" & id &" and orders.createdDate between DATEADD(DAY, 0, DATEDIFF(DAY, 0, @myDate)) and DATEADD(DAY, 1, DATEDIFF(DAY, 0, @myDate))")
 		while not rs.eof
 			set result(null) = jsObject()
 			result(null)("id")=rs("id") 
@@ -53,7 +52,7 @@ select case request("act")
 		id=0
 		if isNumeric(request("id")) then id=request("id")
 		myDate = "dbo.udf_date_solarToDate(" & mid(request("date"),1,4) & "," & mid(request("date"),6,2) & "," & mid(request("date"),9,2) & ")"
-		set rs=Conn.Execute("select orders.*, orderTypes.name as order_kind, accounts.accountTitle from orders inner join Accounts on orders.customer=accounts.id inner join orderTypes on orders.type = orderTypes.id where orders.isOrder=1 and orders.id>" & id &" and orders.createdDate between DATEADD(DAY, 0, DATEDIFF(DAY, 0, " & myDate & ")) and DATEADD(DAY, 1, DATEDIFF(DAY, 0, " & myDate & "))")
+		set rs=Conn.Execute("declare @myDate datetime;set @myDate = dbo.udf_date_solarToDate(" & mid(request("date"),1,4) & "," & mid(request("date"),6,2) & "," & mid(request("date"),9,2) & ");select orders.*, orderTypes.name as order_kind, accounts.accountTitle from orders inner join Accounts on orders.customer=accounts.id inner join orderTypes on orders.type = orderTypes.id where orders.isOrder=1 and orders.id>" & id &" and orders.createdDate between DATEADD(DAY, 0, DATEDIFF(DAY, 0, @myDate)) and DATEADD(DAY, 1, DATEDIFF(DAY, 0, @myDate))")
 		'DATEADD(DAY, 0, DATEDIFF(DAY, 0, createdDate)),DATEADD(DAY, 1, DATEDIFF(DAY, 0, createdDate))
 		while not rs.eof
 			set result(null) = jsObject()

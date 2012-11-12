@@ -243,7 +243,7 @@ elseif request("act")="show" then
 </div>
 <SCRIPT type="text/javascript">
 	$(document).ready(function(){
-		TransformXmlURL('/service/xml_getOrderTrace.asp?act=getFolow&isOrder=1&fromDate=<%=request("fromDate")%>&toDate=<%=request("toDate")%>&orderTypes=<%=request("orderTypes")%>&step=<%=request("step")%>',"/xsl/orderShowList.xsl?v=<%=version%>", function(result){
+		TransformXmlURL('/service/xml_getOrderTrace.asp?act=getFolow&isOrder=1&fromDate=<%=request("fromDate")%>&toDate=<%=request("toDate")%>&orderTypes=<%=request("orderTypes")%>&step=<%=request("step")%>',"/xsl.<%=version%>/orderShowList.xsl", function(result){
 			$("#traceResult").html(result);
 			$("#traceResult td.orderDates").each(function(i){
 				var createdDate = $(this).find(".createdDate");

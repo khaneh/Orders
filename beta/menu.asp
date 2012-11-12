@@ -77,7 +77,7 @@ End Function
 <script type="text/javascript" src="/js/jquery.jsonSuggest-2.min.js"></script>
 <script type="text/javascript" src="/js/jalaliCalendar.js"></script>
 <script type="text/javascript" src="/js/xslTransform.js"></script>
-<script type="text/javascript" src="/js/jame.js"></script>
+<script type="text/javascript" src="/js/jame.1.js"></script>
 <script type="text/javascript" src="/js/jquery-ui-1.8.16.custom.min.js"></script>
 </HEAD>
 <BODY bgcolor=<%=AppBgColor%> topmargin=0 leftmargin=0><!<% if onunload<>"" then %> onunload="<%=onunload%>"<% end if %> >

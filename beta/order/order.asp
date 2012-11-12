@@ -171,7 +171,7 @@ select case request("act")
 <SCRIPT type="text/javascript">
 	$(document).ready(function(){
 		$("#search_box").focus();
-		TransformXmlURL("/service/xml_getOrderTrace.asp?act=search&searchBox=<%=Server.URLEncode(searchBox)%>","/xsl/orderShowList.xsl?v=<%=version%>", function(result){
+		TransformXmlURL("/service/xml_getOrderTrace.asp?act=search&searchBox=<%=Server.URLEncode(searchBox)%>","/xsl.<%=version%>/orderShowList.xsl", function(result){
 			$("#traceResult").html(result);
 			$("#traceResult td.orderDates").each(function(i){
 				var createdDate = $(this).find(".createdDate");
@@ -212,7 +212,7 @@ select case request("act")
 		'-----------------------------------------------------------------------------------------------------	
 	case "":				'---------------------------------------------------------------------------------
 		'-----------------------------------------------------------------------------------------------------	
-
+		Response.redirect "?act=getShow"
 
 		'-----------------------------------------------------------------------------------------------------	
 	case "search":			'---------------------------------------------------------------------------------
@@ -406,7 +406,7 @@ $(".check").click(function(){
 <SCRIPT type="text/javascript">
 	$(document).ready(function(){
 		$("#search_box").focus();
-		TransformXmlURL("/service/xml_getOrderTrace.asp?act=advanceSearch&<%=request.form%>","/xsl/orderShowList.xsl?v=<%=version%>", function(result){
+		TransformXmlURL("/service/xml_getOrderTrace.asp?act=advanceSearch&<%=request.form%>","/xsl.<%=version%>/orderShowList.xsl", function(result){
 			$("#traceResult").html(result);
 			$("#traceResult td.orderDates").each(function(i){
 				var createdDate = $(this).find(".createdDate");
@@ -519,20 +519,20 @@ $(".check").click(function(){
 %>
 <script type="text/javascript" src="/js/jquery.printElement.min.js"></script>
 <script type="text/javascript">
-	TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=<%=orderID%>","/xsl/orderShowHeader.xsl?v=<%=version%>", function(result){
+	TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=<%=orderID%>","/xsl.<%=version%>/orderShowHeader.xsl", function(result){
 		$("#orderHeader").html(result);	
 		$('a#customerID').click(function(e){
 			window.open('../CRM/AccountInfo.asp?act=show&selectedCustomer='+$('a#customerID').attr("myID"), 'showCustomer');
 			e.preventDefault();
 		});
 	});
-	TransformXmlURL("/service/xml_getOrderProperty.asp?act=showOrder&id=<%=orderID%>","/xsl/orderShowProperty.xsl?v=<%=version%>", function(result){
+	TransformXmlURL("/service/xml_getOrderProperty.asp?act=showOrder&id=<%=orderID%>","/xsl.<%=version%>/orderShowProperty.xsl", function(result){
 		$("#orderDetails").html(result);
 		$('div.priceGroup').tooltip({
 	      selector: "div[rel=tooltip]"
 	    });	
 	});
-	TransformXmlURL("/service/xml_getOrderProperty.asp?act=showLog&id=<%=orderID%>","/xsl/orderShowlogs.xsl?v=<%=version%>", function(result){
+	TransformXmlURL("/service/xml_getOrderProperty.asp?act=showLog&id=<%=orderID%>","/xsl.<%=version%>/orderShowlogs.xsl", function(result){
 		$("#orderLogs").html(result);	
 		$("#orderLogs td.date").each(function(i){
 			$(this).html($.jalaliCalendar.gregorianToJalaliStr($(this).html()));
@@ -547,7 +547,7 @@ $(".check").click(function(){
 			$("#orderHeader").html('<center><img style="margin:50px;" src="/images/ajaxLoad.gif"></center>');
 			$("#orderDetails").html('<center><img style="margin:50px;" src="/images/ajaxLoad.gif"></center>');
 			loadXMLDoc("/service/xml_getOrderProperty.asp?act=showHead&logID=" + logID, function(orderXML){
-				TransformXml(orderXML, "/xsl/orderShowHeader.xsl?v=<%=version%>", function(result){
+				TransformXml(orderXML, "/xsl.<%=version%>/orderShowHeader.xsl", function(result){
 					$("#orderHeader").html(result);	
 					$('a#customerID').click(function(e){
 						window.open('../CRM/AccountInfo.asp?act=show&selectedCustomer='+$('a#customerID').attr("myID"), 'showCustomer');
@@ -556,7 +556,7 @@ $(".check").click(function(){
 				});
 			});
 			loadXMLDoc("/service/xml_getOrderProperty.asp?act=showOrder&logID=" + logID, function(orderXML){
-				TransformXml(orderXML, "/xsl/orderShowProperty.xsl?v=<%=version%>", function(result){
+				TransformXml(orderXML, "/xsl.<%=version%>/orderShowProperty.xsl", function(result){
 					$("#orderDetails").html(result);
 					$('div.priceGroup').tooltip({
 				      selector: "div[rel=tooltip]"
@@ -565,7 +565,7 @@ $(".check").click(function(){
 			});
 		});
 	});
-	TransformXmlURL("/service/xml_getMessage.asp?act=related&table=orders&id=<%=orderID%>","/xsl/showRelatedMessage.xsl?v=<%=version%>", function(result){
+	TransformXmlURL("/service/xml_getMessage.asp?act=related&table=orders&id=<%=orderID%>","/xsl.<%=version%>/showRelatedMessage.xsl", function(result){
 		$("#orderMessages").html(result);
 		$("td.msgBody").each(function(i){
 			$(this).html($(this).html().replace(/\n/gi,"<br/>"));
@@ -574,13 +574,13 @@ $(".check").click(function(){
 				document.location="../home/message.asp?RelatedTable=orders&RelatedID=" + $("#orderID").val() + "&retURL=" + escape("../Order/order.asp?act=show&id=" + $("#orderID").val());
 		});
 	});
-	TransformXmlURL("/service/xml_getOrderProperty.asp?act=stock&id=<%=orderID%>","/xsl/orderShowRequestInventory.xsl?v=<%=version%>", function(result){
+	TransformXmlURL("/service/xml_getOrderProperty.asp?act=stock&id=<%=orderID%>","/xsl.<%=version%>/orderShowRequestInventory.xsl", function(result){
 		$("#orderStock").html(result);	
 	});
-	TransformXmlURL("/service/xml_getOrderProperty.asp?act=purchase&id=<%=orderID%>","/xsl/orderShowRequestPurchase.xsl?v=<%=version%>", function(result){
+	TransformXmlURL("/service/xml_getOrderProperty.asp?act=purchase&id=<%=orderID%>","/xsl.<%=version%>/orderShowRequestPurchase.xsl", function(result){
 		$("#orderPurchase").html(result);	
 	});
-	TransformXmlURL("/service/xml_getCosts.asp?act=orderCost&id=<%=orderID%>","/xsl/costListShow.xsl?v=<%=version%>", function(result){
+	TransformXmlURL("/service/xml_getCosts.asp?act=orderCost&id=<%=orderID%>","/xsl.<%=version%>/costListShow.xsl", function(result){
 		$("#orderCosts").html(result);
 		$(".delCost").mouseover(function(event){
 			$(this).find(".delCostBtn").css("display","block");
@@ -788,7 +788,7 @@ $(".check").click(function(){
 	};
 </script>
 <%
-	set rs = Conn.Execute("SELECT orders.type,orders.status,orders.createdBy, orders.id, orders.isClosed,orders.isApproved,orders.isOrder, isnull(invoices.Approved,0) as Approved,isnull(invoices.Issued,0) as Issued FROM orders left outer join InvoiceOrderRelations on InvoiceOrderRelations.[Order] = orders.id left outer join Invoices on Invoices.ID=InvoiceOrderRelations.Invoice WHERE orders.ID=" & orderID)
+	set rs = Conn.Execute("SELECT orders.type,orders.step,orders.createdBy, orders.id, orders.isClosed,orders.isApproved,orders.isOrder, isnull(invoices.Approved,0) as Approved,isnull(invoices.Issued,0) as Issued FROM orders left outer join InvoiceOrderRelations on InvoiceOrderRelations.[Order] = orders.id left outer join Invoices on Invoices.ID=InvoiceOrderRelations.Invoice WHERE orders.ID=" & orderID)
 %>
 <div id="costDelComfirm">
 	<h3>¬Ì« „ÿ„∆‰ Â” Ìœ ﬂÂ ⁄„·ﬂ—œ –Ì· Õ–› ‘Êœø</h3>
@@ -824,7 +824,7 @@ $(".check").click(function(){
 	<span>Œ·«’Â »«‘œ</span>
 </div>
 <div id="pauseDlg">
-	<h5>Œÿ«Ì »ÊÃÊœ ¬„œÂ —« ‘—Õ œÂÌœ</h5>
+	<h5>œ·Ì·  Êﬁ› —« ‘—Õ œÂÌœ</h5>
 	<input type="text" size="30" id="pauseReason"/>
 </div>
 <div id="convert2orderDlg">
@@ -863,13 +863,13 @@ $(".check").click(function(){
 	if (auth(2,4) and not CBool(rs("isClosed")) and not CBool(rs("issued"))) then Response.write "<a class='btn btn-primary' href='#' id='changeCustomerBtn'> €ÌÌ— Õ”«»</a>"
 	if (auth(2,2) and not CBool(rs("isClosed")) and Not CBool(rs("approved")) and not CBool(rs("issued"))) then Response.write "<a class='btn' href='#' id='orderEditBtn'>ÊÌ—«Ì‘</a>"
 	if (auth(2,1) and not CBool(rs("isOrder")) and CBool(rs("isApproved"))) then Response.write "<a class='btn btn-success' href='#' id='convert2orderBtn'> »œÌ· »Â ”›«—‘</a>"
-	if (auth(2,"A") and not CBool(rs("isApproved")) and not CBool(rs("isClosed"))) then Response.write "<a class='btn btn-primary' href='#' id='approvedBtn'> «ÌÌœ</a>"
+	if (auth(2,"A") and not CBool(rs("isApproved")) and not CBool(rs("isClosed"))) and not CBool(rs("isOrder")) then Response.write "<a class='btn btn-primary' href='#' id='approvedBtn'> «ÌÌœ</a>"
 	if (auth(2,"D") and not CBool(rs("isClosed")) and CBool(rs("isOrder"))) then 
 		Response.write "<a class='btn' href='#' id='pauseBtn'>"
-		if CInt(rs("status"))=3 then 
-			Response.write "—›⁄ Œÿ«"
+		if CInt(rs("step"))=40 then 
+			Response.write "—›⁄  Êﬁ›"
 		else
-			Response.write "«⁄·«„ Œÿ«"
+			Response.write "œ—ŒÊ«”   Êﬁ›"
 		end if
 		response.write "</a>"
 	end if
@@ -972,7 +972,7 @@ $(".check").click(function(){
 		customerApprovedType = Request("customerApprovedType")
 		customerApprovedDate = Request("customerApprovedDate")
 		if not Auth(2 , 1) then NotAllowdToViewThisPage()
-		set rs = Conn.Execute("select orders.*, accounts.arBalance, accounts.creditLimit, accounts.status as accountStatus from orders inner join accounts on orders.customer=accounts.id where orders.id=" & orderID)
+		set rs = Conn.Execute("select orders.*, accounts.arBalance, accounts.creditLimit, accounts.status as accountStatus, accounts.maxCreditDay, isnull(ar.firstDebit,0) as firstDebit from orders inner join accounts on orders.customer=accounts.id left outer join (select Account,datediff(day, dbo.udf_date_solarToDate(cast(substring(min(effectiveDate),1,4) as int),cast(substring(min(effectiveDate),6,2) as int),cast(substring(min(effectiveDate),9,2) as int)),getDate()) as firstDebit from ARItems where FullyApplied=0 and IsCredit=0 and voided=0 group by account) as ar on orders.customer=ar.account where orders.id=" & orderID)
 		if rs("isOrder") then 
 			Conn.Close
 			response.redirect "?act=show&id=" & orderID &"&errmsg=" & Server.URLEncode("ﬁ»·« »Â ”›«—‘  »œÌ· ‘œÂ!")
@@ -983,36 +983,19 @@ $(".check").click(function(){
 			CustomerID = cdbl(rs("customer"))
 			Conn.Close
 			response.redirect "?act=show&id=" & orderID &"&errmsg=" & Server.URLEncode("»œÂÌ «Ì‰ Õ”«» «“ „Ì“«‰ «⁄ »«— ¬‰ »Ì‘ — ‘œÂ°<br> ·ÿ›« »« ”—Å—”  ›—Ê‘ Â„«Â‰ê ﬂ‰Ìœ.<br><a href='../CRM/AccountInfo.asp?act=show&selectedCustomer=" & CustomerID & "'>‰„«Ì‘ Õ”«»</a>")
+		elseif (CDbl(rs("firstDebit")) > CDbl(rs("maxCreditDay"))) then
+			CustomerID = cdbl(rs("customer"))
+			firstDebit = rs("firstDebit")
+			Conn.Close
+			response.redirect "?act=show&id=" & orderID &"&errmsg=" & Server.URLEncode("»œÂÌ «Ì‰ „‘ —Ì „—»Êÿ »Â " & firstDebit & " —Ê“ ê–‘ Â »ÊœÂ°<br> ﬂÂ «“ ”——”Ìœ Å—œ«Œ  ¬‰ ê–‘ Â<br> ·ÿ›« »« ”—Å—”  ›—Ê‘ Â„«Â‰ê ﬂ‰Ìœ.<br>(„„ﬂ‰ «”  ﬂÂ «‘ﬂ«·Ì œ— œÊŒ ‰ »«‘œ)<br><a href='../CRM/AccountInfo.asp?act=show&selectedCustomer=" & CustomerID & "'>‰„«Ì‘ Õ”«»</a>")
 		elseif CInt(rs("accountStatus"))<>1 then 
 			CustomerID = cdbl(rs("customer"))
 			Conn.Close
 			response.redirect "?act=show&id=" & orderID &"&errmsg=" & Server.URLEncode("«Ì‰ Õ”«» ›⁄«· ‰Ì” !<br> ·ÿ›« »« ”—Å—”  ›—Ê‘ Â„«Â‰ê ﬂ‰Ìœ.<br><a href='../CRM/AccountInfo.asp?act=show&selectedCustomer=" & CustomerID & "'>‰„«Ì‘ Õ”«»</a>")
 		else
-			mySQL = "update orders set isOrder=1,  isApproved=0, approvedDate=null, isPrinted=0, customerApprovedDate='" & customerApprovedDate & "', customerApprovedType=" & customerApprovedType 
-			if returnDate<>"" then 
-				mySQL = mySQL & " ,returnDate='" & returnDate & "'"
-			else
-				mySQL = mySQL & " ,returnDate=null"
-			end if
-			mySQL = mySQL & ",LastUpdatedDate=getDate(),LastUpdatedBy=" &session("ID")& " where id=" & orderID
-			Conn.Execute(mySQL)
-			Conn.Close
-			response.redirect "?act=show&id=" & orderID &"&msg=" & Server.URLEncode("»Â ”›«—‘  »œÌ· ‘œ!")
-		end if
-		'-----------------------------------------------------------------------------------------------------
-	case "approve":			'---------------------------------------------------------------------------------
-		'-----------------------------------------------------------------------------------------------------
-		orderID=cdbl(request("id"))
-		set rs=Conn.Execute("select Orders.Customer, orders.isOrder, orders.isApproved, orders.property as data, orderTypes.property as keys from Orders inner join orderTypes on orders.Type=orderTypes.ID where orders.id=" & orderID & " and lastUpdatedDate>lastUpdate")
-		if rs.eof then 
-			response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode("<b>ﬁÌ„ ùÂ« »—Ê“ ‘œÂ! </b><br>ﬁ»· «“  «ÌÌœ° ·ÿ›« ”›«—‘/«” ⁄·«„ —« »—Ê“ ﬂ‰Ìœ")
-		elseif (rs("isApproved")) then 
-			response.redirect "?act=show&id=" & orderID & "&errmsg=" & Server.URLEncode("ﬁ»·«  «ÌÌœ ‘œÂ!")
-		else
-			if (not rs("isOrder")) then 
-				mySQL = "update orders set isApproved=1, isPrinted=0,approvedDate=getDate(),LastUpdatedDate=getDate(),LastUpdatedBy=" &session("ID")& " where id="& orderID
-				Conn.execute(mySQL)
-				response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode("«” ⁄·«„  «ÌÌœ ‘œ")
+			set rs=Conn.Execute("select Orders.Customer, orders.isOrder, orders.isApproved, orders.property as data, orderTypes.property as keys from Orders inner join orderTypes on orders.Type=orderTypes.ID where orders.id=" & orderID & " and lastUpdatedDate>lastUpdate")
+			if rs.eof then 
+				response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode("<b>ﬁÌ„ ùÂ« »—Ê“ ‘œÂ! </b><br>ﬁ»· «“  «ÌÌœ° ·ÿ›« «” ⁄·«„ —« »—Ê“ ﬂ‰Ìœ")
 			else
 				set data=server.createobject("MSXML2.DomDocument")
 				set keys=server.createobject("MSXML2.DomDocument")
@@ -1370,9 +1353,16 @@ $(".check").click(function(){
 					Next
 				end if
 				if errMSG="" then 
-					mySQL = "update orders set isApproved=1, isPrinted=0,approvedDate=getDate(),LastUpdatedDate=getDate(),LastUpdatedBy=" &session("ID")& " where id="& orderID
-					Conn.execute(mySQL)
-					response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode("<b> «ÌÌœ ‘œ</b>")
+					mySQL = "update orders set isOrder=1, isPrinted=0, customerApprovedDate='" & customerApprovedDate & "', customerApprovedType=" & customerApprovedType 
+					if returnDate<>"" then 
+						mySQL = mySQL & " ,returnDate='" & returnDate & "'"
+					else
+						mySQL = mySQL & " ,returnDate=null"
+					end if
+					mySQL = mySQL & ",LastUpdatedDate=getDate(),LastUpdatedBy=" &session("ID")& " where id=" & orderID
+					Conn.Execute(mySQL)
+					
+					response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode("<b>»Â ”›«—‘  »œÌ· ‘œ!</b>")
 				else
 					response.redirect "?act=show&id=" & orderID & "&errmsg=" & Server.URLEncode(errMSG)
 				end if
@@ -1383,6 +1373,23 @@ $(".check").click(function(){
 				rsp.Close
 				set rsp = Nothing
 			end if
+			Conn.Close
+		end if
+		'-----------------------------------------------------------------------------------------------------
+	case "approve":			'---------------------------------------------------------------------------------
+		'-----------------------------------------------------------------------------------------------------
+		orderID=cdbl(request("id"))
+		set rs=Conn.Execute("select Orders.Customer, orders.isOrder, orders.isApproved, orders.property as data, orderTypes.property as keys from Orders inner join orderTypes on orders.Type=orderTypes.ID where orders.id=" & orderID & " and lastUpdatedDate>lastUpdate")
+		if rs.eof then 
+			response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode("<b>ﬁÌ„ ùÂ« »—Ê“ ‘œÂ! </b><br>ﬁ»· «“  «ÌÌœ° ·ÿ›« «” ⁄·«„ —« »—Ê“ ﬂ‰Ìœ")
+		elseif (rs("isApproved")) then 
+			response.redirect "?act=show&id=" & orderID & "&errmsg=" & Server.URLEncode("ﬁ»·«  «ÌÌœ ‘œÂ!")
+		else
+			if (not rs("isOrder")) then 
+				mySQL = "update orders set isApproved=1, isPrinted=0,approvedDate=getDate(),LastUpdatedDate=getDate(),LastUpdatedBy=" &session("ID")& " where id="& orderID
+				Conn.execute(mySQL)
+				response.redirect "?act=show&id=" & orderID & "&msg=" & Server.URLEncode("«” ⁄·«„  «ÌÌœ ‘œ")
+			end if
 		end if
 		'-----------------------------------------------------------------------------------------------------
 	case "pause":			'---------------------------------------------------------------------------------
@@ -1390,10 +1397,10 @@ $(".check").click(function(){
 		if not Auth(2 , "D") then NotAllowdToViewThisPage()
 		orderID=cdbl(request("id"))
 		
-		Conn.Execute("update orders set LastUpdatedDate=getDate(), isPrinted=0,LastUpdatedBy=" &session("ID")& ", status = (case status when 3 then 1 else 3 end) where id=" & orderID)
+		Conn.Execute("update orders set LastUpdatedDate=getDate(), isPrinted=0,LastUpdatedBy=" &session("ID")& ", step = (case step when 40 then 1 else 40 end) where id=" & orderID)
 		msgFrom=session("id")
 		msgTo= Request("createdBy")
-		msgTitle		= "ﬂ‰”· ”›«—‘"
+		msgTitle		= " Êﬁ› ”›«—‘"
 		msgBody			= Request("reason")
 		RelatedTable	= "orders"
 		relatedID		= orderID
@@ -1579,7 +1586,7 @@ $(".check").click(function(){
 		rs.close
 		set rs=nothing
 %>
-<script type="text/javascript" src="calcOrder.js"></script>
+<script type="text/javascript" src="calcOrder.3.js"></script>
 <script type="text/javascript">
 	function checkForceHead(e){
 		if ($(e).val()=="") 
@@ -1616,11 +1623,11 @@ $(".check").click(function(){
 			return makeOutXML();
 		} 
 	}
-	TransformXmlURL("/service/xml_getOrderProperty.asp?act=getProperty&type=<%=orderTypeID%>","/xsl/orderEditProperty.xsl?v=<%=version%>", function(result){
+	TransformXmlURL("/service/xml_getOrderProperty.asp?act=getProperty&type=<%=orderTypeID%>","/xsl.<%=version%>/orderEditProperty.xsl", function(result){
 		$("#orderDetails").html(result);	
 		readyForm();
 	});
-	TransformXmlURL("/service/xml_getOrderProperty.asp?act=getNew&isOrder=&typeID=<%=orderTypeID%>&id=<%=CustomerID%>","/xsl/orderEditHeader.xsl?v=<%=version%>", function(result){
+	TransformXmlURL("/service/xml_getOrderProperty.asp?act=getNew&isOrder=&typeID=<%=orderTypeID%>&id=<%=CustomerID%>","/xsl.<%=version%>/orderEditHeader.xsl", function(result){
 		$("#orderHeader").html(result);	
 	});
 </script>
@@ -1645,7 +1652,7 @@ $(".check").click(function(){
 		orderID=request("id")
 		if not Auth(2 , 2) then NotAllowdToViewThisPage()
 %>
-<script type="text/javascript" src="calcOrder.js"></script>
+<script type="text/javascript" src="calcOrder.3.js"></script>
 <script type="text/javascript">
 function checkValidation() {
 	if (!$("[name=returnDateNull]").is(":checked")){
@@ -1675,7 +1682,7 @@ function checkValidation() {
 		return makeOutXML();
 	} 
 }	
-TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=<%=orderID%>","/xsl/orderEditHeader.xsl?v=<%=version%>", function(result){
+TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=<%=orderID%>","/xsl.<%=version%>/orderEditHeader.xsl", function(result){
 		$("#orderHeader").html(result);	
 		$('a#customerID').click(function(e){
 			window.open('../CRM/AccountInfo.asp?act=show&selectedCustomer='+$('a#customerID').attr("myID"), 'showCustomer');
@@ -1692,7 +1699,7 @@ TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=<%=orderID%>"
 			$("[name=ReturnTime]").val("");
 		});
 	});
-	TransformXmlURL("/service/xml_getOrderProperty.asp?act=editOrder&id=<%=orderID%>","/xsl/orderEditProperty.xsl?v=<%=version%>", function(result){
+	TransformXmlURL("/service/xml_getOrderProperty.asp?act=editOrder&id=<%=orderID%>","/xsl.<%=version%>/orderEditProperty.xsl", function(result){
 		$("#orderDetails").html(result);
 		readyForm();	
 	});
@@ -1745,16 +1752,16 @@ TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=<%=orderID%>"
 			var i = q.split('=');
 			queries[i[0].toString()] = i[1].toString();
 		});
-		TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=" + queries['id'],"/xsl/quotePrintHead.xsl?v=<%=version%>", function(result){
+		TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=" + queries['id'],"/xsl.<%=version%>/quotePrintHead.xsl", function(result){
 			$("#head").html(result);
-			TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=" + queries['id'],"/xsl/quotePrintTail.xsl?v=<%=version%>", function(result){
+			TransformXmlURL("/service/xml_getOrderProperty.asp?act=showHead&id=" + queries['id'],"/xsl.<%=version%>/quotePrintTail.xsl", function(result){
 				$("#tail").html(result);
 				
 				var xslURL;
 				if (queries['inShort']=="false")
-					xslURL = "/xsl/quotePrintProperty.xsl?v=<%=version%>";
+					xslURL = "/xsl.<%=version%>/quotePrintProperty.xsl";
 				else
-					xslURL = "/xsl/quotePrintPropertyShort.xsl?v=<%=version%>";
+					xslURL = "/xsl.<%=version%>/quotePrintPropertyShort.xsl";
 				TransformXmlURL("/service/xml_getOrderProperty.asp?act=showOrder&id=" + queries['id'], xslURL, function(result){
 					$("#quote").html(result);
 					window.print();

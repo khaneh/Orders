@@ -1376,9 +1376,9 @@ elseif request("act")="showVoucher" then
 '-----------------------------------------------------------------------------------------------------
 elseif request("act")="showInvoice" AND request("invoice") <> "" then
 %>
-<script type="text/javascript" src="../AO/include_AccountReport_showInvoice.js" charset="Windows-1256"></script>
+<script type="text/javascript" src="../AO/include_AccountReport_showInvoice.1.js" charset="Windows-1256"></script>
 <script type="text/javascript">
-	TransformXmlURL("/service/xml_getMessage.asp?act=related&table=invoices&id=<%=request("invoice")%>","/xsl/showRelatedMessage.xsl?v=<%=version%>", function(result){
+	TransformXmlURL("/service/xml_getMessage.asp?act=related&table=invoices&id=<%=request("invoice")%>","/xsl.<%=version%>/showRelatedMessage.xsl", function(result){
 		$("#invoiceMessages").html(result);
 		$("td.msgBody").each(function(i){
 			$(this).html($(this).html().replace(/\n/gi,"<br/>"));

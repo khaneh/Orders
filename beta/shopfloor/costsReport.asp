@@ -29,7 +29,7 @@ if not Auth(3 , "A") then NotAllowdToViewThisPage()
 			title: "ÊÇííÏ"
 		});
 		$("#costCenters").change(function(){
-			TransformXmlURL("/service/xml_getCosts.asp?act=costCenter&id=" + $("#costCenters").val(),"/xsl/costListShow.xsl", function(result){
+			TransformXmlURL("/service/xml_getCosts.asp?act=costCenter&id=" + $("#costCenters").val(),"/xsl.<%=version%>/costListShow.xsl", function(result){
 				$("#report").html(result);
 				$(".delCost").mouseover(function(event){
 					$(this).find(".delCostBtn").css("display","block");

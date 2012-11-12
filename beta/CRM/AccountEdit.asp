@@ -181,6 +181,10 @@ elseif request("act")="editaccount" AND (request("selectedCustomer") <> ""  or r
 	JobTitle1		=	RS1("JobTitle1")
 	JobTitle2		=	RS1("JobTitle2")
 	website			=	RS1("website")
+	maxCreditDay	=	RS1("maxCreditDay")
+	maxChequeDay	=	RS1("maxChequeDay")
+	maxChequeAmount	=	RS1("maxChequeAmount")
+
 end if
 if request("act")="getAccount" or editFlag = 1 then
 if CSR = "" then CSR = session("ID")
@@ -190,7 +194,7 @@ if CSR = "" then CSR = session("ID")
 		<br><br><INPUT TYPE="hidden" name=ID value=<%=ID%>>
 		<table class="CustGenTable" Border="0" align='center' Width="600" Cellspacing="1" Cellpadding="5" Dir="RTL">
 			<tr bgcolor='#C3C300'>
-				<td align='center' colspan="5"><b>
+				<td align='center' colspan="6"><b>
 				<% if editFlag = 0 then
 					response.write "Ê—Êœ «ÿ·«⁄«  Õ”«»  "& CusID
 				   else
@@ -200,11 +204,16 @@ if CSR = "" then CSR = session("ID")
 			</tr>
 			<tr>
 				<td align='left' <% if not Auth(1,7) and editFlag=1 then response.write "title='‘„« „Ã«“ »Â ÊÌ—«Ì‘ «Ì‰ ¬Ì „ ‰Ì” Ìœ!'"%>><span <% if Auth(1,7) or editFlag=0 then response.write "onclick='setAccountTitle();'" %>>⁄‰Ê«‰ Õ”«» :</span></td>
-				<td colspan='3' <% if not Auth(1,7) and editFlag=1 then response.write "title='‘„« „Ã«“ »Â ÊÌ—«Ì‘ «Ì‰ ¬Ì „ ‰Ì” Ìœ!'"%>>
-					<INPUT class="CustGenInput" TYPE="text" NAME="AccountTitle" VALUE="<%=AccountTitle%>" size="30" MaxLength="200" onfocus="//if (this.value=='') this.value=document.all.Dear.value+' '+document.all.Name.value;" <%if Not Auth(1,7) and editFlag=1 then response.write "readonly"%>> 
-					<INPUT class="CustGenInput" TYPE="checkbox" NAME="IsPersonal" <% if IsPersonal then %> checked <% end if %> onclick='showCompanyName();'><span>Õ”«» ‘Œ’Ì «” </span>
+				<td <% if not Auth(1,7) and editFlag=1 then response.write "title='‘„« „Ã«“ »Â ÊÌ—«Ì‘ «Ì‰ ¬Ì „ ‰Ì” Ìœ!'"%>>
+					<INPUT class="CustGenInput" TYPE="text" NAME="AccountTitle" VALUE="<%=AccountTitle%>" size="20" MaxLength="200" <%if Not Auth(1,7) and editFlag=1 then response.write "readonly"%>> 
+					
 				</td>
-				<td width='130px' align='left'>„”Ê·: 
+				<td align="left">Õ”«» ‘Œ’Ì «” </td>
+				<td align="right">
+					<INPUT class="CustGenInput" TYPE="checkbox" NAME="IsPersonal" <% if IsPersonal then %> checked <% end if %> onclick='showCompanyName();'>
+				</td>
+				<td align="left">„”Ê·:</td>
+				<td align="right"> 
 					<%if Auth(1 , 4) then %>
 					<select name="CSR" class="CustGenInput" style="width:90">
 						<option value=""> «‰ Œ«» ﬂ‰Ìœ </option>
@@ -237,43 +246,30 @@ if CSR = "" then CSR = session("ID")
 						<INPUT TYPE="text" NAME="" value="<%=a%>" size=9 readonly>
 						<INPUT TYPE="hidden" NAME="CSR" value="<%=CSR%>" size=9 readonly>
 					<% end if %>
-					
 				</td >
 			</tr>
 			<tr>
 				<td align='left'>‰«„ ‘—ﬂ  : </td>
-				<td colspan='1'><INPUT class="CustGenInput" TYPE="text"  <% if IsPersonal then %> style="visibility:hidden;" <% end if %>NAME="CompanyName" value="<%=CompanyName%>" size="30" onfocus="//if (this.value=='') this.value=document.all.Dear.value+' '+document.all.Name.value;">
+				<td align="right">
+					<INPUT class="CustGenInput" TYPE="text"  <% if IsPersonal then %> style="visibility:hidden;" <% end if %>NAME="CompanyName" value="<%=CompanyName%>" size="20">
 				</td>
-				<td align='right' colspan=2>&nbsp;</td>
-				<td align='left'>‰Ê⁄:
+				<td align="left">‰Ê⁄:</td>
+				<td align='right'>
 					<select name="type" class="CustGenInput">
 					<%
 					set rs=Conn.Execute("select * from accountTypes")
 					while not rs.eof
-						%>
-						<option <% if AccType = rs("id") then response.write "selected" %> value=<%=rs("id")%>><%=rs("name")%></option>	
-						<%
+						response.write "<option " 
+						if CInt(AccType) = cint(rs("id")) then response.write " selected " 
+						response.write " value='" & rs("id") & "'>" & rs("name") & "</option>" 
 						rs.moveNext
 					wend
 					rs.close
 %> 
 					</select>
 				</td>
-			</tr>
-			<tr>
-				<td colspan='2' align=left>ﬂœ «ﬁ ’«œÌ : </td>
-				<td align='right' colspan=2>
-					<INPUT class="CustGenInput" NAME="EconomicalCode" value="<%=EconomicalCode%>" TYPE="text" size="15" maxlength="20" style="direction:LTR;"> 
-				</td>
-				<td>
-				    <INPUT class="CustGenInput" TYPE="checkbox" NAME="IsADefault" <% if IsADefault or editFlag<>1 then response.write "checked" %>>ÅÌ‘ ›—÷ «·›</td>
-			</tr>
-			<tr>
-				<td colspan='2' align='left'>”ﬁ› «⁄ »«—: </td>
-				<td align='right' colspan=2>
-					<INPUT dir=LTR class="CustGenInput" TYPE="text" name=CreditLimit value="<%=separate(CreditLimit)%>" size=12 onblur="this.value=val2txt(txt2val(this.value))" maxlength=15 <%if not Auth(1 , 4) then response.write "readonly" %>> —Ì«·
-				</td>
-				<td align='left'>Ê÷⁄Ì :
+				<td align='left'>Ê÷⁄Ì :</td>
+				<td align="right">
 <%				if editFlag=0 then Status=1
 				if Auth(1,5) then%>	
 					<select name="Status" class="CustGenInput">
@@ -293,16 +289,32 @@ if CSR = "" then CSR = session("ID")
 				</td>
 			</tr>
 			<tr>
-				<td colspan='2' align=left>
+				<td align="left">
 					<input name="lblNorRCode" type="text" readonly value="<%If IsPersonal Then %> ‘„«—Â „·Ì: <%Else%> ‘„«—Â À» : <%End if%>" size=10 style='background-color:transparent;border:0 transparent hidden;text-align:left;'>
 				</td>
-				<td align=right colspan='3'>
-					<input class="CustGenInput" name="NorRCode" value="<%=NorRCode%>" type="text" size="15" maxlength="20">
+				<td align="right">
+					<input class="CustGenInput" name="NorRCode" dir="ltr" value="<%=NorRCode%>" type="text" size="15" maxlength="20">
+				</td>
+				<td align="left">ﬂœ «ﬁ ’«œÌ : </td>
+				<td align='right'>
+					<INPUT class="CustGenInput" NAME="EconomicalCode" dir="ltr" value="<%=EconomicalCode%>" TYPE="text" size="10" maxlength="20" style="direction:LTR;"> 
+				</td>
+				<td align="left">ÅÌ‘ ›—÷ «·›</td>
+				<td align='right'>
+					<INPUT class="CustGenInput" TYPE="checkbox" NAME="IsADefault" <% if IsADefault or editFlag<>1 then response.write "checked" %>>				
 				</td>
 			</tr>
 			<tr>
-				<td colspan="2" align="left"> ⁄œ«œ ‰›—« :</td>
-				<td align="right" colspan="3">
+				<td align='left'>”ﬁ› «⁄ »«—: </td>
+				<td>
+					<INPUT dir=LTR class="CustGenInput num" TYPE="text" name="CreditLimit" value="<%=separate(CreditLimit)%>" size="12" maxlength="15" <%if not Auth(1 , 4) then response.write "readonly" %>> —Ì«·
+				</td>
+				<td align='right'> ⁄œ«œ —Ê“ «⁄ »«—: </td>
+				<td>
+					<input dir="ltr" lass="CustGenInput" TYPE="text" name="maxCreditDay" value="<%=separate(maxCreditDay)%>" size=3 <%if not Auth(1 , 4) then response.write "readonly" %>/>
+				</td>
+				<td align="left"> ⁄œ«œ ‰›—« :</td>
+				<td align="right">
 					<select name="employee" id="employee" <% if IsPersonal then response.write " style='visibility:hidden;' " %> >
 						<option value="0" <%if IsNull(employee) or employee=0 or IsPersonal then response.write " selected='selected' "%>>«‰ Œ«» ‰‘œÂ</option>
 						<option value="1" <%if employee=1 then response.write " selected='selected' "%>>0  « 5 ‰›—</option>
@@ -313,68 +325,164 @@ if CSR = "" then CSR = session("ID")
 				</td>
 			</tr>
 			<tr>
-				<td colspan="2" align="left">Ê» ”«Ì :</td>
-				<td align=right colspan=3>
-					<input class="CustGenInput" name="website" dir="ltr" value="<%=website%>" type="text" size="30" maxlength="100">
+				<td align="left">”ﬁ› «⁄ »«— —Ì«·Ì çﬂ:</td>
+				<td>
+					<input name="maxChequeAmount" class="num" type="text" value="<%=separate(maxChequeAmount)%>" size="10" <%if not Auth(1 , 4) then response.write "readonly" %>/>
+				</td>
+				<td align="left">”ﬁ› «⁄ »«— —Ê“ çﬂ:</td>
+				<td align=right>
+					<input name="maxChequeDay" class="num" type="text" value="<%=separate(maxChequeDay)%>" size="10" <%if not Auth(1 , 4) then response.write "readonly" %>/>
+				</td>
+				<td align="left">Ê» ”«Ì :</td>
+				<td align=right>
+					<input class="CustGenInput" name="website" dir="ltr" value="<%=website%>" type="text" size="20" maxlength="100">
 				</td>
 			</tr>
 			<tr bgcolor='#C3C300'>
-				<td align='center' colspan='4'><b> «ÿ·«⁄«  —«»ÿ «’·Ì </b></td>
+				<td align='center' colspan='5'><b> «ÿ·«⁄«  —«»ÿ «’·Ì </b></td>
 				<td align='center'>
 				<INPUT TYPE="checkbox" NAME="postable1" <% if postable1 then response.write "checked" %> >
 				ﬁ«»· Å”  ﬂ—œ‰ </td>
 			</tr>
 			<tr>
-				<td align='center'><BR><SELECT class="CustGenInput" NAME="Dear1" style="width:70"><option value="">«‰ Œ«» ﬂ‰Ìœ</option><option <% if Dear1="¬ﬁ«Ì" then%> selected <% end if %>value="¬ﬁ«Ì">¬ﬁ«Ì</option><option <% if Dear1="Œ«‰„" then%> selected <% end if %> value="Œ«‰„">Œ«‰„</option></SELECT></td>
-				<td colspan=2 align='center'><BR>‰«„ <INPUT class="CustGenInput" NAME="FirstName1" value="<%=FirstName1%>" TYPE="text" size="13">
-				›«„Ì· <INPUT class="CustGenInput" NAME="LastName1" value="<%=LastName1%>" TYPE="text" size="13"></td>
-				<td align='center'>‘Â— <BR><INPUT class="CustGenInput" TYPE="text" NAME="City1" size="15" value="<%=City1%>"></td>
-				<td align='center'>ﬂœÅ” Ì <BR><INPUT class="CustGenInput" TYPE="text" NAME="PostCode1" size="15" value="<%=PostCode1%>"></td>
+				<td align='center'>
+					<BR>
+					<SELECT class="CustGenInput" NAME="Dear1" style="width:70">
+						<option value="">«‰ Œ«» ﬂ‰Ìœ</option>
+						<option <% if Dear1="¬ﬁ«Ì" then%> selected <% end if %>value="¬ﬁ«Ì">¬ﬁ«Ì</option>
+						<option <% if Dear1="Œ«‰„" then%> selected <% end if %> value="Œ«‰„">Œ«‰„</option>
+					</SELECT>
+				</td>
+				<td colspan="3" align='center'>
+					<BR>
+					<span>‰«„</span> 
+					<INPUT class="CustGenInput" NAME="FirstName1" value="<%=FirstName1%>" TYPE="text" size="13">
+					<span>›«„Ì·</span>
+					<INPUT class="CustGenInput" NAME="LastName1" value="<%=LastName1%>" TYPE="text" size="13">
+				</td>				
+				<td align='center'>
+					<span>‘Â— </span>
+					<BR>
+					<INPUT class="CustGenInput" TYPE="text" NAME="City1" size="15" value="<%=City1%>">
+				</td>
+				<td align='center'>
+					<span>ﬂœÅ” Ì </span>
+					<BR>
+					<INPUT class="CustGenInput" TYPE="text" NAME="PostCode1" size="15" value="<%=PostCode1%>">
+				</td>
 			</tr>
 			<tr>
-				<td align='center' rowspan='3' colspan='3'> ¬œ—” <BR><br><TEXTAREA class="CustGenInput" NAME="Address1" ROWS="6" COLS="60"><%=Address1%></TEXTAREA></td>
-				<td valign='top' align='center'> ·›‰<BR><INPUT class="CustGenInput" Dir="LTR" NAME="Tel1" value="<%=Tel1%>" TYPE="text" size="15"></td>
-				<td valign='top' align='center'>›«ﬂ”<BR><INPUT class="CustGenInput" Dir="LTR" NAME="Fax1" value="<%=Fax1%>" TYPE="text" size="15"></td>
+				<td align='center' rowspan='3' colspan='4'>
+					<span> ¬œ—”</span> 
+					<BR><br>
+					<TEXTAREA class="CustGenInput" NAME="Address1" ROWS="6" COLS="60"><%=Address1%></TEXTAREA>
+				</td>
+				<td valign='top' align='center'>
+					<span> ·›‰</span>
+					<BR>
+					<INPUT class="CustGenInput" Dir="LTR" NAME="Tel1" value="<%=Tel1%>" TYPE="text" size="15">
+				</td>
+				<td valign='top' align='center'>
+					<span>›«ﬂ”</span>
+					<BR>
+					<INPUT class="CustGenInput" Dir="LTR" NAME="Fax1" value="<%=Fax1%>" TYPE="text" size="15">
+				</td>
 			</tr>
 			<tr>
-				<td align='center'>„Ê»«Ì· <BR><INPUT class="CustGenInput" TYPE="text"  Dir="LTR"  NAME="Mobile1" size="15" value="<%=Mobile1%>"></td>
-				<td valign='top' align='center'>«Ì„Ì·<BR><INPUT class="CustGenInput" Dir="LTR" NAME="Email1"  value="<%=Email1%>" TYPE="text" size="15" onkeyDown="return myKeyDownHandler();" onKeyPress="return myKeyPressHandler();"></td>
+				<td align='center'>
+					<span>„Ê»«Ì· </span>
+					<BR>
+					<INPUT class="CustGenInput" TYPE="text"  Dir="LTR"  NAME="Mobile1" size="15" value="<%=Mobile1%>">
+				</td>
+				<td valign='top' align='center'>
+					<span>«Ì„Ì·</span>
+					<BR>
+					<INPUT class="CustGenInput" Dir="LTR" NAME="Email1"  value="<%=Email1%>" TYPE="text" size="15" onkeyDown="return myKeyDownHandler();" onKeyPress="return myKeyPressHandler();">
+				</td>
 			</tr>
 			<tr>
-				<td colspan="2" align="center">”„  <br><input class="CustGenInput" type="text" dir="rtl" name="JobTitle1" value="<%=JobTitle1%>" size="40"></td>
+				<td colspan="2" align="center">
+					<span>”„  </span>
+					<br>
+					<input class="CustGenInput" type="text" dir="rtl" name="JobTitle1" value="<%=JobTitle1%>" size="40">
+				</td>
 			</tr>
 			<tr bgcolor='#C3C300'>
-				<td align='center' colspan='4'><b> «ÿ·«⁄«  —«»ÿ œÊ„ </b></td>
+				<td align='center' colspan='5'><b> «ÿ·«⁄«  —«»ÿ œÊ„ </b></td>
 				<td align='center'>
 				<INPUT TYPE="checkbox" NAME="postable2" <% if postable2 then response.write "checked" %> >
 				ﬁ«»· Å”  ﬂ—œ‰ </td>
 			</tr>
 			<tr>
-				<td align='center'><BR><SELECT class="CustGenInput" NAME="Dear2" style="width:70"><option value="">«‰ Œ«» ﬂ‰Ìœ</option><option <% if Dear2="¬ﬁ«Ì" then%> selected <% end if %>value="¬ﬁ«Ì">¬ﬁ«Ì</option><option <% if Dear2="Œ«‰„" then%> selected <% end if %> value="Œ«‰„">Œ«‰„</option></SELECT></td>
-				<td colspan=2 align='center'><BR>‰«„ <INPUT class="CustGenInput" NAME="FirstName2" value="<%=FirstName2%>" TYPE="text" size="13">
-				›«„Ì· <INPUT class="CustGenInput" NAME="LastName2" value="<%=LastName2%>" TYPE="text" size="13"></td>
-				<td align='center'>‘Â— <BR><INPUT class="CustGenInput" TYPE="text" NAME="City2" size="15" value="<%=City2%>"></td>
-				<td align='center'>ﬂœÅ” Ì <BR><INPUT class="CustGenInput" TYPE="text" NAME="PostCode2" size="15" value="<%=PostCode2%>"></td>
+				<td align='center'>
+					<BR>
+					<SELECT class="CustGenInput" NAME="Dear2" style="width:70">
+						<option value="">«‰ Œ«» ﬂ‰Ìœ</option>
+						<option <% if Dear2="¬ﬁ«Ì" then%> selected <% end if %>value="¬ﬁ«Ì">¬ﬁ«Ì</option>
+						<option <% if Dear2="Œ«‰„" then%> selected <% end if %> value="Œ«‰„">Œ«‰„</option>
+					</SELECT>
+				</td>
+				<td colspan=3 align='center'>
+					<BR>
+					<span>‰«„ </span>
+					<INPUT class="CustGenInput" NAME="FirstName2" value="<%=FirstName2%>" TYPE="text" size="13">
+					<span>›«„Ì·</span>
+					<INPUT class="CustGenInput" NAME="LastName2" value="<%=LastName2%>" TYPE="text" size="13">
+				</td>
+				<td align='center'>
+					<span>‘Â— </span>
+					<BR>
+					<INPUT class="CustGenInput" TYPE="text" NAME="City2" size="15" value="<%=City2%>">
+				</td>
+				<td align='center'>
+					<span>ﬂœÅ” Ì </span>
+					<BR>
+					<INPUT class="CustGenInput" TYPE="text" NAME="PostCode2" size="15" value="<%=PostCode2%>">
+				</td>
 			</tr>
 			<tr>
-				<td align='center' rowspan='3' colspan='3'> ¬œ—” <BR><TEXTAREA class="CustGenInput" NAME="Address2" ROWS="6" COLS="60"><%=Address2%></TEXTAREA></td>
-				<td valign='top' align='center'> ·›‰<BR><INPUT class="CustGenInput" Dir="LTR" NAME="Tel2" value="<%=Tel2%>" TYPE="text" size="15"></td>
-				<td valign='top' align='center'>›«ﬂ”<BR><INPUT class="CustGenInput" Dir="LTR" NAME="Fax2" value="<%=Fax2%>" TYPE="text" size="15"></td>
+				<td align='center' rowspan='3' colspan='4'>
+					<span> ¬œ—” </span>
+					<BR>
+					<TEXTAREA class="CustGenInput" NAME="Address2" ROWS="6" COLS="60"><%=Address2%></TEXTAREA>
+				</td>
+				<td valign='top' align='center'>
+					<span> ·›‰</span>
+					<BR>
+					<INPUT class="CustGenInput" Dir="LTR" NAME="Tel2" value="<%=Tel2%>" TYPE="text" size="15">
+				</td>
+				<td valign='top' align='center'>
+					<span>›«ﬂ”</span>
+					<BR>
+					<INPUT class="CustGenInput" Dir="LTR" NAME="Fax2" value="<%=Fax2%>" TYPE="text" size="15">
+				</td>
 			</tr>
 			<tr>
-				<td align='center'>„Ê»«Ì· <BR><INPUT class="CustGenInput" TYPE="text"  Dir="LTR"  NAME="Mobile2" size="15" value="<%=Mobile2%>"></td>
-				<td valign='top' align='center'>«Ì„Ì·<BR><INPUT class="CustGenInput" Dir="LTR" NAME="Email2"  value="<%=Email2%>" TYPE="text" size="15" onkeyDown="return myKeyDownHandler();" onKeyPress="return myKeyPressHandler();"></td>
+				<td align='center'>
+					<span>„Ê»«Ì· </span>
+					<BR>
+					<INPUT class="CustGenInput" TYPE="text"  Dir="LTR"  NAME="Mobile2" size="15" value="<%=Mobile2%>">
+				</td>
+				<td valign='top' align='center'>
+					<span>«Ì„Ì·</span>
+					<BR>
+					<INPUT class="CustGenInput" Dir="LTR" NAME="Email2"  value="<%=Email2%>" TYPE="text" size="15" onkeyDown="return myKeyDownHandler();" onKeyPress="return myKeyPressHandler();">
+				</td>
 			</tr>
 			<tr>
-				<td colspan="2" align="center">”„  <br><input class="CustGenInput" type="text" dir="rtl" name="JobTitle2" value="<%=JobTitle2%>" size="40"></td>
+				<td colspan="2" align="center">
+					<span>”„  </span>
+					<br>
+					<input class="CustGenInput" type="text" dir="rtl" name="JobTitle2" value="<%=JobTitle2%>" size="40">
+				</td>
 			</tr>
 			<%' ----------------------------S A M    E D I T  ----------------------------------------
 			%>
 			<tr bgcolor='#C3C300'>
-				<td align='center' colspan='5'><b>œ” Â »‰œÌ</b></td>
+				<td align='center' colspan='6'><b>œ” Â »‰œÌ</b></td>
 			</tr>
 			<tr>
-				<td colspan=5>
+				<td colspan=6>
 					<table>
 			<%
 			accountGroup=0
@@ -421,10 +529,10 @@ if CSR = "" then CSR = session("ID")
 				</td>
 			</tr>
 			<tr bgcolor='#C3C300'>
-				<td align='center' colspan='5'><b>”Ê«·« </b></td>
+				<td align='center' colspan='6'><b>”Ê«·« </b></td>
 			</tr>
 			<tr>
-				<td colspan="5">
+				<td colspan="6">
 					<table>
 						<%
 						if CLng(CusID)>0 then 
@@ -490,18 +598,21 @@ if CSR = "" then CSR = session("ID")
 			<%' ----------------------------S A M    E D I T  ----------------------------------------
 			%>
 			<tr bgcolor='#C3C300'>
-				<td align='center' colspan="5"><INPUT class="CustGenInput" TYPE="submit"  NAME="submit" value="À» "> <% if request("act")="editaccount" then %><INPUT class="CustGenInput" TYPE="submit" NAME="submit" value="À»  Ê »⁄œÌ">
-				<% end if %>
+				<td align='center' colspan="6">
+					<INPUT class="CustGenInput" TYPE="submit"  NAME="submit" value="À» "> 
+					<% if request("act")="editaccount" then %>
+					<INPUT class="CustGenInput" TYPE="submit" NAME="submit" value="À»  Ê »⁄œÌ">
+					<% end if %>
 				</td>
 			</tr>
 			<tr>
-				<td colspan="5">&nbsp;</td>
+				<td colspan="6">&nbsp;</td>
 			</tr>
 			<tr bgcolor='#C3C300'>
-				<td align='center' colspan="5"><b>«ÿ·«⁄«  ﬁœÌ„Ì</b></td>
+				<td align='center' colspan="6"><b>«ÿ·«⁄«  ﬁœÌ„Ì</b></td>
 			</tr>
 			<tr dir="LTR">
-				<td align='center' colspan="5">
+				<td align='center' colspan="6">
 			<% OLD_ACID = ID%>
 			<!--#include File="include_OldCusData.asp"-->
 				</td>
@@ -556,6 +667,9 @@ elseif request("act")="submitEdit" then
 	accountGroup	= cdbl(text2value(request.form("accountGroup")))
 	employee		= cint(text2value(request.form("employee")))
 	website			= left(sqlSafe(Request.form("website")) , 100)
+	maxCreditDay	= cdbl(text2value(Request.form("maxCreditDay")))
+	maxChequeDay	= cdbl(text2value(Request.form("maxChequeDay")))
+	maxChequeAmount	= cdbl(text2value(Request.form("maxChequeAmount")))
 	
 	if not Auth(1 , 4) then ' Doesn't have the permission to set CSR / credit limit
 		CSR			= ""
@@ -572,20 +686,23 @@ elseif request("act")="submitEdit" then
 		end if
 		RS1.close
 
-		mySQL="SELECT Accounts.CSR, Users.RealName, Accounts.CreditLimit FROM Accounts INNER JOIN Users ON Accounts.CSR = Users.ID WHERE (Accounts.ID = "& ID & ")"
+		mySQL="SELECT Accounts.CSR, Users.RealName, Accounts.CreditLimit, Accounts.maxCreditDay, Accounts.maxChequeDay, Accounts.maxChequeAmount FROM Accounts INNER JOIN Users ON Accounts.CSR = Users.ID WHERE (Accounts.ID = "& ID & ")"
 		Set RS1=Conn.Execute(mySQL)
 		if RS1.eof then
 			Conn.close
 			response.redirect "?msg=" & Server.URLEncode("ç‰Ì‰ ›«ﬂ Ê—Ì ÅÌœ« ‰‘œ.")
 		else
 			OldCreditLimit=	cdbl(RS1("CreditLimit"))
+			oldMaxCreditDay = CDbl(rs1("maxCreditDay"))
+			oldMaxChequeDay = CDbl(rs1("maxChequeDay"))
+			oldMaxChequeAmount = CDbl(rs1("maxChequeAmount"))
 			OldCSRID=		cint(RS1("CSR"))
 			OldCSRName=		RS1("RealName")
 		end if
 		RS1.close
 		Set RS1=Nothing
 
-		if OldCSRID <> CSR OR OldCreditLimit <> CreditLimit then
+		if OldCSRID <> CSR OR OldCreditLimit <> CreditLimit or maxChequeDay<>oldMaxChequeDay or oldMaxCreditDay<>maxCreditDay or oldMaxChequeAmount<>maxChequeAmount then
 
 			mySQL = "SELECT [User] as ID, OnAccountCSRChangeSendMessageTo FROM UserDefaults WHERE (([User] = "& session("ID") & ") OR (UserDefaults.[User] = 0)) AND (OnAccountCSRChangeSendMessageTo IS NOT NULL) ORDER BY ABS(UserDefaults.[User]) DESC"
 			Set RS2 = Conn.Execute (mySQL)
@@ -603,9 +720,22 @@ elseif request("act")="submitEdit" then
 
 			if OldCreditLimit <> CreditLimit then
 				msg = msg & tmpAnd &  "”ﬁ› «⁄ »«— «“  '" & Separate(OldCreditLimit) & "' »Â '" & Separate(CreditLimit) & "' "
+				tmpAnd = "Ê "
+			end if
+			if maxCreditDay<>oldMaxCreditDay then 
+				msg = msg & tmpAnd & "”ﬁ› «⁄ »«— «“ " & Separate(oldMaxCreditDay) & " —Ê“ »Â " & Separate(maxCreditDay) & " —Ê“ "
+				tmpAnd = "Ê "
+			end if
+			if maxChequeAmount<>oldMaxChequeAmount then 
+				msg = msg & tmpAnd & "«⁄ »«— „»·€ çﬂ «“ " & Separate(oldMaxChequeAmount) & " »Â " & Separate(maxChequeAmount) & " "
+				tmpAnd = "Ê "
+			end if
+			if maxChequeDay<>oldMaxChequeDay then 
+				msg = msg & tmpAnd & "«⁄ »«—  «—ÌŒ çﬂ «“ " & Separate(oldMaxChequeDay) & " —Ê“ »Â " & Separate(maxChequeDay) & " —Ê“ "
+				tmpAnd = "Ê "
 			end if
 			msg = msg & " €ÌÌ— Ì«› ."
-
+			
 			MsgTo			=	MessageTo
 			msgTitle		=	"Account changed"
 			msgBody			=	sqlSafe(msg)
@@ -674,7 +804,7 @@ elseif request("act")="submitEdit" then
 	if CSR="" then
 		mySQL="UPDATE Accounts SET LastEditOn='"& EditDate & "', LastEditBy='"& EditBy& "', Type ="&AccType & ", Status ="&Status & ", AccountTitle =N'"& AccountTitle& "', Postable1 = "& Postable1 & ", Postable2 = "& Postable2 & ", IsADefault = "& IsADefault & ", EconomicalCode =N'"& EconomicalCode& "', IsPersonal ="& IsPersonal& ", CompanyName =N'"& CompanyName& "', Dear1 =N'"& Dear1& "', FirstName1 =N'"& FirstName1& "', LastName1 =N'"& LastName1& "', JobTitle1 =N'"& JobTitle1& "', Tel1 =N'"& Tel1& "', Fax1 =N'"& Fax1& "', EMail1 =N'"& EMail1& "', Mobile1 =N'"& Mobile1& "', PostCode1 =N'"& PostCode1& "', City1 =N'"& City1& "', Address1 =N'"& Address1& "', Dear2 =N'"& Dear2& "', FirstName2 =N'"& FirstName2& "', LastName2 =N'"& LastName2& "', JobTitle2 =N'"& JobTitle2 & "', Tel2 =N'"& Tel2& "', Fax2 =N'"& Fax2& "', EMail2 =N'"& EMail2& "', Mobile2 =N'"& Mobile2& "', PostCode2 =N'"& PostCode2& "', City2 =N'"& City2& "', Address2 =N'"& Address2& "', NorRCode = N'" & NorRCode & "' , employee=" & employee & ",website=N'" & website & "' WHERE (ID = "& ID & ")"
 	else
-		mySQL="UPDATE Accounts SET CSR ="& CSR & ", LastEditOn='"& EditDate & "', LastEditBy='"& EditBy& "', Type ="&AccType & ", Status ="&Status & ", AccountTitle =N'"& AccountTitle& "', Postable1 = "& Postable1 & ", Postable2 = "& Postable2 & ", IsADefault = "& IsADefault & ", EconomicalCode =N'"& EconomicalCode& "', CreditLimit="& CreditLimit & ", IsPersonal ="& IsPersonal& ", CompanyName =N'"& CompanyName& "', Dear1 =N'"& Dear1& "', FirstName1 =N'"& FirstName1& "', LastName1 =N'"& LastName1& "', JobTitle1 =N'"& JobTitle1& "', Tel1 =N'"& Tel1& "', Fax1 =N'"& Fax1& "', EMail1 =N'"& EMail1& "', Mobile1 =N'"& Mobile1& "', PostCode1 =N'"& PostCode1& "', City1 =N'"& City1& "', Address1 =N'"& Address1& "', Dear2 =N'"& Dear2& "', FirstName2 =N'"& FirstName2& "', LastName2 =N'"& LastName2& "', JobTitle2 =N'"& JobTitle2 & "', Tel2 =N'"& Tel2& "', Fax2 =N'"& Fax2& "', EMail2 =N'"& EMail2& "', Mobile2 =N'"& Mobile2& "', PostCode2 =N'"& PostCode2& "', City2 =N'"& City2& "', Address2 =N'"& Address2& "', NorRCode = N'" & NorRCode & "',employee=" & employee & ",website=N'" & website & "' WHERE (ID = "& ID & ")"
+		mySQL="UPDATE Accounts SET CSR ="& CSR & ", LastEditOn='"& EditDate & "', LastEditBy='"& EditBy& "', Type ="&AccType & ", Status ="&Status & ", AccountTitle =N'"& AccountTitle& "', Postable1 = "& Postable1 & ", Postable2 = "& Postable2 & ", IsADefault = "& IsADefault & ", EconomicalCode =N'"& EconomicalCode& "', CreditLimit="& CreditLimit & ", IsPersonal ="& IsPersonal& ", CompanyName =N'"& CompanyName& "', Dear1 =N'"& Dear1& "', FirstName1 =N'"& FirstName1& "', LastName1 =N'"& LastName1& "', JobTitle1 =N'"& JobTitle1& "', Tel1 =N'"& Tel1& "', Fax1 =N'"& Fax1& "', EMail1 =N'"& EMail1& "', Mobile1 =N'"& Mobile1& "', PostCode1 =N'"& PostCode1& "', City1 =N'"& City1& "', Address1 =N'"& Address1& "', Dear2 =N'"& Dear2& "', FirstName2 =N'"& FirstName2& "', LastName2 =N'"& LastName2& "', JobTitle2 =N'"& JobTitle2 & "', Tel2 =N'"& Tel2& "', Fax2 =N'"& Fax2& "', EMail2 =N'"& EMail2& "', Mobile2 =N'"& Mobile2& "', PostCode2 =N'"& PostCode2& "', City2 =N'"& City2& "', Address2 =N'"& Address2& "', NorRCode = N'" & NorRCode & "',employee=" & employee & ",website=N'" & website & "',maxCreditDay = " & maxCreditDay & ",maxChequeDay=" & maxChequeDay & ", maxChequeAmount=" & maxChequeAmount & "  WHERE (ID = "& ID & ")"
 	end If
 	'response.write mySQL
 	'response.end
@@ -765,11 +895,18 @@ elseif request("act")="submitcustomer" then
 	employee		= cint(text2value(request.form("employee")))
 	website			= left(sqlSafe(Request.form("website")) , 100)
 	
+
 	if not Auth(1 , 4) then ' Doesn't have the permission to set CSR / credit limit
 		CreditLimit = 0
 		CSR			= 0
+		maxCreditDay= 0
+		maxChequeDay= 0
+		maxChequeAmount=50000000
 	else
 		CSR			= cint(sqlSafe(Request.form("CSR")))
+		maxCreditDay	= cdbl(text2value(Request.form("maxCreditDay")))
+		maxChequeDay	= cdbl(text2value(Request.form("maxChequeDay")))
+		maxChequeAmount	= cdbl(text2value(Request.form("maxChequeAmount")))
 	end if
 
 	AccType			= sqlSafe(Request.form("Type"))
@@ -800,15 +937,14 @@ elseif request("act")="submitcustomer" then
 		Postable2=0
 	end if
 
-
 	mySQL="SELECT MAX(ID) AS MaxID FROM Accounts WHERE ([ID] <900000)"	
 	Set RS1=Conn.Execute(mySQL)
 	NewAccID=RS1("MAXID")+1
 	RS1.close
 	Set RS1=Nothing
 
-	mySQL="INSERT INTO Accounts (ID, CreatedDate, CreatedBy, LastEditOn, LastEditBy, CSR, IsADefault, EconomicalCode, Type, AccountTitle, IsPersonal, CompanyName, Postable1, Dear1, FirstName1, LastName1, JobTitle1, Tel1, Fax1, EMail1, Mobile1, PostCode1, City1, Address1, Postable2, Dear2, FirstName2, LastName2, JobTitle2, Tel2, Fax2, EMail2, Mobile2, PostCode2, City2, Address2, NorRCode, employee, website) VALUES ("&_
-	NewAccID & ", N'"& CreatedDate & "', "& CreatedBy & ", N'"& CreatedDate & "', "& CreatedBy & ", "& CSR & ", "& IsADefault & ", N'"& EconomicalCode & "', "& AccType & ", N'"& AccountTitle & "',"& IsPersonal & ", N'"& CompanyName & "', " & Postable1 & ", N'"& Dear1 & "', N'"& FirstName1 & "', N'"& LastName1 & "', N'"& JobTitle1 & "', N'"& Tel1 & "', N'"& Fax1 & "', N'"& Email1 & "', N'"& Mobile1 & "', N'"& PostCode1 & "', N'"& City1 & "', N'"& Address1 & "', " & Postable2 & ",N'"& Dear2 & "', N'"& FirstName2 & "', N'"& LastName2 & "',  N'"& JobTitle2 & "', N'"& Tel2 & "', N'"& Fax2 & "', N'"& Email2 & "', N'"& Mobile2 & "', N'"& PostCode2 & "', N'"& City2 & "', N'"& Address2 & "', N'" & NorRCode & "', " & employee & ",N'" & website & "')"
+	mySQL="INSERT INTO Accounts (ID, CreatedDate, CreatedBy, LastEditOn, LastEditBy, CSR, IsADefault, EconomicalCode, Type, AccountTitle, IsPersonal, CompanyName, Postable1, Dear1, FirstName1, LastName1, JobTitle1, Tel1, Fax1, EMail1, Mobile1, PostCode1, City1, Address1, Postable2, Dear2, FirstName2, LastName2, JobTitle2, Tel2, Fax2, EMail2, Mobile2, PostCode2, City2, Address2, NorRCode, employee, website,maxCreditDay, maxChequeDay, maxChequeAmount) VALUES ("&_
+	NewAccID & ", N'"& CreatedDate & "', "& CreatedBy & ", N'"& CreatedDate & "', "& CreatedBy & ", "& CSR & ", "& IsADefault & ", N'"& EconomicalCode & "', "& AccType & ", N'"& AccountTitle & "',"& IsPersonal & ", N'"& CompanyName & "', " & Postable1 & ", N'"& Dear1 & "', N'"& FirstName1 & "', N'"& LastName1 & "', N'"& JobTitle1 & "', N'"& Tel1 & "', N'"& Fax1 & "', N'"& Email1 & "', N'"& Mobile1 & "', N'"& PostCode1 & "', N'"& City1 & "', N'"& Address1 & "', " & Postable2 & ",N'"& Dear2 & "', N'"& FirstName2 & "', N'"& LastName2 & "',  N'"& JobTitle2 & "', N'"& Tel2 & "', N'"& Fax2 & "', N'"& Email2 & "', N'"& Mobile2 & "', N'"& PostCode2 & "', N'"& City2 & "', N'"& Address2 & "', N'" & NorRCode & "', " & employee & ",N'" & website & "'," & maxCreditDay & "," & maxChequeDay & "," & maxChequeAmount & ")"
 
 	conn.Execute(mySQL)
 '	Added By kid 820727 

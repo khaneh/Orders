@@ -208,6 +208,9 @@ elseif request("act")="getReceipt" then
 	<hr>
 	<input type="hidden" Name='tmpDlgArg' value=''>
 	<input type="hidden" Name='tmpDlgTxt' value=''>
+	<input type="hidden" id="maxChequeDay" value="<%=rs1("maxChequeDay")%>"/>
+	<input type="hidden" id="maxChequeAmount" value="<%=rs1("maxChequeAmount")%>"/>
+	<input type="hidden" id="customerRemainCheque" />
 	<FORM METHOD=POST ACTION="?act=submitReceipt" onsubmit="return submitCeck2();" id="form1">
 	<TABLE Cellspacing="0" Cellpadding="10" align="center">
 	<TR><TD valign='top'>
@@ -242,7 +245,7 @@ elseif request("act")="getReceipt" then
 					<tr>
 						<td align="left"> «—ÌŒ:</td>
 						<td dir="LTR">
-							<INPUT class="RcpGenInput" style="text-align:Left;" NAME="ReceiptDate" TYPE="text" maxlength="10" size="10" value="<%=CreationDate%>" onblur="acceptDate(this)"></td>
+							<INPUT class="RcpGenInput date" style="text-align:Left;" NAME="ReceiptDate" TYPE="text" maxlength="10" size="10" value="<%=CreationDate%>" ></td>
 						<td dir="RTL"><%=weekdayname(weekday(date))%></td>
 					</tr>
 					</table></TD>
@@ -281,11 +284,11 @@ elseif request("act")="getReceipt" then
 
 <%		
 		for i=1 to 1
-%>
+ %>
 			<tr bgcolor='#F0F0F0' onclick="currentRow=this.rowIndex;" >
 				<td align='center' width="25px"><%=i%></td>
 				<td dir="LTR"><INPUT class="RcpRowInput" TYPE="text" NAME="ChequeNos" size="12" onKeyPress="return maskNumber(this);"></td>
-				<td dir="LTR"><INPUT class="RcpRowInput" style="text-align:left;" TYPE="text" NAME="ChequeDates" maxlength="10" size="10" onblur="acceptDate(this)"></td>
+				<td dir="LTR"><INPUT class="RcpRowInput" style="text-align:left;" TYPE="text" NAME="ChequeDates" maxlength="10" size="10" onblur="chequeDate(this)"></td>
 				<td dir="RTL"><INPUT class="RcpRowInput" TYPE="text" NAME="Banks" size="10"></td>
 				<td dir="RTL"><INPUT class="RcpRowInput" TYPE="text" NAME="Descriptions" size="20"></td>
 				<td dir="LTR"><INPUT class="RcpRowInput" TYPE="text" NAME="Amounts" size="15" onKeyPress="return maskNumber(this);" onBlur="setPrice(this);"></td>
@@ -712,6 +715,16 @@ conn.Close
 <% if request("act")="getReceipt" then %>
 
 <script language="JavaScript">
+$(document).ready(function(){
+	$.ajaxSetup({
+		cache: false
+	});
+	$.getJSON("/service/json_getAccount.asp",
+			{act:"chequeRemain",account:$("input[name=customerID]").val()},
+			function (json){
+				$("#customerRemainCheque").val(json.amount);
+		});
+});
 <!--
 function delRow(rowNo){
 	chqTable=document.getElementById("ChequeLines");
@@ -741,7 +754,7 @@ function addRow(rowNo){
 
 	tempTD=document.createElement("td");
 	tempTD.setAttribute("dir", 'LTR');
-	tempTD.innerHTML='<INPUT class="RcpRowInput" style="text-align:left;" TYPE="text" NAME="ChequeDates" maxlength="10" size="10" onblur="acceptDate(this)">'
+	tempTD.innerHTML='<INPUT class="RcpRowInput" style="text-align:left;" TYPE="text" NAME="ChequeDates" maxlength="10" size="10" onblur="chequeDate(this)">'
 	newRow.appendChild(tempTD);
 
 	tempTD=document.createElement("td");
@@ -782,6 +795,48 @@ function setPrice(src){
 			totalAmount += getNum($(amount).val());
 	});
 	$("input[name=TotalAmount]:first").val(echoNum(totalAmount));
+	if ($(src).attr("name")=="Amounts"){
+		if ((getNum($(src).val()) + parseInt($("#customerRemainCheque").val())) > getNum($("#maxChequeAmount").val())){
+			var str="Õœ«ﬂÀ— çﬂ œ—Ì«› Ì »—«Ì «Ì‰ Õ”«» " + echoNum($("#maxChequeAmount").val()) + " „Ì »«‘œ";
+			if ( parseInt($("#customerRemainCheque").val())>0)
+				str += " »œÂÌ çﬂÌ «Ì‰ „‘ —Ì " + echoNum(parseInt($("#customerRemainCheque").val())) + "„Ìù»«‘œ. ";
+			alert(str);
+			$(this).closest("tr").find("input").val("");
+		}
+	}
+}
+function chequeDate(obj){
+	var obj=$(obj);
+	obj.attr("title","");
+	if (obj.val()=="") {
+		obj.attr("title","·ÿ›«  «—ÌŒ —« Ê«—œ ﬂ‰Ìœ");
+		obj.focus();
+	}
+	else if (obj.val()=="//") {
+		var today = new Date();
+		obj.val($.format.date(today,"yyyy/MM/dd"));
+	} else {
+		var rege=/^(13)?[7-9][0-9]\/[0-1]?[0-9]\/[0-3]?[0-9]$/;
+		if( rege.test(obj.val()) ) {
+			var SP = obj.val().split("/");
+			if (SP[0].length == 2) SP[0] = "13" + SP[0] ;
+			if (SP[1].length == 1) SP[1] = "0"  + SP[1] ;
+			if (SP[2].length == 1) SP[2] = "0"  + SP[2] ;
+			obj.val(SP.join("/"));	
+		}
+		if(!rege.test(obj.val())||( SP[0]<'1376' || SP[1]>'12' || SP[2]>'31' )) {
+			obj.attr("title","›—„   «—ÌŒ »«Ìœ YYYY/MM/DD »«‘œ.");
+			obj.focus();
+		};
+	}
+	var now = new Date();
+	var chequeDate = $.jalaliCalendar.jalaliToGregorianStr(obj.val());
+	var diff = Math.floor((Date( chequeDate ) - Date( now )) / 86400000); 
+	if (parseInt($("#maxChequeDay").val())<diff){
+		alert("„œ  çﬂ »«Ìœ " + $("#maxChequeDay").val() + " —Ê“Â »«‘œ");
+		obj.val($.format.date(now,"yyyy/MM/dd"));
+	}
+
 }
 
 //-->

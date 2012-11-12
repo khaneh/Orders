@@ -61,7 +61,7 @@ $(document).ready(function(){
 	});
 });
 function showMemo(){
-	TransformXmlURL("/service/xml_getMemo.asp?act=showType&gl="+$("#gl").val()+"&type="+$("#type").val(),"/xsl/showMemoList.xsl", function(result){
+	TransformXmlURL("/service/xml_getMemo.asp?act=showType&gl="+$("#gl").val()+"&type="+$("#type").val(),"/xsl.<%=version%>/showMemoList.xsl", function(result){
 		$("#Memos").html(result);	
 		var sum=0;
 		$(".credit").each(function(){

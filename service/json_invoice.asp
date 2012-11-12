@@ -132,6 +132,7 @@ select case request("act")
 						RS1.movenext
 					Loop
 				end if
+				conn.Execute("update ARItems set FullyApplied=0,RemainedAmount= " & totalReceivable & ",amountOriginal=" & totalReceivable & " where id=" & voidedARItem)
 			end if
 			set rs=Conn.Execute("select * from Invoices where id=" & id)
 			j("isa")=rs("isa")

@@ -9,6 +9,16 @@ if not Auth(3 , 7) then NotAllowdToViewThisPage()
 <!--#include File="../include_UtilFunctions.asp"-->
 <STYLE>
 	li{margin: 8px 10px 0 0;}
+	.orderColor {background-color: black;color: yellow;}
+	.quoteColor {background-color: #559;color: yellow;}
+	.quoteColor td a:link{color: yellow;}
+	.quoteColor td a:visited{color: #47FF00;}
+	.quoteColor td a:hover{color: red;}
+	.orderColor td a:link{color: yellow;}
+	.orderColor td a:visited{color: #47FF00;}
+	.orderColor td a:hover{color: red;}
+	.grayColor{background-color: #ccc;}
+	span.stName{padding: 0 5px;font-family: "b zar";font-weight: bold;font-size: 12px;color: #b04444}
 </STYLE>
 <script type="text/javascript">
 $(document).ready(function(){
@@ -270,26 +280,39 @@ $(document).ready(function(){
 	});
 	$("#order").blur(function(){
 		$("#result").html(ajax_load);
-		var id=$("#order").val();
-		$.getJSON(loadUrl,
-			{act:"order",orderID:id},
-			function(json){
-				if (json.order>0){
-					var result = "”›«—‘: " + json.orderKind + "° " + "<b>" + json.orderTitle + "</b>" + "<br>";
-					result += " Ê”ÿ: " + "<b>" + json.customerName + "</b>" + "<br>" ;
-					result += "œ— „—Õ·Â: " + "<b>" + json.orderStep + "</b>";
-					$("#result").html(result);
-					$("#order_found").val("1");
-					checkBut($("#order"));
-				} else {
-					$("#result").html("ç‰Ì‰ ”›«—‘Ì ÊÃÊœ ‰œ«œ° ·ÿ›« œﬁ  ﬂ‰Ìœ!");
-					$("#order").val("");
-					$("#order").focus();
-					$("#save").prop("disabled", true);
+		var orderID = Number($("#order").val());
+		if (!isNaN(orderID) && orderID!='') {
+			loadXMLDoc("/service/xml_getOrderProperty.asp?act=showHead&id=" + orderID, function(orderXML){
+				var isOrder = $(orderXML).find("status isOrder").text();
+				var isClosed = $(orderXML).find("status isClosed").text();
+				var isApproved = $(orderXML).find("status isApproved").text();
+				var step = $(orderXML).find("status step").text();
+				if (step=='40'){
 					$("#order_found").val("0");
-				}
-			}
-		);
+					alert("œﬁ  ﬂ‰Ìœ «Ì‰ ”›«—‘ „ Êﬁ› ‘œÂ");
+				} else if (parseInt(step)>0)
+					$("#order_found").val("1");
+				else
+					$("#order_found").val("0");
+				
+				TransformXml(orderXML, "/xsl.<%=version%>/orderShowHeader.xsl", function(result){
+					$("#result").html(result);	
+					$('a#customerID').click(function(e){
+						window.open('../CRM/AccountInfo.asp?act=show&selectedCustomer='+$('a#customerID').attr("myID"), 'showCustomer');
+						e.preventDefault();
+						checkBut($("#order"));
+					});
+				});
+			});
+			
+		} else {
+			$("#order_found").val("0");
+			$("#result").html("ç‰Ì‰ ”›«—‘Ì ÊÃÊœ ‰œ«œ° ·ÿ›« œﬁ  ﬂ‰Ìœ!");
+			$("#order").val("");
+			$("#order").focus();
+			$("#save").prop("disabled", true);
+		}
+		
 	});
 });
 </script>

@@ -21,6 +21,7 @@
 		<tr>
 			<xsl:attribute name="class">
 				<xsl:if test="./status!=1">pause</xsl:if>
+				<xsl:if test="./status=1 and ./step=40">pause</xsl:if>
 			</xsl:attribute>
 			<xsl:attribute name="logID">
 				<xsl:value-of select="./id"/>

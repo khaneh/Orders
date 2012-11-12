@@ -26,6 +26,12 @@ select case request("act")
 			rs.close
 			set rs = Nothing
 		end if
+	case "chequeRemain":
+		set j = jsObject()
+		account = CDbl(request("account"))
+		mySQL = "with cheque (ref1,ref2) as (select g.ref1,g.ref2 from EffectiveGLRows as g13 inner join EffectiveGLRows as g on g13.glDoc=g.glDoc and g13.sys=g.sys and g13.link=g.link where g13.GL=" & Session("OpenGL") & " and g13.sys<>'' and g13.GLAccount=13003 and g.ref1<>'' and g13.tafsil= " & account & " group by g.ref1,g.ref2,g13.tafsil) select isnull(sum(amount),0) as amount from EffectiveGLRows where id in (SELECT MAX(ID) AS MaxID FROM EffectiveGLRows inner join cheque on cheque.ref1=EffectiveGLRows.Ref1 and cheque.ref2=EffectiveGLRows.ref2 GROUP BY GLAccount, EffectiveGLRows.Tafsil, Amount, EffectiveGLRows.Ref1, EffectiveGLRows.Ref2, GL HAVING  GLAccount in (select id from GLAccounts where GLGroup<>12000 and GL=" & Session("OpenGL") & ") AND (GL = " & Session("OpenGL") & ") AND (COUNT(EffectiveGLRows.Ref1) % 2 = 1))"
+		set rs = conn.Execute(mySQL)
+		j("amount")=rs("amount")
 end select
 Response.Write toJSON(j)
 %>

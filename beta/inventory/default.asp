@@ -708,7 +708,7 @@ $(document).ready(function(){
 					dis = "";
 				}	
 				
-				TransformXml(orderXML, "/xsl/orderShowHeader.xsl", function(result){
+				TransformXml(orderXML, "/xsl.<%=version%>/orderShowHeader.xsl", function(result){
 					$("#orderHeader").html(result);	
 					$('a#customerID').click(function(e){
 						window.open('../CRM/AccountInfo.asp?act=show&selectedCustomer='+$('a#customerID').attr("myID"), 'showCustomer');

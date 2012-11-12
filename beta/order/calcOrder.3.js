@@ -203,7 +203,7 @@ function readyForm() {
 					myGroup.find("input[name=catalogItem-group]").val(mySel[3]);
 					myGroup.find("input[name=catalogItem-desc]").val(mySel[4]);
 					checkForce(mySearch);
-					
+					calc_catalogItem(myGroup.find("input[name=catalogItem-price]"));
 				}
 			});
 	    });
@@ -322,6 +322,7 @@ function cloneRow(e){
 					myGroup.find("input[name=catalogItem-group]").val(mySel[3]);
 					myGroup.find("input[name=catalogItem-desc]").val(mySel[4]);
 					checkForce(mySearch);
+					calc_catalogItem(myGroup.find("input[name=catalogItem-price]"));
 				}
 			});
 	    });
@@ -828,14 +829,14 @@ function calc_verni(e){
 		var verni_wat = parseInt(myGroup.find("select[name=verni-wat]:first").children(":selected").val());
 		var price = parseInt(myGroup.find("select[name=verni-type]:first").children(":selected").attr("price"));
 		var type = parseInt(myGroup.find("select[name=verni-type]:first").children(":selected").val());
-		var rate = 30; 
+		var rate = 50; 
 		if (type==3) {
 			myGroup.children("select[name=verni-wat]:first").val(1);
 			if (parseInt(myGroup.find("select[name=verni-mat] option:selected").val())==1)
-				rate = 50;
+				rate = 70;
 				// mat
 			else
-				rate = 40;
+				rate = 60;
 				// barragh
 		} else {
 			myGroup.children("select[name=verni-wat]:first").val(2);

@@ -72,6 +72,18 @@
 			<td class="CusTD2"><%=separate(RS1("CreditLimit"))%></td>
 		</tr>
 		<tr>
+			<td class="CusTD1">”ﬁ› «⁄ »«—(—Ê“) : </td>
+			<td class="CusTD2"><%=separate(RS1("maxCreditDay"))%></td>
+		</tr>
+		<tr>
+			<td class="CusTD1">”ﬁ› «⁄ »«—(çﬂ) : </td>
+			<td class="CusTD2"><%=separate(RS1("maxChequeAmount"))%></td>
+		</tr>
+		<tr>
+		<td class="CusTD1">”ﬁ› «⁄ »«—(çﬂ/—Ê“) : </td>
+			<td class="CusTD2"><%=separate(RS1("maxChequeDay"))%></td>
+		</tr>
+		<tr>
 			<td class="CusTD1"><%If CBool(RS1("IsPersonal")) Then response.write "‘„«—Â „·Ì:" Else response.write "‘„«—Â À» :" End if%></td>
 			<td class="CusTD2"><%=RS1("NorRCode")%></td>
 		</tr>
@@ -193,7 +205,7 @@
 			<input id="customerID" type="hidden" value="<%=RS1("ID")%>"/>
 			<script type="text/javascript">
 				$(document).ready(function(){
-					TransformXmlURL("/service/xml_getMessage.asp?act=related&table=accounts&id=" + $("#customerID").val(),"/xsl/showRelatedMessage.xsl", function(result){
+					TransformXmlURL("/service/xml_getMessage.asp?act=related&table=accounts&id=" + $("#customerID").val(),"/xsl.<%=version%>/showRelatedMessage.xsl", function(result){
 						$("#orderMessages").html(result);
 						$("td.msgBody").each(function(i){
 							$(this).html($(this).html().replace(/\n/gi,"<br/>"));
