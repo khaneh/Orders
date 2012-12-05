@@ -176,12 +176,12 @@
 				</td>
 			</tr>
 			<tr class="grayColor">
-				<td align="left">ÅÌ‘ Å—œ«Œ :</td>
-				<td align="right"><xsl:value-of select="./deposit"/> —Ì«·</td>
-				<td align="left">”——”Ìœ:</td>
-				<td align="right"><xsl:value-of select="./dueDate"/> —Ê“</td>
-				<td align="left">„Â·  œ—Ì«›  çﬂ:</td>
-				<td align="right"><xsl:value-of select="./chequeDueDate"/> —Ê“</td>
+				<td align="left" class="isPrice">ÅÌ‘ Å—œ«Œ :</td>
+				<td align="right" class="isPrice"><xsl:value-of select="./deposit"/> —Ì«·</td>
+				<td align="left" class="isPrice">”——”Ìœ:</td>
+				<td align="right" class="isPrice"><xsl:value-of select="./dueDate"/> —Ê“</td>
+				<td align="left" class="isPrice">„Â·  œ—Ì«›  çﬂ:</td>
+				<td align="right" class="isPrice"><xsl:value-of select="./chequeDueDate"/> —Ê“</td>
 			</tr>
 	</table>
 </xsl:template>

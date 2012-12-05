@@ -1041,7 +1041,7 @@ $(".check").click(function(){
 	case "submitEdit":		'---------------------------------------------------------------------------------
 		'-----------------------------------------------------------------------------------------------------
 		orderID=cdbl(request("id"))
-		set rs = Conn.Execute("select orders.ver, orders.isClosed, orders.isApproved, orders.isOrder, isnull(invoices.approved,0) as approved, isnull(invoices.issued,0) as issued from orders left outer join InvoiceOrderRelations on orders.id=InvoiceOrderRelations.[order] left outer join invoices on InvoiceOrderRelations.invoice = invoices.id where orders.id = " & orderID)
+		set rs = Conn.Execute("select orders.customer, orders.ver, orders.isClosed, orders.isApproved, orders.isOrder, isnull(invoices.approved,0) as approved, isnull(invoices.issued,0) as issued,accounts.arBalance, accounts.creditLimit, accounts.status as accountStatus, accounts.maxCreditDay, isnull(ar.firstDebit,0) as firstDebit from orders inner join accounts on orders.customer=accounts.id left outer join (select Account,datediff(day, dbo.udf_date_solarToDate(cast(substring(min(effectiveDate),1,4) as int),cast(substring(min(effectiveDate),6,2) as int),cast(substring(min(effectiveDate),9,2) as int)),getDate()) as firstDebit from ARItems where FullyApplied=0 and IsCredit=0 and voided=0 group by account) as ar on orders.customer=ar.account left outer join InvoiceOrderRelations on orders.id=InvoiceOrderRelations.[order] left outer join invoices on InvoiceOrderRelations.invoice = invoices.id where orders.id = " & orderID)
 		msg=""
 		errMsg=""
 		if rs.eof then 
@@ -1056,6 +1056,14 @@ $(".check").click(function(){
 			msg = "ÇÓÊÚáÇã ÕÇÏÑ ÔÏå ÑÇ æíÑÇíÔ äãæÏíÏ¡<br> İáĞÇ ÇÒ ÕÏæÑ ÎÇÑÌ ÔÏ<br>"
 		elseif CBool(rs("isOrder")) then 
 			msg = "ÓİÇÑÔ ÑÇ æíÑÇíÔ äãæÏíÏ<br>İáĞÇ ãÊæŞİ ÎæÇåÏ ÔÏ ÊÇ ÔãÇ ÊÇííÏ ãÔÊÑí ÑÇ ÏÑíÇİÊ ßäíÏ<br>"
+		end if
+		if (cdbl(rs("arBalance"))+cdbl(rs("creditLimit")) < 0) then 
+			CustomerID = cdbl(rs("customer"))
+			msg = msg & "<br>ÈÏåí Çíä ÍÓÇÈ ÇÒ ãíÒÇä ÇÚÊÈÇÑ Âä ÈíÔÊÑ ÔÏå¡<br> áØİÇ ÈÇ ÓÑÑÓÊ İÑæÔ åãÇåä ßäíÏ.<br><a href='../CRM/AccountInfo.asp?act=show&selectedCustomer=" & CustomerID & "'>äãÇíÔ ÍÓÇÈ</a>"
+		elseif (CDbl(rs("firstDebit")) > CDbl(rs("maxCreditDay"))) then
+			CustomerID = cdbl(rs("customer"))
+			firstDebit = rs("firstDebit")
+			msg = msg & "<br>ÈÏåí Çíä ãÔÊÑí ãÑÈæØ Èå " & firstDebit & " ÑæÒ ĞÔÊå ÈæÏå¡<br> ßå ÇÒ ÓÑÑÓíÏ ÑÏÇÎÊ Âä ĞÔÊå<br> áØİÇ ÈÇ ÓÑÑÓÊ İÑæÔ åãÇåä ßäíÏ.<br>(ããßä ÇÓÊ ßå ÇÔßÇáí ÏÑ ÏæÎÊä ÈÇÔÏ)<br><a href='../CRM/AccountInfo.asp?act=show&selectedCustomer=" & CustomerID & "'>äãÇíÔ ÍÓÇÈ</a>"
 		end if
 		if errMsg="" then
 			ver = CInt(rs("ver"))
