@@ -79,10 +79,8 @@ function checkOrder(){
 				$("#message").html("”›«—‘ »” Â ‘œÂ!");
 				$("#step").prop("disabled", true);
 				$("#submit").prop("disabled", true);
-			} else if (isApproved=='0'){
-				$("#message").html("”›«—‘  «ÌÌœ ‰‘œÂ");
-			} else if (step=='40'){
-				$("#message").html("<B>”›«—‘ „ Êﬁ› ‘œÂ.</B> Å” ‰»«Ìœ »—«Ì «Ì‰ ”›«—‘ ﬂ«—Ì ﬂ—œ!");
+			} else if (step=='40' && isApproved=='0'){
+				$("#message").html("<B>”›«—‘ »Â œ·Ì·  €ÌÌ— „ Êﬁ› ‘œÂ.</B> Å” ‰»«Ìœ »—«Ì «Ì‰ ”›«—‘ ﬂ«—Ì ﬂ—œ! (”—Å—”  ›—Ê‘ „Ìù Ê«‰œ «Ì‰ ”›«—‘ —« «“  Êﬁ› Œ«—Ã ﬂ‰œ.)");
 				$("#step").prop("disabled", true);
 				$("#submit").prop("disabled", true);
 			} else {
@@ -90,6 +88,8 @@ function checkOrder(){
 				$("#step").prop("disabled", false);
 				$("#submit").prop("disabled", false);
 				$("#step option[value=" + step + "]").prop("selected", true);
+				if (isApproved=='0')
+					$("#message").html("<b>”›«—‘  «ÌÌœ ‰‘œÂ</b>");
 			}	
 			
 			TransformXml(orderXML, "/xsl.<%=version%>/orderShowHeader.xsl", function(result){

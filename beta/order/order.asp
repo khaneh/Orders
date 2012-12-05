@@ -965,7 +965,7 @@ $(".check").click(function(){
 	elseif isApproved then
 		Response.write "<div id='isApprovedStamp' class='stamp'><h2>ÕÇÏÑ ÔÏå</h2><div><span>ÕÇÏÑ ÔÏå ÊæÓØ: </span><span id='approvedBy'>" & rs("approvedByName")  & "</span></div></div>"
 	end if
-	if (auth(2,2) and not CBool(rs("isClosed")) and CBool(rs("isOrder"))) then Response.write "<a class='btn' href='#' id='changeReturnDateBtn'>ÊÛííÑ ÊÇÑíÎ ÊÍæíá</a>"
+	if (auth(2,2) and not CBool(rs("isClosed")) and CBool(rs("isOrder"))) then Response.write "<a class='btn btn-inverse' href='#' id='changeReturnDateBtn'>ÊÛííÑ ÊÇÑíÎ ÊÍæíá</a>"
 	if (auth(2,4) and not CBool(rs("isClosed")) and not CBool(rs("issued"))) then Response.write "<a class='btn btn-primary' href='#' id='changeCustomerBtn'>ÊÛííÑ ÍÓÇÈ</a>"
 	if (auth(2,2) and not CBool(rs("isClosed")) and Not CBool(rs("approved")) and not CBool(rs("issued"))) then Response.write "<a class='btn' href='#' id='orderEditBtn'>æíÑÇíÔ</a>"
 	if (auth(2,1) and not CBool(rs("isOrder")) and CBool(rs("isApproved"))) then Response.write "<a class='btn btn-success' href='#' id='convert2orderBtn'>ÊÈÏíá Èå ÓİÇÑÔ</a>"
