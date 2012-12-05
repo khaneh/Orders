@@ -52,13 +52,13 @@ select case request("act")
 		id=0
 		if isNumeric(request("id")) then id=request("id")
 		myDate = "dbo.udf_date_solarToDate(" & mid(request("date"),1,4) & "," & mid(request("date"),6,2) & "," & mid(request("date"),9,2) & ")"
-		set rs=Conn.Execute("declare @myDate datetime;set @myDate = dbo.udf_date_solarToDate(" & mid(request("date"),1,4) & "," & mid(request("date"),6,2) & "," & mid(request("date"),9,2) & ");select orders.*, orderTypes.name as order_kind, accounts.accountTitle from orders inner join Accounts on orders.customer=accounts.id inner join orderTypes on orders.type = orderTypes.id where orders.isOrder=1 and orders.id>" & id &" and orders.createdDate between DATEADD(DAY, 0, DATEDIFF(DAY, 0, @myDate)) and DATEADD(DAY, 1, DATEDIFF(DAY, 0, @myDate))")
+		set rs=Conn.Execute("declare @myDate datetime;set @myDate = dbo.udf_date_solarToDate(" & mid(request("date"),1,4) & "," & mid(request("date"),6,2) & "," & mid(request("date"),9,2) & ");select orders.*, orderTypes.name as order_kind, accounts.accountTitle from orders inner join Accounts on orders.customer=accounts.id inner join orderTypes on orders.type = orderTypes.id where orders.isOrder=1 and orders.id>" & id &" and orders.orderDate between DATEADD(DAY, 0, DATEDIFF(DAY, 0, @myDate)) and DATEADD(DAY, 1, DATEDIFF(DAY, 0, @myDate))")
 		'DATEADD(DAY, 0, DATEDIFF(DAY, 0, createdDate)),DATEADD(DAY, 1, DATEDIFF(DAY, 0, createdDate))
 		while not rs.eof
 			set result(null) = jsObject()
 			result(null)("id")=rs("id") 
-			result(null)("date")=shamsiDate(rs("createdDate"))
-			result(null)("time")=FormatDateTime(rs("createdDate"), 4)
+			result(null)("date")=shamsiDate(rs("orderDate"))
+			result(null)("time")=FormatDateTime(rs("orderDate"), 4)
 			result(null)("accountTitle")=rs("accountTitle")
 			result(null)("kind")=rs("order_kind") 
 			result(null)("title")=rs("orderTitle") 

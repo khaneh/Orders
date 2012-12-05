@@ -1,5 +1,7 @@
 body {direction: rtl;font-family: Tahoma;font-size: 8pt;}
 .price{background-color: #FFC;border-width: 0px;margin: 0px;padding: 0px;}
+.cost{background-color: #FF7B7B;border-width: 0px;margin: 0px;padding: 0px;}
+.purchasePrice{background-color: #FF5050;border-width: 0px;margin: 0px;padding: 0px;}
 .dis{background-color: #F9A;border-width: 0px;margin: 0px;padding: 0px;}
 .over{background-color: #BF6;border-width: 0px;margin: 0px;padding: 0px;}
 .reverse{background-color: #A8B2FF;border-width: 0px;margin: 0px;padding: 0px;}

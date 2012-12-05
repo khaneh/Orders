@@ -3,6 +3,7 @@
 	SubmenuItem=9
 %>
 <!--#include file="top.asp" -->
+<!--#include virtual="/beta/include_farsiDateHandling.asp"-->
 <%
 if not Auth(3 , "A") then NotAllowdToViewThisPage()
 %>
@@ -28,8 +29,13 @@ if not Auth(3 , "A") then NotAllowdToViewThisPage()
 			}},
 			title: "ÊÇííÏ"
 		});
-		$("#costCenters").change(function(){
-			TransformXmlURL("/service/xml_getCosts.asp?act=costCenter&id=" + $("#costCenters").val(),"/xsl.<%=version%>/costListShow.xsl", function(result){
+		$("#check").click(function(){
+			var fromdate = escape($("#dateFrom").val());
+			var todate = escape($("#dateTo").val());
+			var url = "/service/xml_getCosts.asp?act=costCenter&id=" + $("#costCenters").val()+"&fromdate="+fromdate+"&todate="+todate;
+			if ($("#insertDate").is(":checked"))
+				url += "&insertdate=1"
+			TransformXmlURL(url,"/xsl.<%=version%>/costListShow.xsl", function(result){
 				$("#report").html(result);
 				$(".delCost").mouseover(function(event){
 					$(this).find(".delCostBtn").css("display","block");
@@ -49,6 +55,7 @@ if not Auth(3 , "A") then NotAllowdToViewThisPage()
 	});
 </script>
 <div>
+	<span>ãÑßÒ</span>
 	<select id="costCenters" class="btn">
 		<option value="-1">ÇäÊÎÇÈ ßäíÏ</option>
 <%
@@ -59,6 +66,14 @@ if not Auth(3 , "A") then NotAllowdToViewThisPage()
 	wend
 %>		
 	</select>
+	<span>ÊÇÑíÎ</span>
+	<input type="text" dir="ltr" class="date boot" size="10" id="dateFrom" value="<%=shamsitoday()%>"/>
+	<span>Çáí</span>
+	<input type="text" dir="ltr" class="date boot" size="10" id="dateTo" value="<%=shamsitoday()%>"/>
+	<input type="button" class="btn" value="ÊÇííÏ" id="check"/>
+	<br>
+	<input type="checkbox" id="insertDate" checked="checked"/>
+	<span>ÊÇÑíÎ ËÈÊ ÑÇ ÏÑäÙÑ ÈíÑ <small class="comment">(ÏÑ ÕæÑÊí ßå Êíß äÔæÏ ÚãáßÑÏåÇíí ßå ÊÇÑíÎ äÏÇÑäÏ äãÇíÔ ÏÇÏå äÎæÇåäÏ ÔÏ æ ÊÇÑíÎ ÔÑæÚ ãáÇß İíáÊÑ ÎæÇåÏ ÈæÏ)</small></span>
 </div>
 <div id="report"></div>
 <div id="costDelComfirm">

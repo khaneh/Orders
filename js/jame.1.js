@@ -1,3 +1,6 @@
+function daydiff(first, second) {
+    return (second-first)/(1000*60*60*24)
+}
 function getNum(n){
 	var out = 0;
 	if (typeof(n)=="number")

@@ -41,7 +41,11 @@ $(document).ready(function(){
 			$.ajax({
 				type:"POST",
 				url:"/service/json_getInventory.asp",
-				data:{act:"updatePaperPrice",paperType:$("#paperType").val(),price: Math.ceil(getNum($("#purchasePrice").val()) * 1.25)},
+				data:{act:"updatePaperPrice",
+					paperType:$("#paperType").val(),
+					price: Math.ceil(getNum($("#purchasePrice").val()) * 1.25),
+					cost: Math.ceil(getNum($("#purchasePrice").val()) * 1.05),
+					purchasePrice:getNum($("#purchasePrice").val())},
 				dataType:"json"
 			}).done(function (data){
 				if (parseInt(data.price)>0)

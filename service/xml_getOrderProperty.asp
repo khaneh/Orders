@@ -182,19 +182,40 @@ select case request("act")
 		set rs = Conn.Execute("select * from orders where id=" & orderID)
 		orderType=rs("type")
 		set orderProp = server.createobject("MSXML2.DomDocument")
-		orderProp.loadXML(rs("property"))
-		set rs = Conn.Execute("select * from orderTypes where id=" & orderType)
 		set typeProp = server.createobject("MSXML2.DomDocument")
-		typeProp.loadXML(rs("property"))
+		orderProp.loadXML(rs("property"))
+		canUpdate = false
+		if CBool(rs("isApproved")) and Not IsNull(rs("approvedDate")) then 
+			set rs1 = Conn.Execute("select top 1 * from orderTypesLog where id=" & orderType & " and lastUpdate < N'" & FormatDateTime(cdate(rs("approvedDate")),2) & " " & FormatDateTime(cdate(rs("approvedDate")),4) & "' order by lastUpdate desc")
+			if not rs1.EOF then canUpdate = true
+			if not rs1.EOF and not Request("update")="yes" then 
+				typeProp.loadXML(rs1("property"))
+			else
+				set rs = Conn.Execute("select * from orderTypes where id=" & orderType)
+				typeProp.loadXML(rs("property"))
+			end if	
+			rs1.Close
+			set rs1 = Nothing
+		else
+			set rs = Conn.Execute("select * from orderTypes where id=" & orderType)
+			typeProp.loadXML(rs("property"))
+		end if
 		rs.close
 		set rs = nothing
 		set out = server.createobject("MSXML2.DomDocument")
 		out.loadXML( "<keys/>" )
+		if canUpdate then 
+			set tmp = out.SelectSingleNode("/keys")
+			tmp.setAttribute "canUpdate","yes"
+		end if
 		if orderProp.SelectSingleNode("/data") is Nothing then
 			orderProp.loadXML("<data/>")
 		end if
 		for each group in typeProp.selectNodes("//group[@hasValue='yes']")
 			group.removeAttribute("hasValue")
+			if auth(2,"G") then 
+				group.setAttribute "showCost","yes"
+			end if
 		next
 		for each row in typeProp.SelectNodes("//rows")
 			rowName = row.GetAttribute("name")
@@ -255,7 +276,7 @@ select case request("act")
 				group.setAttribute "reverse",thisReverse
 				group.setAttribute "w",w
 				group.setAttribute "l",l
-				if group.getAttribute("hasStock")="yes" then 
+				if group.getAttribute("hasStock")="yes" or group.getAttribute("hasStock")="option" then 
 					set tmp = row.selectNodes("//key[@name='"&group.getAttribute("name")&"-stockName"&"' and ../@id='" & rowID & "']")
 					if tmp.length>0 then group.setAttribute "stockName", tmp(0).text
 					set tmp = row.selectNodes("//key[@name='"&group.getAttribute("name")&"-stockDesc"&"' and ../@id='" & rowID & "']")
@@ -308,6 +329,17 @@ select case request("act")
 			customer.text = rs("firstName2") & " " & rs("lastName2")
 		end if
 		node.AppendChild customer
+		Set node = head.createElement("deposit")
+		node.text = "0"
+		head.documentElement.AppendChild node
+		Set node = head.createElement("dueDate")
+		node.text=rs("maxCreditDay")
+		if not auth(2,"H") then node.setAttribute "readOnly","yes"
+		head.documentElement.AppendChild node
+		Set node = head.createElement("chequeDueDate")
+		node.text=rs("maxChequeDay")
+		if not auth(2,"H") then node.setAttribute "readOnly","yes"
+		head.documentElement.AppendChild node
 		rs.close
 		set rs=nothing
 		Set node = head.createElement("orderTypeID")
@@ -338,13 +370,13 @@ select case request("act")
 		node.text=""
 		head.documentElement.AppendChild node
 		Set node = head.createElement("paperSize")
-		node.text=""
+		node.text="21X30"
 		head.documentElement.AppendChild node
 		Set node = head.createElement("notes")
 		node.text=""
 		head.documentElement.AppendChild node
 		Set node = head.createElement("qtty")
-		node.text=""
+		node.text="1"
 		head.documentElement.AppendChild node
 		Set node = head.createElement("totalPrice")
 		node.text=""
@@ -379,9 +411,11 @@ select case request("act")
 		set head = server.createobject("MSXML2.DomDocument")
 		head.loadXML( "<head/>" )
 		if orderID>0 and logID=0 then 
-			mySQL = "select orders.*, Accounts.tel1, Accounts.tel2, Accounts.dear1, Accounts.dear2, Accounts.firstName1, Accounts.firstName2, Accounts.lastName1,Accounts.lastName2, Accounts.companyName, Accounts.accountTitle,orderTypes.name as orderTypeName,users.realName, users.extention, isnull(invoices.Approved,-1) as invoiceApproved, isnull(invoices.Issued,-1) as invoiceIssued, orderSteps.name as stepName, orderStatus.name as statusName from Orders inner join orderSteps on orders.step=orderSteps.id inner join orderStatus on orderStatus.id=orders.status inner join Accounts on orders.customer=Accounts.ID inner join orderTypes on orders.type=orderTypes.id inner join users on orders.createdBy=users.id left outer join InvoiceOrderRelations on InvoiceOrderRelations.[order]=orders.id left outer join invoices on InvoiceOrderRelations.invoice = invoices.id and invoices.voided=0 where orders.id=" & orderID
+			mySQL = "select orders.*, Accounts.tel1, Accounts.tel2, Accounts.dear1, Accounts.dear2, Accounts.firstName1, Accounts.firstName2, Accounts.lastName1,Accounts.lastName2, Accounts.companyName, Accounts.accountTitle,orderTypes.name as orderTypeName,users.realName, users.extention, isnull(invoices.Approved,-1) as invoiceApproved, isnull(invoices.Issued,-1) as invoiceIssued, orderSteps.name as stepName, orderStatus.name as statusName, appUser.realName as approvedByName from Orders inner join orderSteps on orders.step=orderSteps.id inner join orderStatus on orderStatus.id=orders.status inner join Accounts on orders.customer=Accounts.ID inner join orderTypes on orders.type=orderTypes.id inner join users on orders.createdBy=users.id left outer join InvoiceOrderRelations on InvoiceOrderRelations.[order]=orders.id left outer join invoices on InvoiceOrderRelations.invoice = invoices.id and invoices.voided=0 left outer join users as appUser on appUser.id=orders.approvedBy where orders.id=" & orderID
+			myContract = "select returnDate as contractDate from orderLogs where id in (select min(id) from orderLogs where returnDate is not null and isOrder=1 and orderID=" & orderID & ")"
 		elseif orderID=0 and logID>0 then
-			mySQL = "select orderlogs.*, orders.createdDate, Accounts.tel1, Accounts.tel2, Accounts.dear1, Accounts.dear2, Accounts.firstName1, Accounts.firstName2, Accounts.lastName1,Accounts.lastName2, Accounts.companyName, Accounts.accountTitle,orderTypes.name as orderTypeName,users.realName, users.extention, isnull(invoices.Approved,-1) as invoiceApproved, isnull(invoices.Issued,-1) as invoiceIssued, orderSteps.name as stepName, orderStatus.name as statusName from orderlogs inner join orderSteps on orderlogs.step=orderSteps.id inner join orderStatus on orderStatus.id=orderlogs.status inner join orders on orderLogs.orderID=orders.id inner join Accounts on orderlogs.customer=Accounts.ID inner join orderTypes on orderlogs.type=orderTypes.id inner join users on orders.createdBy=users.id left outer join InvoiceOrderRelations on InvoiceOrderRelations.[order]=orderlogs.orderID left outer join invoices on InvoiceOrderRelations.invoice = invoices.id and invoices.voided=0 where orderlogs.id=" & logID
+			mySQL = "select orderlogs.*, orders.createdDate, Accounts.tel1, Accounts.tel2, Accounts.dear1, Accounts.dear2, Accounts.firstName1, Accounts.firstName2, Accounts.lastName1,Accounts.lastName2, Accounts.companyName, Accounts.accountTitle,orderTypes.name as orderTypeName,users.realName, users.extention, isnull(invoices.Approved,-1) as invoiceApproved, isnull(invoices.Issued,-1) as invoiceIssued, orderSteps.name as stepName, orderStatus.name as statusName, appUser.realName as approvedByName from orderlogs inner join orderSteps on orderlogs.step=orderSteps.id inner join orderStatus on orderStatus.id=orderlogs.status inner join orders on orderLogs.orderID=orders.id inner join Accounts on orderlogs.customer=Accounts.ID inner join orderTypes on orderlogs.type=orderTypes.id inner join users on orders.createdBy=users.id left outer join InvoiceOrderRelations on InvoiceOrderRelations.[order]=orderlogs.orderID left outer join invoices on InvoiceOrderRelations.invoice = invoices.id and invoices.voided=0 left outer join users as appUser on appUser.id=orderLogs.approvedBy where orderlogs.id=" & logID
+			myContract = "select returnDate as contractDate from orderLogs where id in (select min(id) from orderLogs where returnDate is not null and isOrder=1 and orderID=" & orderID & " and id <= " & logID & ")"
 		end if
 		set rs = Conn.Execute(mySQL)
 		set node = head.createElement("status")	
@@ -505,6 +539,24 @@ select case request("act")
 			node.text=rs("Price")
 		end if
 		head.documentElement.AppendChild node
+		Set node = head.createElement("approvedByName")
+		if IsNull(rs("approvedByName")) then
+			node.text=""
+		else
+			node.text=rs("approvedByName")
+		end if
+		head.documentElement.AppendChild node
+		Set node = head.createElement("deposit")
+		node.text = Separate(rs("deposit"))
+		head.documentElement.AppendChild node
+		Set node = head.createElement("dueDate")
+		node.text=rs("dueDate")
+		if not auth(2,"H") then node.setAttribute "readOnly","yes"
+		head.documentElement.AppendChild node
+		Set node = head.createElement("chequeDueDate")
+		node.text=rs("chequeDueDate")
+		if not auth(2,"H") then node.setAttribute "readOnly","yes"
+		head.documentElement.AppendChild node
 		set node = head.createElement("today")
 		head.documentElement.AppendChild node
 		set today = head.createElement("date")
@@ -523,20 +575,61 @@ select case request("act")
 			set today = head.createElement("retIsNull")
 			today.text="yes"
 			node.AppendChild today
+			set today = head.createElement("retClass")
+			today.text=""
+			node.AppendChild today
 		else
 			today.text=shamsiDate(rs("returnDate"))
 			node.AppendChild today
 			set today = head.createElement("retTime")
 			today.text=FormatDateTime(rs("returnDate"),vbshorttime)
 			node.AppendChild today
+			set today = head.createElement("retClass")
+			if shamsiDate(rs("returnDate"))=shamsiToday() then today.text="isBlue"
+			if shamsiDate(rs("returnDate"))>shamsiToday() then today.text="isBlack"
+			if shamsiDate(rs("returnDate"))<shamsiToday() then today.text="isRed"
+			node.AppendChild today
 		end if
-		
+		set today = head.createElement("contractDate")
+		set rsc = conn.Execute(myContract)
+		if IsNull(rsc("contractDate")) or rsc.EOF then 
+			today.text=""
+			node.AppendChild today
+			set today = head.createElement("contractTime")
+			today.text=""
+			node.AppendChild today
+			set today = head.createElement("contractIsNull")
+			today.text="yes"
+			node.AppendChild today
+			set today = head.createElement("contractClass")
+			today.text=""
+			node.AppendChild today
+		else
+			today.text=shamsiDate(rsc("contractDate"))
+			node.AppendChild today
+			set today = head.createElement("contractTime")
+			today.text=FormatDateTime(rsc("contractDate"),vbshorttime)
+			node.AppendChild today
+			set today = head.createElement("contractIsNull")
+			today.text="no"
+			node.AppendChild today
+			set today = head.createElement("contractClass")
+			if shamsiDate(rsc("contractDate"))=shamsiToday() then today.text="isBlue"
+			if shamsiDate(rsc("contractDate"))>shamsiToday() then today.text="isBlack"
+			if shamsiDate(rsc("contractDate"))<shamsiToday() then today.text="isRed"
+			node.AppendChild today
+		end if
+		rsc.Close
+		set rsc = Nothing
 		set today = head.createElement("wName")
 		today.text=weekdaynameFA(weekdayname(weekday(rs("createdDate"))))
 		node.AppendChild today
 		set today = head.createElement("shamsiToday")
 		today.text = shamsiToday()
 		node.AppendChild today
+		Set node = head.createElement("ver")
+		node.text = rs("ver")
+		head.documentElement.AppendChild node
 		rs.close
 		set rs=nothing
 		response.write(head.xml)

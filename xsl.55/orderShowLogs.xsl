@@ -62,7 +62,7 @@
 			</td>
 			<td>
 				<xsl:attribute name="title">
-					<xsl:if test="./isApproved!=0">йгММо тоЕ</xsl:if>
+					<xsl:if test="./isApproved!=0">угоя тоЕ</xsl:if>
 				</xsl:attribute>
 				<xsl:if test="./isApproved!=0"><i class="icon-ok-sign"></i></xsl:if>
 			</td>

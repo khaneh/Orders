@@ -10,6 +10,7 @@ function makeOutXML(){
 	}
 	else {
  		try { 
+ 			$("#Submit").prop("disabled",true);
 			var out=$("<data></data>");
 			var id=0
 			$(".myRow").each(function(i,myRow){
@@ -46,6 +47,7 @@ function makeOutXML(){
 		catch (e){
 			alert("ÎØÇí ÚÌíÈ!");
 			 return false;
+			 $("#Submit").prop("disabled",false);
 		}
 	}
 }
@@ -145,6 +147,8 @@ function readyForm() {
 	});
 	$('[name$=-addValue]').hide();
 	$("[name$=-price]").addClass("price");
+	$("[name$=-cost]").addClass("cost");
+	$("[name$=-purchasePrice]").addClass("purchasePrice");
 	$("[name$=-dis]").addClass("dis");
 	$("[name$=-reverse]").addClass("reverse");
 	$("[name$=-over]").addClass("over");
@@ -244,21 +248,31 @@ function clearThis(e){
 	$(e).val("");
 }
 function getPer(n){
-	var n = parseInt(n.replace(/%/gi,''));
-	if (n>100) n=100;
+	if (n.indexOf("%")>-1){
+		var n = parseInt(n.replace(/%/gi,''));
+		if (n>=100) n=99;
+	} else {
+		var n = parseInt(n.replace(/,/gi,''));
+	}
 	if (n<0) n=0;
 	if (isNaN(n)) n=0;
 	return n;
 }
 function echoPer(str){
-	var n = parseInt(str);
-	return n + '%';
+	str += ''; 
+	if (str.indexOf("%")>-1){
+		var n = parseInt(str.replace(/%/gi,''));
+		if (n>=100) n=99;
+		return n + '%';
+	} else{
+		return echoNum(getNum(str));
+	}
 }
-function calcDisOver(myGroup,price){
+function calcDisOver(myGroup,price, cost, purchasePrice){
 	var result = price;
 	if (myGroup.find("input[name$=-dis]:first").val().indexOf("%")>-1){
 		var dis = getPer(myGroup.find("input[name$=-dis]:first").val());
-		myGroup.find("input[name$=-dis]:first").val(echoPer(dis));
+		myGroup.find("input[name$=-dis]:first").val(echoPer(dis+'%'));
 		result -= price * dis / 100;
 	} else {
 		var dis = getNum(myGroup.find("input[name$=-dis]:first").val());
@@ -267,7 +281,7 @@ function calcDisOver(myGroup,price){
 	}
 	if (myGroup.find("input[name$=-reverse]:first").val().indexOf("%")>-1){
 		var reverse = getPer(myGroup.find("input[name$=-reverse]:first").val());
-		myGroup.find("input[name$=-reverse]:first").val(echoPer(reverse));
+		myGroup.find("input[name$=-reverse]:first").val(echoPer(reverse+'%'));
 		result -= price * reverse / 100;
 	} else {
 		var reverse = getNum(myGroup.find("input[name$=-reverse]:first").val());
@@ -276,7 +290,7 @@ function calcDisOver(myGroup,price){
 	}
 	if (myGroup.find("input[name$=-over]:first").val().indexOf("%")>-1){
 		var over = getPer(myGroup.find("input[name$=-over]:first").val());
-		myGroup.find("input[name$=-over]:first").val(echoPer(over));
+		myGroup.find("input[name$=-over]:first").val(echoPer(over+'%'));
 		result += price * over / 100;
 	} else {
 		var over = getNum(myGroup.find("input[name$=-over]:first").val());
@@ -284,20 +298,79 @@ function calcDisOver(myGroup,price){
 		result += getNum(over);
 	}
 	myGroup.find("input[name$=-price]:first").val(echoNum(result));
+	if (isNaN(cost))
+		myGroup.find("input[name$=-cost]:first").val('---');
+	else
+		myGroup.find("input[name$=-cost]:first").val(echoNum(cost));
+	if (isNaN(purchasePrice))
+		myGroup.find("input[name$=-purchasePrice]:first").val('---');
+	else
+		myGroup.find("input[name$=-purchasePrice]:first").val(echoNum(purchasePrice));
 }
 function calc_total(){
 	var totalPrice = 0;
 	var totalVatedPrice = 0;
+	var sumDis = 0;
+	var sumOver = 0;
+	var sumReverse = 0;
 	$('input[name$=-price]:not(:disabled)').each(function(i){
 		if ($.isNumeric(getNum($(this).val())))
+			if ($(this).closest("div.priceGroup").find("input[name$=-dis]").val().indexOf("%")>-1) {
+				var per = parseInt($(this).closest("div.priceGroup").find("input[name$=-dis]").val().replace(/%/gi,''));
+				var price = getNum($(this).val());
+				if (per>0 && per <100){
+					sumDis += price / (100/per - 1);
+				}	
+			} else{
+			   sumDis += getNum($(this).closest("div.priceGroup").find("input[name$=-dis]").val());
+			}
+			if ($(this).closest("div.priceGroup").find("input[name$=-over]").val().indexOf("%")>-1) {
+				var per = parseInt($(this).closest("div.priceGroup").find("input[name$=-over]").val().replace(/%/gi,''));
+				var price = getNum($(this).val());
+				if (per>0 && per <100){
+					sumOver += price / (100/per - 1);
+				}	
+			} else{
+			   sumOver += getNum($(this).closest("div.priceGroup").find("input[name$=-over]").val());
+			}
+			if ($(this).closest("div.priceGroup").find("input[name$=-reverse]").val().indexOf("%")>-1) {
+				var per = parseInt($(this).closest("div.priceGroup").find("input[name$=-reverse]").val().replace(/%/gi,''));
+				var price = getNum($(this).val());
+				if (per>0 && per <100){
+					sumReverse += price / (100/per - 1);
+				}	
+			} else{
+			   sumReverse += getNum($(this).closest("div.priceGroup").find("input[name$=-reverse]").val());
+			}
 			totalPrice += getNum($(this).val());
 			if ($(this).closest("div.group").attr("groupname")!="paper")
 				totalVatedPrice += getNum($(this).val()) * (100 + parseFloat($("#vatRate").val())) / 100;
 			else
 				totalVatedPrice += getNum($(this).val());
 	});
+	$("#sumDis").html(echoNum(sumDis));
+	$("#sumOver").html(echoNum(sumOver));
+	$("#sumReverse").html(echoNum(sumReverse));
 	$('#totalPrice').val(echoNum(totalPrice));
 	$('#totalVatedPrice').val(echoNum(totalVatedPrice));
+	if (((sumDis - sumOver) / totalPrice * 100) >= parseInt($("#disLimitP").val()) && parseInt($("#disLimitP").val())!=100){
+		$("#errMsg").html("ÔãÇ ãÌÇÒ Èå ÏÇÏä Çíä ãíÒÇä ÊÎİíİ äíÓÊíÏ! ÍÏÇßËÑ ÊÎİíİ ãÌÇÒ ÈÑÇí ÔãÇ " + $("#disLimitP").val() + " ÏÑÕÏ ãíÈÇÔÏ.");
+		$("#Submit").css("display","none");
+
+	} else {
+		if ((sumDis - sumOver)  > parseInt($("#disLimit").val())){
+			$("#errMsg").html("ÔãÇ ãÌÇÒ Èå ÏÇÏä Çíä ãíÒÇä ÊÎİíİ äíÓÊíÏ! ÍÏÇßËÑ ÊÎİíİ ãÌÇÒ ÈÑÇí ÔãÇ " + echoNum($("#disLimit").val()) + " ÑíÇá ãíÈÇÔÏ.");
+			$("#Submit").css("display","none");
+		} else {
+			if (sumReverse>0 && $("#reverseLimit").val()=='0'){
+				$("#Submit").css("display","none");
+				$("#errMsg").html("ÔãÇ ãÌÇÒ Èå ËÈÊ ÈÑÔÊ ÇÒ İÑæÔ äíÓÊíÏ");
+			} else {
+				$("#Submit").css("display","inline-block");
+				$("#errMsg").html("");
+			}
+		}
+	}
 }
 function cloneRow(e){
 	var myRow = $(e).closest(".exteraArea");
@@ -385,6 +458,7 @@ function checkOther(e){
 	} else {
 		$(e).next().hide();
 	}
+	
 }
 function addOther(e){
 	if ($(e).val()!="" && $(e).val()!="ãŞÏÇÑ ÑÇ æÇÑÏ ßäíÏ" && $(e).val()!="äãíÔå ßå ÎÇáí ÈÇÔå!"){
@@ -411,8 +485,12 @@ function addOther(e){
 			$(e).prev().find("option:selected").text($(e).val());
 			$(e).prev().find("option:selected").val('other:'+$(e).val());
 			$(e).hide();
-			if ($(e).parent().attr("groupname")=="paper") calc_paper(e);
-			if ($(e).parent().attr("groupname")=="selefon") calc_selefon(e);
+			if ($(e).closest("div.group").attr("groupname")=="paper") {
+				calc_paper(e);
+				calc_paper(e);
+			}
+			if ($(e).closest("div.group").attr("groupname")=="selefon") 
+				calc_selefon(e);
 		} else {
 			$(e).val("ãŞÏÇÑ ÑÇ æÇÑÏ ßäíÏ");
 			$(e).focus();
@@ -484,7 +562,32 @@ function calc_invRequest(e){
 			myGroup.find("input[name=invRequest-qtty]").val(parseInt(myGroup.find("input[name=invRequest-qtty]").val()));
 		myGroup.find("input[name$=-stockName]").val(myGroup.find("input[name$=-name]").val());
 		myGroup.find("input[name$=-stockDesc]").val(myGroup.find("input[name$=-desc]").val());
-		calcDisOver(myGroup,getNum(myGroup.find("input[name$=-price]").val()));
+		var price = getNum(myGroup.find("input[name$=-price]:first").val());
+		if (myGroup.find("input[name$=-reverse]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-reverse]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-reverse]").val());
+		}
+		if (myGroup.find("input[name$=-over]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-over]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price -= price * per / (100 - per);
+			}	
+		} else{
+		   price -= getNum(myGroup.find("input[name$=-over]").val());
+		}
+		if (myGroup.find("input[name$=-dis]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-dis]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-dis]").val());
+		}
+		calcDisOver(myGroup,price);
 	} else {
 		calcDisOver(myGroup,0);
 	}
@@ -546,19 +649,32 @@ function calc_print(e){
 function calc_transport(e){
 	var myGroup = $(e).closest("div.group");
 	if (myGroup.find("[name$=-disBtn]").is(":checked")){
-		switch ($(e).attr("name")){
-			case 'transport-price':
-				$(e).val(echoNum(getNum($(e).val())));
-				break;
-			case 'transport-dis':
-				var price=getNum(myGroup.find("input[name$=-price]:first").val());
-				calcDisOver(myGroup,price);			
-				break;
-			case 'transport-over':
-				var price=getNum(myGroup.find("input[name$=-price]:first").val());
-				calcDisOver(myGroup,price);
-				break;
-		}	
+		var price = getNum(myGroup.find("input[name$=-price]:first").val());
+		if (myGroup.find("input[name$=-reverse]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-reverse]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-reverse]").val());
+		}
+		if (myGroup.find("input[name$=-over]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-over]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price -= price * per / (100 - per);
+			}	
+		} else{
+		   price -= getNum(myGroup.find("input[name$=-over]").val());
+		}
+		if (myGroup.find("input[name$=-dis]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-dis]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-dis]").val());
+		}
+		calcDisOver(myGroup,price);	
 	} else
 		calcDisOver(myGroup,0);		
 	checkForce(e);
@@ -585,10 +701,10 @@ function calc_binding(e){
 				if (form < 3) form = 3;
 				break;
 			case 3:
-				if (form < 15) form = 15;
+				if (form < 12) form = 12;
 				break;
 			case 4:
-				if (form < 15) form = 15;
+				if (form < 12) form = 12;
 				break;
 			default:
 				other = true;
@@ -634,26 +750,31 @@ function calc_paper(e){
 			myGroup.find("input[name=paper-after-cut_qtty]").prop("readonly",false);
 			var paperAfter = getNum(myGroup.find("input[name=paper-after-cut_qtty]").val());
 			myGroup.find("input[name=paper-after-cut_qtty]").val(echoNum(paperAfter));
-			myGroup.find("input[name=paper-qtty]").val(echoNum( Math.ceil(paperAfter/rate)));
-//			console.log(qtty);
-//			console.log(rate);
-			
+			myGroup.find("input[name=paper-qtty]").val(echoNum( Math.ceil(paperAfter/rate)));			
 		}
-		//console.log(bw +" X " + bh);
+//		console.log(bw +" X " + bh);
 		myGroup.find("input[name$=-l]").val(bh);
 		myGroup.find("input[name$=-w]").val(bw);
 		myGroup.find("input[name=paper-in-form]").val(rate);
 		var weight = parseInt(myGroup.find("[name=paper-weight]").children(":selected").text());
 		var price = parseInt(myGroup.find("[name=paper-type]").children(":selected").attr("price"));
+		var cost = parseInt(myGroup.find("[name=paper-type]").children(":selected").attr("cost"));
+		var purchasePrice = parseInt(myGroup.find("[name=paper-type]").children(":selected").attr("purchasePrice"));
 		var qtty = getNum(myGroup.find("input[name=paper-qtty]").val());
+/*
+		console.log(qtty);
+		console.log(rate);
+*/
 		myGroup.find("input[name=paper-qtty]").val(echoNum(qtty));
 		var customer = 1;
 		if (myGroup.find("[name=paper-customer]").is(":checked"))
 			customer = 0;
 		//console.log("h: " + bh + ",w: " + bw + ",weight: " + weight + ",qtty: " + qtty + ",price: " + price);
 		price *= customer * bh * bw / 10000 * weight / 1000 * qtty;
+		cost *= customer * bh * bw / 10000 * weight / 1000 * qtty;
+		purchasePrice *= customer * bh * bw / 10000 * weight / 1000 * qtty;
 		
-		calcDisOver(myGroup,price);
+		calcDisOver(myGroup,price, cost,purchasePrice);
 		//------------- Related Event -------------
 		if ($(e).attr("name")=="paper-after-cut_size"){
 			if (myGroup.parent().find("[name=selefon-disBtn]").is(":checked"))
@@ -670,7 +791,7 @@ function calc_paper(e){
 		myGroup.find("input[name$=-stockName]").val(stockName);
 		myGroup.find("input[name$=-stockDesc]").val(myGroup.find("input[name$=-desc]").val());
 	} else {
-		calcDisOver(myGroup,0);
+		calcDisOver(myGroup,0,0,0);
 		myGroup.find("input[name$=-stockName]").val("");
 		myGroup.find("input[name$=-stockDesc]").val("");
 	}
@@ -686,18 +807,33 @@ function calc_snap(e){
 			myGroup.find("input[name$=-l]").val($(e).val().split("X")[0]);
 			myGroup.find("input[name$=-w]").val($(e).val().split("X")[1]);
 			break;
-		case 'snap-price':
-			$(e).val(echoNum(getNum($(e).val())));
-			break;
-		case 'snap-dis':
-			var price=getNum(myGroup.find("input[name$=-price]:first").val());
-			calcDisOver(myGroup,price);	
-			break;
-		case 'snap-over':
-			var price=getNum(myGroup.find("input[name$=-price]:first").val());
-			calcDisOver(myGroup,price);	
-			break;
 	}
+		var price = getNum(myGroup.find("input[name$=-price]:first").val());
+		if (myGroup.find("input[name$=-reverse]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-reverse]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-reverse]").val());
+		}
+		if (myGroup.find("input[name$=-over]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-over]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price -= price * per / (100 - per);
+			}	
+		} else{
+		   price -= getNum(myGroup.find("input[name$=-over]").val());
+		}
+		if (myGroup.find("input[name$=-dis]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-dis]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-dis]").val());
+		}
+		calcDisOver(myGroup,price);
 		var desc = "áØİÇ ";
 		desc += myGroup.find("[name=snap-qtty]").val();
 		desc += " ÚÏÏ ŞÇáÈ Òäí Èå ÇÈÚÇÏ ";
@@ -951,19 +1087,32 @@ function calc_uv(e){
 function calc_fold(e){
 	var myGroup = $(e).closest("div.group");
 	if (myGroup.find("[name$=-disBtn]").is(":checked")){
-		switch ($(e).attr("name")){
-			case 'fold-price':
-				$(e).val(echoNum(getNum($(e).val())));
-				break;
-			case 'fold-dis':
-				var price=getNum(myGroup.find("input[name$=-price]:first").val());
-				calcDisOver(myGroup,price);	
-				break;
-			case 'fold-over':
-				var price=getNum(myGroup.find("input[name$=-price]:first").val());
-				calcDisOver(myGroup,price);	
-				break;
+		var price = getNum(myGroup.find("input[name$=-price]:first").val());
+		if (myGroup.find("input[name$=-reverse]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-reverse]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-reverse]").val());
 		}
+		if (myGroup.find("input[name$=-over]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-over]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price -= price * per / (100 - per);
+			}	
+		} else{
+		   price -= getNum(myGroup.find("input[name$=-over]").val());
+		}
+		if (myGroup.find("input[name$=-dis]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-dis]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-dis]").val());
+		}
+		calcDisOver(myGroup,price);
 	} else {
 		calcDisOver(myGroup,0);
 	}
@@ -992,18 +1141,30 @@ function calc_packing(e){
 function calc_service(e){
 	var myGroup = $(e).closest("div.group");
 	if (myGroup.find("[name$=-disBtn]").is(":checked")){
-		switch ($(e).attr("name")){
-			case 'service-price':
-				$(e).val(echoNum(getNum($(e).val())));
-				break;
-			case 'service-dis':
-				var price=getNum(myGroup.find("input[name$=-price]:first").val());
-				calcDisOver(myGroup,price);	
-				break;
-			case 'service-over':
-				var price=getNum(myGroup.find("input[name$=-price]:first").val());
-				calcDisOver(myGroup,price);	
-				break;
+		var price = getNum(myGroup.find("input[name$=-price]:first").val());
+		if (myGroup.find("input[name$=-reverse]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-reverse]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-reverse]").val());
+		}
+		if (myGroup.find("input[name$=-over]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-over]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price -= price * per / (100 - per);
+			}	
+		} else{
+		   price -= getNum(myGroup.find("input[name$=-over]").val());
+		}
+		if (myGroup.find("input[name$=-dis]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-dis]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-dis]").val());
 		}
 		myGroup.find("input[name$=-purchaseName]").val(myGroup.find("[name=service-item] option:selected").text());
 		myGroup.find("input[name$=-purchaseDesc]").val((myGroup.find("[name=service-description]")[0]).value);
@@ -1011,6 +1172,7 @@ function calc_service(e){
 		$("[name=print-type]").each(function(i){
 			calc_addedPaper($(this));
 		});
+		calcDisOver(myGroup,price);	
 	} else {
 		calcDisOver(myGroup,0);
 	}
@@ -1019,19 +1181,32 @@ function calc_service(e){
 }
 function calc_serviceIN(e){
 	var myGroup = $(e).closest("div.group");
-	switch ($(e).attr("name")){
-		case 'serviceIN-price':
-			$(e).val(echoNum(getNum($(e).val())));
-			break;
-		case 'serviceIN-dis':
-			var price=getNum(myGroup.find("input[name$=-price]:first").val());
-			calcDisOver(myGroup,price);				
-			break;
-		case 'serviceIN-over':
-			var price=getNum(myGroup.find("input[name$=-price]:first").val());
-			calcDisOver(myGroup,price);	
-			break;
+	var price = getNum(myGroup.find("input[name$=-price]:first").val());
+	if (myGroup.find("input[name$=-reverse]").val().indexOf("%")>-1) {
+		var per = parseInt(myGroup.find("input[name$=-reverse]").val().replace(/%/gi,''));
+		if (per>0 && per <100){
+			price += price * per / (100 - per);
+		}	
+	} else{
+	   price += getNum(myGroup.find("input[name$=-reverse]").val());
 	}
+	if (myGroup.find("input[name$=-over]").val().indexOf("%")>-1) {
+		var per = parseInt(myGroup.find("input[name$=-over]").val().replace(/%/gi,''));
+		if (per>0 && per <100){
+			price -= price * per / (100 - per);
+		}	
+	} else{
+	   price -= getNum(myGroup.find("input[name$=-over]").val());
+	}
+	if (myGroup.find("input[name$=-dis]").val().indexOf("%")>-1) {
+		var per = parseInt(myGroup.find("input[name$=-dis]").val().replace(/%/gi,''));
+		if (per>0 && per <100){
+			price += price * per / (100 - per);
+		}	
+	} else{
+	   price += getNum(myGroup.find("input[name$=-dis]").val());
+	}
+	calcDisOver(myGroup,price);
 	checkForce(e);
 	calc_total();
 }
@@ -1062,8 +1237,10 @@ function calc_proof(e){
 		proofSize.val(proofSize.val().replace("x","X").replace("-","X").replace("*","X").replace(" ","X"));
 		var w = parseFloat(proofSize.val().split("X")[0]);
 		var h = parseFloat(proofSize.val().split("X")[1]);
+/*
 		if (w>0 && h>0)
 			myGroup.parent().find("input[name=paper-after-cut_size]").val(w + "X" + h);
+*/
 		myGroup.parent().find("input[name=print-form]:first").val(form);
 		myGroup.parent().find("input[name=plate-qtty]:first").val(form);
 		myGroup.parent().find("input[name=verni-form]:first").val(form);
@@ -1094,17 +1271,6 @@ function calc_delivery(e){
 	var myGroup = $(e).closest("div.group");
 	if (myGroup.find("[name$=-disBtn]").is(":checked")){
 		switch ($(e).attr("name")){
-			case 'delivery-price':
-				$(e).val(echoNum(getNum($(e).val())));
-				break;
-			case 'delivery-dis':
-				var price=getNum(myGroup.find("input[name$=-price]:first").val());
-				calcDisOver(myGroup,price);			
-				break;
-			case 'delivery-over':
-				var price=getNum(myGroup.find("input[name$=-price]:first").val());
-				calcDisOver(myGroup,price);
-				break;
 			case 'delivery-point':
 				myGroup.find("[name=delivery-address]").val($(e).children(":selected").attr("addr"));
 				if ($(e).children(":selected").val()==3){
@@ -1118,7 +1284,33 @@ function calc_delivery(e){
 						});
 				}
 				break;
-		}	
+		}
+		var price = getNum(myGroup.find("input[name$=-price]:first").val());
+		if (myGroup.find("input[name$=-reverse]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-reverse]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-reverse]").val());
+		}
+		if (myGroup.find("input[name$=-over]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-over]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price -= price * per / (100 - per);
+			}	
+		} else{
+		   price -= getNum(myGroup.find("input[name$=-over]").val());
+		}
+		if (myGroup.find("input[name$=-dis]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-dis]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-dis]").val());
+		}
+		calcDisOver(myGroup,price);	
 	} else {
 		calcDisOver(myGroup,0);
 	}	
@@ -1129,21 +1321,32 @@ function calc_delivery(e){
 function calc_cutting(e){
 	var myGroup = $(e).closest("div.group");
 	if (myGroup.find("[name$=-disBtn]").is(":checked")){
-		switch ($(e).attr("name")){
-			case 'cutting-price':
-				$(e).val(echoNum(getNum($(e).val())));
-				myGroup.find("input[name$=-dis]:first").val("0%");
-				myGroup.find("input[name$=-over]:first").val("0%");
-				break;
-			case 'cutting-dis':
-				var price=getNum(myGroup.find("input[name$=-price]:first").val());
-				calcDisOver(myGroup,price);
-				break;
-			case 'cutting-over':
-				var price=getNum(myGroup.find("input[name$=-price]:first").val());
-				calcDisOver(myGroup,price);
-				break;
+		var price = getNum(myGroup.find("input[name$=-price]:first").val());
+		if (myGroup.find("input[name$=-reverse]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-reverse]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-reverse]").val());
 		}
+		if (myGroup.find("input[name$=-over]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-over]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price -= price * per / (100 - per);
+			}	
+		} else{
+		   price -= getNum(myGroup.find("input[name$=-over]").val());
+		}
+		if (myGroup.find("input[name$=-dis]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-dis]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-dis]").val());
+		}
+		calcDisOver(myGroup,price);
 	} else {
 		calcDisOver(myGroup,0);
 	}
@@ -1312,6 +1515,19 @@ function calc_konica(e){
 			myGroup.parent().find("[name=digitalBinding-qtty]").val(qtty);
 		if (myGroup.parent().find("[name=digitalLaminate-qtty]").val()=='')
 			myGroup.parent().find("[name=digitalLaminate-qtty]").val(qtty * form);
+	} else {
+		calcDisOver(myGroup,0);
+	}
+	checkForce(e);
+	calc_total();
+}
+function calc_variable(e){
+	var myGroup = $(e).closest("div.group");
+	if (myGroup.find("[name$=-disBtn]").is(":checked")){
+		var qtty = parseInt(myGroup.find("[name=variable-qtty]").val());
+		var price = parseInt(myGroup.find("[name=variable-qtty]").attr("price")); 
+		price *= qtty;
+		calcDisOver(myGroup,price);
 	} else {
 		calcDisOver(myGroup,0);
 	}
@@ -1549,6 +1765,8 @@ function calc_piramonFrame(e){
 }
 function calc_catalogItem(e){
 	var myGroup = $(e).closest("div.group");
+	var price = getNum(myGroup.find("input[name$=-price]:first").val());
+	calcDisOver(myGroup,price);	
 	checkForce(e);
 	calc_total();
 }

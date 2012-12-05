@@ -245,31 +245,29 @@ elseif request("act")="show" then
 	$(document).ready(function(){
 		TransformXmlURL('/service/xml_getOrderTrace.asp?act=getFolow&isOrder=1&fromDate=<%=request("fromDate")%>&toDate=<%=request("toDate")%>&orderTypes=<%=request("orderTypes")%>&step=<%=request("step")%>',"/xsl.<%=version%>/orderShowList.xsl", function(result){
 			$("#traceResult").html(result);
-			$("#traceResult td.orderDates").each(function(i){
-				var createdDate = $(this).find(".createdDate");
-				var createdTime = $(this).find(".createdTime");
-				var returnTime = $(this).find(".returnTime");
-				var returnDate = $(this).find(".returnDate");
-				if (returnDate.html()=="0"){
-					returnDate.html("›⁄·« „⁄·Ê„ ‰Ì” !");
-					returnTime.html("");
+			$("#traceResult td.orderDates span.faDate").each(function(i){
+				var myDate = $(this);
+				var today = new Date();
+				if (myDate.html()=="0"){
+					myDate.html("----/--/--");
 				} else {
-					returnDate.html($.jalaliCalendar.gregorianToJalaliStr(returnDate.html()));
-					var myTime = new Date(returnTime.html().replace(RegExp('-','g'),'/'));
-					if (myTime.getHours()==0 && myTime.getMinutes()==0)
-						returnTime.html("");
-					else
-					returnTime.html("("+((myTime.getHours()<10)?('0'+myTime.getHours()):myTime.getHours())+':'+((myTime.getMinutes() < 10)?('0'+myTime.getMinutes()):(myTime.getMinutes()))+")");
-				}
-				
-				createdDate.html($.jalaliCalendar.gregorianToJalaliStr(createdDate.html()));
-				
-				var myTime = new Date(createdTime.html().replace(RegExp('-','g'),'/'));
-				if (myTime.getHours()==0 && myTime.getMinutes()==0)
-					createdTime.html("");
-				else
-				createdTime.html("("+((myTime.getHours()<10)?('0'+myTime.getHours()):myTime.getHours())+':'+((myTime.getMinutes() < 10)?('0'+myTime.getMinutes()):(myTime.getMinutes()))+")");
-				
+					var myTime = new Date(myDate.html().replace(RegExp('-','g'),'/'));
+					myDate.html($.jalaliCalendar.gregorianToJalaliStr(myDate.html()));
+					var diff = daydiff(today,myTime);
+					switch (true){
+						case (diff < -1):
+							myDate.attr("class","isRed");
+							break;
+						case (diff >=-1 && diff < 1):
+							myDate.attr("class","isBlue");
+							break;
+						case (diff >= 1):
+							myDate.attr("class","isBlack");
+							break;
+					}
+					if (myTime.getHours()!=0 || myTime.getMinutes()!=0)
+						myDate.attr("title", "("+((myTime.getHours()<10)?('0'+myTime.getHours()):myTime.getHours())+':'+((myTime.getMinutes() < 10)?('0'+myTime.getMinutes()):(myTime.getMinutes()))+")");
+				}	
 			});
 			$(".list tr:not(.head):not(.sumTotal)").find("td:first").each(function(i,no){
 				$(no).html(i+1);

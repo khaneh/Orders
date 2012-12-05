@@ -3,17 +3,25 @@
 <xsl:template match="/costs">
 	<TABLE border="0" cellspacing="0" cellpadding="2" align="center" style=" color:black; direction:RTL; width:700; ">
 		<tr bgcolor="black">
-			<td align="center" colspan="8" style="color:yellow;padding:3px 0 8px 0;">зЦАМгй²ЕгМ гДлгЦ тоЕ хягМ гМД сщгят:</td>
+			<td align="center" colspan="12" style="color:yellow;padding:3px 0 8px 0;">зЦАМгй²ЕгМ гДлгЦ тоЕ :</td>
 		</tr>
 		<tr bgcolor="black" style="color:yellow;">
-			<td>Цяър</td>
-			<td>оягМФя</td>
-			<td>зЦАМгй</td>
-			<td>йзого</td>
-			<td>рЦгД</td>
-			<td>тям</td>
-			<td>кхй ъДДоЕ</td>
-			<td>тЦгяЕ сщгят</td>
+			<td rowspan="2">Цяър</td>
+			<td rowspan="2">оягМФя</td>
+			<td rowspan="2">зЦАМгй</td>
+			<td colspan="3" align="center">йзого</td>
+			<td colspan="3" align="center">рЦгД</td>
+			<td rowspan="2">тям</td>
+			<td rowspan="2">кхй ъДДоЕ</td>
+			<td rowspan="2">тЦгяЕ сщгят</td>
+		</tr>
+		<tr bgcolor="black" style="color:yellow;">
+			<td>ъгяъяо</td>
+			<td>гр</td>
+			<td>йг</td>
+			<td>Цой</td>
+			<td>тяФз</td>
+			<td>│гМгД</td>
 		</tr>
 		<xsl:for-each select="./cost">
 			<tr bgcolor="#CCCCCC">
@@ -27,7 +35,11 @@
 				<td><xsl:value-of select="./driverName"/></td>
 				<td><xsl:value-of select="./operationName"/></td>
 				<td><xsl:value-of select="./theCount"/></td>
+				<td><xsl:value-of select="./start_counter"/></td>
+				<td><xsl:value-of select="./end_counter"/></td>
 				<td><xsl:value-of select="./theTime"/></td>
+				<td><xsl:value-of select="./start_time"/></td>
+				<td><xsl:value-of select="./end_time"/></td>
 				<td><xsl:value-of select="./description"/></td>
 				<td>
 					<xsl:attribute name="title">йгяМн кхй: <xsl:value-of select="./insertDate"/></xsl:attribute>

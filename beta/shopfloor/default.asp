@@ -70,8 +70,10 @@ function checkOrder(){
 			var isApproved = $(orderXML).find("status isApproved").text();
 			var step = $(orderXML).find("status step").text();
 			if (isOrder=='0'){
-				$("#message").html("<b>ÇÓÊÚáÇã</b> Ñæ ÊÛííÑ ãÑÍáå äãíÏíã¡ ÔãÇ ãæÙİ åÓÊíÏ ßå ÊæáíÏ ÑÇ ãÊæŞİ ßäíÏ. ÊÇ Çíä ÇÓÊÚáÇã Èå ÓİÇÑÔ ÊÈÏíá ÔæÏ");
-				$("#step").prop("disabled", true);
+				$("#message").html("<b>ÇÓÊÚáÇã</b> ŞİØ ãíÊæÇäÏ Èå íÔ ÇÒ Ç ÊÛííÑ ãÑÍáå íÏÇ ßäÏ");
+				$("#step option").prop("disabled", true);
+				$("#step option[value=25]").prop("disabled", false);
+				$("#step option[value=38]").prop("disabled", false);
 			} else
 			if (isClosed!='0'){
 				$("#message").html("ÓİÇÑÔ ÈÓÊå ÔÏå!");
@@ -84,7 +86,7 @@ function checkOrder(){
 				$("#step").prop("disabled", true);
 				$("#submit").prop("disabled", true);
 			} else {
-				//console.log(step);
+				$("#step option").prop("disabled", false);
 				$("#step").prop("disabled", false);
 				$("#submit").prop("disabled", false);
 				$("#step option[value=" + step + "]").prop("selected", true);

@@ -287,20 +287,22 @@ $(document).ready(function(){
 				var isClosed = $(orderXML).find("status isClosed").text();
 				var isApproved = $(orderXML).find("status isApproved").text();
 				var step = $(orderXML).find("status step").text();
-				if (step=='40'){
+				/*
+if (step=='40'){
 					$("#order_found").val("0");
 					alert("ÏÞÊ ßäíÏ Çíä ÓÝÇÑÔ ãÊæÞÝ ÔÏå");
-				} else if (parseInt(step)>0)
+				} else
+*/ if (parseInt(step)>0)
 					$("#order_found").val("1");
 				else
 					$("#order_found").val("0");
 				
 				TransformXml(orderXML, "/xsl.<%=version%>/orderShowHeader.xsl", function(result){
 					$("#result").html(result);	
+					checkBut($("#order"));
 					$('a#customerID').click(function(e){
 						window.open('../CRM/AccountInfo.asp?act=show&selectedCustomer='+$('a#customerID').attr("myID"), 'showCustomer');
 						e.preventDefault();
-						checkBut($("#order"));
 					});
 				});
 			});

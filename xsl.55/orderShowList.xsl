@@ -5,14 +5,15 @@
 		<TR valign="top" class="head">
 			<TD>#</TD>
 			<TD width="40">‘„«—Â</TD>
-			<TD width="65"> «—ÌŒ À» <br/> «—ÌŒ  ÕÊÌ·/«⁄ »«—</TD>
+			<TD width="55"><small> «—ÌŒ À» <br/> «—ÌŒ ’œÊ—<br/> «—ÌŒ ”›«—‘</small></TD>
+			<TD width="55"><small> «—ÌŒ  ÕÊÌ· ﬁ—«œ«œ<br/> «—ÌŒ  ÕÊÌ· ⁄„·Ì</small></TD>
 			<TD width="130">‰«„ ‘—ﬂ  - „‘ —Ì</TD>
 			<TD width="80">⁄‰Ê«‰ ﬂ«—</TD>
 			<TD width="36">‰Ê⁄</TD>
 			<TD width="45">„—Õ·Â</TD>
 			<TD width="38">”›«—‘ êÌ—‰œÂ</TD>
 			<TD width="18">Ê÷⁄</TD>
-			<TD width="30">’Ê— Õ”«»</TD>
+			<TD width="30"><small>’Ê— Õ”«»</small></TD>
 			<td width="50">ﬁÌ„ </td>
 		</TR>
 		<xsl:for-each select="./row">
@@ -24,18 +25,26 @@
 						<xsl:value-of select="./id"/>
 					</a>
 				</td>
+				
 				<td class="orderDates">
-					<span class="createdDate">
-						<xsl:value-of select="./createdDate"/>
-					</span>
-					<span class="createdTime">
+					<span class="faDate">
 						<xsl:value-of select="./createdDate"/>
 					</span>
 					<br/>
-					<span class="returnDate">
-						<xsl:value-of select="./returnDate"/>
+					<span class="faDate">
+						<xsl:value-of select="./approvedDate"/>
 					</span>
-					<span class="returnTime">
+					<br/>
+					<span class="faDate">
+						<xsl:value-of select="./orderDate"/>
+					</span>
+				</td>
+				<td class="orderDates">
+					<span class="faDate">
+						<xsl:value-of select="./contractDate"/>
+					</span>
+					<br/>
+					<span class="faDate">
 						<xsl:value-of select="./returnDate"/>
 					</span>
 				</td>
@@ -59,14 +68,51 @@
 				<td><xsl:value-of select="./stepName"/></td>
 				<td><xsl:value-of select="./RealName"/></td>
 				<td>
-					<xsl:attribute name="title">
-						<xsl:value-of select="./statusName"/>
-					</xsl:attribute>
-					<img>
-						<xsl:attribute name="src">
-							<xsl:value-of select="./statusIcon"/>
+					<div>
+						<xsl:attribute name="title">
+							<xsl:value-of select="./statusName"/>
 						</xsl:attribute>
-					</img>
+						<xsl:if test="./status=1">
+							<i class="icon-play"></i>
+						</xsl:if>
+						<xsl:if test="./status=2">
+							<i class="icon-trash"></i>
+						</xsl:if>
+						<xsl:if test="./status=3">
+							<i class="icon-pause"></i>
+						</xsl:if>
+						<xsl:if test="./status=4">
+							<i class="icon-question-sign"></i>
+						</xsl:if>
+					</div>
+					<div>
+						<xsl:attribute name="title">
+							<xsl:if test="./isPrinted!=0">ç«Å ‘œÂ</xsl:if>
+						</xsl:attribute>
+						<xsl:if test="./isPrinted!=0"><i class="icon-print"></i></xsl:if>
+					</div>
+					<div>
+						<xsl:attribute name="title">
+							<xsl:if test="./isOrder!=0">”›«—‘</xsl:if>
+							<xsl:if test="./isOrder=0">«” ⁄·«„</xsl:if>
+						</xsl:attribute>
+						<xsl:if test="./isOrder!=0"><i class="icon-book"></i></xsl:if>
+						<xsl:if test="./isOrder=0"><i class="icon-list-alt"></i></xsl:if>
+					</div>
+					<div>
+						<xsl:attribute name="title">
+							<xsl:if test="./isApproved!=0">’«œ— ‘œÂ</xsl:if>
+						</xsl:attribute>
+						<xsl:if test="./isApproved!=0"><i class="icon-ok-sign"></i></xsl:if>
+					</div>
+					<div>
+						<xsl:attribute name="title">
+							<xsl:if test="./customerApprovedType!=0">
+								<xsl:value-of select="./customerApprovedTypeName"/>
+							</xsl:if>
+						</xsl:attribute>
+						<xsl:if test="./customerApprovedType!=0"><i class="icon-thumbs-up"></i></xsl:if>
+					</div>
 				</td>
 				<td>
 					<xsl:if test="./invoiceID=0">
@@ -83,7 +129,7 @@
 			</tr>
 		</xsl:for-each>
 		<tr class="sumTotal">
-			<td colspan="10">Ã„⁄</td>
+			<td colspan="11">Ã„⁄</td>
 			<td/>
 		</tr>
 	</table>

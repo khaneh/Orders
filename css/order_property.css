@@ -26,8 +26,6 @@ div.funcBtn {width: 80px;margin: 0;float: left;position: absolute;top: 0;left: 0
 div.downBtn {width: 700px;margin-right: 26px;text-align: center;background-color: #CCC;padding: 20px 0 10px 0;}
 
 #errMsg {background-color: #ccc;width: 700px;color: red; font-size: 10pt;text-align: center;margin: 0 26px 0 0;}
-#totalPrice {background-color:#FED;border-width:0;}
-#totalVatedPrice {background-color:#FED;border-width:0;}
 #orderDetails {margin: 0 26px;}
 #orderOrgin{display: none;}
 .orderColor {background-color: black;color: yellow;}

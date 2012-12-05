@@ -5,6 +5,10 @@
 'dim result
 set result = jsObject()
 select case request("act")
+	case "returnDate":
+		orderID = CDbl(Request("orderID"))
+		conn.Execute("update orders set returnDate = '" & Request("retDate") & "' where id=" & orderID)
+		result("status")="ok"
 	case "prop":
 		if IsNumeric(request("orderID")) then 
 			set rs=Conn.Execute("select orders.id,orderTypes.name as typeName,orders.orderTitle, accounts.AccountTitle,orderStatus.Name as statusName, orderSteps.Name as stepName,orders.isClosed,orders.isApproved,orders.isOrder, orders.step from orders inner join orderTypes on orders.type=orderTypes.id inner join Accounts on orders.Customer = accounts.ID inner join orderStatus on orders.status=orderStatus.ID inner join orderSteps on orders.step=orderSteps.ID where orders.id=" & request("orderID"))

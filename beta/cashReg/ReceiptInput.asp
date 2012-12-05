@@ -296,11 +296,11 @@ elseif request("act")="getReceipt" then
 <%
 		next
 %>
-			<tr bgcolor='#F0F0F0' onclick="currentRow=this.rowIndex;" >
+			<!--tr bgcolor='#F0F0F0' onclick="currentRow=this.rowIndex;" >
 				<td colspan="15">
 					<INPUT class="RcpGenInput" TYPE="button" value="«÷«›Â" onkeyDown="if(event.keyCode==9) return false;" onClick="addRow(this.parentNode.parentNode.rowIndex);">
 				</td>
-			</tr>
+			</tr-->
 			</Tbody></TABLE></div>
 			</TD>
 			</tr>
@@ -800,8 +800,10 @@ function setPrice(src){
 			var str="Õœ«ﬂÀ— çﬂ œ—Ì«› Ì »—«Ì «Ì‰ Õ”«» " + echoNum($("#maxChequeAmount").val()) + " „Ì »«‘œ";
 			if ( parseInt($("#customerRemainCheque").val())>0)
 				str += " »œÂÌ çﬂÌ «Ì‰ „‘ —Ì " + echoNum(parseInt($("#customerRemainCheque").val())) + "„Ìù»«‘œ. ";
+			$(src).val("0");
 			alert(str);
-			$(this).closest("tr").find("input").val("");
+			$(src).focus();
+			//$(this).closest("tr").find("input").val("");
 		}
 	}
 }

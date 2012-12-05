@@ -2,8 +2,11 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 <xsl:template match="/head">
 	<div class="logo"><img src="/images/logo-bw.jpg"/></div>
-	<p class="inthename">»Â ‰«„ Œœ«</p>
-	<p class="date"><xsl:value-of select="./today/shamsiToday"/></p>
+	<div class="head">
+		<p class="inthename">»Â ‰«„ Œœ«</p>
+		<p class="date"><xsl:value-of select="./today/shamsiToday"/></p>
+		<p class="no"><xsl:value-of select="./orderID"/>-<xsl:value-of select="./ver"/></p>
+	</div>
 	<xsl:if test="concat(./customer/companyName,'')!=''">
 		<p class="company">‘—ﬂ  „Õ —„ <xsl:value-of select="./customer/companyName"/></p>
 	</xsl:if>

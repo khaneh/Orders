@@ -67,36 +67,50 @@
 							<span>ัๆา</span>
 						</h6>
 					</td>
-				</xsl:if>
-				<xsl:if test="./isOrder='yes'">
-					<td align="right" colspan="2">
-						<xsl:if test="concat(./today/retDate,'')=''">
-							<h6 class="isBlack">
-								<xsl:if test="./today/retIsNull='yes'">
-									<span style="margin-right: 18px;">สวัํฮ สอๆํแ Þัวัฯวฯก Ýฺแว ใฺแๆใ ไํำส!</span>
-								</xsl:if>
-							</h6>
-						</xsl:if>
+					<td align="left">ใๆฺฯ วฺสศวั:</td>
+					<td>
+						<h6 class="isBlack">
+							<xsl:value-of select="./today/retDate"/>
+						</h6>
+					</td>
+					<td align="left">ำวฺส วฺสศวั:</td>
+					<td align="right">
+						<h6 class="isBlack">
+							<xsl:value-of select="./today/retTime"/>
+						</h6>
 					</td>
 				</xsl:if>
-				<td align="left">
-					<xsl:if test="./isOrder!='yes'">ใๆฺฯ วฺสศวั:</xsl:if>
-					<xsl:if test="./isOrder='yes'">สวัํฮ สอๆํแ Þัวัฯวฯ:</xsl:if>
-				</td>
-				<td>
-					<h6 class="isBlack">
-						<xsl:value-of select="./today/retDate"/>
-					</h6>
-				</td>
-				<td align="left">
-					<xsl:if test="./isOrder!='yes'">ำวฺส วฺสศวั:</xsl:if>
-					<xsl:if test="./isOrder='yes'">ำวฺส สอๆํแ:</xsl:if>
-				</td>
-				<td align="right">
-					<h6 class="isBlack">
-						<xsl:value-of select="./today/retTime"/>
-					</h6>
-				</td>
+				<xsl:if test="./isOrder='yes'">
+					<xsl:if test="./today/contractIsNull='yes'">
+						<td align="right" colspan="6">
+							<h6 class="isBlack">
+								<center>สวัํฮ สอๆํแ Þัวัฯวฯก Ýฺแว ใฺแๆใ ไํำส!</center>
+							</h6>
+						</td>
+					</xsl:if>
+					<xsl:if test="./today/contractIsNull='no'">
+						<td align="left">สวัํฮ สอๆํแ Þัวัฯวฯ:</td>
+						<td align="right">
+							<h4>
+								<xsl:attribute name="class">
+									<xsl:value-of select="./today/contractClass"/>
+								</xsl:attribute>
+								<xsl:value-of select="./today/contractDate"/> &#160;<xsl:value-of select="./today/contractTime"/>
+							</h4>
+						</td>
+						<td align="left">สวัํฮ สอๆํแ ฺใแํ:</td>
+						<td align="right" colspan="3">
+							<h4>
+								<xsl:attribute name="class">
+									<xsl:value-of select="./today/retClass"/>
+								</xsl:attribute>
+								<xsl:value-of select="./today/retDate"/> &#160;<xsl:value-of select="./today/retTime"/>
+							</h4>
+						</td>
+					</xsl:if>
+						
+				</xsl:if>
+				
 			</tr>
 			<tr class="grayColor">
 				<td align="left">ำวํา:</td>
@@ -136,14 +150,15 @@
 			</tr>
 			<tr class="grayColor">
 				<td align="left">Þํใส ฿แ:</td>
-				<td colspan="2">
-					<h6 class="isBlack isPrice">
-						<xsl:value-of select="./totalPrice"/>
-					</h6>
+				<td colspan="2" class="isPrice">
+					<span class="isBlack price" id="sumTotal" rel="tooltip" data-placement="top" data-original-title="ศๅวํ ฿แ ำÝวัิ"><xsl:value-of select="./totalPrice"/></span>
+					<span class="isBlack dis" id="sumDis" rel="tooltip" data-placement="top" data-original-title="ศๅวํ ฿แ สฮÝํÝ"></span>
+					<span class="isBlack over" id="sumOver" rel="tooltip" data-placement="top" data-original-title="ศๅวํ ฿แ ใวาวฯ"></span>
+					<span class="isBlack reverse" id="sumReverse" rel="tooltip" data-placement="top" data-original-title="ศๅวํ ฿แ ศัิส"></span>
 				</td>
 			</tr>
 			<tr class="grayColor">
-				<td colspan="3" align="center">
+				<td colspan="2" align="right">
 					<span>ๆึฺํส:</span>
 					<span class="stName">
 						<xsl:value-of select="./status/statusName"/>
@@ -153,6 +168,20 @@
 						<xsl:value-of select="./status/stepName"/>
 					</span>
 				</td>
+				<td>
+					<span align="center">ไำฮๅ </span>
+					<span class="badge badge-important">
+						<xsl:value-of select="./ver"/>
+					</span>
+				</td>
+			</tr>
+			<tr class="grayColor">
+				<td align="left">ํิ ัฯวฮส:</td>
+				<td align="right"><xsl:value-of select="./deposit"/> ัํวแ</td>
+				<td align="left">ำััำํฯ:</td>
+				<td align="right"><xsl:value-of select="./dueDate"/> ัๆา</td>
+				<td align="left">ใๅแส ฯัํวÝส ฿:</td>
+				<td align="right"><xsl:value-of select="./chequeDueDate"/> ัๆา</td>
 			</tr>
 	</table>
 </xsl:template>

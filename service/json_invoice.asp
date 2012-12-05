@@ -94,7 +94,7 @@ select case request("act")
 				else
 					if rfdID>0 then Conn.Execute("delete InvoiceLines where id=" & rfdID)
 			end if
-			Conn.Execute("update Invoices set totalPrice=" & totalPrice & ", totalVat= " & totalVat & ",totalReceivable=" & totalReceivable & ",totalDiscount=" & totalDiscount & " where id=" & id)
+			Conn.Execute("update Invoices set totalPrice=" & totalPrice & ", totalReverse=" & totalReverse & ", totalVat= " & totalVat & ",totalReceivable=" & totalReceivable & ",totalDiscount=" & totalDiscount & " where id=" & id)
 			if isIssued then 
 				if isReverse then
 					isCredit=1
@@ -132,7 +132,7 @@ select case request("act")
 						RS1.movenext
 					Loop
 				end if
-				conn.Execute("update ARItems set FullyApplied=0,RemainedAmount= " & totalReceivable & ",amountOriginal=" & totalReceivable & " where id=" & voidedARItem)
+				conn.Execute("update ARItems set FullyApplied=0,RemainedAmount= " & totalReceivable & ",amountOriginal=" & totalReceivable  & ", vat = " & totalVat & " where id=" & voidedARItem)
 			end if
 			set rs=Conn.Execute("select * from Invoices where id=" & id)
 			j("isa")=rs("isa")
@@ -167,7 +167,7 @@ select case request("act")
 				j("err")=1
 				j("msg")="خطا"
 			else
-				mySQL="SELECT Invoices.*,orders.isApproved, orders.status FROM Invoices inner join InvoiceOrderRelations on Invoices.ID=InvoiceOrderRelations.Invoice inner join orders on InvoiceOrderRelations.[Order] = orders.id WHERE Invoices.ID="& InvoiceID
+				mySQL="SELECT Invoices.*,orders.isApproved, orders.status, orders.step, accounts.arBalance, accounts.creditLimit, accounts.status as accountStatus, accounts.maxCreditDay, isnull(ar.firstDebit,0) as firstDebit, InvoiceOrderRelations.[Order] FROM Invoices inner join InvoiceOrderRelations on Invoices.ID=InvoiceOrderRelations.Invoice inner join orders on InvoiceOrderRelations.[Order] = orders.id inner join accounts on orders.customer=accounts.id left outer join (select Account,datediff(day, dbo.udf_date_solarToDate(cast(substring(min(effectiveDate),1,4) as int),cast(substring(min(effectiveDate),6,2) as int),cast(substring(min(effectiveDate),9,2) as int)),getDate()) as firstDebit from ARItems where FullyApplied=0 and IsCredit=0 and voided=0 group by account) as ar on orders.customer=ar.account WHERE Invoices.ID="& InvoiceID
 				Set RS1 = conn.Execute(mySQL)
 				if not RS1.eof then
 					if RS1("Voided") = True then
@@ -188,6 +188,18 @@ select case request("act")
 					elseif rs1("status")<>"1" then 
 						j("err")=1
 						j("msg")="سفارش در جریان نیست! پس کاری نمی شود کرد!"
+					elseif rs1("step")="40" then 
+						j("err")=1
+						j("msg")="سفارش این فاکتور به دلیل خطایی که سفارش رخ داده متوقف شده. <br>دلیل آن در یادداشتی در ذیل سفارش شرح داده شده. <br>فلذا آنرا تایید نمی‌کنیم!"
+					elseif (cdbl(rs1("arBalance"))+cdbl(rs1("creditLimit")) < 0) then 
+						j("err")=1
+						j("msg")="بدهي اين حساب از ميزان اعتبار آن بيشتر شده،<br> لطفا با سرپرست فروش هماهنگ كنيد."
+					elseif (CDbl(rs1("firstDebit")) > CDbl(rs1("maxCreditDay"))) then
+						j("err")=1
+						j("msg")="بدهي اين مشتري مربوط به " & rs1("firstDebit") & " روز گذشته بوده،<br> كه از سررسيد پرداخت آن گذشته<br> لطفا با سرپرست فروش هماهنگ كنيد.<br>(ممكن است كه اشكالي در دوختن باشد)"
+					elseif CInt(rs1("accountStatus"))<>1 then 
+						j("err")=1
+						j("msg")="اين حساب فعال نيست!<br> لطفا با سرپرست فروش هماهنگ كنيد."
 					end if
 					mySQL = "SELECT COUNT(Invoice) AS OrderCount FROM (SELECT DISTINCT InvoiceOrderRelations.Invoice FROM InvoiceOrderRelations inner join Invoices on InvoiceOrderRelations.Invoice = Invoices.ID WHERE InvoiceOrderRelations.[Order] IN (SELECT [Order] FROM InvoiceOrderRelations WHERE Invoice=204133) and Invoices.Voided=0) tbl"
 					set RS1= conn.Execute(mySQL)
@@ -269,7 +281,7 @@ select case request("act")
 				j("err")=1
 				j("msg")="خطا! سال مالي جاري بسته شده و شما قادر به تغيير در آن نيستيد."
 			else
-				mySQL="SELECT Invoices.*,orders.isApproved,orders.status FROM Invoices inner join InvoiceOrderRelations on Invoices.ID=InvoiceOrderRelations.Invoice inner join orders on InvoiceOrderRelations.[Order] = orders.id WHERE Invoices.ID="& InvoiceID
+				mySQL="SELECT Invoices.*,orders.isApproved, orders.status, orders.step, accounts.arBalance, accounts.creditLimit, accounts.status as accountStatus, accounts.maxCreditDay, isnull(ar.firstDebit,0) as firstDebit, InvoiceOrderRelations.[Order] FROM Invoices inner join InvoiceOrderRelations on Invoices.ID=InvoiceOrderRelations.Invoice inner join orders on InvoiceOrderRelations.[Order] = orders.id inner join accounts on orders.customer=accounts.id left outer join (select Account,datediff(day, dbo.udf_date_solarToDate(cast(substring(min(effectiveDate),1,4) as int),cast(substring(min(effectiveDate),6,2) as int),cast(substring(min(effectiveDate),9,2) as int)),getDate()) as firstDebit from ARItems where FullyApplied=0 and IsCredit=0 and voided=0 group by account) as ar on orders.customer=ar.account WHERE Invoices.ID="& InvoiceID
 				Set RS1 = conn.Execute(mySQL)
 				if not RS1.eof then
 					if RS1("Voided") = True then
@@ -287,11 +299,24 @@ select case request("act")
 					elseif rs1("status")<>"1" then 
 						j("err")=1
 						j("msg")="سفارش در جریان نیست! پس کاری نمی شود کرد!"
+					elseif rs1("step")="40" then 
+						j("err")=1
+						j("msg")="سفارش این فاکتور به دلیل خطایی که سفارش رخ داده متوقف شده. <br>دلیل آن در یادداشتی در ذیل سفارش شرح داده شده. <br>فلذا آنرا تایید نمی‌کنیم!"
+					elseif (cdbl(rs1("arBalance"))+cdbl(rs1("creditLimit")) < 0) then 
+						j("err")=1
+						j("msg")="بدهي اين حساب از ميزان اعتبار آن بيشتر شده،<br> لطفا با سرپرست فروش هماهنگ كنيد."
+					elseif (CDbl(rs1("firstDebit")) > CDbl(rs1("maxCreditDay"))) then
+						j("err")=1
+						j("msg")="بدهي اين مشتري مربوط به " & rs1("firstDebit") & " روز گذشته بوده،<br> كه از سررسيد پرداخت آن گذشته<br> لطفا با سرپرست فروش هماهنگ كنيد.<br>(ممكن است كه اشكالي در دوختن باشد)"
+					elseif CInt(rs1("accountStatus"))<>1 then 
+						j("err")=1
+						j("msg")="اين حساب فعال نيست!<br> لطفا با سرپرست فروش هماهنگ كنيد."
 					end if
 					if j("err")<>1 then
 						mySQL="UPDATE Invoices SET Issued=1, IssuedDate=N'"& issueDate & "', IssuedBy='"& session("ID") & "' WHERE (ID='"& InvoiceID & "')"
 						conn.Execute(mySQL)
-						invoiceFee = RS1("TotalReceivable")
+						invoiceFee = CDbl(RS1("TotalReceivable"))
+						Vat = CDbl(rs1("totalVat"))
 						if rs1("isReverse") then
 							isCredit=1
 							itemType=4 

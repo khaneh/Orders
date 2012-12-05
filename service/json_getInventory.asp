@@ -53,6 +53,8 @@ select case request("act")
 		set j = jsObject()
 		paperType = CInt(Request("paperType"))
 		price = CDbl(Request("price"))
+		cost = CDbl(Request("cost"))
+		purchasePrice = CDbl(Request("purchasePrice"))
 		set rs = Conn.Execute("select * from orderTypes where id=2")
 		set prop=server.createobject("MSXML2.DomDocument")
 		prop.loadXML(rs("property"))
@@ -60,6 +62,8 @@ select case request("act")
 		set rs = Nothing
 		set paper = prop.SelectNodes("//key[@name='paper-type']/option[.=" & paperType & "]")
 		paper(0).setAttribute "price",price
+		paper(0).setAttribute "cost",cost
+		paper(0).setAttribute "purchasePrice",purchasePrice
 		conn.Execute("update orderTypes set property=N'" & prop.xml & "' where id=2")
 		j("price") = paper(0).getAttribute("price")
 	case "addWasteRequest":

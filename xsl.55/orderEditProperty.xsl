@@ -106,6 +106,20 @@
 								</xsl:if>
 							</input>
 						</div>
+						<xsl:if test="./@showCost='yes'">
+							<div>
+								<input type="text" size="12" class="myInput" dir="ltr" rel="tooltip" data-placement="right" data-original-title="ÈåÇí ÊãÇã ÔÏå" readonly="readonly">
+									<xsl:attribute name="name"><xsl:value-of select="./@name"/>-cost</xsl:attribute>			
+									<xsl:if test="./@disable='yes' and ./@hasValue!='yes'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+								</input>
+							</div>
+							<div>
+								<input type="text" size="12" class="myInput" dir="ltr" rel="tooltip" data-placement="right" data-original-title="ÈåÇí ÎÑíÏ" readonly="readonly">
+									<xsl:attribute name="name"><xsl:value-of select="./@name"/>-purchasePrice</xsl:attribute>
+									<xsl:if test="./@disable='yes' and ./@hasValue!='yes'"><xsl:attribute name="disabled">true</xsl:attribute></xsl:if>
+								</input>
+							</div>
+						</xsl:if>
 						<input type="hidden" out='yes'>
 							<xsl:attribute name="name"><xsl:value-of select="./@name"/>-w</xsl:attribute>
 							<xsl:attribute name="value">
@@ -194,6 +208,16 @@
 												<xsl:value-of select="./@price"/>
 											</xsl:attribute>
 										</xsl:if>
+										<xsl:if test="./@cost!=''">
+											<xsl:attribute name="cost">
+												<xsl:value-of select="./@cost"/>
+											</xsl:attribute>
+										</xsl:if>
+										<xsl:if test="./@purchasePrice!=''">
+											<xsl:attribute name="purchasePrice">
+												<xsl:value-of select="./@purchasePrice"/>
+											</xsl:attribute>
+										</xsl:if>
 										<xsl:attribute name="group">
 											<xsl:value-of select="../../@name"/>
 										</xsl:attribute>
@@ -259,6 +283,16 @@
 											<xsl:attribute name="price">
 												<xsl:value-of select="./@price"/>
 											</xsl:attribute>
+											<xsl:if test="./@cost!=''">
+												<xsl:attribute name="cost">
+													<xsl:value-of select="./@cost"/>
+												</xsl:attribute>
+											</xsl:if>
+											<xsl:if test="./@purchasePrice!=''">
+												<xsl:attribute name="purchasePrice">
+													<xsl:value-of select="./@purchasePrice"/>
+												</xsl:attribute>
+											</xsl:if>
 										</xsl:if>
 									</input>
 								</xsl:when>
@@ -293,6 +327,16 @@
 													<xsl:value-of select="./@price"/>
 												</xsl:attribute>
 											</xsl:if>
+											<xsl:if test="./@cost!=''">
+													<xsl:attribute name="cost">
+														<xsl:value-of select="./@cost"/>
+													</xsl:attribute>
+												</xsl:if>
+												<xsl:if test="./@purchasePrice!=''">
+													<xsl:attribute name="purchasePrice">
+														<xsl:value-of select="./@purchasePrice"/>
+													</xsl:attribute>
+												</xsl:if>
 										</input>
 										<xsl:if test="./@br='yes'">
 											<br/>
@@ -318,6 +362,16 @@
 												<xsl:if test="./@price!=''">
 													<xsl:attribute name="price">
 														<xsl:value-of select="./@price"/>
+													</xsl:attribute>
+												</xsl:if>
+												<xsl:if test="./@cost!=''">
+													<xsl:attribute name="cost">
+														<xsl:value-of select="./@cost"/>
+													</xsl:attribute>
+												</xsl:if>
+												<xsl:if test="./@purchasePrice!=''">
+													<xsl:attribute name="purchasePrice">
+														<xsl:value-of select="./@purchasePrice"/>
 													</xsl:attribute>
 												</xsl:if>
 												<xsl:if test="./@addr!=''">
@@ -363,6 +417,16 @@
 												<xsl:if test="./@price!=''">
 													<xsl:attribute name="price">
 														<xsl:value-of select="./@price"/>
+													</xsl:attribute>
+												</xsl:if>
+												<xsl:if test="./@cost!=''">
+													<xsl:attribute name="cost">
+														<xsl:value-of select="./@cost"/>
+													</xsl:attribute>
+												</xsl:if>
+												<xsl:if test="./@purchasePrice!=''">
+													<xsl:attribute name="purchasePrice">
+														<xsl:value-of select="./@purchasePrice"/>
 													</xsl:attribute>
 												</xsl:if>
 												<xsl:if test="../@value=.">

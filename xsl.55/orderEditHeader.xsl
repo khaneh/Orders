@@ -91,7 +91,7 @@
 				</xsl:if>
 				<xsl:if test="./isOrder='yes'">
 					<td align="right" colspan="2">
-						<span style="margin-right: 18px;"> «—ÌŒ  ÕÊÌ· ﬁ—«—œ«œ° ›⁄·« „⁄·Ê„ ‰Ì” !</span>
+						<span style="margin-right: 18px;"> «—ÌŒ  ÕÊÌ·° ›⁄·« „⁄·Ê„ ‰Ì” !</span>
 						<input name="returnDateNull" type="checkbox">
 							<xsl:if test="./today/retIsNull='yes'">
 								<xsl:attribute name="checked">true</xsl:attribute>
@@ -101,7 +101,7 @@
 				</xsl:if>
 				<td align="left">
 					<xsl:if test="./isOrder!='yes'">„Ê⁄œ «⁄ »«—:</xsl:if>
-					<xsl:if test="./isOrder='yes'"> «—ÌŒ  ÕÊÌ· ﬁ—«—œ«œ:</xsl:if>
+					<xsl:if test="./isOrder='yes'"> «—ÌŒ  ÕÊÌ·:</xsl:if>
 				</td>
 				<td>
 					<input type="text" name="ReturnDate" onblur="acceptDate(this);checkForceHead(this);" maxlength="10" size="10" dir="LTR">
@@ -129,7 +129,7 @@
 			<tr class="grayColor">
 				<td align="left">”«Ì“:</td>
 				<td>
-					<input type="text" name="paperSize" size="5" onblur="acceptPaper(this);checkForceHead(this);" class="forceErr">
+					<input type="text" name="paperSize" size="5" onblur="acceptPaper(this);checkForceHead(this);">
 						<xsl:attribute name="value"><xsl:value-of select="./paperSize"/></xsl:attribute>
 					</input>
 					<span>„«‰‰œ: 21X30</span>
@@ -144,7 +144,7 @@
 			<tr class="grayColor">
 				<td align="left"> Ì—«é:</td>
 				<td>
-					<input type="text" name="qtty" size="5" class="forceErr" onblur="checkForceHead(this);">
+					<input type="text" name="qtty" size="5" onblur="checkForceHead(this);">
 						<xsl:attribute name="value"><xsl:value-of select="./qtty"/></xsl:attribute>
 					</input>
 					<span>Ìﬂ ⁄œœ ’ÕÌÕ</span>
@@ -155,7 +155,6 @@
 				</td>
 			</tr>
 			<tr class="grayColor">
-				
 				<td align="left">ﬁÌ„  ﬂ·:</td>
 				<td colspan="2">
 					<input type="text" name="totalPrice" id="totalPrice" readonly="readonly">
@@ -164,10 +163,47 @@
 				</td>
 			</tr>
 			<tr class="grayColor">
-				
 				<td align="left">ﬁÌ„  ﬂ· »« „«·Ì« :</td>
 				<td colspan="2">
 					<input type="text" name="totalVatedPrice" id="totalVatedPrice" readonly="readonly"/>
+					<span id="sumDis" class="dis"></span>
+					<span id="sumOver" class="over"></span>
+					<span id="sumReverse" class="reverse"></span>
+				</td>
+			</tr>
+			<tr class="grayColor">
+				<td align="left">ÅÌ‘ Å—œ«Œ :</td>
+				<td align="right">
+					<input name="deposit" size="10" onblur="checkForceHead(this);">
+						<xsl:attribute name="value">
+							<xsl:value-of select="./deposit"/>
+						</xsl:attribute>
+					</input>
+					<span> —Ì«·</span>
+				</td>
+				<td align="left">”——”Ìœ:</td>
+				<td align="right">
+					<input name="dueDate" size="2" onblur="checkForceHead(this);">
+						<xsl:attribute name="value">
+							<xsl:value-of select="./dueDate"/>
+						</xsl:attribute>
+						<xsl:if test="concat(./dueDate/@readOnly,'')='yes'">
+							<xsl:attribute name="readonly">readonly</xsl:attribute>	
+						</xsl:if>
+					</input>
+					<span> —Ê“</span>
+				</td>
+				<td align="left">„Â·  œ—Ì«›  çﬂ:</td>
+				<td align="right">
+					<input name="chequeDueDate" size="2" onblur="checkForceHead(this);">
+						<xsl:attribute name="value">
+							<xsl:value-of select="./chequeDueDate"/>
+						</xsl:attribute>
+						<xsl:if test="concat(./chequeDueDate/@readOnly,'')='yes'">
+							<xsl:attribute name="readonly">readonly</xsl:attribute>	
+						</xsl:if>
+					</input>
+					<span> —Ê“</span>
 				</td>
 			</tr>
 	</table>
