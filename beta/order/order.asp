@@ -526,6 +526,9 @@ $(".check").click(function(){
 	case "show":
 		'-----------------------------------------------------------------------------------------------------
 		orderID=request("id")
+		if not IsNumeric(orderID) then 
+			Response.redirect "?act=getShow&msg=" & Server.URLEncode("Èå äÙÑ ÔãÇ ÔãÇÑå ÓÝÇÑÔ äÈÇíÏ íå ÚÏÏ ÈÇÔå¿")
+		end if
 %>
 <script type="text/javascript" src="/js/jquery.printElement.min.js"></script>
 <script type="text/javascript">
@@ -1783,7 +1786,7 @@ $(".check").click(function(){
 		rs.close
 		set rs=nothing
 %>
-<script type="text/javascript" src="calcOrder.10.js"></script>
+<script type="text/javascript" src="calcOrder.11.js"></script>
 <script type="text/javascript">
 	function checkForceHead(e){
 		if ($(e).val()=="") 
@@ -1863,7 +1866,7 @@ end if
 		orderID=request("id")
 		if not Auth(2 , 2) then NotAllowdToViewThisPage()
 %>
-<script type="text/javascript" src="calcOrder.10.js"></script>
+<script type="text/javascript" src="calcOrder.11.js"></script>
 <script type="text/javascript">
 function checkValidation() {
 	if (!$("[name=returnDateNull]").is(":checked")){

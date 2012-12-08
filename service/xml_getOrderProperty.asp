@@ -635,7 +635,7 @@ select case request("act")
 		response.write(head.xml)
 	case "stock":
 		orderID=Cdbl(request("id"))
-		set rs = Conn.Execute("select InventoryItemRequests.*, InventoryPickuplists.status as pickStatus, InventoryPickuplistItems.pickupListID, InventoryPickuplistItems.qtty as pickQtty, InventoryPickuplistItems.unit as pickUnit from InventoryItemRequests left outer join InventoryPickuplistItems on InventoryPickuplistItems.requestID=InventoryItemRequests.id left outer join InventoryPickuplists on InventoryPickuplists.id=InventoryPickuplistItems.pickupListID where isnull(InventoryPickuplists.status,'')<>'del' and  InventoryItemRequests.orderID=" & orderID)
+		set rs = Conn.Execute("select InventoryItemRequests.*, InventoryPickuplists.status as pickStatus, InventoryPickuplistItems.pickupListID, InventoryPickuplistItems.qtty as pickQtty, InventoryPickuplistItems.unit as pickUnit from InventoryItemRequests left outer join InventoryPickuplistItems on InventoryPickuplistItems.requestID=InventoryItemRequests.id left outer join InventoryPickuplists on InventoryPickuplists.id=InventoryPickuplistItems.pickupListID where InventoryItemRequests.orderID=" & orderID)
 		set stock=server.createobject("MSXML2.DomDocument")
 		stock.loadXML("<stock/>")
 		while not rs.eof
@@ -681,20 +681,36 @@ select case request("act")
 				stClass.text="label label-success"
 				link.text = rs("pickupListID")
 			elseif rs("Status")="pick" then
-				st.text="ÕÊ«·Â"
-				qtty.text = rs("pickQtty")
-				unit.text = rs("pickUnit")
-				stClass.text="label label-inverse"
-				link.text = rs("pickupListID")
-			elseif rs("Status")="new" then
-				st.text="ÃœÌœ"
-				qtty.text = rs("Qtty")
-				if IsNull(rs("unit")) then
-					unit.text=""
+				if rs("pickStatus") = "del" then 
+					st.text="ÕÊ«·Â Õ–› ‘œÂ"
+					qtty.text = rs("pickQtty")
+					unit.text = rs("pickUnit")
+					stClass.text="label label-warning"
+					link.text = rs("pickupListID")
 				else
-					unit.text = rs("unit")
+					st.text="ÕÊ«·Â"
+					qtty.text = rs("pickQtty")
+					unit.text = rs("pickUnit")
+					stClass.text="label label-inverse"
+					link.text = rs("pickupListID")
 				end if
-				stClass.text="label label-info"
+			elseif rs("Status")="new" then
+				if rs("pickStatus") = "del" then 
+					st.text="ÃœÌœ° ÕÊ«·Â Õ–› ‘œÂ!"
+					qtty.text = rs("pickQtty")
+					unit.text = rs("pickUnit")
+					stClass.text="label label-warning"
+					link.text = rs("pickupListID")
+				else
+					st.text="ÃœÌœ"
+					qtty.text = rs("Qtty")
+					if IsNull(rs("unit")) then
+						unit.text=""
+					else
+						unit.text = rs("unit")
+					end if
+					stClass.text="label label-info"
+				end if
 			elseif rs("Status")="del" then 
 				st.text="œ—ŒÊ«”  Å«ﬂ ‘œÂ"
 				qtty.text = rs("Qtty")

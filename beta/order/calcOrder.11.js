@@ -1448,14 +1448,38 @@ function calc_design(e){
 }
 function calc_otherdsigen(e){
 	var myGroup = $(e).closest("div.group");
+	
 	if (myGroup.find("[name$=-disBtn]").is(":checked")){
-		var price = parseFloat(myGroup.find("[name$=-price]:first").val());
-		var qtty = parseInt(myGroup.find("[name$=-qtty]").val());
-		price *= qtty;
-		calcDisOver(myGroup,price);
+		var price = getNum(myGroup.find("input[name$=-price]:first").val());
+		if (myGroup.find("input[name$=-reverse]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-reverse]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-reverse]").val());
+		}
+		if (myGroup.find("input[name$=-over]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-over]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price -= price * per / (100 - per);
+			}	
+		} else{
+		   price -= getNum(myGroup.find("input[name$=-over]").val());
+		}
+		if (myGroup.find("input[name$=-dis]").val().indexOf("%")>-1) {
+			var per = parseInt(myGroup.find("input[name$=-dis]").val().replace(/%/gi,''));
+			if (per>0 && per <100){
+				price += price * per / (100 - per);
+			}	
+		} else{
+		   price += getNum(myGroup.find("input[name$=-dis]").val());
+		}
+		calcDisOver(myGroup,price);	
 	} else {
-		calcDisOver(myGroup,0);	
+		calcDisOver(myGroup,0);
 	}
+	
 	checkForce(e);
 	calc_total();
 }
