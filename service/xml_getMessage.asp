@@ -10,7 +10,7 @@ select case request("act")
 	case "related":
 		table = request("table")
 		id= request("id")
-		mySQL="SELECT Messages.*, fu.realName as fromName, tu.realName as toName,Messages.Urgent, message_types.name typeName FROM Messages INNER JOIN Users as fu ON Messages.MsgFrom = fu.ID inner join users as tu on tu.id=messages.msgTo inner join message_types on Messages.type=message_types.id WHERE (Messages.RelatedTable = '" & table & "') AND (Messages.RelatedID = " & id & ") ORDER BY Messages.Urgent desc,Messages.type desc, Messages.ID DESC"
+		mySQL="SELECT Messages.*, fu.realName as fromName, tu.realName as toName,Messages.Urgent, message_types.name typeName FROM Messages INNER JOIN Users as fu ON Messages.MsgFrom = fu.ID inner join users as tu on tu.id=messages.msgTo inner join message_types on Messages.type=message_types.id WHERE (Messages.RelatedTable = '" & table & "') AND (Messages.RelatedID = " & id & ") ORDER BY Messages.ID DESC"
 		Set rs = conn.execute(mySQL)
 		set rows=server.createobject("MSXML2.DomDocument")
 		rows.loadXML("<rows/>")
