@@ -69,8 +69,20 @@ menuItem=1
 				<TD width=10><img src='/images/LTS.gif'></td>
 			<%end if %>
 			<%end if %>
+			
+			<%if Auth(1 , 9) then %>
+			<%if SubmenuItem="4" then %> 
+				<TD width=10><img src='/images/RTB.gif'></td>
+				<TD align=center background="/images/MTB.gif" class='alak2'><A HREF='campain.asp'>œ‘»Ê—œ ﬂ„ÅÌ‰</A></TD>
+				<TD width=10><img src='/images/LTB.gif'></td>
+			<%else %>  
+				<TD width=10><img src='/images/RTS.gif'></td>
+				<TD align=center background="/images/MTS.gif" class='alak'><A HREF='campain.asp'>œ‘»Ê—œ ﬂ„ÅÌ‰</A></TD>
+				<TD width=10><img src='/images/LTS.gif'></td>
+			<%end if %>
+			<%end if %>
 
-			<TD  width=300 align=left bgcolor=<%=SelectedMenuColor%>></TD>
+			<TD  width=150 align=left bgcolor=<%=SelectedMenuColor%>></TD>
 			<TD  align=left bgcolor=<%=unSelectedSubMenuColor%>><A HREF="../logout.asp">Œ—ÊÃ </A></TD>
 		</TR>
 		</TABLE>
